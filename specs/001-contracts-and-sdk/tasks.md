@@ -39,7 +39,7 @@ requires RLS isolation tests.
 
 **Purpose**: contracts and their generated code, shared by every story.
 
-- [ ] T007 Move the four contracts from `specs/001-contracts-and-sdk/contracts/` to `contracts/` (event, delivery, manifest, health)
+- [ ] T007 Move the four contracts from `specs/001-contracts-and-sdk/contracts/` to `contracts/` (event, delivery, manifest, health), with `contracts/README.md` stating the versioning rules (additive within a major version, breaking only in a new major, previous major accepted during a transition) — FR-003
 - [ ] T008 Create the package skeleton `packages/sdk/` (`package.json` as `@kete/sdk`, `tsconfig.json`, `src/index.ts`)
 - [ ] T009 Write `tooling/scripts/contracts-generate.ts`: generate types into `packages/sdk/src/contracts/types.gen.ts` and compiled Ajv validators into `packages/sdk/src/contracts/validators.gen.ts`, with a "generated — do not edit" header
 - [ ] T010 Add a CI step and `pnpm contracts:check` that regenerate and fail on any diff
@@ -59,7 +59,7 @@ requires RLS isolation tests.
 
 ### Tests for User Story 1
 
-- [ ] T014 [P] [US1] Atomic recording test (commit leaves one row, rollback leaves none) in `packages/sdk/tests/outbox.record.test.ts`
+- [ ] T014 [P] [US1] Atomic recording test (commit leaves one row, rollback leaves none; an undeclared type, an invalid payload or an oversized event is refused before insert — FR-010) in `packages/sdk/tests/outbox.record.test.ts`
 - [ ] T015 [P] [US1] RLS isolation test (an organization never reads another's outbox rows) in `packages/sdk/tests/outbox.rls.test.ts`
 - [ ] T016 [P] [US1] Relay tests: claim with lease, backoff, settle accepted/duplicate/refused, concurrent relays never double-claim, in `packages/sdk/tests/outbox.relay.test.ts`
 
