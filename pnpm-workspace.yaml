@@ -3,4 +3,5 @@ packages:
   - examples/*
 
 allowBuilds:
+  '@parcel/watcher': set this to true or false
   esbuild: true

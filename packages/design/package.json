@@ -1,0 +1,29 @@
+{
+  "name": "@kete/design",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Kete design system v1 rectangle: DESIGN.md (source of truth), Tailwind 4 theme, React components.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./styles.css",
+    "./DESIGN.md": "./DESIGN.md"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "react": "^19"
+  },
+  "dependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/instrument-sans": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}

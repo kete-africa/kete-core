@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm contracts:check && pnpm docs:check",
+    "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm contracts:check && pnpm design:check && pnpm docs:check",
     "lint": "eslint .",
     "typecheck": "tsc -b",
     "format": "prettier --write .",
@@ -16,10 +16,13 @@
     "contracts:generate": "tsx tooling/scripts/contracts-generate.ts",
     "contracts:check": "tsx tooling/scripts/contracts-generate.ts --check",
     "chaos": "tsx tooling/scripts/chaos.ts",
-    "docs:check": "tsx tooling/scripts/check-readmes.ts"
+    "docs:check": "tsx tooling/scripts/check-readmes.ts",
+    "design:generate": "tsx tooling/scripts/design-generate.ts",
+    "design:check": "tsx tooling/scripts/design-generate.ts --check"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@google/design.md": "^0.4.0",
     "@types/node": "^22.20.4",
     "eslint": "^9.39.5",
     "json-schema-to-typescript": "^15.0.4",
