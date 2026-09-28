@@ -5,3 +5,5 @@ dist/
 test-results/
 playwright-report/
 project.inlang/cache/
+project.inlang/.meta.json
+project.inlang/README.md

@@ -10,3 +10,5 @@ specs/
 **/playwright-report
 **/dist
 **/project.inlang/cache
+**/project.inlang/.meta.json
+**/project.inlang/README.md
