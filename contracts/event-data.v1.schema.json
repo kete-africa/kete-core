@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/event-data.v1.schema.json",
+  "title": "StandardEventData",
+  "description": "The data payload of each standard event type. Facts and counters only; amounts are integers in the currency's smallest unit.",
+  "$defs": {
+    "AccountCreated": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "plan": { "type": "string", "maxLength": 60 } }
+    },
+    "AccountActivated": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["activation"],
+      "properties": { "activation": { "type": "string", "maxLength": 60 } }
+    },
+    "PaymentSucceeded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency", "reference"],
+      "properties": {
+        "amount": { "type": "integer", "minimum": 0 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "reference": { "type": "string", "maxLength": 100 }
+      }
+    },
+    "PaymentFailed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency", "reason_code"],
+      "properties": {
+        "amount": { "type": "integer", "minimum": 0 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "reason_code": { "type": "string", "maxLength": 60 }
+      }
+    },
+    "SubscriptionRenewalDue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["due_on", "plan"],
+      "properties": {
+        "due_on": { "type": "string", "format": "date" },
+        "plan": { "type": "string", "maxLength": 60 }
+      }
+    },
+    "AccountClosed": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": { "reason_code": { "type": "string", "maxLength": 60 } }
+    },
+    "MetricsDaily": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["day", "counters"],
+      "properties": {
+        "day": { "type": "string", "format": "date" },
+        "counters": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,59}$" },
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

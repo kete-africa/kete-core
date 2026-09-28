@@ -18,16 +18,17 @@
    missing or failing scanner blocks availability.
 4. **Retention by purpose** (defaults, adjustable per organization within legal limits):
 
-   | Purpose | Retention |
-   |---|---|
-   | Data export | 7 days |
-   | Draft source (photo, voice note) | 90 days after validation |
-   | Deposit or job photos | While the record is active, then 1 year |
+   | Purpose                           | Retention                                        |
+   | --------------------------------- | ------------------------------------------------ |
+   | Data export                       | 7 days                                           |
+   | Draft source (photo, voice note)  | 90 days after validation                         |
+   | Deposit or job photos             | While the record is active, then 1 year          |
    | Invoices and accounting documents | 10 years (OHADA; to confirm with the accountant) |
-   | Organization identity (logo) | While the organization exists |
+   | Organization identity (logo)      | While the organization exists                    |
 
    Purging destroys the content and keeps a minimal trace (who, what, when). A GDPR erasure request
    purges personal files immediately.
+
 5. **Validated legal documents are immutable.** A correction creates a new version; the content
    hash is journaled.
 

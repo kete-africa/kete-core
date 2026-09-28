@@ -1,13 +1,21 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://kete.africa/contracts/event.v1.schema.json",
-  "title": "Kete integration event, version 1",
+  "title": "KeteEvent",
+  "description": "An immutable fact announced by a Kete app. Facts and counters only: no names, e-mails or phone numbers.",
   "type": "object",
   "additionalProperties": false,
   "required": ["id", "type", "specversion", "product", "organization", "occurred_at", "data"],
   "properties": {
-    "id": { "type": "string", "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
-    "type": { "type": "string", "pattern": "^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$", "maxLength": 100 },
+    "id": {
+      "type": "string",
+      "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "type": {
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+    },
     "specversion": { "const": "1" },
     "product": { "type": "string", "pattern": "^prd_[a-z0-9_]{2,40}$" },
     "organization": { "type": "string", "pattern": "^org_[A-Za-z0-9_-]{4,64}$" },

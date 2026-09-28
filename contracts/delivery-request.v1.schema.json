@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/delivery-request.v1.schema.json",
+  "title": "DeliveryRequest",
+  "description": "A signed batch of events sent to a receiver.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["events"],
+  "properties": {
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": { "$ref": "event.v1.schema.json" }
+    }
+  }
+}

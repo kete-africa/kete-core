@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint, types, formatting, generated contracts, package READMEs
+        run: pnpm check
+      - name: Tests (integration on the Neon "test" branch)
+        run: pnpm test
+        env:
+          KETE_TEST_OWNER_URL: ${{ secrets.KETE_TEST_OWNER_URL }}
+          KETE_TEST_APP_URL: ${{ secrets.KETE_TEST_APP_URL }}
