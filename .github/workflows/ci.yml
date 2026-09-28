@@ -22,10 +22,36 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Lint, types, formatting, generated contracts, package READMEs
+      - name: Lint, types, formatting, generated contracts and design, READMEs, catalogs
         run: pnpm check
-      - name: Tests (integration on the Neon "test" branch)
+      - name: Migrate the Compte Kete "test" branch
+        run: pnpm --filter @kete/account db:migrate
+        env:
+          ACCOUNT_OWNER_URL: ${{ secrets.ACCOUNT_TEST_OWNER_URL }}
+      - name: Tests (integration on the Neon "test" branches)
         run: pnpm test
         env:
           KETE_TEST_OWNER_URL: ${{ secrets.KETE_TEST_OWNER_URL }}
           KETE_TEST_APP_URL: ${{ secrets.KETE_TEST_APP_URL }}
+          ACCOUNT_TEST_OWNER_URL: ${{ secrets.ACCOUNT_TEST_OWNER_URL }}
+          ACCOUNT_TEST_APP_URL: ${{ secrets.ACCOUNT_TEST_APP_URL }}
+          ACCOUNT_TEST_AUTH_SECRET: ${{ secrets.ACCOUNT_TEST_AUTH_SECRET }}
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @kete/account exec playwright install --with-deps chromium
+      - name: Compte Kete in a browser (production build, Neon "test" branch)
+        run: pnpm test:e2e
+        env:
+          ACCOUNT_TEST_APP_URL: ${{ secrets.ACCOUNT_TEST_APP_URL }}
+          ACCOUNT_TEST_AUTH_SECRET: ${{ secrets.ACCOUNT_TEST_AUTH_SECRET }}

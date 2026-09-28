@@ -1,0 +1,45 @@
+{
+  "name": "@kete/account",
+  "private": true,
+  "type": "module",
+  "description": "Compte Kete: one account for every Kete app, organizations, and Mon espace Kete.",
+  "scripts": {
+    "dev": "vite dev --port 3100",
+    "build": "vite build",
+    "start": "srvx serve --entry dist/server/server.js --static dist/client --prod --host 0.0.0.0 --port 3000",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "typecheck": "vite build && tsc --noEmit"
+  },
+  "dependencies": {
+    "@kete/design": "workspace:*",
+    "@kete/sdk": "workspace:*",
+    "@tanstack/react-router": "^1.170.40",
+    "@tanstack/react-start": "^1.168.59",
+    "better-auth": "^1.7.6",
+    "drizzle-orm": "^0.45.3",
+    "jose": "^6.2.12",
+    "pg": "^8.23.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "srvx": "0.11.22",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@inlang/paraglide-js": "^2.25.4",
+    "@kete/auth": "workspace:*",
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "drizzle-kit": "^0.31.11",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "vite": "^7.3.6",
+    "vitest": "^3.2.7"
+  }
+}
