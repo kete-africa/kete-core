@@ -73,7 +73,11 @@ One account for every Kete app, and the visual foundation of every screen.
 - `@kete/auth` for apps: reading the token, active organization, mapping to business roles.
 - `@kete/design`: the **v1 rectangle** design system and its `DESIGN.md` (Google DESIGN.md format),
   kept in sync with the tokens and linted in CI.
-- Mon espace Kete, minimal: my tools, my organization, generic settings.
+- `@kete/files` (core): files separated from their stored content, attachments to records, direct
+  uploads through a storage port (S3-compatible adapter first), type and size checks, scanning
+  before availability, image renditions, time-limited share links, retention policies.
+- Mon espace Kete, minimal: my tools, my organization (including its logo, through
+  `@kete/files`), generic settings.
 
 ### Dependencies
 Phase 1.
@@ -81,6 +85,8 @@ Phase 1.
 ### Proof
 - `[agent]` A person creates an account, an organization, invites a member; two organizations never
   see each other (RLS test).
+- `[agent]` An organization uploads its logo and a document; another organization can neither list
+  nor download them; an unscanned or rejected file is never served.
 - `[blocking]` The author validates the first screens against `DESIGN.md`.
 
 ---
@@ -115,6 +121,8 @@ Apps let agents prepare and humans decide, the same way everywhere.
   journal.
 - `@kete/drafts`: record drafts and change proposals, the verification card, agent states.
 - `@kete/capabilities`: declaring agent-facing capabilities and their autonomy level; MCP exposure.
+- `@kete/files` (extractions): text, transcription and extracted fields derived from a file (a
+  photo, a voice note), used as the traced source of a draft.
 
 ### Dependencies
 Phases 2 and 3.
@@ -122,6 +130,7 @@ Phases 2 and 3.
 ### Proof
 - `[agent]` An agent prepares a draft through MCP; a human verifies and validates it; the action is
   journaled with its actor and provenance.
+- `[agent]` A draft prepared from a photo shows the photo next to the extracted fields.
 
 ---
 
@@ -145,6 +154,6 @@ Phase 4.
 
 ## Later, when a real need appears
 
-`@kete/offline` (local command queue) · `@kete/sequences` (legal numbering) · `@kete/files` ·
+`@kete/offline` (local command queue) · `@kete/sequences` (legal numbering) ·
 `@kete/ai` (model routing and budgets) · phone sign-in · additional payment adapters (Moneroo,
 Stripe) · a Python SDK if a Python app needs it.
