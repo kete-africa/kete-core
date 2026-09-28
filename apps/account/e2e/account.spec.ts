@@ -20,13 +20,28 @@ async function signUp(page: Page, person: { name: string; email: string }) {
   await page.getByRole('button', { name: 'Créer mon compte' }).click();
 }
 
+type Session = Awaited<ReturnType<Awaited<ReturnType<Browser['newContext']>>['storageState']>>;
+const sessions = new Map<string, Session>();
+
+/**
+ * A page signed in as `email`. Each person signs in once; later tests reuse the session, as a
+ * browser would — sign-in is rate-limited, and a test suite must not look like an attack.
+ */
 async function signedIn(browser: Browser, email: string): Promise<Page> {
-  const page = await (await browser.newContext()).newPage();
+  const saved = sessions.get(email);
+  if (saved) {
+    const page = await (await browser.newContext({ storageState: saved })).newPage();
+    await page.goto('/espace');
+    return page;
+  }
+  const context = await browser.newContext();
+  const page = await context.newPage();
   await page.goto('/connexion');
   await page.getByLabel('Adresse e-mail').fill(email);
   await page.getByLabel('Mot de passe').fill(password);
   await page.getByRole('button', { name: 'Se connecter' }).click();
   await page.waitForURL('**/espace');
+  sessions.set(email, await context.storageState());
   return page;
 }
 
@@ -165,4 +180,17 @@ test('Mon espace Kete is usable at 375 px, in English too', async ({ browser }) 
   }
   await page.getByRole('button', { name: 'English' }).click();
   await expect(page.getByRole('heading', { name: 'Organization settings' })).toBeVisible();
+});
+
+test('repeated sign-in attempts are slowed down, and the person is told so', async ({ page }) => {
+  await page.goto('/connexion');
+  await page.getByLabel('Adresse e-mail').fill(owner.email);
+  await page.getByLabel('Mot de passe').fill('not-the-password');
+  const alert = page.getByRole('alert');
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    await page.getByRole('button', { name: 'Se connecter' }).click();
+    await expect(alert).toBeVisible();
+    if ((await alert.textContent())?.includes('Trop de tentatives')) break;
+  }
+  await expect(alert).toHaveText('Trop de tentatives. Réessayez dans une minute.');
 });

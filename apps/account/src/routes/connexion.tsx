@@ -15,20 +15,20 @@ export const Route = createFileRoute('/connexion')({
 function SignIn() {
   const hydrated = useHydrated();
   const { redirect } = Route.useSearch();
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<'refused' | 'rate_limited' | null>(null);
   const [pending, setPending] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     setPending(true);
-    setError(false);
+    setError(null);
     const { error: failure } = await authClient.signIn.email({
       email: String(form.get('email')),
       password: String(form.get('password')),
     });
     if (failure) {
-      setError(true);
+      setError(failure.status === 429 ? 'rate_limited' : 'refused');
       setPending(false);
       return;
     }
@@ -38,7 +38,11 @@ function SignIn() {
   return (
     <AuthFrame title={m.auth_sign_in_title()} intro={m.auth_intro()}>
       <form method="post" onSubmit={submit} className="flex flex-col gap-4" noValidate>
-        {error && <Notice tone="error">{m.auth_error_invalid()}</Notice>}
+        {error && (
+          <Notice tone="error">
+            {error === 'rate_limited' ? m.auth_error_rate_limited() : m.auth_error_invalid()}
+          </Notice>
+        )}
         <TextField label={m.auth_email()} name="email" type="email" autoComplete="email" required />
         <TextField
           label={m.auth_password()}

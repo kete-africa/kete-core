@@ -81,5 +81,6 @@
   "tools_soon_tag": "Bientôt",
   "members_cancel_invitation": "Annuler",
   "invitation_wrong_account": "Cette invitation n'est pas adressée à ce compte, ou n'est plus valable.",
-  "invitation_for": "Adressée à {email}."
+  "invitation_for": "Adressée à {email}.",
+  "auth_error_rate_limited": "Trop de tentatives. Réessayez dans une minute."
 }

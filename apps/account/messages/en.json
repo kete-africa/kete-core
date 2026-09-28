@@ -81,5 +81,6 @@
   "tools_soon_tag": "Coming soon",
   "members_cancel_invitation": "Cancel",
   "invitation_wrong_account": "This invitation is not for this account, or is no longer valid.",
-  "invitation_for": "Sent to {email}."
+  "invitation_for": "Sent to {email}.",
+  "auth_error_rate_limited": "Too many attempts. Try again in a minute."
 }

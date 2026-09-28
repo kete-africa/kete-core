@@ -15,14 +15,14 @@ export const Route = createFileRoute('/inscription')({
 function SignUp() {
   const hydrated = useHydrated();
   const { redirect } = Route.useSearch();
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<'refused' | 'rate_limited' | null>(null);
   const [pending, setPending] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     setPending(true);
-    setError(false);
+    setError(null);
     const { error: failure } = await authClient.signUp.email({
       name: String(form.get('name')),
       email: String(form.get('email')),
@@ -30,7 +30,7 @@ function SignUp() {
     });
     if (failure) {
       // One message whatever the cause: it must not reveal whether an address has an account.
-      setError(true);
+      setError(failure.status === 429 ? 'rate_limited' : 'refused');
       setPending(false);
       return;
     }
@@ -40,7 +40,11 @@ function SignUp() {
   return (
     <AuthFrame title={m.auth_sign_up_title()} intro={m.auth_intro()}>
       <form method="post" onSubmit={submit} className="flex flex-col gap-4" noValidate>
-        {error && <Notice tone="error">{m.auth_error_sign_up()}</Notice>}
+        {error && (
+          <Notice tone="error">
+            {error === 'rate_limited' ? m.auth_error_rate_limited() : m.auth_error_sign_up()}
+          </Notice>
+        )}
         <TextField label={m.auth_name()} name="name" autoComplete="name" required />
         <TextField label={m.auth_email()} name="email" type="email" autoComplete="email" required />
         <TextField
