@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/health.v1.schema.json",
+  "title": "Kete health report, version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "version", "checked_at", "dependencies", "outbox"],
+  "properties": {
+    "status": { "enum": ["healthy", "degraded", "down"] },
+    "version": { "type": "string" },
+    "checked_at": { "type": "string", "format": "date-time" },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 60 },
+          "status": { "enum": ["up", "down"] },
+          "latency_ms": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "outbox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pending"],
+      "properties": {
+        "pending": { "type": "integer", "minimum": 0 },
+        "oldest_pending_age_seconds": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}
