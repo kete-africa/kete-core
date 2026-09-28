@@ -1,0 +1,32 @@
+{
+  "name": "kete-core",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm contracts:check && pnpm docs:check",
+    "lint": "eslint .",
+    "typecheck": "tsc -b",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "contracts:generate": "tsx tooling/scripts/contracts-generate.ts",
+    "contracts:check": "tsx tooling/scripts/contracts-generate.ts --check",
+    "chaos": "tsx tooling/scripts/chaos.ts",
+    "docs:check": "tsx tooling/scripts/check-readmes.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.20.4",
+    "eslint": "^9.39.5",
+    "json-schema-to-typescript": "^15.0.4",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^3.2.7"
+  }
+}

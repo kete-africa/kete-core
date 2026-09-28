@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/delivery-result.v1.schema.json",
+  "title": "DeliveryResult",
+  "description": "The receiver's outcome for each event of a batch.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["results"],
+  "properties": {
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "outcome"],
+        "properties": {
+          "id": { "type": "string" },
+          "outcome": { "enum": ["accepted", "duplicate", "refused"] },
+          "reason": {
+            "enum": [
+              "invalid_signature",
+              "stale",
+              "unknown_product",
+              "invalid_payload",
+              "undeclared_type",
+              "batch_too_large"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

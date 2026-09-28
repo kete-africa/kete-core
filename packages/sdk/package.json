@@ -1,0 +1,21 @@
+{
+  "name": "@kete/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Kete SDK: outbox, signed event delivery, receiver verification, manifest and health.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1"
+  }
+}

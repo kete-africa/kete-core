@@ -14,7 +14,8 @@ The shared foundation of every Kete app: contracts, shared packages, the **Compt
 2. The Kete doctrine, repository `kete-africa/kete` (local: `../kete`), in this order:
    `docs/PRINCIPES.md`, `docs/CONCEPTION.md`, `docs/ARCHITECTURE.md`,
    `docs/ARCHITECTURE_APP.md`, `docs/FLUX.md`, `docs/DECISIONS.md`.
-3. `docs/decisions/` — technical decisions of this repository.
+3. `docs/ROADMAP.md` — the phases of this repository and their proofs.
+4. `docs/decisions/` — technical decisions of this repository.
 
 The doctrine is written in French; everything in this repository is written in English.
 

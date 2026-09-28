@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/manifest.v1.schema.json",
+  "title": "Manifest",
+  "description": "A Kete app's self-description, served at GET /.well-known/kete.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["product", "name", "version", "environment", "events"],
+  "properties": {
+    "product": { "type": "string", "pattern": "^prd_[a-z0-9_]{2,40}$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$" },
+    "environment": { "enum": ["production", "staging", "preview", "development"] },
+    "events": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$" }
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": { "type": "string", "format": "uri" },
+        "documentation": { "type": "string", "format": "uri" }
+      }
+    }
+  }
+}
