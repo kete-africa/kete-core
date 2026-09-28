@@ -75,7 +75,7 @@ Phase 0.
 
 ---
 
-## Phase 2 — Compte Kete and design system · _in progress: design system and Compte Kete delivered, files next_
+## Phase 2 — Compte Kete and design system · _delivered; three human proofs pending_
 
 ### Objective
 
@@ -105,8 +105,11 @@ One account for every Kete app, and the visual foundation of every screen.
   every altered, expired or foreign token refused (SC-003), the journeys in a browser on the
   production build. Pending: a timed sign-up by a person (SC-001) and the author's validation of
   the screens (SC-004).
-- Next: `@kete/files` (core) on Neon object storage (decision 0002), then the logo in Mon espace
-  Kete.
+- `specs/004-files` delivered: `@kete/files` on Neon object storage, the organization's logo in
+  Mon espace Kete. Proven on the real database and storage: another organization can neither list,
+  read nor reference a file; disguised or oversized files are refused and never served; no
+  metadata of the original survives. Scope kept to images: documents wait for an antivirus
+  adapter; share links, renditions and retention jobs come with the apps that need them.
 
 ### Dependencies
 

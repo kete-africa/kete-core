@@ -82,5 +82,18 @@
   "members_cancel_invitation": "Cancel",
   "invitation_wrong_account": "This invitation is not for this account, or is no longer valid.",
   "invitation_for": "Sent to {email}.",
-  "auth_error_rate_limited": "Too many attempts. Try again in a minute."
+  "auth_error_rate_limited": "Too many attempts. Try again in a minute.",
+  "settings_logo": "Logo",
+  "settings_logo_hint": "PNG, JPEG or WebP, 5 MB at most. The image is checked and cleaned before it is shown.",
+  "settings_logo_alt": "Organization logo",
+  "settings_logo_none": "No logo yet.",
+  "settings_logo_file": "Logo image",
+  "settings_logo_upload": "Upload the logo",
+  "settings_logo_remove": "Remove the logo",
+  "settings_logo_saved": "Logo saved.",
+  "settings_logo_removed": "Logo removed.",
+  "file_error_too_large": "This file is too large: 5 MB at most.",
+  "file_error_unsupported_type": "This file is not a PNG, JPEG or WebP image.",
+  "file_error_unreadable": "This image is unreadable or incomplete.",
+  "file_error_missing": "The upload did not arrive. Try again."
 }

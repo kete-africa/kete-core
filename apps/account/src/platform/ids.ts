@@ -10,6 +10,7 @@ const prefixes: Record<string, string> = {
   member: 'mbr',
   invitation: 'inv',
   jwks: 'jwk',
+  file: 'fil',
 };
 
 export function prefixedId(model: string): string {

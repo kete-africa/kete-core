@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { expect, test, type Browser, type Page } from '@playwright/test';
 import { createTokenVerifier } from '@kete/auth';
+import sharp from 'sharp';
 
 // Spec 003, user stories 1 to 4, in a browser, against the test branch. Every run uses fresh
 // addresses, so runs never collide.
@@ -123,6 +124,43 @@ test('the owner invites a member, who accepts once with the invited address', as
   await expect(again.getByText("Cette invitation n'est plus valable.")).toBeVisible();
 });
 
+test('the owner gives the organization a logo; a disguised file is refused', async ({
+  browser,
+}) => {
+  const page = await signedIn(browser, owner.email);
+  await page.goto('/espace/parametres');
+  const logo = await sharp({
+    create: { width: 160, height: 80, channels: 3, background: '#b83a1b' },
+  })
+    .png()
+    .toBuffer();
+
+  await page.getByLabel('Image du logo').setInputFiles({
+    name: 'logo.png',
+    mimeType: 'image/png',
+    buffer: logo,
+  });
+  await page.getByRole('button', { name: 'Envoyer le logo' }).click();
+  // Storage round trips and re-encoding take a few seconds.
+  await expect(page.getByText('Logo enregistré.')).toBeVisible({ timeout: 30_000 });
+  const image = page.getByRole('img', { name: "Logo de l'organisation" });
+  await expect(image).toBeVisible();
+  await expect
+    .poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth))
+    .toBe(160);
+
+  await page.getByLabel('Image du logo').setInputFiles({
+    name: 'invoice.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('<html><script>alert(1)</script></html>'),
+  });
+  await page.getByRole('button', { name: 'Envoyer le logo' }).click();
+  await expect(page.getByText("Ce fichier n'est pas une image PNG, JPEG ou WebP.")).toBeVisible({
+    timeout: 30_000,
+  });
+  await expect(image).toBeVisible();
+});
+
 test('a member can neither invite nor change settings', async ({ browser }) => {
   const page = await signedIn(browser, invited.email);
 
@@ -139,6 +177,9 @@ test('a member can neither invite nor change settings', async ({ browser }) => {
     ),
   ).toBeVisible();
   await expect(page.getByLabel('Raison sociale')).toBeDisabled();
+  // The member sees the organization's logo but cannot change it.
+  await expect(page.getByRole('img', { name: "Logo de l'organisation" })).toBeVisible();
+  await expect(page.getByLabel('Image du logo')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Enregistrer les paramètres' })).toHaveCount(0);
 });
 

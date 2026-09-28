@@ -20,6 +20,14 @@ if (!databaseUrl || !authSecret) {
   );
 }
 
+// The test branch's object storage, under the names the service reads.
+const storage = Object.fromEntries(
+  ['ENDPOINT', 'REGION', 'BUCKET', 'ACCESS_KEY_ID', 'SECRET_ACCESS_KEY'].map((name) => [
+    `ACCOUNT_STORAGE_${name}`,
+    process.env[`ACCOUNT_TEST_STORAGE_${name}`] ?? '',
+  ]),
+);
+
 export default defineConfig({
   testDir: 'e2e',
   timeout: 90_000,
@@ -40,6 +48,7 @@ export default defineConfig({
       ACCOUNT_DATABASE_URL: databaseUrl,
       BETTER_AUTH_URL: origin,
       BETTER_AUTH_SECRET: authSecret,
+      ...storage,
     },
     reuseExistingServer: false,
     timeout: 240_000,

@@ -82,5 +82,18 @@
   "members_cancel_invitation": "Annuler",
   "invitation_wrong_account": "Cette invitation n'est pas adressée à ce compte, ou n'est plus valable.",
   "invitation_for": "Adressée à {email}.",
-  "auth_error_rate_limited": "Trop de tentatives. Réessayez dans une minute."
+  "auth_error_rate_limited": "Trop de tentatives. Réessayez dans une minute.",
+  "settings_logo": "Logo",
+  "settings_logo_hint": "PNG, JPEG ou WebP, 5 Mo au plus. L'image est vérifiée et nettoyée avant d'être affichée.",
+  "settings_logo_alt": "Logo de l'organisation",
+  "settings_logo_none": "Aucun logo pour le moment.",
+  "settings_logo_file": "Image du logo",
+  "settings_logo_upload": "Envoyer le logo",
+  "settings_logo_remove": "Retirer le logo",
+  "settings_logo_saved": "Logo enregistré.",
+  "settings_logo_removed": "Logo retiré.",
+  "file_error_too_large": "Ce fichier est trop lourd : 5 Mo au plus.",
+  "file_error_unsupported_type": "Ce fichier n'est pas une image PNG, JPEG ou WebP.",
+  "file_error_unreadable": "Cette image est illisible ou incomplète.",
+  "file_error_missing": "L'envoi n'est pas arrivé. Réessayez."
 }
