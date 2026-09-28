@@ -1,113 +1,117 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Contracts and SDK
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Branch**: `001-contracts-and-sdk` | **Date**: 2026-09-28 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/speckit-plan` command; its definition describes the execution workflow.
+**Input**: Feature specification from `/specs/001-contracts-and-sdk/spec.md`
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Publish three versioned contracts (manifest, event, health) plus the delivery batch contract, and
+ship `@kete/sdk`: an outbox written in the caller's transaction, a relay that delivers signed
+batches with retries, receiver-side verification with exactly-once processing, and
+framework-agnostic manifest and health handlers. The workspace tooling that closes roadmap phase 0
+(pnpm, TypeScript strict, lint, boundaries, CI) is set up as this feature's first step.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
+**Language/Version**: TypeScript 5 (strict), Node 22
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
+**Primary Dependencies**: Ajv (JSON Schema 2020-12 validation), json-schema-to-typescript (type
+generation), Drizzle ORM and `pg` (outbox adapter), `uuid` (UUIDv7), Node `crypto` (HMAC)
 
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+**Storage**: PostgreSQL (Neon) — `kete_outbox` in each app's database; a dedupe table on the
+receiver side
 
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+**Testing**: Vitest; integration tests on a real Postgres (local container, Neon `test` branch in CI)
 
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
+**Target Platform**: Node 22 servers (apps and their workers), deployed on Coolify
 
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: TypeScript library in a pnpm monorepo, plus a sample app and a test receiver
 
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
+**Performance Goals**: 95% of events accepted within 60 s when the receiver is up (SC-002); batch
+of 100 events per request
 
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
+**Constraints**: recording adds < 10% latency to a business change when the receiver is down
+(SC-004); batch ≤ 256 KB; freshness window 300 s; no `BYPASSRLS` for the application role
 
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
-
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Scale/Scope**: a handful of apps at first, thousands of events per day per app
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+| Principle | Status | How |
+|---|---|---|
+| I. Simple and working | Pass | One library, one sample app, one test receiver; no broker, no new infrastructure |
+| II. Current step only | Pass | Receiving is limited to what Kete Cockpit will need; Python SDK deferred |
+| III. Generic first | Pass | Ports: `OutboxStore`, `Transport`, `DedupeStore`, `KeyRing`; Postgres and HTTP are adapters |
+| IV. Contract first | Pass | JSON Schema in `contracts/`, types generated and checked in CI |
+| V. Security in the database | Pass | Outbox table created with its RLS policy; cross-organization claim through `SECURITY DEFINER` functions (research R-03) |
+| VI. AI prepares, human decides | N/A | No agent action in this feature |
+| VII. Every app stays autonomous | Pass | Outbox in the same transaction; delivery never blocks a user |
+| VIII. Nothing claimed without proof | Pass | Proofs in [quickstart.md](quickstart.md), mapped to SC-001…SC-006 |
+
+Post-design re-check: **pass**, no violation to justify.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit-plan command output)
-├── research.md          # Phase 0 output (/speckit-plan command)
-├── data-model.md        # Phase 1 output (/speckit-plan command)
-├── quickstart.md        # Phase 1 output (/speckit-plan command)
-├── contracts/           # Phase 1 output (/speckit-plan command)
-└── tasks.md             # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
+specs/001-contracts-and-sdk/
+├── spec.md
+├── plan.md              # this file
+├── research.md
+├── data-model.md
+├── quickstart.md
+├── contracts/           # draft contracts, moved to /contracts on implementation
+├── checklists/
+└── tasks.md             # next step (/speckit-tasks)
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+contracts/
+├── event.v1.schema.json
+├── delivery.v1.schema.json
+├── manifest.v1.schema.json
+└── health.v1.schema.json
 
-tests/
-├── contract/
-├── integration/
-└── unit/
+packages/
+└── sdk/                         # @kete/sdk
+    ├── README.md                # usage + event lifecycle and delivery sequence diagrams
+    ├── src/
+    │   ├── contracts/           # generated types and compiled validators (do not edit)
+    │   ├── events/              # standard event types, per-type data schemas, defineEvents()
+    │   ├── outbox/              # OutboxStore port, recordEvent(), relay (claim, deliver, settle, backoff)
+    │   │   └── postgres/        # Drizzle table, SQL migration with RLS, claim/settle functions
+    │   ├── signing/             # sign(), verify(), KeyRing with rotation
+    │   ├── delivery/            # Transport port, HTTP adapter
+    │   ├── receiver/            # processDelivery(), DedupeStore port, Postgres adapter
+    │   ├── health/              # health report builder, GET /health handler
+    │   ├── manifest/            # kete.json loading and validation, GET /.well-known/kete handler
+    │   └── index.ts             # the package's only public entry point
+    └── tests/
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
+examples/
+├── sample-app/                  # a minimal app using the SDK (scenarios 2 and 6)
+├── minimal-app/                 # the adoption exercise, without the SDK (scenario 7)
+└── test-receiver/               # the reference receiver used for the proofs
 
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
+tooling/
+├── tsconfig/                    # shared strict configuration
+├── eslint/                      # flat config, boundaries rules
+└── scripts/                     # contracts:generate, chaos test
 
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+.github/workflows/ci.yml         # lint, types, boundaries, tests, generated-files check
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: a pnpm monorepo. Contracts at the root are shared by every package and by
+future non-TypeScript clients. `@kete/sdk` is one package organized by responsibility, each folder
+exposing only what `src/index.ts` re-exports; examples live outside `packages/` so they are never
+published.
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+No constitution violation to justify.
