@@ -1,0 +1,16 @@
+{
+  "name": "@kete/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Kete auth: verifies Compte Kete tokens inside a Kete app, without calling the Compte Kete on every request.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "jose": "^6.2.12"
+  }
+}
