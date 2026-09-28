@@ -75,7 +75,7 @@ Phase 0.
 
 ---
 
-## Phase 2 — Compte Kete and design system
+## Phase 2 — Compte Kete and design system · _in progress: design system and Compte Kete delivered, files next_
 
 ### Objective
 
@@ -85,7 +85,8 @@ One account for every Kete app, and the visual foundation of every screen.
 
 - `apps/account` on Better Auth: e-mail sign-in, organizations, organization roles, invitations,
   the token carrying person, active organization, role and apps.
-- Operator identity with mandatory two-factor authentication.
+- Operator identity with mandatory two-factor authentication — moved to Kete Cockpit, where
+  operators act (spec 003, assumptions).
 - `@kete/auth` for apps: reading the token, active organization, mapping to business roles.
 - `@kete/design`: the **v1 rectangle** design system and its `DESIGN.md` (Google DESIGN.md format),
   kept in sync with the tokens and linted in CI.
@@ -94,6 +95,18 @@ One account for every Kete app, and the visual foundation of every screen.
   before availability, image renditions, time-limited share links, retention policies.
 - Mon espace Kete, minimal: my tools, my organization (including its logo, through
   `@kete/files`), generic settings.
+
+### Status
+
+- `specs/002-design-system` delivered: `DESIGN.md` linted with 0 warnings, generated theme checked
+  in CI, first components. Author validation happens on the Compte Kete screens.
+- `specs/003-compte-kete` delivered: accounts, organizations, roles, invitations, generic settings,
+  the token and `@kete/auth`. Proven: isolation between two organizations in the database (SC-002),
+  every altered, expired or foreign token refused (SC-003), the journeys in a browser on the
+  production build. Pending: a timed sign-up by a person (SC-001) and the author's validation of
+  the screens (SC-004).
+- Next: `@kete/files` (core) on Neon object storage (decision 0002), then the logo in Mon espace
+  Kete.
 
 ### Dependencies
 
