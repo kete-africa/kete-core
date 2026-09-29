@@ -20,7 +20,8 @@
     "design:generate": "tsx tooling/scripts/design-generate.ts",
     "design:check": "tsx tooling/scripts/design-generate.ts --check",
     "test:e2e": "pnpm --filter @kete/account test:e2e && pnpm --filter @kete/cockpit test:e2e",
-    "i18n:check": "tsx tooling/scripts/check-hardcoded-strings.ts"
+    "i18n:check": "tsx tooling/scripts/check-hardcoded-strings.ts",
+    "packages:pack": "tsx tooling/scripts/pack-packages.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

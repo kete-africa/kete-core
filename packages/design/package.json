@@ -25,5 +25,24 @@
     "@types/react-dom": "^19.3.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
+  },
+  "files": [
+    "dist/src",
+    "README.md",
+    "src",
+    "styles.css",
+    "theme.gen.css",
+    "DESIGN.md"
+  ],
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      },
+      "./styles.css": "./styles.css",
+      "./theme.gen.css": "./theme.gen.css",
+      "./DESIGN.md": "./DESIGN.md"
+    }
   }
 }

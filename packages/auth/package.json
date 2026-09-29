@@ -12,5 +12,17 @@
   },
   "dependencies": {
     "jose": "^6.2.12"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
   }
 }

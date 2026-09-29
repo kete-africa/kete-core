@@ -182,6 +182,30 @@ simulated outage raises an alert; an agent answers about the apps' state.
 
 ---
 
+## Firmo's needs (doctrine D-023, D-024)
+
+Firmo is rewritten on this foundation in its own repository (`kete-africa/firmo`). It needs two
+things from here, delivered before its conversation phase.
+
+### 012 — Package distribution · _decision 0005_
+
+- `pnpm packages:pack` builds and packs `@kete/*` into versioned tarballs with their checksums,
+  vendored by the app.
+- `[agent]` Firmo installs the tarballs and passes its CI with them.
+
+### 013 — The Compte Kete by phone number
+
+- A person whose phone number is proven by a messaging channel gets a Compte Kete without e-mail,
+  password or form, provisioned by a trusted Kete app (Firmo) with its own client credentials;
+  her business becomes an organization.
+- A one-time, short-lived sign-in link, requested by the app for that person, opens the Compte
+  Kete signed in and lands in the app through single sign-on.
+- Mon espace Kete shows the phone number; e-mail and password can be added there.
+- `[agent]` A test app provisions a person by phone, requests a link, and the link signs her into
+  the app once — never twice, never after expiry, never for another app's return address.
+
+---
+
 ## Phase 4 — AI-era primitives
 
 ### Objective
@@ -235,5 +259,5 @@ Phase 4.
 ## Later, when a real need appears
 
 `@kete/offline` (local command queue) · `@kete/sequences` (legal numbering) ·
-`@kete/ai` (model routing and budgets) · phone sign-in · additional payment adapters (Moneroo,
+`@kete/ai` (model routing and budgets) · phone sign-in by one-time code · additional payment adapters (Moneroo,
 Stripe) · a Python SDK if a Python app needs it.
