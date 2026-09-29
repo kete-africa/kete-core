@@ -121,5 +121,6 @@
   "billing_provider_unavailable": "Le service de paiement ne répond pas. Réessayez dans un instant.",
   "billing_invalid_phone": "Numéro de téléphone invalide.",
   "tools_subscribed_until": "Abonné jusqu’au {date}",
-  "tools_see_billing": "Voir les abonnements"
+  "tools_see_billing": "Voir les abonnements",
+  "billing_offer_refused": "Cette offre ne peut pas être payée pour le moment. L’équipe Kete en est informée."
 }

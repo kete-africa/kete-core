@@ -216,6 +216,20 @@ describe('what never grants access', () => {
     expect(await subscription(orgB)).toBeUndefined();
   });
 
+  it('an offer the provider refuses: the checkout is closed, the reason is explicit', async () => {
+    const product = provider.products.get(productId);
+    provider.products.delete(productId);
+    try {
+      await expect(startCheckout(ownerA, payment)).rejects.toMatchObject({
+        code: 'provider_refused',
+      });
+    } finally {
+      if (product) provider.products.set(productId, product);
+    }
+    const failed = await inOrganization(orgA, (tx) => tx.select().from(checkouts));
+    expect(failed.some((row) => row.status === 'failed' && row.providerSaleId === null)).toBe(true);
+  });
+
   it("another organization's payment, and a member's attempt", async () => {
     expect((await readBilling(actor(orgB, 'member'))).subscriptions).toEqual([]);
     expect(await inOrganization(orgB, (tx) => tx.select().from(subscriptions))).toEqual([]);

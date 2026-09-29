@@ -104,7 +104,7 @@ const countryNames = () => new Intl.DisplayNames([getLocale()], { type: 'region'
 function CheckoutForm({ offerId, onCancel }: { offerId: string; onCancel: () => void }) {
   const hydrated = useHydrated();
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<'phone' | 'provider' | null>(null);
+  const [error, setError] = useState<'phone' | 'provider' | 'refused' | null>(null);
   const names = countryNames();
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -118,14 +118,19 @@ function CheckoutForm({ offerId, onCancel }: { offerId: string; onCancel: () => 
     setPending(true);
     setError(null);
     try {
-      const { checkoutUrl } = await beginCheckout({
+      const result = await beginCheckout({
         data: {
           offerId,
           phoneNumber,
           countryCode: String(form.get('country')) as (typeof PHONE_COUNTRIES)[number],
         },
       });
-      window.location.assign(checkoutUrl);
+      if (!result.ok) {
+        setError(result.reason === 'provider_unavailable' ? 'provider' : 'refused');
+        setPending(false);
+        return;
+      }
+      window.location.assign(result.checkoutUrl);
     } catch {
       setError('provider');
       setPending(false);
@@ -156,6 +161,7 @@ function CheckoutForm({ offerId, onCancel }: { offerId: string; onCancel: () => 
         {...(error === 'phone' ? { error: m.billing_invalid_phone() } : {})}
       />
       {error === 'provider' && <Notice tone="error">{m.billing_provider_unavailable()}</Notice>}
+      {error === 'refused' && <Notice tone="error">{m.billing_offer_refused()}</Notice>}
       <div className="flex flex-wrap gap-3">
         <Button type="submit" disabled={pending || !hydrated}>
           {pending ? m.common_loading() : m.billing_go_to_payment()}
