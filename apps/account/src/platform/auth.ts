@@ -8,7 +8,9 @@ import { sendEmail } from './email';
 import { env } from './env';
 import { prefixedId } from './ids';
 import { KETE_APPS_AUDIENCE, type KeteClaims } from './claims';
+import { accountEvent, record } from './events';
 import { keteOAuthProvider } from './oauth';
+import { inOrganization } from './tenancy';
 import * as schema from './schema';
 import { accessUntil } from '../features/payments/access';
 
@@ -75,6 +77,15 @@ export const auth = betterAuth({
       // No mail provider yet, so no address can be verified: the invitation link, handed to the
       // invited person, is the proof. Turn this back on with e-mail delivery (spec 003, edge cases).
       requireEmailVerificationOnInvitation: false,
+      organizationHooks: {
+        // Announced to Kete Cockpit through the outbox. Better Auth commits the organization first,
+        // so the event follows in its own transaction.
+        async afterCreateOrganization({ organization: created }) {
+          await inOrganization(created.id, (tx) =>
+            record(tx, accountEvent('account.created', created.id, {})),
+          );
+        },
+      },
       async sendInvitationEmail({ email, organization: org, inviter, id }) {
         await sendEmail({
           to: email,

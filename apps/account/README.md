@@ -63,6 +63,9 @@ clients`); they sign people in with `@kete/auth`. Discovery at `/.well-known/ope
 - **Operators**: owners and admins of `KETE_OPERATORS_ORGANIZATION_ID` with two-factor on. They
   alone register apps and use `/api/admin/offers` (Kete Cockpit), whose writes go through two
   definer functions — the catalog stays read-only otherwise.
+- **Events** (spec 010): `account.created` and `payment.succeeded` go to Kete Cockpit through the
+  `@kete/sdk` outbox (written in the same transaction as the change) and its relay, signed with
+  the key the Cockpit handed out (`KETE_EVENTS_*`). `/health` reports the backlog.
 - E-mails go through a port (`platform/email.ts`). No mail provider yet: invitations work through
   their link, shown to the person who invites; e-mail verification and password reset wait for a
   provider, and so does the verified-address requirement on invitations.
@@ -114,6 +117,8 @@ Kete's origins: `ACCOUNT_STORAGE_CORS_ORIGINS="https://…" pnpm --filter @kete/
   database) and catalog writes at the provider's price.
 - `e2e/sso.spec.ts` — a witness app on `@kete/auth`: sign-in when not signed in, silent sign-in
   with organization and role, an unregistered address refused, admin API 401/403.
+- `tests/events.test.ts` — the organization and payment events, delivered signed and marked
+  delivered.
 - `e2e/account.spec.ts` — the production build in a browser: sign-up to tools, duplicate address,
   settings, invitation accepted once, logo, member refusals, token verified by `@kete/auth`, 375 px
   and English, sign-in rate limiting.
