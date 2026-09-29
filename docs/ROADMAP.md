@@ -161,6 +161,23 @@ Phase 2.
 
 ---
 
+## Kete Cockpit (in this repository, decision D-022)
+
+Where Kete operators run the Kete apps — doctrine step 1.
+
+- **V0.1 — operators and the offers catalog** · _delivered in `specs/008-cockpit`_: operators sign
+  in with their Compte Kete (two-factor), offer and withdraw products; proven in a browser.
+  Pending: staging (Coolify) and the author's own sign-in.
+- **V0.2 — the app registry**: each app's manifest and health, probed; its events received through
+  `@kete/sdk`; daily snapshots.
+- **V0.3 — the brief and agents**: the morning brief on Telegram; read-only MCP tools so an agent
+  answers about the apps' state.
+
+Proof of V0 (doctrine): an event from an app in production appears in the next morning's brief; a
+simulated outage raises an alert; an agent answers about the apps' state.
+
+---
+
 ## Phase 4 — AI-era primitives
 
 ### Objective
