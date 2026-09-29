@@ -84,7 +84,9 @@ with the branch's `ACCOUNT_STORAGE_*` variables.
    `KETE_OPERATORS_ORGANIZATION_ID`, `COCKPIT_DATABASE_URL` (app role, `dev`),
    `COCKPIT_ENCRYPTION_KEY` (kept also in the local `.env`: losing it means new keys for every app)
    — runtime only.
-6. In the Cockpit, register the staging Compte Kete (`https://compte-kete-staging…`).
+6. In the Cockpit, register the staging Compte Kete (`https://compte-kete-staging…`); give the
+   Compte Kete staging app `KETE_EVENTS_URL=https://cockpit-kete-staging…/api/events` and the
+   shown `KETE_EVENTS_KID` / `KETE_EVENTS_SECRET`, then redeploy it: its events start flowing.
 
 ## Production
 

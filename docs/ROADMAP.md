@@ -172,6 +172,8 @@ Where Kete operators run the Kete apps — doctrine step 1.
   their manifest, health read on a schedule, signed events received exactly once (key rotation);
   proven in a browser with the Compte Kete registered. Daily snapshots move to V0.3 with the brief
   that uses them.
+- **Events from the Compte Kete** · _delivered in `specs/010-account-events`_: `account.created` and
+  `payment.succeeded` through the outbox and its relay.
 - **V0.3 — the brief and agents**: daily snapshots; the morning brief on Telegram; read-only MCP tools so an agent
   answers about the apps' state.
 

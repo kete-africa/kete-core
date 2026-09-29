@@ -44,6 +44,16 @@ function actor(organizationId: string, role: Actor['role']): Actor {
 const ownerA = actor(orgA, 'owner');
 const payment = { offerId, phoneNumber: '90 00 00 00', countryCode: 'TG' as const };
 
+/** What the outbox holds for an organization, for one event type (read under its RLS). */
+async function announced(organizationId: string, type: string) {
+  const { rows } = await inOrganization(organizationId, (tx) =>
+    tx.execute<{ envelope: { type: string; data: unknown } }>(
+      sql`select envelope from kete_outbox where organization_id = ${organizationId}`,
+    ),
+  );
+  return rows.filter((row) => row.envelope.type === type).map((row) => row.envelope.data);
+}
+
 async function subscription(organizationId: string) {
   const [row] = await inOrganization(organizationId, (tx) => tx.select().from(subscriptions));
   return row;
@@ -83,6 +93,7 @@ afterAll(async () => {
   await db.delete(organization).where(inArray(organization.id, [orgA, orgB]));
   await db.delete(user).where(inArray(user.id, [person]));
   await owner.query('delete from offers where id = $1', [offerId]);
+  await owner.query('delete from kete_outbox where organization_id = any($1)', [[orgA, orgB]]);
   await owner.end();
   await getPool().end();
 });
@@ -138,6 +149,10 @@ describe('a paid sale', () => {
     expect(sub?.paidUntil.getTime()).toBeGreaterThanOrEqual(before + 30 * DAY - 5000);
     expect(sub && sub.graceUntil.getTime() - sub.paidUntil.getTime()).toBe(3 * DAY);
     expect(Object.keys(await accessUntil(orgA))).toEqual(['nettio']);
+    // Announced to Kete Cockpit in the same transaction: 5000 F CFA, the provider's sale.
+    expect(await announced(orgA, 'payment.succeeded')).toEqual([
+      { amount: 5000, currency: 'XOF', reference: saleId },
+    ]);
   });
 
   it('is applied once: a replayed notification and a later confirmation change nothing', async () => {
@@ -161,6 +176,8 @@ describe('a paid sale', () => {
     });
     expect(await confirmCheckout(ownerA, first)).toMatchObject({ status: 'paid' });
     expect((await subscription(orgA))?.paidUntil).toEqual(before?.paidUntil);
+    // Still one announcement for that sale.
+    expect(await announced(orgA, 'payment.succeeded')).toHaveLength(1);
   });
 
   it('extends from the end of the current period when paid early', async () => {
@@ -194,6 +211,7 @@ describe('what never grants access', () => {
     provider.settle(String(sale?.id), 'failed');
     expect(await confirmCheckout(orgBOwner, checkoutId)).toEqual({ status: 'failed' });
     expect(await subscription(orgB)).toBeUndefined();
+    expect(await announced(orgB, 'payment.succeeded')).toEqual([]);
   });
 
   it('a paid sale for a different amount or product', async () => {

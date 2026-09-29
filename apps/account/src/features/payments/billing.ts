@@ -11,6 +11,7 @@ import {
 } from '@/platform/actor';
 import { db } from '@/platform/db';
 import { env } from '@/platform/env';
+import { accountEvent, record } from '@/platform/events';
 import { prefixedId } from '@/platform/ids';
 import { getPaymentProvider } from '@/platform/payments';
 import {
@@ -22,6 +23,12 @@ import {
 } from '@/platform/schema';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const ZERO_DECIMAL_CURRENCIES = new Set(['XOF', 'XAF', 'GNF', 'JPY']);
+
+/** Amounts in events are integers in the currency's smallest unit (cents; F CFA as is). */
+function minorUnits(value: number, currency: string): number {
+  return Math.round(value * (ZERO_DECIMAL_CURRENCIES.has(currency.toUpperCase()) ? 1 : 100));
+}
 
 export { PHONE_COUNTRIES };
 
@@ -258,6 +265,15 @@ async function reconcile(organizationId: string, sale: Sale): Promise<ReconcileO
       .update(checkouts)
       .set({ status: 'paid', periodEnd: paidUntil, decidedAt: now })
       .where(eq(checkouts.id, checkout.id));
+    // Same transaction: access and its announcement to Kete Cockpit commit together.
+    await record(
+      tx,
+      accountEvent('payment.succeeded', organizationId, {
+        amount: minorUnits(checkout.expectedValue, checkout.expectedCurrency),
+        currency: checkout.expectedCurrency.toUpperCase(),
+        reference: sale.id,
+      }),
+    );
     return { status: 'paid', app: offer.app, paidUntil: paidUntil.toISOString() };
   });
 }
