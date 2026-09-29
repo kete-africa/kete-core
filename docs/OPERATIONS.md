@@ -55,6 +55,15 @@ runs them after a green push on `dev`. The instance-wide token is never stored i
   with the branch's owner URL (`ACCOUNT_OWNER_URL`) — the price is read from the provider.
 - A Pulse is disabled by Chariow after 5 failed attempts: re-enable it in the dashboard.
 
+### Sign-in for Kete apps and operators
+
+- `KETE_OPERATORS_ORGANIZATION_ID`: Kete's own organization in this Compte Kete. Its owners and
+  admins with two-factor on are operators.
+- An operator registers each app once (its secret is printed once, then kept with the app's
+  secrets):
+  `OPERATOR_PASSWORD=… pnpm --filter @kete/account clients create --operator … --code 123456 --name "Kete Cockpit" --redirect https://…/auth/callback`
+  with the branch's `ACCOUNT_DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`.
+
 ### Storage CORS
 
 Browsers upload straight to the bucket, only from the Compte Kete's origin:

@@ -1,5 +1,5 @@
-import { inOrganization } from '@/platform/tenancy';
-import { subscriptions, type KeteApp } from '@/platform/schema';
+import { inOrganization } from '../../platform/tenancy';
+import { subscriptions, type KeteApp } from '../../platform/schema';
 
 /** Apps the organization may use now, and until when (end of grace): carried in the token. */
 export async function accessUntil(

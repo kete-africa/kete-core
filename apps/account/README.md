@@ -14,6 +14,8 @@ client's single place for their tools, their organization and its generic settin
 | `/espace/abonnements`           | Subscriptions: offers, paying, access per tool                                                   |
 | `/espace/organisation`          | Members, roles, invitations                                                                      |
 | `/espace/parametres`            | Logo, and generic settings: identity, legal identifiers, language, time zone, currency, channels |
+| `/espace/securite`              | Two-factor authentication (authenticator app, backup codes)                                      |
+| `/connexion/code`               | The second step of a sign-in with two-factor                                                     |
 | `/invitation/$id`               | Accept an invitation                                                                             |
 
 Machine endpoints: `/api/auth/*` (Better Auth, including `/api/auth/token` and the published keys
@@ -55,6 +57,12 @@ flowchart LR
   the service, set by operators with `pnpm --filter @kete/account offers`), checkouts and
   subscriptions under RLS. A notification is only a hint: the sale is re-read from the provider
   and applied once; the token carries `apps`, the end of access per tool (grace included).
+- **One sign-in for every Kete app** (spec 007): the Compte Kete is an OAuth 2.1 / OpenID Connect
+  provider. Apps are trusted clients registered by operators (`pnpm --filter @kete/account
+clients`); they sign people in with `@kete/auth`. Discovery at `/.well-known/openid-configuration`.
+- **Operators**: owners and admins of `KETE_OPERATORS_ORGANIZATION_ID` with two-factor on. They
+  alone register apps and use `/api/admin/offers` (Kete Cockpit), whose writes go through two
+  definer functions — the catalog stays read-only otherwise.
 - E-mails go through a port (`platform/email.ts`). No mail provider yet: invitations work through
   their link, shown to the person who invites; e-mail verification and password reset wait for a
   provider, and so does the verified-address requirement on invitations.
@@ -102,6 +110,10 @@ Kete's origins: `ACCOUNT_STORAGE_CORS_ORIGINS="https://…" pnpm --filter @kete/
   replaced and removed, administrators only.
 - `tests/payments.test.ts` — paid sales open access once and extend from the end; forged,
   replayed, unpaid or mismatching sales grant nothing; another organization sees nothing.
+- `tests/admin.test.ts` — who is an operator (organization, role, second factor, still so in the
+  database) and catalog writes at the provider's price.
+- `e2e/sso.spec.ts` — a witness app on `@kete/auth`: sign-in when not signed in, silent sign-in
+  with organization and role, an unregistered address refused, admin API 401/403.
 - `e2e/account.spec.ts` — the production build in a browser: sign-up to tools, duplicate address,
   settings, invitation accepted once, logo, member refusals, token verified by `@kete/auth`, 375 px
   and English, sign-in rate limiting.

@@ -40,6 +40,8 @@ function localServer() {
       ACCOUNT_DATABASE_URL: databaseUrl,
       BETTER_AUTH_URL: origin,
       BETTER_AUTH_SECRET: authSecret,
+      // e2e/sso.spec.ts makes its operator an owner of this organization.
+      KETE_OPERATORS_ORGANIZATION_ID: 'org_e2e_operators',
       ...storage,
     },
     reuseExistingServer: false,

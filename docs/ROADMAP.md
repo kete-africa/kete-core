@@ -141,6 +141,9 @@ Take a real payment through a generic port.
 
 - Prerequisite delivered in `specs/005-staging`: the Compte Kete runs in staging on Coolify
   (branch `dev`), so providers can reach it and the author can validate screens on a phone.
+- `specs/007-single-sign-on` delivered (prerequisite of Kete Cockpit): the Compte Kete signs people
+  in to every Kete app (OAuth 2.1 / OIDC, `@kete/auth` `createKeteSignIn`), two-factor
+  authentication, operators, and the offers admin API. Proven in a browser with a witness app.
 - `specs/006-payments` delivered: `@kete/payments` with the Chariow adapter (checked read-only
   against the real API), offers set by operators from provider products, checkouts and
   subscriptions under RLS, notifications verified and applied once, access in the token
