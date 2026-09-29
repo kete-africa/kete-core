@@ -147,6 +147,38 @@ export function chariowProvider(options: ChariowOptions): PaymentProvider {
       return { id, name: text(data.name) ?? id, price };
     },
 
+    async listProducts(): Promise<Product[]> {
+      const products: Product[] = [];
+      let cursor: string | null = null;
+      // Pages of 100; a store of Kete's size fits in a few.
+      for (let page = 0; page < 20; page += 1) {
+        const query = new URLSearchParams({ per_page: '100', ...(cursor ? { cursor } : {}) });
+        let response: Response;
+        try {
+          response = await http(`${baseUrl}/products?${query.toString()}`, {
+            headers: { authorization: `Bearer ${options.apiKey}`, accept: 'application/json' },
+            signal: AbortSignal.timeout(timeoutMs),
+          });
+        } catch {
+          throw new PaymentProviderError('unreachable', 'GET /products: provider unreachable');
+        }
+        if (!response.ok) {
+          throw new PaymentProviderError('refused', `GET /products: status ${response.status}`);
+        }
+        const json = object(await response.json().catch(() => null));
+        for (const item of Array.isArray(json.data) ? json.data : []) {
+          const data = object(item);
+          const pricing = object(data.pricing);
+          const price = money(pricing.current_price) ?? money(pricing.price);
+          const id = text(data.id);
+          if (id && price) products.push({ id, name: text(data.name) ?? id, price });
+        }
+        cursor = text(object(json.pagination).next_cursor);
+        if (!cursor) break;
+      }
+      return products;
+    },
+
     async verifyNotification(rawBody: string, headers: Headers): Promise<Notification | null> {
       // Without a secret nothing is genuine: an empty key would make any signature forgeable.
       if (options.pulseSecret.length < 16) return null;

@@ -13,9 +13,11 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "typecheck": "vite build && tsc --noEmit",
     "storage:cors": "tsx scripts/storage-cors.ts",
-    "offers": "tsx scripts/offers.ts"
+    "offers": "tsx scripts/offers.ts",
+    "clients": "tsx --tsconfig tsconfig.json scripts/clients.ts"
   },
   "dependencies": {
+    "@better-auth/oauth-provider": "1.7.6",
     "@kete/design": "workspace:*",
     "@kete/files": "workspace:*",
     "@kete/payments": "workspace:*",
@@ -26,6 +28,7 @@
     "drizzle-orm": "^0.45.3",
     "jose": "^6.2.12",
     "pg": "^8.23.0",
+    "qrcode": "1.5.4",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "srvx": "0.11.22",
@@ -38,6 +41,7 @@
     "@playwright/test": "1.63.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/pg": "^8.23.1",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.2.0",

@@ -19,6 +19,8 @@ export interface KeteIdentity {
   role: KeteRole | null;
   /** Apps the organization may use, each with the end of its access (grace period included). */
   apps: Record<string, Date>;
+  /** Whether the person signs in with a second factor (required for Kete operators). */
+  twoFactor: boolean;
   expiresAt: Date;
 }
 
@@ -45,7 +47,7 @@ function appsClaim(value: unknown): Record<string, Date> {
 export interface TokenVerifierOptions {
   /** The Compte Kete's public origin, e.g. https://compte.kete.africa — the token's issuer. */
   issuer: string;
-  /** Defaults to `kete-apps`. */
+  /** Defaults to `urn:kete:apps`. */
   audience?: string;
   /**
    * The published keys. Defaults to `${issuer}/api/auth/jwks`, fetched once and cached; a token
@@ -86,7 +88,7 @@ export function createTokenVerifier(options: TokenVerifierOptions): TokenVerifie
   const source = options.jwks ?? new URL(`${issuer}/api/auth/jwks`);
   const keys: JWTVerifyGetKey =
     source instanceof URL ? createRemoteJWKSet(source) : createLocalJWKSet(source);
-  const audience = options.audience ?? 'kete-apps';
+  const audience = options.audience ?? 'urn:kete:apps';
   const clockTolerance = options.clockToleranceSeconds ?? 5;
 
   return async (token) => {
@@ -120,6 +122,7 @@ export function createTokenVerifier(options: TokenVerifierOptions): TokenVerifie
       role: role as KeteRole | null,
       // No organization, no app.
       apps: org === null ? {} : appsClaim(payload.apps),
+      twoFactor: payload.two_factor === true,
       expiresAt: new Date((payload.exp as number) * 1000),
     };
   };

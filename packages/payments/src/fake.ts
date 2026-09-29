@@ -70,6 +70,10 @@ export function fakeProvider(secret = 'whsec_fake'): FakeProvider {
       };
     },
 
+    async listProducts() {
+      return [...products.values()];
+    },
+
     async getProduct(productId) {
       const product = products.get(productId);
       if (!product) throw new PaymentProviderError('refused', `unknown product ${productId}`);

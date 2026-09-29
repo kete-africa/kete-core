@@ -22,6 +22,20 @@
       "when": 1790651549422,
       "tag": "0002_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790655756031,
+      "tag": "0003_single_sign_on",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790681694969,
+      "tag": "0004_offers_admin",
+      "breakpoints": true
     }
   ]
 }

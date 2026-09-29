@@ -1,7 +1,7 @@
 import { type FormEvent, useState } from 'react';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, useLocation } from '@tanstack/react-router';
 import { Button, TextField } from '@kete/design';
-import { authClient } from '@/lib/auth-client';
+import { authClient, continueAfterSignIn } from '@/lib/auth-client';
 import { AuthFrame, Notice, safeRedirect, useHydrated } from '@/lib/ui';
 import * as m from '@/paraglide/messages.js';
 
@@ -15,6 +15,8 @@ export const Route = createFileRoute('/connexion')({
 function SignIn() {
   const hydrated = useHydrated();
   const { redirect } = Route.useSearch();
+  // The raw query: a Kete app's signed authorization request must survive the switch.
+  const searchStr = useLocation({ select: (location) => location.searchStr });
   const [error, setError] = useState<'refused' | 'rate_limited' | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -23,7 +25,7 @@ function SignIn() {
     const form = new FormData(event.currentTarget);
     setPending(true);
     setError(null);
-    const { error: failure } = await authClient.signIn.email({
+    const { data, error: failure } = await authClient.signIn.email({
       email: String(form.get('email')),
       password: String(form.get('password')),
     });
@@ -32,7 +34,7 @@ function SignIn() {
       setPending(false);
       return;
     }
-    window.location.assign(redirect ?? '/espace');
+    continueAfterSignIn(data, redirect ?? '/espace');
   }
 
   return (
@@ -57,13 +59,9 @@ function SignIn() {
       </form>
       <p className="text-body-sm">
         {m.auth_no_account()}{' '}
-        <Link
-          to="/inscription"
-          search={{ redirect }}
-          className="font-semibold text-primary underline"
-        >
+        <a href={`/inscription${searchStr}`} className="font-semibold text-primary underline">
           {m.auth_create_account()}
-        </Link>
+        </a>
       </p>
     </AuthFrame>
   );

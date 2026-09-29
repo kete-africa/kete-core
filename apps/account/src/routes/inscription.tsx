@@ -1,7 +1,7 @@
 import { type FormEvent, useState } from 'react';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, useLocation } from '@tanstack/react-router';
 import { Button, TextField } from '@kete/design';
-import { authClient } from '@/lib/auth-client';
+import { authClient, continueAfterSignIn } from '@/lib/auth-client';
 import { AuthFrame, Notice, safeRedirect, useHydrated } from '@/lib/ui';
 import * as m from '@/paraglide/messages.js';
 
@@ -15,6 +15,8 @@ export const Route = createFileRoute('/inscription')({
 function SignUp() {
   const hydrated = useHydrated();
   const { redirect } = Route.useSearch();
+  // The raw query: a Kete app's signed authorization request must survive the switch.
+  const searchStr = useLocation({ select: (location) => location.searchStr });
   const [error, setError] = useState<'refused' | 'rate_limited' | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -23,7 +25,7 @@ function SignUp() {
     const form = new FormData(event.currentTarget);
     setPending(true);
     setError(null);
-    const { error: failure } = await authClient.signUp.email({
+    const { data, error: failure } = await authClient.signUp.email({
       name: String(form.get('name')),
       email: String(form.get('email')),
       password: String(form.get('password')),
@@ -34,7 +36,7 @@ function SignUp() {
       setPending(false);
       return;
     }
-    window.location.assign(redirect ?? '/espace');
+    continueAfterSignIn(data, redirect ?? '/espace');
   }
 
   return (
@@ -63,13 +65,9 @@ function SignUp() {
       <Notice tone="info">{m.auth_mail_notice()}</Notice>
       <p className="text-body-sm">
         {m.auth_has_account()}{' '}
-        <Link
-          to="/connexion"
-          search={{ redirect }}
-          className="font-semibold text-primary underline"
-        >
+        <a href={`/connexion${searchStr}`} className="font-semibold text-primary underline">
           {m.auth_sign_in_submit()}
-        </Link>
+        </a>
       </p>
     </AuthFrame>
   );

@@ -34,7 +34,7 @@ function token(
     .setProtectedHeader({ alg: 'EdDSA', kid: String(signer.jwk.kid) })
     .setSubject('usr_a1')
     .setIssuer(overrides.issuer ?? issuer)
-    .setAudience(overrides.audience ?? 'kete-apps')
+    .setAudience(overrides.audience ?? 'urn:kete:apps')
     .setIssuedAt()
     .setExpirationTime(overrides.expiresAt ?? '15m')
     .sign(signer.privateKey);
@@ -113,7 +113,13 @@ describe('createTokenVerifier', () => {
 
   it('refuses an unsigned token and garbage', async () => {
     const payload = Buffer.from(
-      JSON.stringify({ ...claims, sub: 'usr_a1', iss: issuer, aud: 'kete-apps', exp: 9999999999 }),
+      JSON.stringify({
+        ...claims,
+        sub: 'usr_a1',
+        iss: issuer,
+        aud: 'urn:kete:apps',
+        exp: 9999999999,
+      }),
     ).toString('base64url');
     const none = `${Buffer.from('{"alg":"none"}').toString('base64url')}.${payload}.`;
     expect(await refusal(verifier()(none))).toBe('invalid');

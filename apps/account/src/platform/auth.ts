@@ -1,24 +1,41 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { jwt, organization } from 'better-auth/plugins';
+import { jwt, organization, twoFactor } from 'better-auth/plugins';
 import { tanstackStartCookies } from 'better-auth/tanstack-start';
 import { and, asc, eq } from 'drizzle-orm';
 import { db } from './db';
 import { sendEmail } from './email';
 import { env } from './env';
 import { prefixedId } from './ids';
+import { KETE_APPS_AUDIENCE, type KeteClaims } from './claims';
+import { keteOAuthProvider } from './oauth';
 import * as schema from './schema';
-import { accessUntil } from '@/features/payments/access';
+import { accessUntil } from '../features/payments/access';
 
-/** Claims every Kete app reads from a Compte Kete token (@kete/auth). */
-export interface KeteClaims {
-  sub: string;
-  email: string;
-  name: string;
-  org: string | null;
-  role: 'owner' | 'admin' | 'member' | null;
-  /** Apps the organization may use, each with the end of its access (grace included). */
-  apps: Record<string, string>;
+/** The Kete claims of a person for one organization (null: none), from the database. */
+export async function keteClaims(
+  user: { id: string; email: string; name: string; twoFactorEnabled?: boolean | null },
+  organizationId: string | null,
+): Promise<KeteClaims> {
+  let role: KeteClaims['role'] = null;
+  if (organizationId) {
+    const [membership] = await db
+      .select({ role: schema.member.role })
+      .from(schema.member)
+      .where(
+        and(eq(schema.member.organizationId, organizationId), eq(schema.member.userId, user.id)),
+      );
+    role = (membership?.role as KeteClaims['role']) ?? null;
+  }
+  const org = role ? organizationId : null;
+  return {
+    email: user.email,
+    name: user.name,
+    org,
+    role,
+    apps: org ? await accessUntil(org) : {},
+    two_factor: user.twoFactorEnabled === true,
+  };
 }
 
 export const auth = betterAuth({
@@ -70,27 +87,20 @@ export const auth = betterAuth({
         });
       },
     }),
+    twoFactor({ issuer: 'Kete' }),
     jwt({
       jwt: {
         issuer: env.publicUrl,
-        audience: 'kete-apps',
+        audience: KETE_APPS_AUDIENCE,
         expirationTime: '15m',
-        async definePayload({ user, session }): Promise<KeteClaims> {
+        async definePayload({ user, session }) {
           const org =
             (session as { activeOrganizationId?: string | null }).activeOrganizationId ?? null;
-          let role: KeteClaims['role'] = null;
-          if (org) {
-            const [membership] = await db
-              .select({ role: schema.member.role })
-              .from(schema.member)
-              .where(and(eq(schema.member.organizationId, org), eq(schema.member.userId, user.id)));
-            role = (membership?.role as KeteClaims['role']) ?? null;
-          }
-          const apps = org && role ? await accessUntil(org) : {};
-          return { sub: user.id, email: user.email, name: user.name, org, role, apps };
+          return { sub: user.id, ...(await keteClaims(user, org)) };
         },
       },
     }),
+    keteOAuthProvider(keteClaims),
     // Must stay last: lets server functions set the session cookies.
     tanstackStartCookies(),
   ],

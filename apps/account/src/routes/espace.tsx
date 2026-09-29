@@ -41,6 +41,7 @@ function Space() {
     { to: '/espace/organisation', label: m.nav_organization(), exact: false },
     { to: '/espace/abonnements', label: m.nav_billing(), exact: false },
     { to: '/espace/parametres', label: m.nav_settings(), exact: false },
+    { to: '/espace/securite', label: m.nav_security(), exact: false },
   ] as const;
 
   return (

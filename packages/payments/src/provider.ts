@@ -10,6 +10,8 @@ export interface PaymentProvider {
   getSale(saleId: string): Promise<Sale>;
   /** A product as sold by the provider: its price is the reference. */
   getProduct(productId: string): Promise<Product>;
+  /** The products the store sells, for operators choosing what becomes an offer. */
+  listProducts(): Promise<Product[]>;
   /**
    * Authenticates a notification from its raw body and headers. Returns null when it is not
    * genuine. A genuine notification is only a hint: callers re-read the sale with `getSale`.
