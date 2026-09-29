@@ -54,4 +54,5 @@ Flows: [event delivery](flows/event-delivery.md) · sign-in, invitation and toke
 | `kete-core`    | `@kete/sdk` tests                                     | `main`, `dev`, `test` |
 | `kete-account` | Compte Kete, with its object storage (bucket `files`) | `main`, `dev`, `test` |
 
-Each service owns its database; no service reads another's.
+Each service owns its database; no service reads another's. Where services run and how they go
+live: [operations](OPERATIONS.md).

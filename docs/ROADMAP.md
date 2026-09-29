@@ -137,6 +137,11 @@ Take a real payment through a generic port.
 - Subscriptions centralized in the Compte Kete; access carried by the token with a grace period.
 - "My subscriptions" in Mon espace Kete.
 
+### Status
+
+- Prerequisite delivered in `specs/005-staging`: the Compte Kete runs in staging on Coolify
+  (branch `dev`), so providers can reach it and the author can validate screens on a phone.
+
 ### Dependencies
 
 Phase 2.
