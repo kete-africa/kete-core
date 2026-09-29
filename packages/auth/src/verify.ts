@@ -17,7 +17,29 @@ export interface KeteIdentity {
   /** The active organization, or null when the person has none yet. */
   organizationId: string | null;
   role: KeteRole | null;
+  /** Apps the organization may use, each with the end of its access (grace period included). */
+  apps: Record<string, Date>;
   expiresAt: Date;
+}
+
+/** Whether the token's organization may use `app` at `now`. */
+export function canUse(identity: KeteIdentity, app: string, now: Date = new Date()): boolean {
+  const until = identity.apps[app];
+  return until !== undefined && until > now;
+}
+
+function appsClaim(value: unknown): Record<string, Date> {
+  if (value === undefined || value === null) return {};
+  if (typeof value !== 'object' || Array.isArray(value)) throw new InvalidTokenError('invalid');
+  const apps: Record<string, Date> = {};
+  for (const [app, until] of Object.entries(value)) {
+    const date = typeof until === 'string' ? new Date(until) : new Date(Number.NaN);
+    if (!/^[a-z][a-z0-9_-]{0,39}$/.test(app) || Number.isNaN(date.getTime())) {
+      throw new InvalidTokenError('invalid');
+    }
+    apps[app] = date;
+  }
+  return apps;
 }
 
 export interface TokenVerifierOptions {
@@ -96,6 +118,8 @@ export function createTokenVerifier(options: TokenVerifierOptions): TokenVerifie
       name: claim(payload, 'name'),
       organizationId: org,
       role: role as KeteRole | null,
+      // No organization, no app.
+      apps: org === null ? {} : appsClaim(payload.apps),
       expiresAt: new Date((payload.exp as number) * 1000),
     };
   };

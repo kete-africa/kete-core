@@ -4,6 +4,8 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
+  boolean,
   pgPolicy,
   pgRole,
   pgTable,
@@ -113,3 +115,113 @@ export const organizationSettings = pgTable(
     }),
   ],
 ).enableRLS();
+
+/** The Kete apps an organization can subscribe to. */
+export type KeteApp = 'firmo' | 'nettio' | 'nyatefe' | 'cockpit';
+
+/**
+ * Kete's catalog: what can be bought, for how long, through which provider product. Global — the
+ * same for every organization. The application role can only read it; operators change it with
+ * the owner role (scripts/offers.ts), the provider's price being the reference.
+ */
+export const offers = pgTable(
+  'offers',
+  {
+    id: text('id').primaryKey(),
+    app: text('app').$type<KeteApp>().notNull(),
+    name: text('name').notNull(),
+    periodDays: integer('period_days').notNull(),
+    graceDays: integer('grace_days').notNull().default(3),
+    provider: text('provider').notNull(),
+    providerProductId: text('provider_product_id').notNull(),
+    priceValue: numeric('price_value', { precision: 14, scale: 2, mode: 'number' }).notNull(),
+    priceCurrency: text('price_currency').notNull(),
+    active: boolean('active').notNull().default(true),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('offers_provider_product_key').on(table.provider, table.providerProductId),
+    pgPolicy('offers_read', { as: 'permissive', for: 'select', to: accountApp, using: sql`true` }),
+  ],
+).enableRLS();
+
+/**
+ * A payment an organization started. The provider's sale id is known before the customer pays;
+ * it is how a notification finds its organization — never the metadata the provider echoes.
+ */
+export const checkouts = pgTable(
+  'checkouts',
+  {
+    id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
+    offerId: text('offer_id')
+      .notNull()
+      .references(() => offers.id),
+    provider: text('provider').notNull(),
+    providerSaleId: text('provider_sale_id').unique(),
+    status: text('status')
+      .$type<'pending' | 'paid' | 'failed' | 'abandoned'>()
+      .notNull()
+      .default('pending'),
+    /** What the offer cost when the payment started; the sale must match it. */
+    expectedValue: numeric('expected_value', { precision: 14, scale: 2, mode: 'number' }).notNull(),
+    expectedCurrency: text('expected_currency').notNull(),
+    checkoutUrl: text('checkout_url'),
+    /** The access this payment granted, once paid. */
+    periodEnd: timestamp('period_end', { withTimezone: true }),
+    createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    decidedAt: timestamp('decided_at', { withTimezone: true }),
+  },
+  () => [
+    pgPolicy('checkouts_isolation', {
+      as: 'permissive',
+      for: 'all',
+      to: accountApp,
+      using: sql`organization_id = ${activeOrganization}`,
+      withCheck: sql`organization_id = ${activeOrganization}`,
+    }),
+  ],
+).enableRLS();
+
+/** An organization's access to one app: paid until `paidUntil`, then a grace period. */
+export const subscriptions = pgTable(
+  'subscriptions',
+  {
+    id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
+    app: text('app').$type<KeteApp>().notNull(),
+    offerId: text('offer_id')
+      .notNull()
+      .references(() => offers.id),
+    paidUntil: timestamp('paid_until', { withTimezone: true }).notNull(),
+    graceUntil: timestamp('grace_until', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('subscriptions_organization_app_key').on(table.organizationId, table.app),
+    pgPolicy('subscriptions_isolation', {
+      as: 'permissive',
+      for: 'all',
+      to: accountApp,
+      using: sql`organization_id = ${activeOrganization}`,
+      withCheck: sql`organization_id = ${activeOrganization}`,
+    }),
+  ],
+).enableRLS();
+
+/**
+ * Every provider notification accepted, once: the delivery id is the idempotency key. Holds no
+ * organization data; written only after the signature is verified.
+ */
+export const paymentNotifications = pgTable('payment_notifications', {
+  deliveryId: text('delivery_id').primaryKey(),
+  provider: text('provider').notNull(),
+  event: text('event').notNull(),
+  saleId: text('sale_id'),
+  receivedAt: timestamp('received_at', { withTimezone: true }).notNull().defaultNow(),
+});

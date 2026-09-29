@@ -15,6 +15,13 @@
       "when": 1790635653692,
       "tag": "0001_files",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790651549422,
+      "tag": "0002_payments",
+      "breakpoints": true
     }
   ]
 }

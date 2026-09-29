@@ -1,0 +1,13 @@
+{
+  "name": "@kete/payments",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Kete payments: a payment port, the Chariow adapter first, and a fake provider for tests.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  }
+}

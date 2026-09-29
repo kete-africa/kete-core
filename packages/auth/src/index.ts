@@ -1,6 +1,7 @@
 // The public entry point of @kete/auth. Anything not exported here is internal.
 
 export {
+  canUse,
   createTokenVerifier,
   InvalidTokenError,
   type KeteIdentity,

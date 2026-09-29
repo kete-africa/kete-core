@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 import { z } from 'zod';
+import { accessUntil } from '@/features/payments/access';
 import { toolCatalog } from '@/features/tools/catalog';
 import { actorFromHeaders, requireMember } from '@/platform/actor';
 import { readInvitation, readMembers, readViewer } from './viewer';
@@ -19,6 +20,7 @@ export const fetchInvitation = createServerFn({ method: 'GET' })
   .handler(({ data }) => readInvitation(data.id));
 
 export const fetchTools = createServerFn({ method: 'GET' }).handler(async () => {
-  requireMember(await actorFromHeaders(getRequestHeaders()));
-  return toolCatalog();
+  const me = requireMember(await actorFromHeaders(getRequestHeaders()));
+  const access = await accessUntil(me.organizationId);
+  return toolCatalog().map((tool) => ({ ...tool, accessUntil: access[tool.id] ?? null }));
 });
