@@ -21,7 +21,8 @@ export const env = {
   get payments() {
     return {
       apiKey: required('PAYMENTS_CHARIOW_API_KEY'),
-      pulseSecret: required('PAYMENTS_CHARIOW_PULSE_SECRET'),
+      // Optional until the provider's notification endpoint is set up: then none is accepted.
+      pulseSecret: process.env.PAYMENTS_CHARIOW_PULSE_SECRET ?? '',
     };
   },
   /** Object storage of the same Neon branch as the database (decision 0002). */

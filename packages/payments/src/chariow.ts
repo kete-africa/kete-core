@@ -13,7 +13,10 @@ import {
 
 export interface ChariowOptions {
   apiKey: string;
-  /** The signing secret of the store's Pulse (`whsec_…`); not the API key. */
+  /**
+   * The signing secret of the store's Pulse (`whsec_…`); not the API key. Empty or short: every
+   * notification is refused (the person's return still confirms a payment).
+   */
   pulseSecret: string;
   baseUrl?: string;
   timeoutMs?: number;
@@ -145,6 +148,8 @@ export function chariowProvider(options: ChariowOptions): PaymentProvider {
     },
 
     async verifyNotification(rawBody: string, headers: Headers): Promise<Notification | null> {
+      // Without a secret nothing is genuine: an empty key would make any signature forgeable.
+      if (options.pulseSecret.length < 16) return null;
       const signature = headers.get('x-chariow-signature') ?? '';
       const deliveryId = headers.get('x-pulse-delivery-id');
       if (!/^sha256=[0-9a-f]{64}$/.test(signature) || !deliveryId) return null;

@@ -175,6 +175,15 @@ describe('chariowProvider', () => {
       });
     });
 
+    it('refuses everything when no secret is configured', async () => {
+      const unconfigured = chariowProvider({ apiKey: 'k', pulseSecret: '' });
+      const emptyKeySigned = new Headers({
+        'x-chariow-signature': signature(body, ''),
+        'x-pulse-delivery-id': 'pd_1',
+      });
+      expect(await unconfigured.verifyNotification(body, emptyKeySigned)).toBeNull();
+    });
+
     it('refuses a forged, altered, unsigned or anonymous notification', async () => {
       const forged = signature(body, 'whsec_other');
       expect(
