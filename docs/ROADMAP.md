@@ -204,6 +204,16 @@ things from here, delivered before its conversation phase.
 - `[agent]` A test app provisions a person by phone, requests a link, and the link signs her into
   the app once — never twice, never after expiry, never for another app's return address.
 
+### 014 — What an app may know, and paying without an e-mail · _delivered in `specs/014-app-access`_
+
+- A trusted app reads which Kete apps an organization may use, and until when — dates only, never
+  a price, a name or a payment (`GET /api/apps/access`): Firmo applies its own quota with it.
+- A person provisioned by phone is asked the receipt's e-mail when she pays; a person with an
+  e-mail never is.
+- `[agent]` Both proven by the account tests; Firmo reads the access in its plans (Firmo spec 007).
+- Staging: `staging:operator` registers Firmo with `kete:people` in the same gesture as the
+  Cockpit (`docs/OPERATIONS.md`).
+
 ---
 
 ## Phase 4 — AI-era primitives
