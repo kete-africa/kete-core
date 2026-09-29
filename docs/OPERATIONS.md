@@ -70,6 +70,18 @@ Browsers upload straight to the bucket, only from the Compte Kete's origin:
 `ACCOUNT_STORAGE_CORS_ORIGINS=https://compte-kete-staging.13.140.178.49.sslip.io pnpm --filter @kete/account storage:cors`
 with the branch's `ACCOUNT_STORAGE_*` variables.
 
+## Kete Cockpit — staging (to create when Coolify is back)
+
+1. The author signs up on the staging Compte Kete, creates the organization « Kete », turns on
+   two-factor (Mon espace Kete → Sécurité).
+2. `KETE_OPERATORS_ORGANIZATION_ID` = that organization's id, on the staging Compte Kete.
+3. The author registers the Cockpit (password and code asked on the terminal):
+   `pnpm --filter @kete/account clients create --operator <email> --name "Kete Cockpit" --redirect https://cockpit-kete-staging.13.140.178.49.sslip.io/auth/callback`
+   with the staging Compte Kete's environment.
+4. A Coolify application from `apps/cockpit/Dockerfile`, branch `dev`, with `KETE_ACCOUNT_URL`,
+   `COCKPIT_URL`, `COCKPIT_CLIENT_ID`, `COCKPIT_CLIENT_SECRET`, `COCKPIT_SESSION_SECRET`,
+   `KETE_OPERATORS_ORGANIZATION_ID` (runtime only).
+
 ## Production
 
 Nothing follows `main` yet. The production application is created when the author decides the

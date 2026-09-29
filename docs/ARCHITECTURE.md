@@ -40,6 +40,7 @@ flowchart LR
 | `packages/auth/`     | `@kete/auth` — see its [README](../packages/auth/README.md)                   |
 | `packages/payments/` | `@kete/payments` — see its [README](../packages/payments/README.md)           |
 | `packages/files/`    | `@kete/files` — see its [README](../packages/files/README.md)                 |
+| `apps/cockpit/`      | Kete Cockpit — see its [README](../apps/cockpit/README.md)                    |
 | `apps/account/`      | Compte Kete and Mon espace Kete — see its [README](../apps/account/README.md) |
 | `tooling/`           | Shared TypeScript configuration, generation and checks                        |
 | `specs/`             | Spec Kit features                                                             |

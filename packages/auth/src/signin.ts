@@ -23,6 +23,12 @@ export interface SignInOptions {
   cookieName?: string;
   /** Defaults to `urn:kete:apps`. */
   audience?: string;
+  /**
+   * Keep the access token in this app's session (server side, in its signed HttpOnly cookie) to
+   * call Compte Kete APIs on the person's behalf. The session then ends with the token (15 min)
+   * and renews through the Compte Kete, silently while the person is signed in there.
+   */
+  keepAccessToken?: boolean;
   /** Tests only: the published keys, instead of fetching them. */
   jwks?: JSONWebKeySet;
   fetch?: typeof fetch;
@@ -35,6 +41,8 @@ export interface KeteSignIn {
   callback(request: Request): Promise<Response>;
   /** The person signed in to this app, or null. */
   session(request: Request): Promise<KeteIdentity | null>;
+  /** The kept access token (see `keepAccessToken`), or null. Never send it to the browser. */
+  accessToken(request: Request): Promise<string | null>;
   /** Closes this app's session (the Compte Kete session stays). */
   signOut(returnTo?: string): Response;
 }
@@ -197,6 +205,9 @@ export function createKeteSignIn(options: SignInOptions): KeteSignIn {
       } catch (error) {
         throw new SignInError('invalid_token', { cause: error });
       }
+      const lifetime = options.keepAccessToken
+        ? Math.max(0, Math.min(ttl, Math.floor((identity.expiresAt.getTime() - Date.now()) / 1000)))
+        : ttl;
       const session = await new SignJWT({
         email: identity.email,
         name: identity.name,
@@ -206,13 +217,17 @@ export function createKeteSignIn(options: SignInOptions): KeteSignIn {
           Object.entries(identity.apps).map(([app, until]) => [app, until.toISOString()]),
         ),
         two_factor: identity.twoFactor,
+        ...(options.keepAccessToken ? { at: accessToken } : {}),
       })
         .setProtectedHeader({ alg: 'HS256' })
         .setSubject(identity.userId)
         .setIssuedAt()
-        .setExpirationTime(`${ttl}s`)
+        .setExpirationTime(`${lifetime}s`)
         .sign(key);
-      return redirect(flow.returnTo, [cookie(cookieName, session, ttl), cookie(flowCookie, '', 0)]);
+      return redirect(flow.returnTo, [
+        cookie(cookieName, session, lifetime),
+        cookie(flowCookie, '', 0),
+      ]);
     },
 
     async session(request) {
@@ -235,6 +250,17 @@ export function createKeteSignIn(options: SignInOptions): KeteSignIn {
         };
       } catch {
         // Expired, altered or foreign: not signed in.
+        return null;
+      }
+    },
+
+    async accessToken(request) {
+      const raw = cookies(request).get(cookieName);
+      if (!raw) return null;
+      try {
+        const { payload } = await jwtVerify(raw, key, { algorithms: ['HS256'] });
+        return typeof payload.at === 'string' ? payload.at : null;
+      } catch {
         return null;
       }
     },
