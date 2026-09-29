@@ -1,13 +1,14 @@
 /**
  * Makes the author the first Kete operator of the staging Compte Kete and connects Kete Cockpit
- * to it — in one command, after they have, in a browser: signed up on the staging Compte Kete,
+ * and Firmo to it — in one command, after they have, in a browser: signed up on the staging Compte Kete,
  * created the organization « Kete », and turned on two-factor authentication.
  *
  *   pnpm --filter @kete/account staging:operator
  *
  * Asks the operator's e-mail, password and code on the terminal (never stored, never printed).
  * Reads the staging configuration from kete-core/.env and the hosting token from the author's
- * secrets file; the Cockpit's client secret goes straight to the hosting environment.
+ * secrets file; the client secrets of the Cockpit and Firmo go straight to the hosting
+ * environment.
  */
 import { existsSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
@@ -34,6 +35,9 @@ Object.assign(process.env, {
 const cockpitUrl = required('COCKPIT_STAGING_URL');
 const accountApp = 'lhu4zeod5dbf19tcjfqmhd00';
 const cockpitApp = required('COCKPIT_STAGING_COOLIFY_APP');
+// Firmo staging (kete-africa/firmo, docs/OPERATIONS.md there).
+const firmoUrl = 'https://firmo-staging.13.140.178.49.sslip.io';
+const firmoApp = 'tzhsp5ehomtd4bpmgjkvcgr7';
 
 function ask(question: string, hidden = false): Promise<string> {
   const ENTER = [10, 13];
@@ -182,16 +186,39 @@ try {
     },
   });
 
+  // Firmo provisions people by the phone number its channel proved (spec 013).
+  const firmo = await api.adminCreateOAuthClient({
+    headers: session,
+    body: {
+      client_name: 'Firmo (staging)',
+      application_type: 'web',
+      redirect_uris: [`${firmoUrl}/auth/callback`],
+      token_endpoint_auth_method: 'client_secret_post',
+      grant_types: ['authorization_code', 'refresh_token', 'client_credentials'],
+      response_types: ['code'],
+      skip_consent: true,
+      require_pkce: true,
+      client_credentials_scopes: ['kete:people'],
+    },
+  });
+
   await setEnv(accountApp, { KETE_OPERATORS_ORGANIZATION_ID: operators });
   await setEnv(cockpitApp, {
     KETE_OPERATORS_ORGANIZATION_ID: operators,
     COCKPIT_CLIENT_ID: client.client_id,
     COCKPIT_CLIENT_SECRET: client.client_secret,
   });
-  for (const uuid of [accountApp, cockpitApp]) await hosting('POST', '/deploy', { uuid });
+  await setEnv(firmoApp, {
+    KETE_OPERATORS_ORGANIZATION_ID: operators,
+    FIRMO_CLIENT_ID: firmo.client_id,
+    FIRMO_CLIENT_SECRET: firmo.client_secret,
+  });
+  for (const uuid of [accountApp, cockpitApp, firmoApp]) {
+    await hosting('POST', '/deploy', { uuid });
+  }
   console.log(
-    `Done. You are a Kete operator; the Cockpit is registered and both apps are redeploying.\n` +
-      `In a few minutes: ${cockpitUrl}`,
+    `Done. You are a Kete operator; the Cockpit and Firmo are registered, the three apps are\n` +
+      `redeploying. In a few minutes: ${cockpitUrl} and ${firmoUrl}/operations`,
   );
 } finally {
   await getPool().end();

@@ -82,9 +82,9 @@ To open it, the author:
 1. Signs up on the staging Compte Kete, creates the organization « Kete », turns on two-factor
    (Mon espace Kete → Sécurité).
 2. Runs `pnpm --filter @kete/account staging:operator` (e-mail, password and code asked on the
-   terminal, never stored). It makes that organization the operators' organization on both apps,
-   registers the Cockpit as a Compte Kete client, hands its secret straight to the hosting
-   environment and redeploys both apps.
+   terminal, never stored). It makes that organization the operators' organization on the three
+   apps, registers the Cockpit and Firmo (with `kete:people`, below) as Compte Kete clients, hands
+   their secrets straight to the hosting environment and redeploys the three apps.
 3. In the Cockpit, registers the staging Compte Kete (`https://compte-kete-staging…`), then gives
    the Compte Kete staging app `KETE_EVENTS_URL=https://cockpit-kete-staging…/api/events` and the
    shown `KETE_EVENTS_KID` / `KETE_EVENTS_SECRET`, and redeploys it: its events start flowing.
@@ -96,6 +96,9 @@ number its channel proved (`POST /api/apps/people`) and ask their one-time sign-
 (`POST /api/apps/sign-in-links`), with a `client_credentials` token carrying `kete:people`:
 
 `pnpm --filter @kete/account clients create --operator <email> --name "Firmo" --redirect https://…/auth/callback --people`
+
+On staging, Firmo (`firmo-staging`, kete-africa/firmo) is registered this way by
+`staging:operator`, above.
 
 Links are never e-mailed: the app hands them to the person in her conversation. They work once, for
 ten minutes, never for a person with a second factor, and land only on the app's own origin.
