@@ -1,0 +1,18 @@
+{
+  "name": "@kete/files",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Kete files: a storage port with an S3-compatible adapter, presigned transfers, and images made safe before they are served.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1141.0",
+    "@aws-sdk/s3-request-presigner": "^3.1141.0",
+    "sharp": "^0.35.5"
+  }
+}

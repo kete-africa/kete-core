@@ -38,6 +38,7 @@ flowchart LR
 | `packages/sdk/`    | `@kete/sdk` — see its [README](../packages/sdk/README.md)                     |
 | `packages/design/` | `@kete/design` — see its [README](../packages/design/README.md)               |
 | `packages/auth/`   | `@kete/auth` — see its [README](../packages/auth/README.md)                   |
+| `packages/files/`  | `@kete/files` — see its [README](../packages/files/README.md)                 |
 | `apps/account/`    | Compte Kete and Mon espace Kete — see its [README](../apps/account/README.md) |
 | `tooling/`         | Shared TypeScript configuration, generation and checks                        |
 | `specs/`           | Spec Kit features                                                             |
@@ -48,9 +49,9 @@ Flows: [event delivery](flows/event-delivery.md) · sign-in, invitation and toke
 
 ## Databases
 
-| Neon project   | Used by           | Branches              |
-| -------------- | ----------------- | --------------------- |
-| `kete-core`    | `@kete/sdk` tests | `main`, `dev`, `test` |
-| `kete-account` | Compte Kete       | `main`, `dev`, `test` |
+| Neon project   | Used by                                               | Branches              |
+| -------------- | ----------------------------------------------------- | --------------------- |
+| `kete-core`    | `@kete/sdk` tests                                     | `main`, `dev`, `test` |
+| `kete-account` | Compte Kete, with its object storage (bucket `files`) | `main`, `dev`, `test` |
 
 Each service owns its database; no service reads another's.

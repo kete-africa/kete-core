@@ -1,0 +1,84 @@
+# @kete/files
+
+Files for Kete apps: a **storage port** with an S3-compatible adapter (Neon object storage first,
+decision 0002), **presigned transfers** so browsers send and read content directly, and
+**images made safe** before anyone can see them (decision 0001).
+
+## Use
+
+```ts
+import { prepareImage, s3Storage, UnsafeFileError } from '@kete/files';
+
+const storage = s3Storage({ endpoint, region, bucket, accessKeyId, secretAccessKey });
+
+// 1. The browser gets a short-lived address and sends the original there.
+const upload = await storage.presignUpload(`organizations/${org}/uploads/${id}`, {
+  contentType: 'image/png',
+});
+
+// 2. The server reads it, keeps it only if it is a real image, re-encodes it, stores the result.
+try {
+  const safe = await prepareImage(original, { maxBytes: 5 * 1024 * 1024, maxDimension: 1024 });
+  await storage.put(`organizations/${org}/files/${id}.webp`, safe.body, safe.contentType);
+} catch (error) {
+  if (error instanceof UnsafeFileError) {
+    // error.code: 'too_large' | 'unsupported_type' | 'unreadable'
+  }
+}
+
+// 3. Reading always goes through a short-lived address.
+const url = await storage.presignDownload(`organizations/${org}/files/${id}.webp`);
+```
+
+`memoryStorage()` implements the same port for tests.
+
+## The flow
+
+```mermaid
+sequenceDiagram
+  participant B as Browser
+  participant A as App server
+  participant S as Object storage
+  participant D as Database (RLS)
+  B->>A: I want to send an image (type, size)
+  A->>D: file row, status pending, for the active organization
+  A-->>B: presigned PUT (10 min) to uploads/…
+  B->>S: PUT original
+  B->>A: done (file id)
+  A->>S: HEAD then GET uploads/… (real size, real bytes)
+  A->>A: prepareImage — real format, decode, re-encode WebP, no metadata
+  A->>S: PUT files/….webp · DELETE uploads/…
+  A->>D: status available (or rejected, with its reason)
+  B->>A: show it
+  A-->>B: presigned GET (5 min)
+```
+
+## Rules
+
+- **Content is judged by its bytes, never by its name or declared type.** A presigned PUT does not
+  bind the content type on Neon object storage: an SVG sent as `image/png` arrives. The server
+  refuses it after reading it.
+- **Only JPEG, PNG and WebP**, re-encoded as WebP: re-encoding drops anything hidden in the
+  original; location, camera and comment metadata are removed; the camera's orientation is
+  applied first. SVG, GIF, PDF and everything else are refused until a scanner exists for them.
+- **Size and pixels are bounded** before decoding (decompression bombs).
+- **Keys** are ASCII paths without `..`; one organization's files live under its own prefix, but
+  isolation is enforced by the database rows that point at them, not by the prefix.
+- **No permanent public URL**; buckets stay private.
+
+## What Neon object storage does and does not do (measured)
+
+| Capability                                      | Result                                 |
+| ----------------------------------------------- | -------------------------------------- |
+| Put, get, head, delete                          | Works                                  |
+| Presigned PUT and GET                           | Works                                  |
+| Content type bound by a presigned PUT           | **Not enforced** — checked server-side |
+| `response-content-disposition` on presigned GET | **Ignored** — not offered by the port  |
+| Bucket CORS (browser uploads)                   | Works (`apps/account` `storage:cors`)  |
+| Unsigned request                                | Refused                                |
+
+## Tests
+
+- `tests/images.test.ts` — re-encoding, metadata removal, orientation, resizing, refusals.
+- `tests/storage.test.ts` — the same contract on `memoryStorage()` and on Neon object storage
+  (branch `test` of `kete-account`), presigned transfers included.

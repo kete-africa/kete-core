@@ -6,7 +6,9 @@ import {
   requireMember,
   type Actor,
 } from '@/platform/actor';
-import { organizationSettings } from '@/platform/schema';
+import { and, eq } from 'drizzle-orm';
+import { files, organizationSettings } from '@/platform/schema';
+import { getStorage } from '@/platform/storage';
 
 /** The generic settings every Kete app reads (doctrine D-013). */
 export const settingsInput = z.object({
@@ -41,6 +43,8 @@ export interface OrganizationSettingsView {
   timeZone: string;
   currency: string;
   notificationChannels: ('email' | 'whatsapp' | 'telegram')[];
+  /** A short-lived address of the logo, or null. */
+  logoUrl: string | null;
   canEdit: boolean;
 }
 
@@ -55,14 +59,21 @@ const defaults = {
   timeZone: 'Africa/Lome',
   currency: 'XOF',
   notificationChannels: ['email' as const],
+  logoUrl: null,
 };
 
 /** Reads the active organization's settings; the database only returns that organization's row. */
 export async function readSettings(actor: Actor | null): Promise<OrganizationSettingsView> {
   const me = requireMember(actor);
-  const [row] = await inOrganization(me.organizationId, (tx) =>
-    tx.select().from(organizationSettings),
-  );
+  const { row, logoKey } = await inOrganization(me.organizationId, async (tx) => {
+    const [settings] = await tx.select().from(organizationSettings);
+    if (!settings?.logoFileId) return { row: settings, logoKey: null };
+    const [logo] = await tx
+      .select({ contentKey: files.contentKey })
+      .from(files)
+      .where(and(eq(files.id, settings.logoFileId), eq(files.status, 'available')));
+    return { row: settings, logoKey: logo?.contentKey ?? null };
+  });
   const canEdit = canAdminister(me.role);
   if (!row) return { ...defaults, canEdit };
   return {
@@ -77,6 +88,7 @@ export async function readSettings(actor: Actor | null): Promise<OrganizationSet
     currency: row.currency,
     notificationChannels:
       row.notificationChannels as OrganizationSettingsView['notificationChannels'],
+    logoUrl: logoKey ? await getStorage().presignDownload(logoKey) : null,
     canEdit,
   };
 }

@@ -17,4 +17,14 @@ export const env = {
   get publicUrl() {
     return required('BETTER_AUTH_URL');
   },
+  /** Object storage of the same Neon branch as the database (decision 0002). */
+  get storage() {
+    return {
+      endpoint: required('ACCOUNT_STORAGE_ENDPOINT'),
+      region: required('ACCOUNT_STORAGE_REGION'),
+      bucket: required('ACCOUNT_STORAGE_BUCKET'),
+      accessKeyId: required('ACCOUNT_STORAGE_ACCESS_KEY_ID'),
+      secretAccessKey: required('ACCOUNT_STORAGE_SECRET_ACCESS_KEY'),
+    };
+  },
 };

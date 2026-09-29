@@ -11,3 +11,10 @@ process.env.ACCOUNT_DATABASE_URL = appUrl;
 process.env.BETTER_AUTH_SECRET ??=
   process.env.ACCOUNT_TEST_AUTH_SECRET ?? 'test-secret-not-used-outside-tests-0123456789';
 process.env.BETTER_AUTH_URL ??= 'http://localhost:3100';
+
+// The service's object storage is the test branch's.
+for (const name of ['ENDPOINT', 'REGION', 'BUCKET', 'ACCESS_KEY_ID', 'SECRET_ACCESS_KEY']) {
+  const value = process.env[`ACCOUNT_TEST_STORAGE_${name}`];
+  if (value && !process.env[`ACCOUNT_STORAGE_${name}`])
+    process.env[`ACCOUNT_STORAGE_${name}`] = value;
+}
