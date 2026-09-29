@@ -78,9 +78,13 @@ with the branch's `ACCOUNT_STORAGE_*` variables.
 3. The author registers the Cockpit (password and code asked on the terminal):
    `pnpm --filter @kete/account clients create --operator <email> --name "Kete Cockpit" --redirect https://cockpit-kete-staging.13.140.178.49.sslip.io/auth/callback`
    with the staging Compte Kete's environment.
-4. A Coolify application from `apps/cockpit/Dockerfile`, branch `dev`, with `KETE_ACCOUNT_URL`,
+4. Migrate the Cockpit's `dev` branch (Neon `kete-cockpit`, owner role).
+5. A Coolify application from `apps/cockpit/Dockerfile`, branch `dev`, with `KETE_ACCOUNT_URL`,
    `COCKPIT_URL`, `COCKPIT_CLIENT_ID`, `COCKPIT_CLIENT_SECRET`, `COCKPIT_SESSION_SECRET`,
-   `KETE_OPERATORS_ORGANIZATION_ID` (runtime only).
+   `KETE_OPERATORS_ORGANIZATION_ID`, `COCKPIT_DATABASE_URL` (app role, `dev`),
+   `COCKPIT_ENCRYPTION_KEY` (kept also in the local `.env`: losing it means new keys for every app)
+   — runtime only.
+6. In the Cockpit, register the staging Compte Kete (`https://compte-kete-staging…`).
 
 ## Production
 

@@ -168,9 +168,11 @@ Where Kete operators run the Kete apps — doctrine step 1.
 - **V0.1 — operators and the offers catalog** · _delivered in `specs/008-cockpit`_: operators sign
   in with their Compte Kete (two-factor), offer and withdraw products; proven in a browser.
   Pending: staging (Coolify) and the author's own sign-in.
-- **V0.2 — the app registry**: each app's manifest and health, probed; its events received through
-  `@kete/sdk`; daily snapshots.
-- **V0.3 — the brief and agents**: the morning brief on Telegram; read-only MCP tools so an agent
+- **V0.2 — the app registry** · _delivered in `specs/009-cockpit-registry`_: apps registered from
+  their manifest, health read on a schedule, signed events received exactly once (key rotation);
+  proven in a browser with the Compte Kete registered. Daily snapshots move to V0.3 with the brief
+  that uses them.
+- **V0.3 — the brief and agents**: daily snapshots; the morning brief on Telegram; read-only MCP tools so an agent
   answers about the apps' state.
 
 Proof of V0 (doctrine): an event from an app in production appears in the next morning's brief; a
