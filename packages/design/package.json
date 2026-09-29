@@ -1,9 +1,13 @@
 {
-  "name": "@kete/design",
+  "name": "@kete-africa/design",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Kete design system v1 rectangle: DESIGN.md (source of truth), Tailwind 4 theme, React components.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/design"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./styles.css": "./styles.css",
@@ -35,6 +39,7 @@
     "DESIGN.md"
   ],
   "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
     "exports": {
       ".": {
         "types": "./dist/src/index.d.ts",

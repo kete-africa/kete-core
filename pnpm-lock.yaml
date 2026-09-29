@@ -45,16 +45,16 @@ importers:
         specifier: 1.7.6
         version: 1.7.6(@better-auth/core@1.7.6(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-call@1.4.0(zod@4.6.5))(jose@6.2.12)(kysely@0.29.6)(nanostores@1.5.4))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.2)(better-auth@1.7.6(@tanstack/react-start@1.168.59(esbuild@0.28.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rollup@4.63.5)(supports-color@7.2.0)(vite@7.3.6(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1)))(drizzle-kit@0.31.11)(drizzle-orm@0.45.3(@types/pg@8.23.1)(kysely@0.29.6)(pg@8.23.0))(pg@8.23.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@3.2.7(@types/debug@4.1.13)(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.33.0)(supports-color@7.2.0)(tsx@4.23.15)(yaml@2.9.1)))(better-call@1.4.0(zod@4.6.5))
       '@kete/design':
-        specifier: workspace:*
+        specifier: workspace:@kete-africa/design@*
         version: link:../../packages/design
       '@kete/files':
-        specifier: workspace:*
+        specifier: workspace:@kete-africa/files@*
         version: link:../../packages/files
       '@kete/payments':
-        specifier: workspace:*
+        specifier: workspace:@kete-africa/payments@*
         version: link:../../packages/payments
       '@kete/sdk':
-        specifier: workspace:*
+        specifier: workspace:@kete-africa/sdk@*
         version: link:../../packages/sdk
       '@tanstack/react-router':
         specifier: ^1.170.40
@@ -97,7 +97,7 @@ importers:
         specifier: ^2.25.4
         version: 2.25.4(typescript@5.9.3)(vite@7.3.6(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))
       '@kete/auth':
-        specifier: workspace:*
+        specifier: workspace:@kete-africa/auth@*
         version: link:../../packages/auth
       '@playwright/test':
         specifier: 1.63.0
@@ -142,10 +142,10 @@ importers:
   apps/cockpit:
     dependencies:
       '@kete/auth':
-        specifier: workspace:*
+        specifier: workspace:@kete-africa/auth@*
         version: link:../../packages/auth
       '@kete/design':
-        specifier: workspace:*
+        specifier: workspace:@kete-africa/design@*
         version: link:../../packages/design
       '@tanstack/react-router':
         specifier: ^1.170.40
@@ -176,7 +176,7 @@ importers:
         specifier: ^2.25.4
         version: 2.25.4(typescript@5.9.3)(vite@7.3.6(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))
       '@kete/sdk':
-        specifier: workspace:*
+        specifier: workspace:@kete-africa/sdk@*
         version: link:../../packages/sdk
       '@playwright/test':
         specifier: 1.63.0

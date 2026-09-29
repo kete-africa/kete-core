@@ -18,10 +18,10 @@
   },
   "dependencies": {
     "@better-auth/oauth-provider": "1.7.6",
-    "@kete/design": "workspace:*",
-    "@kete/files": "workspace:*",
-    "@kete/payments": "workspace:*",
-    "@kete/sdk": "workspace:*",
+    "@kete/design": "workspace:@kete-africa/design@*",
+    "@kete/files": "workspace:@kete-africa/files@*",
+    "@kete/payments": "workspace:@kete-africa/payments@*",
+    "@kete/sdk": "workspace:@kete-africa/sdk@*",
     "@tanstack/react-router": "^1.170.40",
     "@tanstack/react-start": "^1.168.59",
     "better-auth": "^1.7.6",
@@ -37,7 +37,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.1141.0",
     "@inlang/paraglide-js": "^2.25.4",
-    "@kete/auth": "workspace:*",
+    "@kete/auth": "workspace:@kete-africa/auth@*",
     "@playwright/test": "1.63.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/pg": "^8.23.1",

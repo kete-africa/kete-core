@@ -189,9 +189,9 @@ things from here, delivered before its conversation phase.
 
 ### 012 — Package distribution · _decision 0005_
 
-- `pnpm packages:pack` builds and packs `@kete/*` into versioned tarballs with their checksums,
-  vendored by the app.
-- `[agent]` Firmo installs the tarballs and passes its CI with them.
+- `@kete-africa/*` published on GitHub Packages by this repository's CI; apps keep importing
+  `@kete/*` through aliases.
+- `[agent]` Firmo installs them from the registry and passes its CI.
 
 ### 013 — The Compte Kete by phone number
 

@@ -1,9 +1,13 @@
 {
-  "name": "@kete/files",
+  "name": "@kete-africa/files",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Kete files: a storage port with an S3-compatible adapter, presigned transfers, and images made safe before they are served.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/files"
+  },
   "exports": {
     ".": "./src/index.ts"
   },
@@ -20,6 +24,7 @@
     "README.md"
   ],
   "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
     "exports": {
       ".": {
         "types": "./dist/src/index.d.ts",

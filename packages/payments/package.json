@@ -1,9 +1,13 @@
 {
-  "name": "@kete/payments",
+  "name": "@kete-africa/payments",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Kete payments: a payment port, the Chariow adapter first, and a fake provider for tests.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/payments"
+  },
   "exports": {
     ".": "./src/index.ts"
   },
@@ -15,6 +19,7 @@
     "README.md"
   ],
   "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
     "exports": {
       ".": {
         "types": "./dist/src/index.d.ts",
