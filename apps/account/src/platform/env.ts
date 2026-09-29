@@ -17,6 +17,14 @@ export const env = {
   get publicUrl() {
     return required('BETTER_AUTH_URL');
   },
+  /** The payment provider (Chariow first): API key and the signing secret of its notifications. */
+  get payments() {
+    return {
+      apiKey: required('PAYMENTS_CHARIOW_API_KEY'),
+      // Optional until the provider's notification endpoint is set up: then none is accepted.
+      pulseSecret: process.env.PAYMENTS_CHARIOW_PULSE_SECRET ?? '',
+    };
+  },
   /** Object storage of the same Neon branch as the database (decision 0002). */
   get storage() {
     return {

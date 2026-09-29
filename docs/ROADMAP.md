@@ -141,6 +141,11 @@ Take a real payment through a generic port.
 
 - Prerequisite delivered in `specs/005-staging`: the Compte Kete runs in staging on Coolify
   (branch `dev`), so providers can reach it and the author can validate screens on a phone.
+- `specs/006-payments` delivered: `@kete/payments` with the Chariow adapter (checked read-only
+  against the real API), offers set by operators from provider products, checkouts and
+  subscriptions under RLS, notifications verified and applied once, access in the token
+  (`canUse`). Proven in tests: forged, replayed, unpaid or mismatching sales grant nothing.
+  Pending: the author's Pulse and a real payment on staging.
 
 ### Dependencies
 

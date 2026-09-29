@@ -44,6 +44,17 @@ available at build time.
 Steps 2 and 3 run from the author's machine until a **deploy-only Coolify token** exists; then CI
 runs them after a green push on `dev`. The instance-wide token is never stored in GitHub.
 
+### Payments
+
+- **Provider**: Chariow. Store, products and the Pulse (notification endpoint) are created in the
+  Chariow dashboard; its API cannot create them.
+- **Pulse**: URL `https://compte-kete-staging.13.140.178.49.sslip.io/api/payments/notifications`,
+  events _successful sale_, _failed sale_, _abandoned sale_. Its signing secret (`whsec_…`) goes to
+  `PAYMENTS_CHARIOW_PULSE_SECRET`; the store API key to `PAYMENTS_CHARIOW_API_KEY`.
+- **Offers**: `pnpm --filter @kete/account offers set --app nettio --product prd_… --days 30`
+  with the branch's owner URL (`ACCOUNT_OWNER_URL`) — the price is read from the provider.
+- A Pulse is disabled by Chariow after 5 failed attempts: re-enable it in the dashboard.
+
 ### Storage CORS
 
 Browsers upload straight to the bucket, only from the Compte Kete's origin:

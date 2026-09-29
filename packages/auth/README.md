@@ -6,7 +6,7 @@ and their role — without calling the Compte Kete on every request.
 ## Use
 
 ```ts
-import { createTokenVerifier, InvalidTokenError } from '@kete/auth';
+import { canUse, createTokenVerifier, InvalidTokenError } from '@kete/auth';
 
 const verify = createTokenVerifier({ issuer: 'https://compte.kete.africa' });
 
@@ -14,6 +14,8 @@ try {
   const identity = await verify(bearerToken);
   // identity.userId, identity.email, identity.name,
   // identity.organizationId (null without organization), identity.role ('owner' | 'admin' | 'member' | null)
+  // identity.apps: { nettio: Date, … } — end of access per tool, grace included
+  if (!canUse(identity, 'nettio')) return subscriptionRequired();
 } catch (error) {
   if (error instanceof InvalidTokenError) {
     // error.code: 'expired' → ask the Compte Kete for a fresh token; 'invalid' → refuse

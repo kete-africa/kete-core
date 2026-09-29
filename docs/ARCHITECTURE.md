@@ -32,17 +32,18 @@ flowchart LR
 
 ## Layout
 
-| Path               | Content                                                                       |
-| ------------------ | ----------------------------------------------------------------------------- |
-| `contracts/`       | Versioned JSON Schema contracts                                               |
-| `packages/sdk/`    | `@kete/sdk` — see its [README](../packages/sdk/README.md)                     |
-| `packages/design/` | `@kete/design` — see its [README](../packages/design/README.md)               |
-| `packages/auth/`   | `@kete/auth` — see its [README](../packages/auth/README.md)                   |
-| `packages/files/`  | `@kete/files` — see its [README](../packages/files/README.md)                 |
-| `apps/account/`    | Compte Kete and Mon espace Kete — see its [README](../apps/account/README.md) |
-| `tooling/`         | Shared TypeScript configuration, generation and checks                        |
-| `specs/`           | Spec Kit features                                                             |
-| `docs/`            | This architecture, flows, decisions, roadmap                                  |
+| Path                 | Content                                                                       |
+| -------------------- | ----------------------------------------------------------------------------- |
+| `contracts/`         | Versioned JSON Schema contracts                                               |
+| `packages/sdk/`      | `@kete/sdk` — see its [README](../packages/sdk/README.md)                     |
+| `packages/design/`   | `@kete/design` — see its [README](../packages/design/README.md)               |
+| `packages/auth/`     | `@kete/auth` — see its [README](../packages/auth/README.md)                   |
+| `packages/payments/` | `@kete/payments` — see its [README](../packages/payments/README.md)           |
+| `packages/files/`    | `@kete/files` — see its [README](../packages/files/README.md)                 |
+| `apps/account/`      | Compte Kete and Mon espace Kete — see its [README](../apps/account/README.md) |
+| `tooling/`           | Shared TypeScript configuration, generation and checks                        |
+| `specs/`             | Spec Kit features                                                             |
+| `docs/`              | This architecture, flows, decisions, roadmap                                  |
 
 Flows: [event delivery](flows/event-delivery.md) · sign-in, invitation and token: in the
 [Compte Kete README](../apps/account/README.md) and the [`@kete/auth` README](../packages/auth/README.md).

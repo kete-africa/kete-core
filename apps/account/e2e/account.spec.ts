@@ -183,6 +183,18 @@ test('a member can neither invite nor change settings', async ({ browser }) => {
   await expect(page.getByRole('button', { name: 'Enregistrer les paramètres' })).toHaveCount(0);
 });
 
+test('the subscriptions page shows the catalog; a member is told only admins pay', async ({
+  browser,
+}) => {
+  const page = await signedIn(browser, invited.email);
+  await page.goto('/espace/abonnements');
+  await expect(page.getByRole('heading', { name: 'Abonnements' })).toBeVisible();
+  await expect(
+    page.getByText('Seuls les propriétaires et les administrateurs peuvent payer.'),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Payer' })).toHaveCount(0);
+});
+
 test('an app verifies the Compte Kete token: person, organization and role', async ({
   browser,
   baseURL,
@@ -212,7 +224,12 @@ test('an app verifies the Compte Kete token: person, organization and role', asy
 test('Mon espace Kete is usable at 375 px, in English too', async ({ browser }) => {
   const page = await signedIn(browser, owner.email);
   await page.setViewportSize({ width: 375, height: 812 });
-  for (const path of ['/espace', '/espace/organisation', '/espace/parametres']) {
+  for (const path of [
+    '/espace',
+    '/espace/organisation',
+    '/espace/abonnements',
+    '/espace/parametres',
+  ]) {
     await page.goto(path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

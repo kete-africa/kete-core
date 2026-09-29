@@ -8,6 +8,7 @@ import { sendEmail } from './email';
 import { env } from './env';
 import { prefixedId } from './ids';
 import * as schema from './schema';
+import { accessUntil } from '@/features/payments/access';
 
 /** Claims every Kete app reads from a Compte Kete token (@kete/auth). */
 export interface KeteClaims {
@@ -16,6 +17,8 @@ export interface KeteClaims {
   name: string;
   org: string | null;
   role: 'owner' | 'admin' | 'member' | null;
+  /** Apps the organization may use, each with the end of its access (grace included). */
+  apps: Record<string, string>;
 }
 
 export const auth = betterAuth({
@@ -83,7 +86,8 @@ export const auth = betterAuth({
               .where(and(eq(schema.member.organizationId, org), eq(schema.member.userId, user.id)));
             role = (membership?.role as KeteClaims['role']) ?? null;
           }
-          return { sub: user.id, email: user.email, name: user.name, org, role };
+          const apps = org && role ? await accessUntil(org) : {};
+          return { sub: user.id, email: user.email, name: user.name, org, role, apps };
         },
       },
     }),

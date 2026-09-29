@@ -1,6 +1,6 @@
 import { exportJWK, generateKeyPair, SignJWT, type CryptoKey, type JWK } from 'jose';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { createTokenVerifier, InvalidTokenError } from '../src/index.js';
+import { canUse, createTokenVerifier, InvalidTokenError } from '../src/index.js';
 
 const issuer = 'https://compte.kete.test';
 
@@ -127,5 +127,29 @@ describe('createTokenVerifier', () => {
     );
     expect(await refusal(v(await token(published, { payload: { role: null } })))).toBe('invalid');
     expect(await refusal(v(await token(published, { payload: { email: 42 } })))).toBe('invalid');
+  });
+
+  it('reads which apps the organization may use, and until when', async () => {
+    const until = new Date(Date.now() + 86_400_000).toISOString();
+    const past = new Date(Date.now() - 1000).toISOString();
+    const identity = await verifier()(
+      await token(published, { payload: { apps: { nettio: until, firmo: past } } }),
+    );
+    expect(identity.apps.nettio?.toISOString()).toBe(until);
+    expect(canUse(identity, 'nettio')).toBe(true);
+    expect(canUse(identity, 'firmo')).toBe(false);
+    expect(canUse(identity, 'nyatefe')).toBe(false);
+    expect((await verifier()(await token(published))).apps).toEqual({});
+  });
+
+  it('refuses a malformed apps claim', async () => {
+    const v = verifier();
+    for (const apps of [
+      ['nettio'],
+      { nettio: 'not-a-date' },
+      { 'Bad App': new Date().toISOString() },
+    ]) {
+      expect(await refusal(v(await token(published, { payload: { apps } })))).toBe('invalid');
+    }
   });
 });

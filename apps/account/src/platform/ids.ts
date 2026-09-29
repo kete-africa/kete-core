@@ -11,6 +11,9 @@ const prefixes: Record<string, string> = {
   invitation: 'inv',
   jwks: 'jwk',
   file: 'fil',
+  offer: 'ofr',
+  checkout: 'chk',
+  subscription: 'sub',
 };
 
 export function prefixedId(model: string): string {

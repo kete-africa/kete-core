@@ -1,9 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { Tag } from '@kete/design';
 import { fetchTools } from '@/features/identity/functions';
 import type { ToolEntry } from '@/features/tools/catalog';
-import { Notice } from '@/lib/ui';
 import * as m from '@/paraglide/messages.js';
+import { getLocale } from '@/paraglide/runtime.js';
 
 export const Route = createFileRoute('/espace/')({
   loader: () => fetchTools(),
@@ -32,7 +32,16 @@ function Tools() {
               <h2 className="font-title text-title font-bold">{tool.name}</h2>
               <p className="text-body-sm text-bark">{purpose[tool.id]()}</p>
             </div>
-            <div className="mt-auto">
+            <div className="mt-auto flex flex-wrap items-center gap-3">
+              {tool.accessUntil && (
+                <Tag tone="validated">
+                  {m.tools_subscribed_until({
+                    date: new Intl.DateTimeFormat(getLocale(), { dateStyle: 'long' }).format(
+                      new Date(tool.accessUntil),
+                    ),
+                  })}
+                </Tag>
+              )}
               {tool.url ? (
                 <a
                   href={tool.url}
@@ -41,13 +50,17 @@ function Tools() {
                   {m.tool_open()}
                 </a>
               ) : (
-                <Tag tone="neutral">{m.tools_soon_tag()}</Tag>
+                !tool.accessUntil && <Tag tone="neutral">{m.tools_soon_tag()}</Tag>
               )}
             </div>
           </li>
         ))}
       </ul>
-      <Notice tone="info">{m.tools_soon()}</Notice>
+      <p className="text-body-sm">
+        <Link to="/espace/abonnements" className="font-semibold text-primary underline">
+          {m.tools_see_billing()}
+        </Link>
+      </p>
     </div>
   );
 }

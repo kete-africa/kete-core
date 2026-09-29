@@ -11,12 +11,14 @@ client's single place for their tools, their organization and its generic settin
 | `/connexion`, `/inscription`    | Sign in, create an account (e-mail and password)                                                 |
 | `/espace`                       | My tools: the Kete apps of the active organization                                               |
 | `/espace/nouvelle-organisation` | Create an organization (the creator becomes its owner)                                           |
+| `/espace/abonnements`           | Subscriptions: offers, paying, access per tool                                                   |
 | `/espace/organisation`          | Members, roles, invitations                                                                      |
 | `/espace/parametres`            | Logo, and generic settings: identity, legal identifiers, language, time zone, currency, channels |
 | `/invitation/$id`               | Accept an invitation                                                                             |
 
 Machine endpoints: `/api/auth/*` (Better Auth, including `/api/auth/token` and the published keys
-at `/api/auth/jwks`), `/health`, `/.well-known/kete`.
+at `/api/auth/jwks`), `/api/payments/notifications` (the payment provider's signed notifications),
+`/health`, `/.well-known/kete`.
 
 ## Architecture
 
@@ -49,6 +51,10 @@ flowchart LR
 - **Files** (`features/files`, `@kete/files`): the logo is sent by the browser straight to the
   Neon object storage of the same branch, then read, re-encoded and made available by the server;
   the `files` rows are under RLS and a logo can only point at a file of its organization.
+- **Payments** (`features/payments`, `@kete/payments`): a global catalog of offers (read-only for
+  the service, set by operators with `pnpm --filter @kete/account offers`), checkouts and
+  subscriptions under RLS. A notification is only a hint: the sale is re-read from the provider
+  and applied once; the token carries `apps`, the end of access per tool (grace included).
 - E-mails go through a port (`platform/email.ts`). No mail provider yet: invitations work through
   their link, shown to the person who invites; e-mail verification and password reset wait for a
   provider, and so does the verified-address requirement on invitations.
@@ -94,6 +100,8 @@ Kete's origins: `ACCOUNT_STORAGE_CORS_ORIGINS="https://…" pnpm --filter @kete/
 - `tests/files.test.ts` — the logo on the real database and storage: re-encoded without metadata,
   invisible to another organization, disguised files refused and never served, decided once,
   replaced and removed, administrators only.
+- `tests/payments.test.ts` — paid sales open access once and extend from the end; forged,
+  replayed, unpaid or mismatching sales grant nothing; another organization sees nothing.
 - `e2e/account.spec.ts` — the production build in a browser: sign-up to tools, duplicate address,
   settings, invitation accepted once, logo, member refusals, token verified by `@kete/auth`, 375 px
   and English, sign-in rate limiting.
@@ -107,5 +115,5 @@ pnpm --filter @kete/account test:e2e
 
 `pnpm --filter @kete/account build`, then `pnpm --filter @kete/account start` (srvx, port 3000).
 Environment: `ACCOUNT_DATABASE_URL` (application role), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`
-(public origin), `ACCOUNT_STORAGE_*` (object storage of the same branch), `KETE_ENVIRONMENT`, and
+(public origin), `ACCOUNT_STORAGE_*` (object storage of the same branch), `PAYMENTS_CHARIOW_*`, `KETE_ENVIRONMENT`, and
 optionally `KETE_TOOL_*_URL` for the tools that are live.
