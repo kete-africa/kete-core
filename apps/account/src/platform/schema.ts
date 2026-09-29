@@ -25,6 +25,23 @@ export const accountApp = pgRole('account_app').existing();
 const activeOrganization = sql`current_setting('kete.organization_id', true)`;
 
 /**
+ * A one-time sign-in link an app requested for a person (spec 013). Identity data, global like the
+ * other identity tables (decision 0003): who, for which app, where to land, until when, used or not.
+ * The secret itself is the magic link's token, stored hashed by Better Auth.
+ */
+export const appSignInLinks = pgTable('app_sign_in_links', {
+  id: text('id').primaryKey(),
+  clientId: text('client_id').notNull(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  returnTo: text('return_to').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
  * A file of an organization: what it is and where its content lives, separate from the content
  * itself (decision 0001). Content is served only once `status` is `available`.
  */

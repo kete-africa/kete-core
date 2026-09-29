@@ -3,6 +3,7 @@
  *
  *   pnpm clients create --operator me@kete.africa --name "Kete Cockpit"
  *     --redirect https://cockpit…/auth/callback
+ *   pnpm clients create … --people    (the app may provision people by phone — spec 013)
  *   pnpm clients list
  *
  * Only a Kete operator (owner or admin of Kete's organization, two-factor on) may register an app:
@@ -102,6 +103,8 @@ const { positionals, values } = parseArgs({
     name: { type: 'string' },
     redirect: { type: 'string', multiple: true },
     operator: { type: 'string' },
+    // The app may provision people by phone and ask their sign-in links (spec 013).
+    people: { type: 'boolean', default: false },
   },
 });
 
@@ -125,10 +128,13 @@ try {
         application_type: local ? 'native' : 'web',
         redirect_uris: redirects,
         token_endpoint_auth_method: 'client_secret_post',
-        grant_types: ['authorization_code', 'refresh_token'],
+        grant_types: values.people
+          ? ['authorization_code', 'refresh_token', 'client_credentials']
+          : ['authorization_code', 'refresh_token'],
         response_types: ['code'],
         skip_consent: true,
         require_pkce: true,
+        client_credentials_scopes: values.people ? ['kete:people'] : [],
       },
     });
     console.log(JSON.stringify(client, null, 2));

@@ -1,5 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import { auth } from './auth';
+import { contactOf } from './contact';
 import { db } from './db';
 import { member } from './schema';
 
@@ -37,7 +38,8 @@ export async function actorFromHeaders(headers: Headers): Promise<Actor | null> 
   }
   return {
     userId: session.user.id,
-    email: session.user.email,
+    // A person provisioned by phone is shown her number, never the placeholder address.
+    email: contactOf(session.user as { email: string; phoneNumber?: string | null }),
     name: session.user.name,
     // A session pointing at an organization the person left is treated as none.
     organizationId: role ? organizationId : null,

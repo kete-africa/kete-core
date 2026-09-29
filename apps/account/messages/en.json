@@ -149,5 +149,6 @@
   "consent_title": "Allow access",
   "consent_text": "The application “{client}” asks to access your Kete account.",
   "consent_accept": "Allow",
-  "consent_deny": "Deny"
+  "consent_deny": "Deny",
+  "auth_link_expired": "This link is no longer valid: it was already used or it expired. Ask for a new one from your conversation."
 }

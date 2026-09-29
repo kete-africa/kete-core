@@ -1,6 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { jwt, organization, twoFactor } from 'better-auth/plugins';
+import { jwt, magicLink, organization, twoFactor } from 'better-auth/plugins';
 import { tanstackStartCookies } from 'better-auth/tanstack-start';
 import { and, asc, eq } from 'drizzle-orm';
 import { db } from './db';
@@ -10,6 +10,7 @@ import { prefixedId } from './ids';
 import { KETE_APPS_AUDIENCE, type KeteClaims } from './claims';
 import { accountEvent, record } from './events';
 import { keteOAuthProvider } from './oauth';
+import { deliverSignInLink, SIGN_IN_LINK_SECONDS } from './sign-in-links';
 import { inOrganization } from './tenancy';
 import * as schema from './schema';
 import { accessUntil } from '../features/payments/access';
@@ -53,6 +54,12 @@ export const auth = betterAuth({
   },
   advanced: {
     database: { generateId: ({ model }) => prefixedId(model) },
+  },
+  user: {
+    additionalFields: {
+      // Set only by a trusted app's provisioning (spec 013), never by the person's own input.
+      phoneNumber: { type: 'string', required: false, input: false },
+    },
   },
   databaseHooks: {
     session: {
@@ -99,6 +106,15 @@ export const auth = betterAuth({
       },
     }),
     twoFactor({ issuer: 'Kete' }),
+    // One-time sign-in links requested by an app for a person it provisioned (spec 013): the link
+    // is handed back to the app, never e-mailed; single attempt, token stored hashed.
+    magicLink({
+      expiresIn: SIGN_IN_LINK_SECONDS,
+      allowedAttempts: 1,
+      storeToken: 'hashed',
+      disableSignUp: true,
+      sendMagicLink: async ({ url }) => deliverSignInLink(url),
+    }),
     jwt({
       jwt: {
         issuer: env.publicUrl,

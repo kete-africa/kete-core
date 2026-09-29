@@ -149,5 +149,6 @@
   "consent_title": "Autoriser l’accès",
   "consent_text": "L’application « {client} » demande à accéder à votre Compte Kete.",
   "consent_accept": "Autoriser",
-  "consent_deny": "Refuser"
+  "consent_deny": "Refuser",
+  "auth_link_expired": "Ce lien n'est plus valable : il a déjà servi ou il a expiré. Redemandez-en un depuis votre conversation."
 }
