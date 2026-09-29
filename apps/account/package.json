@@ -14,7 +14,8 @@
     "typecheck": "vite build && tsc --noEmit",
     "storage:cors": "tsx scripts/storage-cors.ts",
     "offers": "tsx scripts/offers.ts",
-    "clients": "tsx --tsconfig tsconfig.json scripts/clients.ts"
+    "clients": "tsx --tsconfig tsconfig.json scripts/clients.ts",
+    "staging:operator": "tsx --tsconfig tsconfig.json scripts/staging-operator.ts"
   },
   "dependencies": {
     "@better-auth/oauth-provider": "1.7.6",

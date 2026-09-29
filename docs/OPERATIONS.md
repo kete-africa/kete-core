@@ -70,23 +70,24 @@ Browsers upload straight to the bucket, only from the Compte Kete's origin:
 `ACCOUNT_STORAGE_CORS_ORIGINS=https://compte-kete-staging.13.140.178.49.sslip.io pnpm --filter @kete/account storage:cors`
 with the branch's `ACCOUNT_STORAGE_*` variables.
 
-## Kete Cockpit — staging (to create when Coolify is back)
+## Kete Cockpit — staging
 
-1. The author signs up on the staging Compte Kete, creates the organization « Kete », turns on
-   two-factor (Mon espace Kete → Sécurité).
-2. `KETE_OPERATORS_ORGANIZATION_ID` = that organization's id, on the staging Compte Kete.
-3. The author registers the Cockpit (password and code asked on the terminal):
-   `pnpm --filter @kete/account clients create --operator <email> --name "Kete Cockpit" --redirect https://cockpit-kete-staging.13.140.178.49.sslip.io/auth/callback`
-   with the staging Compte Kete's environment.
-4. Migrate the Cockpit's `dev` branch (Neon `kete-cockpit`, owner role).
-5. A Coolify application from `apps/cockpit/Dockerfile`, branch `dev`, with `KETE_ACCOUNT_URL`,
-   `COCKPIT_URL`, `COCKPIT_CLIENT_ID`, `COCKPIT_CLIENT_SECRET`, `COCKPIT_SESSION_SECRET`,
-   `KETE_OPERATORS_ORGANIZATION_ID`, `COCKPIT_DATABASE_URL` (app role, `dev`),
-   `COCKPIT_ENCRYPTION_KEY` (kept also in the local `.env`: losing it means new keys for every app)
-   — runtime only.
-6. In the Cockpit, register the staging Compte Kete (`https://compte-kete-staging…`); give the
-   Compte Kete staging app `KETE_EVENTS_URL=https://cockpit-kete-staging…/api/events` and the
-   shown `KETE_EVENTS_KID` / `KETE_EVENTS_SECRET`, then redeploy it: its events start flowing.
+Created: Coolify application `kete-cockpit-staging` (branch `dev`, `apps/cockpit/Dockerfile`),
+Neon `kete-cockpit` branch `dev` migrated, `KETE_ACCOUNT_URL`, `COCKPIT_URL`,
+`COCKPIT_SESSION_SECRET`, `COCKPIT_ENCRYPTION_KEY` (kept also in the local `.env`: losing it means
+new keys for every app) and `COCKPIT_DATABASE_URL` (app role) set — runtime only.
+
+To open it, the author:
+
+1. Signs up on the staging Compte Kete, creates the organization « Kete », turns on two-factor
+   (Mon espace Kete → Sécurité).
+2. Runs `pnpm --filter @kete/account staging:operator` (e-mail, password and code asked on the
+   terminal, never stored). It makes that organization the operators' organization on both apps,
+   registers the Cockpit as a Compte Kete client, hands its secret straight to the hosting
+   environment and redeploys both apps.
+3. In the Cockpit, registers the staging Compte Kete (`https://compte-kete-staging…`), then gives
+   the Compte Kete staging app `KETE_EVENTS_URL=https://cockpit-kete-staging…/api/events` and the
+   shown `KETE_EVENTS_KID` / `KETE_EVENTS_SECRET`, and redeploys it: its events start flowing.
 
 ## Production
 
