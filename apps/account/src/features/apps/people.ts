@@ -10,6 +10,7 @@ import { prefixedId } from '@/platform/ids';
 import { PEOPLE_SCOPE } from '@/platform/oauth';
 import { appSignInLinks, member, oauthClient, user } from '@/platform/schema';
 import { captureSignInLink, SIGN_IN_LINK_SECONDS } from '@/platform/sign-in-links';
+import { accessUntil } from '../payments/access';
 
 /**
  * Spec 013 — a trusted Kete app (Firmo first) provisions people by the phone number a messaging
@@ -258,4 +259,13 @@ export function appApiResponse(error: unknown): Response {
     return Response.json({ error: error.code }, { status: error.status });
   }
   throw error;
+}
+
+/**
+ * Spec 014 — which Kete apps an organization may use now, and until when: what a trusted app needs
+ * to apply its own rules (Firmo's quota). Dates only; never a price, a name or a payment.
+ */
+export async function readAccess(organizationId: string): Promise<Record<string, string>> {
+  if (!/^org_[\w-]{4,64}$/.test(organizationId)) throw new AppApiError(422, 'invalid_input');
+  return accessUntil(organizationId);
 }

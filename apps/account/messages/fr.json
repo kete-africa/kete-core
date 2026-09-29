@@ -150,5 +150,8 @@
   "consent_text": "L’application « {client} » demande à accéder à votre Compte Kete.",
   "consent_accept": "Autoriser",
   "consent_deny": "Refuser",
-  "auth_link_expired": "Ce lien n'est plus valable : il a déjà servi ou il a expiré. Redemandez-en un depuis votre conversation."
+  "auth_link_expired": "Ce lien n'est plus valable : il a déjà servi ou il a expiré. Redemandez-en un depuis votre conversation.",
+  "billing_receipt_email": "E-mail pour le reçu",
+  "billing_receipt_email_hint": "Ton compte n’a pas d’e-mail : le reçu du paiement sera envoyé à cette adresse.",
+  "billing_invalid_email": "Cette adresse e-mail n’est pas valable."
 }
