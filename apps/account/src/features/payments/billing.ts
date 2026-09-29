@@ -1,4 +1,4 @@
-import { isPaid, sameMoney, type Sale } from '@kete/payments';
+import { isPaid, PaymentProviderError, sameMoney, type Sale } from '@kete/payments';
 import { and, asc, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { PHONE_COUNTRIES } from './countries';
@@ -35,7 +35,10 @@ export const checkoutInput = z.object({
 });
 
 export class BillingError extends Error {
-  constructor(readonly code: 'offer_unavailable' | 'checkout_not_found' | 'provider_unavailable') {
+  constructor(
+    readonly code:
+      'offer_unavailable' | 'checkout_not_found' | 'provider_unavailable' | 'provider_refused',
+  ) {
     super(code);
     this.name = 'BillingError';
   }
@@ -147,14 +150,22 @@ export async function startCheckout(
       returnUrl: `${env.publicUrl}/espace/abonnements?paiement=${checkoutId}`,
       metadata: { kete_checkout: checkoutId, kete_organization: me.organizationId },
     });
-  } catch {
+  } catch (error) {
+    // The reason stays in the server log (no personal data in it); the person gets a plain message.
+    console.warn(
+      `[payments] checkout not started: ${error instanceof Error ? error.message : 'unknown'}`,
+    );
     await inOrganization(me.organizationId, (tx) =>
       tx
         .update(checkouts)
         .set({ status: 'failed', decidedAt: new Date() })
         .where(eq(checkouts.id, checkoutId)),
     );
-    throw new BillingError('provider_unavailable');
+    throw new BillingError(
+      error instanceof PaymentProviderError && error.code === 'unreachable'
+        ? 'provider_unavailable'
+        : 'provider_refused',
+    );
   }
   await inOrganization(me.organizationId, (tx) =>
     tx
