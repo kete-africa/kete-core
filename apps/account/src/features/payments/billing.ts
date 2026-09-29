@@ -9,6 +9,7 @@ import {
   requireMember,
   type Actor,
 } from '@/platform/actor';
+import { isPlaceholderEmail } from '@/platform/contact';
 import { db } from '@/platform/db';
 import { env } from '@/platform/env';
 import { accountEvent, record } from '@/platform/events';
@@ -19,6 +20,7 @@ import {
   offers,
   paymentNotifications,
   subscriptions,
+  user,
   type KeteApp,
 } from '@/platform/schema';
 
@@ -39,12 +41,18 @@ export const checkoutInput = z.object({
     .transform((value) => value.replace(/[\s.-]/g, ''))
     .pipe(z.string().regex(/^\d{6,15}$/)),
   countryCode: z.enum(PHONE_COUNTRIES),
+  /** Where the receipt goes, for a person provisioned by phone who has no e-mail (spec 014). */
+  receiptEmail: z.string().trim().email().max(200).optional(),
 });
 
 export class BillingError extends Error {
   constructor(
     readonly code:
-      'offer_unavailable' | 'checkout_not_found' | 'provider_unavailable' | 'provider_refused',
+      | 'offer_unavailable'
+      | 'checkout_not_found'
+      | 'provider_unavailable'
+      | 'provider_refused'
+      | 'email_required',
   ) {
     super(code);
     this.name = 'BillingError';
@@ -70,6 +78,14 @@ export interface BillingView {
   offers: OfferView[];
   subscriptions: SubscriptionView[];
   canPay: boolean;
+  /** No e-mail on the account (provisioned by phone): the receipt's address is asked. */
+  needsEmail: boolean;
+}
+
+/** The account's own e-mail, or null for a person provisioned by phone. */
+async function realEmail(userId: string): Promise<string | null> {
+  const [row] = await db.select({ email: user.email }).from(user).where(eq(user.id, userId));
+  return row && !isPlaceholderEmail(row.email) ? row.email : null;
 }
 
 function stateOf(paidUntil: Date, graceUntil: Date, now = new Date()): SubscriptionView['state'] {
@@ -102,6 +118,7 @@ export async function readBilling(actor: Actor | null): Promise<BillingView> {
       graceUntil: row.graceUntil.toISOString(),
     })),
     canPay: canAdminister(me.role),
+    needsEmail: (await realEmail(me.userId)) === null,
   };
 }
 
@@ -142,15 +159,17 @@ export async function startCheckout(
     }),
   );
 
+  const email = (await realEmail(me.userId)) ?? value.receiptEmail;
+  if (!email) throw new BillingError('email_required');
   const [firstName, ...rest] = me.name.trim().split(/\s+/);
   let started;
   try {
     started = await provider.startCheckout({
       productId: offer.providerProductId,
       customer: {
-        email: me.email,
-        firstName: firstName || me.email,
-        lastName: rest.join(' ') || firstName || me.email,
+        email,
+        firstName: firstName || email,
+        lastName: rest.join(' ') || firstName || email,
         phoneNumber: value.phoneNumber,
         countryCode: value.countryCode,
       },

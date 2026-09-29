@@ -90,7 +90,11 @@ function AppBilling({ app, billing }: { app: OfferView['app']; billing: BillingV
               )}
             </div>
             {open === offer.id && (
-              <CheckoutForm offerId={offer.id} onCancel={() => setOpen(null)} />
+              <CheckoutForm
+                offerId={offer.id}
+                needsEmail={billing.needsEmail}
+                onCancel={() => setOpen(null)}
+              />
             )}
           </li>
         ))}
@@ -101,10 +105,18 @@ function AppBilling({ app, billing }: { app: OfferView['app']; billing: BillingV
 
 const countryNames = () => new Intl.DisplayNames([getLocale()], { type: 'region' });
 
-function CheckoutForm({ offerId, onCancel }: { offerId: string; onCancel: () => void }) {
+function CheckoutForm({
+  offerId,
+  needsEmail,
+  onCancel,
+}: {
+  offerId: string;
+  needsEmail: boolean;
+  onCancel: () => void;
+}) {
   const hydrated = useHydrated();
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<'phone' | 'provider' | 'refused' | null>(null);
+  const [error, setError] = useState<'phone' | 'email' | 'provider' | 'refused' | null>(null);
   const names = countryNames();
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -115,6 +127,11 @@ function CheckoutForm({ offerId, onCancel }: { offerId: string; onCancel: () => 
       setError('phone');
       return;
     }
+    const receiptEmail = String(form.get('email') ?? '').trim();
+    if (needsEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(receiptEmail)) {
+      setError('email');
+      return;
+    }
     setPending(true);
     setError(null);
     try {
@@ -123,9 +140,15 @@ function CheckoutForm({ offerId, onCancel }: { offerId: string; onCancel: () => 
           offerId,
           phoneNumber,
           countryCode: String(form.get('country')) as (typeof PHONE_COUNTRIES)[number],
+          ...(needsEmail ? { receiptEmail } : {}),
         },
       });
       if (!result.ok) {
+        if (result.reason === 'email_required') {
+          setError('email');
+          setPending(false);
+          return;
+        }
         setError(result.reason === 'provider_unavailable' ? 'provider' : 'refused');
         setPending(false);
         return;
@@ -160,6 +183,17 @@ function CheckoutForm({ offerId, onCancel }: { offerId: string; onCancel: () => 
         required
         {...(error === 'phone' ? { error: m.billing_invalid_phone() } : {})}
       />
+      {needsEmail && (
+        <TextField
+          label={m.billing_receipt_email()}
+          hint={m.billing_receipt_email_hint()}
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          {...(error === 'email' ? { error: m.billing_invalid_email() } : {})}
+        />
+      )}
       {error === 'provider' && <Notice tone="error">{m.billing_provider_unavailable()}</Notice>}
       {error === 'refused' && <Notice tone="error">{m.billing_offer_refused()}</Notice>}
       <div className="flex flex-wrap gap-3">

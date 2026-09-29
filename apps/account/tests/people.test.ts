@@ -6,6 +6,7 @@ import {
   AppApiError,
   continueSignIn,
   createSignInLink,
+  readAccess,
   isPlaceholderEmail,
   provisionPerson,
   requireApp,
@@ -221,5 +222,17 @@ describe('a one-time sign-in link', () => {
     expect(replay.headers.get('location') ?? '').not.toContain('/api/apps/continue');
     const second = await continueSignIn(new Request(next, { headers: cookieOf(verified.headers) }));
     expect(second.headers.get('location')).toBe('/connexion?lien=expire');
+  });
+});
+
+describe('what an organization may use', () => {
+  it('is read by a trusted app: dates only, and nothing for a malformed id', async () => {
+    const [personId] = people;
+    const [membership] = await db
+      .select({ organizationId: member.organizationId })
+      .from(member)
+      .where(eq(member.userId, personId ?? ''));
+    expect(await readAccess(membership?.organizationId ?? '')).toEqual({});
+    expect(await status(readAccess("x' or 1=1"))).toBe(422);
   });
 });

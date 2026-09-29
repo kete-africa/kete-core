@@ -150,5 +150,8 @@
   "consent_text": "The application “{client}” asks to access your Kete account.",
   "consent_accept": "Allow",
   "consent_deny": "Deny",
-  "auth_link_expired": "This link is no longer valid: it was already used or it expired. Ask for a new one from your conversation."
+  "auth_link_expired": "This link is no longer valid: it was already used or it expired. Ask for a new one from your conversation.",
+  "billing_receipt_email": "E-mail for the receipt",
+  "billing_receipt_email_hint": "Your account has no e-mail: the payment receipt goes to this address.",
+  "billing_invalid_email": "This e-mail address is not valid."
 }

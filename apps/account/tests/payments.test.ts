@@ -262,3 +262,48 @@ describe('what never grants access', () => {
     await expect(startCheckout(ownerA, { ...payment, phoneNumber: 'abc' })).rejects.toThrow();
   });
 });
+
+// Spec 014: a person provisioned by phone has no e-mail; the receipt's address is asked, never
+// invented, and never the placeholder.
+describe('a person provisioned by phone', () => {
+  const phonePerson = `usr_pay_phone_${run}`;
+  const phoneActor: Actor = {
+    userId: phonePerson,
+    email: '+22890000001',
+    name: 'Kodjo',
+    organizationId: orgB,
+    role: 'owner',
+  };
+
+  beforeAll(async () => {
+    const now = new Date();
+    await db.insert(user).values({
+      id: phonePerson,
+      name: 'Kodjo',
+      email: `p22890${run}@phone.kete.invalid`,
+      emailVerified: false,
+      createdAt: now,
+      updatedAt: now,
+    });
+  });
+
+  afterAll(async () => {
+    await db.delete(user).where(inArray(user.id, [phonePerson]));
+  });
+
+  it('is asked the address of the receipt, and pays with it', async () => {
+    expect((await readBilling(phoneActor)).needsEmail).toBe(true);
+    await expect(startCheckout(phoneActor, payment)).rejects.toMatchObject({
+      code: 'email_required',
+    });
+    await startCheckout(phoneActor, { ...payment, receiptEmail: 'kodjo@example.test' });
+    const sale = [...provider.sales.values()].at(-1);
+    expect((sale?.input as { customer: { email: string } }).customer.email).toBe(
+      'kodjo@example.test',
+    );
+  });
+
+  it('a person with an e-mail is never asked again', async () => {
+    expect((await readBilling(ownerA)).needsEmail).toBe(false);
+  });
+});
