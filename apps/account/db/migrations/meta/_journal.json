@@ -43,6 +43,13 @@
       "when": 1790686021681,
       "tag": "0005_outbox",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790710000000,
+      "tag": "0006_phone_identity",
+      "breakpoints": true
     }
   ]
 }

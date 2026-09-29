@@ -187,13 +187,13 @@ simulated outage raises an alert; an agent answers about the apps' state.
 Firmo is rewritten on this foundation in its own repository (`kete-africa/firmo`). It needs two
 things from here, delivered before its conversation phase.
 
-### 012 — Package distribution · _decision 0005_
+### 012 — Package distribution · _decision 0005, delivered_
 
 - `@kete-africa/*` published on GitHub Packages by this repository's CI; apps keep importing
   `@kete/*` through aliases.
 - `[agent]` Firmo installs them from the registry and passes its CI.
 
-### 013 — The Compte Kete by phone number
+### 013 — The Compte Kete by phone number · _delivered in `specs/013-phone-identity`_
 
 - A person whose phone number is proven by a messaging channel gets a Compte Kete without e-mail,
   password or form, provisioned by a trusted Kete app (Firmo) with its own client credentials;

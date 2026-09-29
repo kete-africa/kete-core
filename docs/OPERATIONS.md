@@ -89,6 +89,17 @@ To open it, the author:
    the Compte Kete staging app `KETE_EVENTS_URL=https://cockpit-kete-staging…/api/events` and the
    shown `KETE_EVENTS_KID` / `KETE_EVENTS_SECRET`, and redeploys it: its events start flowing.
 
+## Apps that provision people by phone (spec 013)
+
+A messaging app (Firmo) is registered with `--people`: it may then provision people by the phone
+number its channel proved (`POST /api/apps/people`) and ask their one-time sign-in links
+(`POST /api/apps/sign-in-links`), with a `client_credentials` token carrying `kete:people`:
+
+`pnpm --filter @kete/account clients create --operator <email> --name "Firmo" --redirect https://…/auth/callback --people`
+
+Links are never e-mailed: the app hands them to the person in her conversation. They work once, for
+ten minutes, never for a person with a second factor, and land only on the app's own origin.
+
 ## Production
 
 Nothing follows `main` yet. The production application is created when the author decides the

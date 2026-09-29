@@ -22,6 +22,8 @@ export const user = pgTable('user', {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
   twoFactorEnabled: boolean('two_factor_enabled').default(false),
+  /** E.164, proven by a messaging channel through a trusted Kete app (spec 013). */
+  phoneNumber: text('phone_number').unique(),
 });
 
 export const session = pgTable(

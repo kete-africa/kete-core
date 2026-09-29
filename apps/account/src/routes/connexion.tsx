@@ -6,15 +6,19 @@ import { AuthFrame, Notice, safeRedirect, useHydrated } from '@/lib/ui';
 import * as m from '@/paraglide/messages.js';
 
 export const Route = createFileRoute('/connexion')({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { redirect: string | undefined; linkExpired?: true } => ({
     redirect: safeRedirect(search.redirect),
+    // A one-time sign-in link that was used or expired (spec 013).
+    ...(search.lien === 'expire' ? { linkExpired: true as const } : {}),
   }),
   component: SignIn,
 });
 
 function SignIn() {
   const hydrated = useHydrated();
-  const { redirect } = Route.useSearch();
+  const { redirect, linkExpired } = Route.useSearch();
   // The raw query: a Kete app's signed authorization request must survive the switch.
   const searchStr = useLocation({ select: (location) => location.searchStr });
   const [error, setError] = useState<'refused' | 'rate_limited' | null>(null);
@@ -40,6 +44,7 @@ function SignIn() {
   return (
     <AuthFrame title={m.auth_sign_in_title()} intro={m.auth_intro()}>
       <form method="post" onSubmit={submit} className="flex flex-col gap-4" noValidate>
+        {linkExpired && !error && <Notice tone="error">{m.auth_link_expired()}</Notice>}
         {error && (
           <Notice tone="error">
             {error === 'rate_limited' ? m.auth_error_rate_limited() : m.auth_error_invalid()}

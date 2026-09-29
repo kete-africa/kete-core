@@ -1,5 +1,6 @@
 import { and, asc, eq, gt } from 'drizzle-orm';
 import type { Actor, OrganizationRole } from '@/platform/actor';
+import { contactOf } from '@/platform/contact';
 import { db } from '@/platform/db';
 import { invitation, member, organization, user } from '@/platform/schema';
 
@@ -54,6 +55,7 @@ export async function readMembers(
       userId: member.userId,
       name: user.name,
       email: user.email,
+      phoneNumber: user.phoneNumber,
       role: member.role,
     })
     .from(member)
@@ -77,7 +79,11 @@ export async function readMembers(
     )
     .orderBy(asc(invitation.expiresAt));
   return {
-    members: members.map((row) => ({ ...row, role: row.role as OrganizationRole })),
+    members: members.map(({ phoneNumber, ...row }) => ({
+      ...row,
+      email: contactOf({ email: row.email, phoneNumber }),
+      role: row.role as OrganizationRole,
+    })),
     invitations: invitations.map((row) => ({
       id: row.id,
       email: row.email,
