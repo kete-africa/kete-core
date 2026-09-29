@@ -1,9 +1,13 @@
 {
-  "name": "@kete/sdk",
+  "name": "@kete-africa/sdk",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Kete SDK: outbox, signed event delivery, receiver verification, manifest and health.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/sdk"
+  },
   "exports": {
     ".": "./src/index.ts"
   },
@@ -17,5 +21,18 @@
   },
   "devDependencies": {
     "@types/pg": "^8.23.1"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
   }
 }

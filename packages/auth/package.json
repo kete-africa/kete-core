@@ -1,9 +1,13 @@
 {
-  "name": "@kete/auth",
+  "name": "@kete-africa/auth",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Kete auth: verifies Compte Kete tokens inside a Kete app, without calling the Compte Kete on every request.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/auth"
+  },
   "exports": {
     ".": "./src/index.ts"
   },
@@ -12,5 +16,18 @@
   },
   "dependencies": {
     "jose": "^6.2.12"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
   }
 }
