@@ -48,6 +48,10 @@ export async function startPostgres(): Promise<StartedPostgres> {
   };
 }
 
+/** Where the global setup leaves the shared container's URLs for the test workers. */
+export const CONTAINER_OWNER_URL = 'KETE_TEST_CONTAINER_OWNER_URL';
+export const CONTAINER_APP_URL = 'KETE_TEST_CONTAINER_APP_URL';
+
 let started: Promise<StartedPostgres> | undefined;
 
 /**
@@ -57,6 +61,10 @@ let started: Promise<StartedPostgres> | undefined;
  */
 export async function testDatabaseUrls(prefix = 'KETE'): Promise<TestDatabaseUrls> {
   if (process.env['KETE_TEST_POSTGRES'] === 'container') {
+    const shared = [process.env[CONTAINER_OWNER_URL], process.env[CONTAINER_APP_URL]];
+    if (shared[0] && shared[1]) {
+      return { ownerUrl: shared[0], appUrl: shared[1], source: 'container' };
+    }
     started ??= startPostgres();
     const { ownerUrl, appUrl, source } = await started;
     return { ownerUrl, appUrl, source };
