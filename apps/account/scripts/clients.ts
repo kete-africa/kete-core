@@ -87,3 +87,5 @@ try {
 } finally {
   await getPool().end();
 }
+// The auth library keeps timers of its own: once everything is done, the script ends here.
+process.exit(0);
