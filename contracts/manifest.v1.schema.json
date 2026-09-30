@@ -16,6 +16,11 @@
       "uniqueItems": true,
       "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$" }
     },
+    "capabilities": {
+      "type": "array",
+      "description": "What the app exposes to agents (optional, added in v1: additive).",
+      "items": { "$ref": "capability.v1.schema.json" }
+    },
     "links": {
       "type": "object",
       "additionalProperties": false,

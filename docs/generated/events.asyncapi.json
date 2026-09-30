@@ -1,0 +1,508 @@
+{
+  "asyncapi": "3.1.0",
+  "info": {
+    "title": "Kete integration events",
+    "version": "1.0.0",
+    "description": "The standard events a Kete app announces through its outbox (@kete/sdk): immutable facts and counters, never names, e-mails or phone numbers. The relay sends them in signed batches (delivery-request.v1) to a receiver such as Kete Cockpit, which answers with delivery-result.v1. Generated from /contracts by `pnpm events:generate`; do not edit."
+  },
+  "channels": {
+    "deliveries": {
+      "address": "{receiver}",
+      "title": "A receiver of Kete events",
+      "description": "An HTTPS endpoint receiving signed batches: headers Kete-Product and Kete-Signature (t=<unix seconds>,kid=<key id>,v1=<hex HMAC-SHA256 of \"{t}.{raw body}\">).",
+      "parameters": {
+        "receiver": {
+          "description": "The receiver URL registered for the product."
+        }
+      },
+      "messages": {
+        "AccountCreated": {
+          "$ref": "#/components/messages/AccountCreated"
+        },
+        "AccountActivated": {
+          "$ref": "#/components/messages/AccountActivated"
+        },
+        "PaymentSucceeded": {
+          "$ref": "#/components/messages/PaymentSucceeded"
+        },
+        "PaymentFailed": {
+          "$ref": "#/components/messages/PaymentFailed"
+        },
+        "SubscriptionRenewalDue": {
+          "$ref": "#/components/messages/SubscriptionRenewalDue"
+        },
+        "AccountClosed": {
+          "$ref": "#/components/messages/AccountClosed"
+        },
+        "MetricsDaily": {
+          "$ref": "#/components/messages/MetricsDaily"
+        }
+      }
+    }
+  },
+  "operations": {
+    "deliverEvents": {
+      "action": "send",
+      "title": "Deliver events from the outbox",
+      "channel": {
+        "$ref": "#/channels/deliveries"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/deliveries/messages/AccountCreated"
+        },
+        {
+          "$ref": "#/channels/deliveries/messages/AccountActivated"
+        },
+        {
+          "$ref": "#/channels/deliveries/messages/PaymentSucceeded"
+        },
+        {
+          "$ref": "#/channels/deliveries/messages/PaymentFailed"
+        },
+        {
+          "$ref": "#/channels/deliveries/messages/SubscriptionRenewalDue"
+        },
+        {
+          "$ref": "#/channels/deliveries/messages/AccountClosed"
+        },
+        {
+          "$ref": "#/channels/deliveries/messages/MetricsDaily"
+        }
+      ]
+    }
+  },
+  "components": {
+    "messages": {
+      "AccountCreated": {
+        "name": "account.created",
+        "title": "account.created",
+        "summary": "The account.created event.",
+        "contentType": "application/json",
+        "payload": {
+          "description": "An immutable fact announced by a Kete app. Facts and counters only: no names, e-mails or phone numbers.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "specversion",
+            "product",
+            "organization",
+            "occurred_at",
+            "data"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "type": {
+              "const": "account.created"
+            },
+            "specversion": {
+              "const": "1"
+            },
+            "product": {
+              "type": "string",
+              "pattern": "^prd_[a-z0-9_]{2,40}$"
+            },
+            "organization": {
+              "type": "string",
+              "pattern": "^org_[A-Za-z0-9_-]{4,64}$"
+            },
+            "occurred_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "plan": {
+                  "type": "string",
+                  "maxLength": 60
+                }
+              }
+            }
+          }
+        }
+      },
+      "AccountActivated": {
+        "name": "account.activated",
+        "title": "account.activated",
+        "summary": "The account.activated event.",
+        "contentType": "application/json",
+        "payload": {
+          "description": "An immutable fact announced by a Kete app. Facts and counters only: no names, e-mails or phone numbers.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "specversion",
+            "product",
+            "organization",
+            "occurred_at",
+            "data"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "type": {
+              "const": "account.activated"
+            },
+            "specversion": {
+              "const": "1"
+            },
+            "product": {
+              "type": "string",
+              "pattern": "^prd_[a-z0-9_]{2,40}$"
+            },
+            "organization": {
+              "type": "string",
+              "pattern": "^org_[A-Za-z0-9_-]{4,64}$"
+            },
+            "occurred_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "activation"
+              ],
+              "properties": {
+                "activation": {
+                  "type": "string",
+                  "maxLength": 60
+                }
+              }
+            }
+          }
+        }
+      },
+      "PaymentSucceeded": {
+        "name": "payment.succeeded",
+        "title": "payment.succeeded",
+        "summary": "The payment.succeeded event.",
+        "contentType": "application/json",
+        "payload": {
+          "description": "An immutable fact announced by a Kete app. Facts and counters only: no names, e-mails or phone numbers.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "specversion",
+            "product",
+            "organization",
+            "occurred_at",
+            "data"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "type": {
+              "const": "payment.succeeded"
+            },
+            "specversion": {
+              "const": "1"
+            },
+            "product": {
+              "type": "string",
+              "pattern": "^prd_[a-z0-9_]{2,40}$"
+            },
+            "organization": {
+              "type": "string",
+              "pattern": "^org_[A-Za-z0-9_-]{4,64}$"
+            },
+            "occurred_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "amount",
+                "currency",
+                "reference"
+              ],
+              "properties": {
+                "amount": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "currency": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{3}$"
+                },
+                "reference": {
+                  "type": "string",
+                  "maxLength": 100
+                }
+              }
+            }
+          }
+        }
+      },
+      "PaymentFailed": {
+        "name": "payment.failed",
+        "title": "payment.failed",
+        "summary": "The payment.failed event.",
+        "contentType": "application/json",
+        "payload": {
+          "description": "An immutable fact announced by a Kete app. Facts and counters only: no names, e-mails or phone numbers.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "specversion",
+            "product",
+            "organization",
+            "occurred_at",
+            "data"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "type": {
+              "const": "payment.failed"
+            },
+            "specversion": {
+              "const": "1"
+            },
+            "product": {
+              "type": "string",
+              "pattern": "^prd_[a-z0-9_]{2,40}$"
+            },
+            "organization": {
+              "type": "string",
+              "pattern": "^org_[A-Za-z0-9_-]{4,64}$"
+            },
+            "occurred_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "amount",
+                "currency",
+                "reason_code"
+              ],
+              "properties": {
+                "amount": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "currency": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{3}$"
+                },
+                "reason_code": {
+                  "type": "string",
+                  "maxLength": 60
+                }
+              }
+            }
+          }
+        }
+      },
+      "SubscriptionRenewalDue": {
+        "name": "subscription.renewal_due",
+        "title": "subscription.renewal_due",
+        "summary": "The subscription.renewal_due event.",
+        "contentType": "application/json",
+        "payload": {
+          "description": "An immutable fact announced by a Kete app. Facts and counters only: no names, e-mails or phone numbers.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "specversion",
+            "product",
+            "organization",
+            "occurred_at",
+            "data"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "type": {
+              "const": "subscription.renewal_due"
+            },
+            "specversion": {
+              "const": "1"
+            },
+            "product": {
+              "type": "string",
+              "pattern": "^prd_[a-z0-9_]{2,40}$"
+            },
+            "organization": {
+              "type": "string",
+              "pattern": "^org_[A-Za-z0-9_-]{4,64}$"
+            },
+            "occurred_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "due_on",
+                "plan"
+              ],
+              "properties": {
+                "due_on": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "plan": {
+                  "type": "string",
+                  "maxLength": 60
+                }
+              }
+            }
+          }
+        }
+      },
+      "AccountClosed": {
+        "name": "account.closed",
+        "title": "account.closed",
+        "summary": "The account.closed event.",
+        "contentType": "application/json",
+        "payload": {
+          "description": "An immutable fact announced by a Kete app. Facts and counters only: no names, e-mails or phone numbers.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "specversion",
+            "product",
+            "organization",
+            "occurred_at",
+            "data"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "type": {
+              "const": "account.closed"
+            },
+            "specversion": {
+              "const": "1"
+            },
+            "product": {
+              "type": "string",
+              "pattern": "^prd_[a-z0-9_]{2,40}$"
+            },
+            "organization": {
+              "type": "string",
+              "pattern": "^org_[A-Za-z0-9_-]{4,64}$"
+            },
+            "occurred_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "reason_code": {
+                  "type": "string",
+                  "maxLength": 60
+                }
+              }
+            }
+          }
+        }
+      },
+      "MetricsDaily": {
+        "name": "metrics.daily",
+        "title": "metrics.daily",
+        "summary": "The metrics.daily event.",
+        "contentType": "application/json",
+        "payload": {
+          "description": "An immutable fact announced by a Kete app. Facts and counters only: no names, e-mails or phone numbers.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "specversion",
+            "product",
+            "organization",
+            "occurred_at",
+            "data"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "type": {
+              "const": "metrics.daily"
+            },
+            "specversion": {
+              "const": "1"
+            },
+            "product": {
+              "type": "string",
+              "pattern": "^prd_[a-z0-9_]{2,40}$"
+            },
+            "organization": {
+              "type": "string",
+              "pattern": "^org_[A-Za-z0-9_-]{4,64}$"
+            },
+            "occurred_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "day",
+                "counters"
+              ],
+              "properties": {
+                "day": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "counters": {
+                  "type": "object",
+                  "propertyNames": {
+                    "pattern": "^[a-z][a-z0-9_]{0,59}$"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

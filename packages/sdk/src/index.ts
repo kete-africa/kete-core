@@ -4,6 +4,7 @@ export type {
   AccountActivated,
   AccountClosed,
   AccountCreated,
+  Capability,
   DeliveryRequest,
   DeliveryResult,
   HealthReport,
@@ -15,6 +16,7 @@ export type {
   SubscriptionRenewalDue,
 } from './contracts/types.gen.js';
 export {
+  validateCapability,
   validateDeliveryRequest,
   validateDeliveryResult,
   validateEvent,

@@ -2,6 +2,36 @@
 /* eslint-disable */
 
 /**
+ * A gesture or a query a Kete product exposes to agents (MCP, chat, other apps), with its autonomy level: 1 read and signal, 2 act reversibly (with a notification and undo), 3 prepare a decision (a draft a person validates), 4 irreversible, money or external (always a person, with confirmation).
+ */
+export interface Capability {
+  /**
+   * snake_case: a valid tool name for MCP and every model provider.
+   */
+  name: string;
+  description: string;
+  autonomy: 1 | 2 | 3 | 4;
+  reversible: boolean;
+  /**
+   * The command that undoes it (a @kete/commands name, kebab-case).
+   */
+  inverse?: string;
+  permission: string;
+  /**
+   * The input's JSON Schema.
+   */
+  input: {
+    [k: string]: unknown;
+  };
+  /**
+   * The output's JSON Schema, when declared.
+   */
+  output?: {
+    [k: string]: unknown;
+  };
+}
+
+/**
  * A signed batch of events sent to a receiver.
  */
 export interface DeliveryRequest {
@@ -135,6 +165,10 @@ export interface Manifest {
   version: string;
   environment: 'production' | 'staging' | 'preview' | 'development';
   events: string[];
+  /**
+   * What the app exposes to agents (optional, added in v1: additive).
+   */
+  capabilities?: Capability[];
   links?: {
     repository?: string;
     documentation?: string;

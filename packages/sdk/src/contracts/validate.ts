@@ -30,6 +30,7 @@ function validator(id: string): (value: unknown) => ValidationResult {
 
 const base = 'https://kete.africa/contracts/';
 export const validateEvent = validator(`${base}event.v1.schema.json`);
+export const validateCapability = validator(`${base}capability.v1.schema.json`);
 export const validateManifest = validator(`${base}manifest.v1.schema.json`);
 export const validateHealthReport = validator(`${base}health.v1.schema.json`);
 export const validateDeliveryRequest = validator(`${base}delivery-request.v1.schema.json`);
