@@ -23,6 +23,7 @@
     "@kete/commands": "workspace:@kete-africa/commands@*",
     "@kete/design": "workspace:@kete-africa/design@*",
     "@kete/files": "workspace:@kete-africa/files@*",
+    "@kete/identity": "workspace:@kete-africa/identity@*",
     "@kete/notify": "workspace:@kete-africa/notify@*",
     "@kete/payments": "workspace:@kete-africa/payments@*",
     "@kete/sdk": "workspace:@kete-africa/sdk@*",

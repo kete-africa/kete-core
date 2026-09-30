@@ -39,6 +39,9 @@
     },
     {
       "path": "packages/notify"
+    },
+    {
+      "path": "packages/identity"
     }
   ]
 }

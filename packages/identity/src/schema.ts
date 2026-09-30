@@ -1,3 +1,7 @@
+// The tables of Better Auth and its plugins, as the Compte Kete runs them (decision 0003: global by
+// nature, reachable only by the instance's application role). An instance generates its migrations
+// from them with drizzle-kit, as the Compte Kete does.
+
 import { relations } from 'drizzle-orm';
 import {
   pgTable,

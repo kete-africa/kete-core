@@ -1,17 +1,18 @@
 import { createTokenVerifier, type KeteIdentity } from '@kete/auth';
 import { defineCommand, executeCommand, type CommandDefinition } from '@kete/commands';
+import { KETE_APPS_AUDIENCE } from '@kete/identity';
 import { inOrganizationTx, sqlExecutorOf } from '@kete/tenancy/drizzle';
 import { asc } from 'drizzle-orm';
 import type { JSONWebKeySet } from 'jose';
-import { z } from 'zod';
+import type { z } from 'zod';
 import { auth } from '@/platform/auth';
-import { KETE_APPS_AUDIENCE } from '@/platform/claims';
 import { db } from '@/platform/db';
 import { env } from '@/platform/env';
 import { prefixedId } from '@/platform/ids';
 import { isOperator, operatorsOrganizationId } from '@/platform/operators';
 import { getPaymentProvider } from '@/platform/payments';
 import { offers } from '@/platform/schema';
+import { disableOfferInput, offerInput } from './inputs';
 
 export class AdminError extends Error {
   constructor(
@@ -57,14 +58,6 @@ export async function requireOperator(request: Request): Promise<KeteIdentity> {
   }
   return identity;
 }
-
-export const offerInput = z.object({
-  app: z.enum(['firmo', 'nettio', 'nyatefe', 'cockpit']),
-  productId: z.string().min(1).max(128),
-  periodDays: z.number().int().min(1).max(366),
-  graceDays: z.number().int().min(0).max(30).default(3),
-  name: z.string().trim().min(1).max(120).optional(),
-});
 
 /** Products the store sells (for choosing), and the current catalog. */
 export async function readCatalog() {
@@ -123,7 +116,7 @@ const setOfferCommand = defineCommand({
 
 const disableOfferCommand = defineCommand({
   name: 'disable-offer',
-  input: z.object({ productId: z.string().min(1).max(128) }),
+  input: disableOfferInput,
   reversibility: { reversible: true, inverse: 'set-offer' },
   async handler({ productId }, { db: tx }) {
     const provider = getPaymentProvider();

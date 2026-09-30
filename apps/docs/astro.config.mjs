@@ -5,6 +5,7 @@ import { existsSync, readdirSync } from 'node:fs';
 import { URL } from 'node:url';
 import mermaid from 'astro-mermaid';
 import starlightLinksValidator from 'starlight-links-validator';
+import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
 import { createStarlightTypeDocPlugin } from 'starlight-typedoc';
 
 // The API reference of each published package, generated from its public entry point.
@@ -35,7 +36,18 @@ export default defineConfig({
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/kete-africa/kete-core' },
       ],
-      plugins: [...apis.map((api) => api.plugin), starlightLinksValidator()],
+      plugins: [
+        ...apis.map((api) => api.plugin),
+        // The Compte Kete's HTTP API, from its generated OpenAPI description (spec 026).
+        starlightOpenAPI([
+          {
+            base: 'reference/http/account',
+            schema: '../../docs/generated/account.openapi.json',
+            sidebar: { label: 'Compte Kete', collapsed: true },
+          },
+        ]),
+        starlightLinksValidator(),
+      ],
       sidebar: [
         { label: 'How-to guides', items: [{ autogenerate: { directory: 'how-to' } }] },
         {
@@ -46,6 +58,7 @@ export default defineConfig({
             { slug: 'reference/events' },
             { label: 'Apps', items: [{ autogenerate: { directory: 'reference/apps' } }] },
             { label: 'API', items: apis.map((api) => api.sidebar) },
+            { label: 'HTTP API', items: openAPISidebarGroups },
           ],
         },
         {

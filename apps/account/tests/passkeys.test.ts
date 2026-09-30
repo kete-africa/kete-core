@@ -6,7 +6,7 @@ import { auth, keteClaims } from '@/platform/auth';
 import { db, getPool } from '@/platform/db';
 import { isOperator } from '@/platform/operators';
 import { account, member, organization, passkey, user } from '@/platform/schema';
-import { removePassword, signInMethods, signsInStrongly } from '@/platform/strength';
+import { removePassword, signInMethods, signsInStrongly } from '@/platform/auth';
 import { openOperatorSession } from '../scripts/operator-session';
 
 // Spec 016: a passkey-only account signs in strongly — like two-factor — and so may be a Kete

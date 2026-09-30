@@ -1,6 +1,6 @@
 import { and, asc, eq, gt } from 'drizzle-orm';
 import type { Actor, OrganizationRole } from '@/platform/actor';
-import { contactOf } from '@/platform/contact';
+import { contactOf } from '@kete/identity';
 import { db } from '@/platform/db';
 import { invitation, member, organization, user } from '@/platform/schema';
 

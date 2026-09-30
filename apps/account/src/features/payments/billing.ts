@@ -9,7 +9,7 @@ import {
   requireMember,
   type Actor,
 } from '@/platform/actor';
-import { isPlaceholderEmail } from '@/platform/contact';
+import { isPlaceholderEmail } from '@kete/identity';
 import { db } from '@/platform/db';
 import { env } from '@/platform/env';
 import { accountEvent, record } from '@/platform/events';

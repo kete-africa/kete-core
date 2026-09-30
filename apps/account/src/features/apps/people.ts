@@ -1,17 +1,15 @@
 import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 import { jwtVerify, createLocalJWKSet, type JSONWebKeySet } from 'jose';
-import { z } from 'zod';
-import { auth } from '@/platform/auth';
-import { KETE_APPS_AUDIENCE } from '@/platform/claims';
-import { isPlaceholderEmail, placeholderEmail } from '@/platform/contact';
+import type { z } from 'zod';
+import { isPlaceholderEmail, KETE_APPS_AUDIENCE, placeholderEmail } from '@kete/identity';
+import { auth, PEOPLE_SCOPE, signsInStrongly } from '@/platform/auth';
 import { db } from '@/platform/db';
 import { env } from '@/platform/env';
 import { prefixedId } from '@/platform/ids';
-import { PEOPLE_SCOPE } from '@/platform/oauth';
 import { appSignInLinks, member, oauthClient, user } from '@/platform/schema';
 import { captureSignInLink, SIGN_IN_LINK_SECONDS } from '@/platform/sign-in-links';
-import { signsInStrongly } from '@/platform/strength';
 import { accessUntil } from '../payments/access';
+import { personInput, signInLinkInput } from './inputs';
 
 /**
  * Spec 013 — a trusted Kete app (Firmo first) provisions people by the phone number a messaging
@@ -78,14 +76,6 @@ export async function requireApp(request: Request): Promise<CallingApp> {
   });
   return { clientId, redirectOrigins };
 }
-
-const e164 = z.string().regex(/^\+[1-9]\d{7,14}$/, 'an E.164 phone number');
-
-export const personInput = z.object({
-  phoneNumber: e164,
-  name: z.string().trim().min(1).max(200).nullish(),
-  organizationName: z.string().trim().min(1).max(200).nullish(),
-});
 
 export { isPlaceholderEmail };
 
@@ -166,11 +156,6 @@ export async function provisionPerson(
     (await createOrganizationFor(personId, organizationName));
   return { personId, organizationId, created };
 }
-
-export const signInLinkInput = z.object({
-  personId: z.string().min(1).max(100),
-  returnTo: z.url().max(2000),
-});
 
 /**
  * A one-time sign-in link for a person provisioned by phone, landing on the app's own origin.
