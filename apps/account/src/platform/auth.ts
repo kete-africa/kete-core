@@ -17,6 +17,11 @@ import { signInMethods, signsInStrongly } from './strength';
 import { inOrganization } from './tenancy';
 import * as schema from './schema';
 import { accessUntil } from '../features/payments/access';
+import {
+  invitationEmail,
+  passwordResetEmail,
+  passwordResetUnavailableEmail,
+} from '../features/emails/templates';
 
 /** The Kete claims of a person for one organization (null: none), from the database. */
 export async function keteClaims(
@@ -52,9 +57,20 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: 'pg', schema }),
   emailAndPassword: {
     enabled: true,
-    // No mail provider yet: verification waits for one (spec, assumptions).
+    // Verification of existing unverified accounts is a separate decision: turning it on would
+    // lock them out until they verify (spec 025, out of scope).
     requireEmailVerification: false,
     minPasswordLength: 10,
+    resetPasswordTokenExpiresIn: 60 * 60,
+    // A new password closes every other session (spec 025).
+    revokeSessionsOnPasswordReset: true,
+    // Only an account that has a password gets a link: Better Auth would otherwise add one, and a
+    // passkey-only account chose to have none (spec 016). Others learn why, by e-mail only.
+    async sendResetPassword({ user, url }) {
+      const { password } = await signInMethods(user.id);
+      if (password) await sendEmail(passwordResetEmail, { to: user.email, values: { link: url } });
+      else await sendEmail(passwordResetUnavailableEmail, { to: user.email, values: {} });
+    },
   },
   advanced: {
     database: { generateId: ({ model }) => prefixedId(model) },
@@ -110,9 +126,8 @@ export const auth = betterAuth({
         },
       },
       async sendInvitationEmail({ email, organization: org, inviter, id }) {
-        await sendEmail({
+        await sendEmail(invitationEmail, {
           to: email,
-          template: 'invitation',
           values: {
             organization: org.name,
             inviter: inviter.user.name,

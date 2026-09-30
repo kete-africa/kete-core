@@ -1,0 +1,44 @@
+{
+  "name": "@kete-africa/notify",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete messages: e-mails rendered with React Email and sent through a port (MailKite first), verified provider webhooks, and the port of chat channels.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/notify"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  },
+  "dependencies": {
+    "@react-email/render": "^2.1.0"
+  },
+  "devDependencies": {
+    "@react-email/components": "^1.0.12",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}
