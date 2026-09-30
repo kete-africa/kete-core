@@ -1,0 +1,26 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "include": ["files", "dependencies", "devDependencies", "unlisted", "binaries", "unresolved"],
+  "playwright": false,
+  "workspaces": {
+    ".": {
+      "entry": ["tooling/scripts/*.ts"]
+    },
+    "apps/account": {
+      "entry": ["src/routes/**/*.{ts,tsx}", "scripts/*.ts", "e2e/**/*.ts", "playwright.config.ts"]
+    },
+    "apps/cockpit": {
+      "entry": ["src/routes/**/*.{ts,tsx}", "scripts/*.ts", "e2e/**/*.ts", "playwright.config.ts"]
+    },
+    "apps/docs": {
+      "entry": ["scripts/*.ts"]
+    },
+    "packages/design": {
+      "ignoreDependencies": [
+        "@fontsource-variable/archivo",
+        "@fontsource-variable/instrument-sans",
+        "@fontsource-variable/jetbrains-mono"
+      ]
+    }
+  }
+}

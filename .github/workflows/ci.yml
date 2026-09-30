@@ -11,19 +11,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: No secret in the repository or its history (gitleaks, values redacted)
+        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact --no-banner --verbose
+
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Lint, types, formatting, generated contracts and design, READMEs, catalogs
+      - name: Lint, types, formatting, generated contracts and design, READMEs, catalogs, Knip, audit
         run: pnpm check
+      - name: A changed package carries a changeset (decision 0006)
+        if: github.event_name == 'pull_request'
+        run: pnpm changeset status --since=origin/${{ github.base_ref }}
+      - name: The documentation site builds, with no broken link
+        run: pnpm docs:build
       - name: Migrate the Compte Kete "test" branch
         run: pnpm --filter @kete/account db:migrate
         env:

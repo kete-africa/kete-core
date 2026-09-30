@@ -1,0 +1,12 @@
+# gitleaks (decision 0006): the default rules, plus the fixtures that exist only in tests. Test
+# keys, signatures and fake provider secrets are generated for tests and grant nothing anywhere.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Test fixtures and documented placeholders"
+paths = [
+  '''(^|/)tests/''',
+  '''(^|/)e2e/''',
+  '''\.env\.example$''',
+]

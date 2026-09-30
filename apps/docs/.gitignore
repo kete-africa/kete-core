@@ -1,0 +1,3 @@
+# Generated from the repository by scripts/sync-content.ts and by starlight-typedoc.
+src/content/docs/
+.astro/

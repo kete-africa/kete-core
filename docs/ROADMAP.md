@@ -224,6 +224,27 @@ things from here, delivered before its conversation phase.
 
 ---
 
+## Consolidation — doctrine D-030 to D-035
+
+Before the apps and Kete Enterprise run in parallel (D-034), `kete-core` receives every shared
+building block already identified (D-030), in dependency order, one Spec Kit feature each, from
+spec 020. Phases 4 and 5 below are delivered through these specs.
+
+| Spec                          | Delivers                                                                               | Proof                                                                             |
+| ----------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `020-tooling-and-docs`        | Changesets, Renovate, gitleaks, `pnpm audit`, Knip, the Starlight site (decision 0006) | `pnpm check` and `pnpm docs:build` pass in CI; a package change needs a changeset |
+| `021-tenancy-and-testing`     | `@kete/tenancy`, `@kete/testing` (Neon test branch and plain Postgres)                 | The RLS tests run through the kit on both                                         |
+| `022-commands-records-drafts` | `@kete/commands`, `@kete/records`, `@kete/drafts`, the doctrine's components           | Operator gestures journaled; a draft has no effect before validation              |
+| `023-capabilities`            | `capability.v1`, `@kete/capabilities`, the event catalog (AsyncAPI)                    | One capability, same rights and journal from MCP and from a model                 |
+| `024-ai`                      | `@kete/ai` on the AI SDK, usage and budgets                                            | A model call through the port, with its usage measured                            |
+| `025-notify`                  | `@kete/notify`, MailKite (D-031); the Compte Kete sends its e-mails                    | A real invitation and password reset sent on staging                              |
+| `026-identity`                | `@kete/identity` extracted from the Compte Kete; its OpenAPI description               | Every Compte Kete end-to-end test passes unchanged                                |
+| `027-design-workspace`        | `@kete/design` in three layers, the `workspace` design, client brands (D-035)          | Two designs and a client brand, contrasts checked in CI                           |
+| `028-app-template`            | `templates/app`, `@kete/admin`, `@kete/feedback` (phase 5)                             | An app from the template passes CI on its first commit                            |
+| `029-cockpit-repository`      | Kete Cockpit moves to `kete-africa/kete-cockpit` (D-033)                               | The Cockpit is green in its own repository and redeployed on staging              |
+
+---
+
 ## Phase 4 — AI-era primitives
 
 ### Objective

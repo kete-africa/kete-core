@@ -9,6 +9,8 @@ export default tseslint.config(
       '**/*.gen.ts',
       '**/src/paraglide/**',
       '**/.tanstack/**',
+      '**/.astro/**',
+      'apps/docs/src/content/docs/**',
       '**/test-results/**',
       '**/playwright-report/**',
       '.specify/**',
