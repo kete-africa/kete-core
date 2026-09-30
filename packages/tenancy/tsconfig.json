@@ -6,9 +6,5 @@
     "types": ["node"]
   },
   "include": ["src", "tests"],
-  "references": [
-    {
-      "path": "../testing"
-    }
-  ]
+  "references": [{ "path": "../sdk" }, { "path": "../testing" }]
 }

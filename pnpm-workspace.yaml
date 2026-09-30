@@ -5,3 +5,7 @@ packages:
 
 allowBuilds:
   esbuild: true
+  # Optional native builds of the Testcontainers stack (ssh2): the JavaScript fallbacks suffice.
+  cpu-features: false
+  protobufjs: false
+  ssh2: false

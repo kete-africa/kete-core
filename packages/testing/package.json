@@ -1,12 +1,12 @@
 {
-  "name": "@kete-africa/sdk",
-  "version": "0.1.0",
+  "name": "@kete-africa/testing",
+  "version": "0.0.0",
   "type": "module",
-  "description": "Kete SDK: outbox, signed event delivery, receiver verification, manifest and health.",
+  "description": "Kete testing kit: a real Postgres (Neon test branch or a container), one isolated schema per test file, and the proof that organizations never see each other.",
   "repository": {
     "type": "git",
     "url": "https://github.com/kete-africa/kete-core.git",
-    "directory": "packages/sdk"
+    "directory": "packages/testing"
   },
   "exports": {
     ".": "./src/index.ts"
@@ -15,13 +15,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "ajv": "^8.20.0",
-    "ajv-formats": "^3.0.1",
+    "@testcontainers/postgresql": "^12.2.0",
     "pg": "^8.23.0"
   },
   "devDependencies": {
-    "@types/pg": "^8.23.1",
-    "@kete/testing": "workspace:@kete-africa/testing@*"
+    "@types/pg": "^8.23.1"
   },
   "files": [
     "dist/src",

@@ -15,6 +15,12 @@
     },
     {
       "path": "packages/payments"
+    },
+    {
+      "path": "packages/testing"
+    },
+    {
+      "path": "packages/tenancy"
     }
   ]
 }
