@@ -58,11 +58,14 @@ runs them after a green push on `dev`. The instance-wide token is never stored i
 ### Sign-in for Kete apps and operators
 
 - `KETE_OPERATORS_ORGANIZATION_ID`: Kete's own organization in this Compte Kete. Its owners and
-  admins with two-factor on are operators.
+  admins who sign in strongly are operators: two-factor on, or a passkey-only account (spec 016).
 - An operator registers each app once (its secret is printed once, then kept with the app's
   secrets):
-  `OPERATOR_PASSWORD=… pnpm --filter @kete/account clients create --operator … --code 123456 --name "Kete Cockpit" --redirect https://…/auth/callback`
-  with the branch's `ACCOUNT_DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`.
+  `pnpm --filter @kete/account clients create --operator <e-mail> --name "Kete Cockpit" --redirect https://…/auth/callback`
+  with the branch's `ACCOUNT_DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` and
+  `KETE_OPERATORS_ORGANIZATION_ID`. The script asks nothing more: it runs with the service's own
+  secrets, checks that the named person is an operator, and acts as her with a session it closes
+  (`scripts/operator-session.ts`).
 
 ### Storage CORS
 
@@ -79,10 +82,10 @@ new keys for every app) and `COCKPIT_DATABASE_URL` (app role) set — runtime on
 
 To open it, the author:
 
-1. Signs up on the staging Compte Kete, creates the organization « Kete », turns on two-factor
-   (Mon espace Kete → Sécurité).
-2. Runs `pnpm --filter @kete/account staging:operator` (e-mail, password and code asked on the
-   terminal, never stored). It makes that organization the operators' organization on the three
+1. Signs up on the staging Compte Kete, creates the organization « Kete », and in Mon espace
+   Kete → Sécurité either turns on two-factor, or adds a passkey (Bitwarden…) and chooses to sign
+   in with passkeys only.
+2. Runs `pnpm --filter @kete/account staging:operator` (only the e-mail is asked). It makes that organization the operators' organization on the three
    apps, registers the Cockpit and Firmo (with `kete:people`, below) as Compte Kete clients, hands
    their secrets straight to the hosting environment and redeploys the three apps.
 3. In the Cockpit, registers the staging Compte Kete (`https://compte-kete-staging…`), then gives

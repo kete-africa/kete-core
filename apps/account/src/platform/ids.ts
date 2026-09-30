@@ -15,6 +15,7 @@ const prefixes: Record<string, string> = {
   checkout: 'chk',
   subscription: 'sub',
   signInLink: 'lnk',
+  passkey: 'pky',
 };
 
 export function prefixedId(model: string): string {

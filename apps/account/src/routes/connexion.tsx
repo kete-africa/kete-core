@@ -21,7 +21,7 @@ function SignIn() {
   const { redirect, linkExpired } = Route.useSearch();
   // The raw query: a Kete app's signed authorization request must survive the switch.
   const searchStr = useLocation({ select: (location) => location.searchStr });
-  const [error, setError] = useState<'refused' | 'rate_limited' | null>(null);
+  const [error, setError] = useState<'refused' | 'rate_limited' | 'passkey' | null>(null);
   const [pending, setPending] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -41,16 +41,48 @@ function SignIn() {
     continueAfterSignIn(data, redirect ?? '/espace');
   }
 
+  // Spec 016: the browser or the password manager offers the person's passkey for this site.
+  async function withPasskey() {
+    setPending(true);
+    setError(null);
+    const result = await authClient.signIn.passkey();
+    if (!result || result.error) {
+      setError('passkey');
+      setPending(false);
+      return;
+    }
+    continueAfterSignIn(result.data, redirect ?? '/espace');
+  }
+
   return (
     <AuthFrame title={m.auth_sign_in_title()} intro={m.auth_intro()}>
       <form method="post" onSubmit={submit} className="flex flex-col gap-4" noValidate>
         {linkExpired && !error && <Notice tone="error">{m.auth_link_expired()}</Notice>}
         {error && (
           <Notice tone="error">
-            {error === 'rate_limited' ? m.auth_error_rate_limited() : m.auth_error_invalid()}
+            {error === 'rate_limited'
+              ? m.auth_error_rate_limited()
+              : error === 'passkey'
+                ? m.auth_error_passkey()
+                : m.auth_error_invalid()}
           </Notice>
         )}
-        <TextField label={m.auth_email()} name="email" type="email" autoComplete="email" required />
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => void withPasskey()}
+          disabled={pending || !hydrated}
+        >
+          {m.auth_sign_in_passkey()}
+        </Button>
+        <p className="text-center text-body-sm text-bark">{m.auth_or_password()}</p>
+        <TextField
+          label={m.auth_email()}
+          name="email"
+          type="email"
+          autoComplete="email webauthn"
+          required
+        />
         <TextField
           label={m.auth_password()}
           name="password"

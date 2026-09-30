@@ -153,5 +153,21 @@
   "auth_link_expired": "This link is no longer valid: it was already used or it expired. Ask for a new one from your conversation.",
   "billing_receipt_email": "E-mail for the receipt",
   "billing_receipt_email_hint": "Your account has no e-mail: the payment receipt goes to this address.",
-  "billing_invalid_email": "This e-mail address is not valid."
+  "billing_invalid_email": "This e-mail address is not valid.",
+  "auth_sign_in_passkey": "Sign in with a passkey",
+  "auth_or_password": "or with your password",
+  "auth_error_passkey": "The passkey was not accepted. Try again, or sign in with your password.",
+  "security_passkeys": "Passkeys",
+  "security_passkeys_intro": "A passkey signs you in without a password: your password manager (Bitwarden…) or your device keeps it and offers it.",
+  "security_passkey_add": "Add a passkey",
+  "security_passkey_default_name": "Passkey",
+  "security_passkey_remove": "Remove",
+  "security_passkey_added": "Passkey added.",
+  "security_passkey_removed": "Passkey removed.",
+  "security_passkey_refused": "That did not go through. Try again.",
+  "security_last_passkey": "It is your only way to sign in: add another passkey first.",
+  "security_password_remove": "Sign in with my passkeys only",
+  "security_password_remove_confirm": "Your password will be deleted: you will sign in with your passkeys only. Continue?",
+  "security_password_removed": "Your account has no password any more: you sign in with your passkeys.",
+  "security_passkey_only": "Your account signs in with your passkeys only."
 }

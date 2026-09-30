@@ -6,8 +6,9 @@
  *   pnpm clients create … --people    (the app may provision people by phone — spec 013)
  *   pnpm clients list
  *
- * Only a Kete operator (owner or admin of Kete's organization, two-factor on) may register an app:
- * the script signs in as one, asking the password and the code on the terminal.
+ * Only a Kete operator (owner or admin of Kete's organization, signing in strongly: two-factor on
+ * or a passkey-only account) may register an app: the script acts as the named operator
+ * (./operator-session.ts), without asking a password or a code.
  * A created app is trusted (no consent screen) and needs PKCE; its secret is printed ONCE — store
  * it with the app's other secrets, never in a repository. Needs the service's own environment
  * (ACCOUNT_DATABASE_URL, BETTER_AUTH_SECRET, BETTER_AUTH_URL, KETE_OPERATORS_ORGANIZATION_ID).
@@ -15,6 +16,7 @@
 import { parseArgs } from 'node:util';
 import { auth } from '../src/platform/auth';
 import { getPool } from '../src/platform/db';
+import { openOperatorSession } from './operator-session';
 
 interface CreatedClient {
   client_id: string;
@@ -29,73 +31,7 @@ const api = auth.api as unknown as {
     body: Record<string, unknown>;
     headers: Headers;
   }): Promise<CreatedClient>;
-  signInEmail(input: {
-    body: { email: string; password: string };
-    returnHeaders: true;
-  }): Promise<{ headers: Headers; response: { twoFactorRedirect?: boolean } }>;
-  verifyTOTP(input: {
-    body: { code: string };
-    headers: Headers;
-    returnHeaders: true;
-  }): Promise<{ headers: Headers }>;
 };
-
-/** The cookies a response sets, as a request's Cookie header. */
-function cookieHeader(headers: Headers): Headers {
-  const pairs = headers.getSetCookie().map((cookie) => cookie.split(';')[0]);
-  return new Headers({ cookie: pairs.join('; ') });
-}
-
-/** Asks a question on the terminal; `hidden` does not echo what is typed (a password). */
-function ask(question: string, hidden = false): Promise<string> {
-  const ENTER = [10, 13];
-  const CTRL_C = 3;
-  const BACKSPACE = [8, 127];
-  return new Promise((resolve) => {
-    const input = process.stdin;
-    process.stdout.write(question);
-    if (!hidden || !input.isTTY) {
-      input.once('data', (chunk) => resolve(String(chunk).trim()));
-      return;
-    }
-    input.setRawMode(true);
-    let answer = '';
-    const onData = (chunk: Buffer) => {
-      for (const char of chunk.toString('utf8')) {
-        const code = char.charCodeAt(0);
-        if (ENTER.includes(code)) {
-          input.setRawMode(false);
-          input.off('data', onData);
-          input.pause();
-          process.stdout.write(String.fromCharCode(10));
-          resolve(answer);
-          return;
-        }
-        if (code === CTRL_C) process.exit(130);
-        answer = BACKSPACE.includes(code) ? answer.slice(0, -1) : answer + char;
-      }
-    };
-    input.resume();
-    input.on('data', onData);
-  });
-}
-
-/**
- * Signs in as the operator — password, then the code of their authenticator app — asked on the
- * terminal: nothing secret goes through arguments, files or the shell history (spec 008, FR-005).
- */
-async function operatorSession(email: string): Promise<Headers> {
-  const password = await ask(`Password for ${email}: `, true);
-  const signIn = await api.signInEmail({ body: { email, password }, returnHeaders: true });
-  if (!signIn.response.twoFactorRedirect) return cookieHeader(signIn.headers);
-  const code = await ask('Code from your authenticator app: ');
-  const verified = await api.verifyTOTP({
-    body: { code },
-    headers: cookieHeader(signIn.headers),
-    returnHeaders: true,
-  });
-  return cookieHeader(verified.headers);
-}
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
@@ -120,23 +56,25 @@ try {
       if (!local && new URL(uri).protocol !== 'https:') throw new Error(`${uri}: https only`);
     }
     if (!values.operator) throw new Error('--operator is required');
-    const headers = await operatorSession(values.operator);
-    const client = await api.adminCreateOAuthClient({
-      headers,
-      body: {
-        client_name: values.name,
-        application_type: local ? 'native' : 'web',
-        redirect_uris: redirects,
-        token_endpoint_auth_method: 'client_secret_post',
-        grant_types: values.people
-          ? ['authorization_code', 'refresh_token', 'client_credentials']
-          : ['authorization_code', 'refresh_token'],
-        response_types: ['code'],
-        skip_consent: true,
-        require_pkce: true,
-        client_credentials_scopes: values.people ? ['kete:people'] : [],
-      },
-    });
+    const session = await openOperatorSession(values.operator);
+    const client = await api
+      .adminCreateOAuthClient({
+        headers: session.headers,
+        body: {
+          client_name: values.name,
+          application_type: local ? 'native' : 'web',
+          redirect_uris: redirects,
+          token_endpoint_auth_method: 'client_secret_post',
+          grant_types: values.people
+            ? ['authorization_code', 'refresh_token', 'client_credentials']
+            : ['authorization_code', 'refresh_token'],
+          response_types: ['code'],
+          skip_consent: true,
+          require_pkce: true,
+          client_credentials_scopes: values.people ? ['kete:people'] : [],
+        },
+      })
+      .finally(() => session.close());
     console.log(JSON.stringify(client, null, 2));
   } else if (positionals[0] === 'list') {
     const { rows } = await getPool().query(

@@ -1,4 +1,6 @@
+import { passkey } from '@better-auth/passkey';
 import { betterAuth } from 'better-auth';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { jwt, magicLink, organization, twoFactor } from 'better-auth/plugins';
 import { tanstackStartCookies } from 'better-auth/tanstack-start';
@@ -11,6 +13,7 @@ import { KETE_APPS_AUDIENCE, type KeteClaims } from './claims';
 import { accountEvent, record } from './events';
 import { keteOAuthProvider } from './oauth';
 import { deliverSignInLink, SIGN_IN_LINK_SECONDS } from './sign-in-links';
+import { signInMethods, signsInStrongly } from './strength';
 import { inOrganization } from './tenancy';
 import * as schema from './schema';
 import { accessUntil } from '../features/payments/access';
@@ -37,7 +40,8 @@ export async function keteClaims(
     org,
     role,
     apps: org ? await accessUntil(org) : {},
-    two_factor: user.twoFactorEnabled === true,
+    // A second factor, or a passkey-only account (spec 016).
+    two_factor: user.twoFactorEnabled === true || (await signsInStrongly(user.id)),
   };
 }
 
@@ -54,6 +58,18 @@ export const auth = betterAuth({
   },
   advanced: {
     database: { generateId: ({ model }) => prefixedId(model) },
+  },
+  hooks: {
+    // A passkey-only account never removes its last passkey: she would lose her way in (spec 016).
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== '/passkey/delete-passkey') return;
+      const session = ctx.context.session ?? (await getSessionFromHeaders(ctx.headers));
+      if (!session) return;
+      const methods = await signInMethods(session.user.id);
+      if (!methods.password && methods.passkeys <= 1) {
+        throw new APIError('FORBIDDEN', { message: 'last_passkey' });
+      }
+    }),
   },
   user: {
     additionalFields: {
@@ -106,6 +122,12 @@ export const auth = betterAuth({
       },
     }),
     twoFactor({ issuer: 'Kete' }),
+    // Spec 016: a passkey (WebAuthn) — kept by the person's password manager or device.
+    passkey({
+      rpID: new URL(env.publicUrl).hostname,
+      rpName: 'Compte Kete',
+      origin: env.publicUrl,
+    }),
     // One-time sign-in links requested by an app for a person it provisioned (spec 013): the link
     // is handed back to the app, never e-mailed; single attempt, token stored hashed.
     magicLink({
@@ -134,3 +156,7 @@ export const auth = betterAuth({
 });
 
 export type Session = typeof auth.$Infer.Session;
+
+async function getSessionFromHeaders(headers: Headers | undefined) {
+  return headers ? auth.api.getSession({ headers }) : null;
+}

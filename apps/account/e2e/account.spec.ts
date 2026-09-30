@@ -40,7 +40,7 @@ async function signedIn(browser: Browser, email: string): Promise<Page> {
   await page.goto('/connexion');
   await page.getByLabel('Adresse e-mail').fill(email);
   await page.getByLabel('Mot de passe').fill(password);
-  await page.getByRole('button', { name: 'Se connecter' }).click();
+  await page.getByRole('button', { name: 'Se connecter', exact: true }).click();
   await page.waitForURL('**/espace');
   sessions.set(email, await context.storageState());
   return page;
@@ -246,7 +246,7 @@ test('repeated sign-in attempts are slowed down, and the person is told so', asy
   await page.getByLabel('Mot de passe').fill('not-the-password');
   const alert = page.getByRole('alert');
   for (let attempt = 0; attempt < 6; attempt += 1) {
-    await page.getByRole('button', { name: 'Se connecter' }).click();
+    await page.getByRole('button', { name: 'Se connecter', exact: true }).click();
     await expect(alert).toBeVisible();
     if ((await alert.textContent())?.includes('Trop de tentatives')) break;
   }

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@better-auth/oauth-provider": "1.7.6",
+    "@better-auth/passkey": "1.7.6",
     "@kete/design": "workspace:@kete-africa/design@*",
     "@kete/files": "workspace:@kete-africa/files@*",
     "@kete/payments": "workspace:@kete-africa/payments@*",
@@ -26,6 +27,7 @@
     "@tanstack/react-router": "^1.170.40",
     "@tanstack/react-start": "^1.168.59",
     "better-auth": "^1.7.6",
+    "better-call": "1.4.0",
     "drizzle-orm": "^0.45.3",
     "jose": "^6.2.12",
     "pg": "^8.23.0",

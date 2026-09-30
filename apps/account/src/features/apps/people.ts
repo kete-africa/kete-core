@@ -10,6 +10,7 @@ import { prefixedId } from '@/platform/ids';
 import { PEOPLE_SCOPE } from '@/platform/oauth';
 import { appSignInLinks, member, oauthClient, user } from '@/platform/schema';
 import { captureSignInLink, SIGN_IN_LINK_SECONDS } from '@/platform/sign-in-links';
+import { signsInStrongly } from '@/platform/strength';
 import { accessUntil } from '../payments/access';
 
 /**
@@ -190,12 +191,12 @@ export async function createSignInLink(
       id: user.id,
       email: user.email,
       phoneNumber: user.phoneNumber,
-      twoFactorEnabled: user.twoFactorEnabled,
     })
     .from(user)
     .where(eq(user.id, parsed.data.personId));
   if (!person?.phoneNumber) throw new AppApiError(404, 'not_found');
-  if (person.twoFactorEnabled) throw new AppApiError(403, 'second_factor_required');
+  // A link would bypass her second factor or her passkey (spec 016).
+  if (await signsInStrongly(person.id)) throw new AppApiError(403, 'second_factor_required');
 
   const id = prefixedId('signInLink');
   const expiresAt = new Date(Date.now() + SIGN_IN_LINK_SECONDS * 1000);

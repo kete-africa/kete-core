@@ -153,5 +153,21 @@
   "auth_link_expired": "Ce lien n'est plus valable : il a déjà servi ou il a expiré. Redemandez-en un depuis votre conversation.",
   "billing_receipt_email": "E-mail pour le reçu",
   "billing_receipt_email_hint": "Ton compte n’a pas d’e-mail : le reçu du paiement sera envoyé à cette adresse.",
-  "billing_invalid_email": "Cette adresse e-mail n’est pas valable."
+  "billing_invalid_email": "Cette adresse e-mail n’est pas valable.",
+  "auth_sign_in_passkey": "Se connecter avec une clé d'accès",
+  "auth_or_password": "ou avec ton mot de passe",
+  "auth_error_passkey": "La clé d'accès n'a pas été acceptée. Réessaie, ou connecte-toi avec ton mot de passe.",
+  "security_passkeys": "Clés d'accès",
+  "security_passkeys_intro": "Une clé d'accès te connecte sans mot de passe : ton gestionnaire de mots de passe (Bitwarden…) ou ton appareil la garde et te la propose.",
+  "security_passkey_add": "Ajouter une clé d'accès",
+  "security_passkey_default_name": "Clé d'accès",
+  "security_passkey_remove": "Retirer",
+  "security_passkey_added": "Clé d'accès ajoutée.",
+  "security_passkey_removed": "Clé d'accès retirée.",
+  "security_passkey_refused": "L'opération n'a pas abouti. Réessaie.",
+  "security_last_passkey": "C'est ta seule façon de te connecter : ajoute d'abord une autre clé d'accès.",
+  "security_password_remove": "Me connecter uniquement avec mes clés d’accès",
+  "security_password_remove_confirm": "Ton mot de passe sera supprimé : tu te connecteras uniquement avec tes clés d'accès. Continuer ?",
+  "security_password_removed": "Ton compte n'a plus de mot de passe : tu te connectes avec tes clés d'accès.",
+  "security_passkey_only": "Ton compte se connecte uniquement avec tes clés d'accès."
 }
