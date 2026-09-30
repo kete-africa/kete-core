@@ -1,4 +1,5 @@
 import { oauthProviderClient } from '@better-auth/oauth-provider/client';
+import { passkeyClient } from '@better-auth/passkey/client';
 import { organizationClient, twoFactorClient } from 'better-auth/client/plugins';
 import { createAuthClient } from 'better-auth/react';
 
@@ -6,6 +7,8 @@ import { createAuthClient } from 'better-auth/react';
 export const authClient = createAuthClient({
   plugins: [
     organizationClient(),
+    // Spec 016: sign in with a passkey, and manage them in Mon espace Kete → Sécurité.
+    passkeyClient(),
     twoFactorClient({
       // The query is kept: a sign-in started by another Kete app resumes after the code.
       onTwoFactorRedirect() {

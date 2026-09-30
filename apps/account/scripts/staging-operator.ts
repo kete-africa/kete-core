@@ -1,11 +1,13 @@
 /**
  * Makes the author the first Kete operator of the staging Compte Kete and connects Kete Cockpit
- * and Firmo to it — in one command, after they have, in a browser: signed up on the staging Compte Kete,
- * created the organization « Kete », and turned on two-factor authentication.
+ * and Firmo to it — in one command, after they have, in a browser: signed up on the staging
+ * Compte Kete, created the organization « Kete », and turned on two-factor authentication or
+ * switched their account to passkeys only (Mon espace Kete → Sécurité, spec 016).
  *
  *   pnpm --filter @kete/account staging:operator
  *
- * Asks the operator's e-mail, password and code on the terminal (never stored, never printed).
+ * Asks only the operator's e-mail: it runs with the Compte Kete's own secrets, and checks that
+ * this person is Kete's owner and signs in strongly (./operator-session.ts).
  * Reads the staging configuration from kete-core/.env and the hosting token from the author's
  * secrets file; the client secrets of the Cockpit and Firmo go straight to the hosting
  * environment.
@@ -124,53 +126,29 @@ async function setEnv(app: string, values: Record<string, string>): Promise<void
 
 const { auth } = await import('../src/platform/auth');
 const { getPool } = await import('../src/platform/db');
+const { openOperatorSession } = await import('./operator-session');
 const api = auth.api as unknown as {
-  signInEmail(input: { body: { email: string; password: string }; returnHeaders: true }): Promise<{
-    headers: Headers;
-    response: { twoFactorRedirect?: boolean; user?: { id: string } };
-  }>;
-  verifyTOTP(input: {
-    body: { code: string };
-    headers: Headers;
-    returnHeaders: true;
-  }): Promise<{ headers: Headers; response: { user?: { id: string } } }>;
   adminCreateOAuthClient(input: {
     body: Record<string, unknown>;
     headers: Headers;
   }): Promise<{ client_id: string; client_secret: string }>;
 };
-const cookies = (headers: Headers) =>
-  new Headers({
-    cookie: headers
-      .getSetCookie()
-      .map((c) => c.split(';')[0])
-      .join('; '),
-  });
 
+let operatorSession: Awaited<ReturnType<typeof openOperatorSession>> | undefined;
 try {
-  const email = await ask('E-mail of your staging Compte Kete: ');
-  const password = await ask('Password: ', true);
-  const signIn = await api.signInEmail({ body: { email, password }, returnHeaders: true });
-  if (!signIn.response.twoFactorRedirect) {
-    throw new Error('Turn on two-factor authentication first (Mon espace Kete → Sécurité).');
-  }
-  const code = await ask('Code from your authenticator app: ');
-  const verified = await api.verifyTOTP({
-    body: { code },
-    headers: cookies(signIn.headers),
-    returnHeaders: true,
-  });
-  const session = cookies(verified.headers);
-
+  const email = (await ask('E-mail of your staging Compte Kete: ')).toLowerCase();
   const { rows } = await getPool().query<{ id: string }>(
     `select o.id from organization o join member m on m.organization_id = o.id
        join "user" u on u.id = m.user_id
-      where u.email = $1 and o.name = 'Kete' and m.role = 'owner'`,
+      where lower(u.email) = $1 and o.name = 'Kete' and m.role = 'owner'`,
     [email],
   );
   if (rows.length !== 1) throw new Error('Create the organization « Kete » first, as its owner.');
   const operators = rows[0]?.id ?? '';
   process.env.KETE_OPERATORS_ORGANIZATION_ID = operators;
+  // Two-factor on, or a passkey-only account: checked before anything is registered.
+  operatorSession = await openOperatorSession(email);
+  const session = operatorSession.headers;
 
   const client = await api.adminCreateOAuthClient({
     headers: session,
@@ -221,5 +199,6 @@ try {
       `redeploying. In a few minutes: ${cockpitUrl} and ${firmoUrl}/operations`,
   );
 } finally {
+  await operatorSession?.close();
   await getPool().end();
 }

@@ -214,6 +214,14 @@ things from here, delivered before its conversation phase.
 - Staging: `staging:operator` registers Firmo with `kete:people` in the same gesture as the
   Cockpit (`docs/OPERATIONS.md`).
 
+### 016 — Passkeys · _delivered in `specs/016-passkeys`_
+
+- A person signs in with a passkey kept by her password manager or device, and may drop her
+  password: a passkey-only account signs in strongly, like two-factor, and so may run Kete.
+- The operator scripts ask only the operator's e-mail and check that she signs in strongly.
+- `[agent]` A virtual authenticator adds a passkey, drops the password and signs in again; the old
+  password opens nothing.
+
 ---
 
 ## Phase 4 — AI-era primitives

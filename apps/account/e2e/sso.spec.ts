@@ -245,7 +245,7 @@ test("the admin API answers only operators: no token 401, a client's token 403",
   await page.goto(`${ACCOUNT}/connexion`);
   await page.getByLabel('Adresse e-mail').fill(`owner.sso.${run}@example.test`);
   await page.getByLabel('Mot de passe').fill(password);
-  await page.getByRole('button', { name: 'Se connecter' }).click();
+  await page.getByRole('button', { name: 'Se connecter', exact: true }).click();
   await page.waitForURL('**/espace');
   const { token } = (await (await page.request.get(`${ACCOUNT}/api/auth/token`)).json()) as {
     token: string;
