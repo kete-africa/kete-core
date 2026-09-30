@@ -1,0 +1,39 @@
+{
+  "name": "@kete-africa/drafts",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete drafts: what an agent prepares and a person validates — record drafts and change proposals, with each field's provenance.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/drafts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kete/commands": "workspace:@kete-africa/commands@*",
+    "@kete/records": "workspace:@kete-africa/records@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}

@@ -4,6 +4,7 @@
  */
 import { sql, type SQL } from 'drizzle-orm';
 import { pgPolicy, type PgRole } from 'drizzle-orm/pg-core';
+import type { SqlExecutor } from '@kete/sdk';
 import { ACTIVE_ORGANIZATION_SQL, checkOrganizationId, ORGANIZATION_SETTING } from './setting.js';
 
 /** The active organization, as a Drizzle SQL fragment. */
@@ -25,6 +26,24 @@ export function organizationIsolation(name: string, appRole: PgRole, column = 'o
     using: condition,
     withCheck: condition,
   });
+}
+
+/**
+ * A Drizzle database or transaction as the `SqlExecutor` every Kete package takes: `$1…`
+ * placeholders become bound values, so a package's SQL runs in the caller's transaction.
+ */
+export function sqlExecutorOf(db: {
+  execute(query: SQL): Promise<{ rows: unknown[] }>;
+}): SqlExecutor {
+  return {
+    async query<R extends Record<string, unknown>>(text: string, params: readonly unknown[] = []) {
+      const chunks: SQL[] = text
+        .split(/\$(\d+)/)
+        .map((part, index) => (index % 2 === 0 ? sql.raw(part) : sql`${params[Number(part) - 1]}`));
+      const result = await db.execute(sql.join(chunks));
+      return { rows: result.rows as R[] };
+    },
+  };
 }
 
 /** Anything with Drizzle's `transaction`: a database, or a transaction (nested as a savepoint). */

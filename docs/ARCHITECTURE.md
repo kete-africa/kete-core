@@ -42,6 +42,9 @@ flowchart LR
 | `packages/files/`    | `@kete/files` — see its [README](../packages/files/README.md)                                 |
 | `packages/tenancy/`  | `@kete/tenancy` — see its [README](../packages/tenancy/README.md)                             |
 | `packages/testing/`  | `@kete/testing` — see its [README](../packages/testing/README.md)                             |
+| `packages/commands/` | `@kete/commands` — see its [README](../packages/commands/README.md)                           |
+| `packages/records/`  | `@kete/records` — see its [README](../packages/records/README.md)                             |
+| `packages/drafts/`   | `@kete/drafts` — see its [README](../packages/drafts/README.md)                               |
 | `apps/cockpit/`      | Kete Cockpit — see its [README](../apps/cockpit/README.md)                                    |
 | `apps/account/`      | Compte Kete and Mon espace Kete — see its [README](../apps/account/README.md)                 |
 | `apps/docs/`         | The documentation site, built from this repository — see its [README](../apps/docs/README.md) |

@@ -77,7 +77,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: The packages' tests on a plain Postgres in a container (doctrine D-029)
-        run: pnpm exec vitest run --project tenancy --project testing --project sdk
+        run: pnpm exec vitest run --project tenancy --project testing --project commands --project records --project drafts --project sdk
         env:
           KETE_TEST_POSTGRES: container
 

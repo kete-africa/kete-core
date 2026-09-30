@@ -4,10 +4,10 @@ import {
   httpTransport,
   recordEvent,
   type KeteEvent,
-  type SqlExecutor,
   type EventData,
 } from '@kete/sdk';
-import { sql, type SQL } from 'drizzle-orm';
+import { sqlExecutorOf } from '@kete/tenancy/drizzle';
+import type { SQL } from 'drizzle-orm';
 import { getPool } from './db';
 
 /** The Compte Kete's product identifier, as its manifest says. */
@@ -31,24 +31,6 @@ export function accountEvent<T extends Declared>(
   });
 }
 
-/** A Drizzle transaction as the SDK's `SqlExecutor`: `$1…` placeholders become bound values. */
-export function sqlExecutor(tx: {
-  execute: (query: SQL) => Promise<{ rows: unknown[] }>;
-}): SqlExecutor {
-  return {
-    async query(text, params = []) {
-      const parts = text.split(/\$(\d+)/);
-      const chunks: SQL[] = [];
-      parts.forEach((part, index) => {
-        if (index % 2 === 0) chunks.push(sql.raw(part));
-        else chunks.push(sql`${params[Number(part) - 1]}`);
-      });
-      const result = await tx.execute(sql.join(chunks));
-      return { rows: result.rows as never[] };
-    },
-  };
-}
-
 /**
  * Writes the event in the caller's transaction (organization set on it): the change and its event
  * commit or roll back together.
@@ -57,7 +39,7 @@ export function record(
   tx: { execute: (query: SQL) => Promise<{ rows: unknown[] }> },
   event: KeteEvent,
 ): Promise<void> {
-  return recordEvent(sqlExecutor(tx), event);
+  return recordEvent(sqlExecutorOf(tx), event);
 }
 
 let started = false;

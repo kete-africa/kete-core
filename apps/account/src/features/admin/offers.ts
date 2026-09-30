@@ -1,5 +1,7 @@
 import { createTokenVerifier, type KeteIdentity } from '@kete/auth';
-import { asc, sql } from 'drizzle-orm';
+import { defineCommand, executeCommand, type CommandDefinition } from '@kete/commands';
+import { inOrganizationTx, sqlExecutorOf } from '@kete/tenancy/drizzle';
+import { asc } from 'drizzle-orm';
 import type { JSONWebKeySet } from 'jose';
 import { z } from 'zod';
 import { auth } from '@/platform/auth';
@@ -87,23 +89,81 @@ export async function readCatalog() {
   };
 }
 
-/** Makes a provider product an offer; its price is read from the provider, never from the caller. */
-export async function setOffer(input: z.input<typeof offerInput>) {
-  const value = offerInput.parse(input);
-  const provider = getPaymentProvider();
-  const product = await provider.getProduct(value.productId);
-  const { rows } = await db.execute<{ id: string }>(
-    sql`select admin_set_offer(${prefixedId('offer')}, ${value.app}, ${value.name ?? product.name},
-          ${value.periodDays}, ${value.graceDays}, ${provider.name}, ${product.id},
-          ${product.price.value}, ${product.price.currency}) as id`,
-  );
-  return { id: rows[0]?.id ?? null, price: product.price };
+/**
+ * Makes a provider product an offer; its price is read from the provider, never from the caller.
+ * A named command (@kete/commands): journaled with the operator, the channel and whether it can be
+ * undone — disabling the offer undoes it.
+ */
+const setOfferCommand = defineCommand({
+  name: 'set-offer',
+  input: offerInput,
+  reversibility: { reversible: true, inverse: 'disable-offer' },
+  async handler(value, { db: tx }) {
+    const provider = getPaymentProvider();
+    const product = await provider.getProduct(value.productId);
+    const { rows } = await tx.query<{ id: string }>(
+      `select admin_set_offer($1, $2, $3, $4, $5, $6, $7, $8, $9) as id`,
+      [
+        prefixedId('offer'),
+        value.app,
+        value.name ?? product.name,
+        value.periodDays,
+        value.graceDays,
+        provider.name,
+        product.id,
+        product.price.value,
+        product.price.currency,
+      ],
+    );
+    return { id: rows[0]?.id ?? null, price: product.price };
+  },
+  summarize: (value, output) =>
+    `Offer ${value.app}, ${value.periodDays} days, at ${output.price.value} ${output.price.currency}`,
+});
+
+const disableOfferCommand = defineCommand({
+  name: 'disable-offer',
+  input: z.object({ productId: z.string().min(1).max(128) }),
+  reversibility: { reversible: true, inverse: 'set-offer' },
+  async handler({ productId }, { db: tx }) {
+    const provider = getPaymentProvider();
+    const { rows } = await tx.query<{ disabled: number }>(
+      `select admin_disable_offer($1, $2) as disabled`,
+      [provider.name, productId],
+    );
+    return { disabled: Number(rows[0]?.disabled ?? 0) };
+  },
+  summarize: ({ productId }, output) => `Offer ${productId} disabled (${output.disabled})`,
+});
+
+/** Who changes the catalog, and the key that makes a retried request harmless. */
+export interface OperatorGesture {
+  identity: KeteIdentity;
+  idempotencyKey: string;
 }
 
-export async function disableOffer(productId: string) {
-  const provider = getPaymentProvider();
-  const { rows } = await db.execute<{ disabled: number }>(
-    sql`select admin_disable_offer(${provider.name}, ${productId}) as disabled`,
-  );
-  return { disabled: Number(rows[0]?.disabled ?? 0) };
+function runAsOperator<Input extends z.ZodType, Output>(
+  command: CommandDefinition<Input, Output>,
+  gesture: OperatorGesture,
+  input: z.input<Input>,
+): Promise<Output> {
+  const organizationId = gesture.identity.organizationId;
+  if (!organizationId) throw new AdminError(403, 'not_an_operator');
+  return inOrganizationTx(db, organizationId, async (tx) => {
+    const { output } = await executeCommand(sqlExecutorOf(tx), command, {
+      organizationId,
+      actor: { kind: 'person', id: gesture.identity.userId, channel: 'api' },
+      idempotencyKey: gesture.idempotencyKey,
+      input,
+    });
+    return output;
+  });
+}
+
+export function setOffer(input: z.input<typeof offerInput>, gesture: OperatorGesture) {
+  return runAsOperator(setOfferCommand, gesture, input);
+}
+
+export function disableOffer(productId: string, gesture: OperatorGesture) {
+  return runAsOperator(disableOfferCommand, gesture, { productId });
 }
