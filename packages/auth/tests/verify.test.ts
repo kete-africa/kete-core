@@ -111,6 +111,21 @@ describe('createTokenVerifier', () => {
     expect(await refusal(v(await token(published, { audience: 'other-app' })))).toBe('invalid');
   });
 
+  it("accepts an MCP server's own address as audience, and only the audiences it names", async () => {
+    const mcp = createTokenVerifier({
+      issuer,
+      audience: ['urn:kete:apps', 'https://app.kete.test/mcp'],
+      jwks: { keys: [published.jwk] },
+    });
+    expect(
+      (await mcp(await token(published, { audience: 'https://app.kete.test/mcp' }))).userId,
+    ).toBe('usr_a1');
+    expect((await mcp(await token(published))).userId).toBe('usr_a1');
+    expect(
+      await refusal(mcp(await token(published, { audience: 'https://other.kete.test/mcp' }))),
+    ).toBe('invalid');
+  });
+
   it('refuses an unsigned token and garbage', async () => {
     const payload = Buffer.from(
       JSON.stringify({

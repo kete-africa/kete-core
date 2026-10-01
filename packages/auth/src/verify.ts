@@ -47,8 +47,11 @@ function appsClaim(value: unknown): Record<string, Date> {
 export interface TokenVerifierOptions {
   /** The Compte Kete's public origin, e.g. https://compte.kete.africa — the token's issuer. */
   issuer: string;
-  /** Defaults to `urn:kete:apps`. */
-  audience?: string;
+  /**
+   * The audiences it accepts; defaults to `urn:kete:apps`. An MCP server adds its own address: an
+   * MCP client asks a token for that resource (RFC 8707), and only that server accepts it.
+   */
+  audience?: string | string[];
   /**
    * The published keys. Defaults to `${issuer}/api/auth/jwks`, fetched once and cached; a token
    * signed by an unknown key triggers one refetch, which is how key rotation reaches apps.

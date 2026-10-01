@@ -58,6 +58,11 @@ export interface IdentityOptions {
   signInLinks: { expiresIn: number; deliver(url: string): Promise<void> };
   /** Scopes beyond OpenID Connect's, e.g. `kete:people` (spec 013). */
   scopes?: string[];
+  /**
+   * Other resources this identity issues tokens for (RFC 8707), beyond `urn:kete:apps`: the MCP
+   * servers whose clients (Claude, ChatGPT…) ask for a token bound to the server's address.
+   */
+  resources?: string[];
   /** The framework's cookie plugin, which must stay last. */
   plugins?: BetterAuthPlugin[];
 }
@@ -229,7 +234,7 @@ function openIdProvider(
     loginPage: options.pages.signIn,
     consentPage: options.pages.consent,
     scopes: ['openid', 'profile', 'email', 'offline_access', ...(options.scopes ?? [])],
-    resources: [KETE_APPS_AUDIENCE],
+    resources: [KETE_APPS_AUDIENCE, ...(options.resources ?? [])],
     enforcePerClientResources: false,
     allowDynamicClientRegistration: false,
     // Registering, changing or removing an app: operators only (two-factor included).

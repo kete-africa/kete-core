@@ -14,6 +14,16 @@ export const env = {
     return required('BETTER_AUTH_SECRET');
   },
   /** The public origin of the Compte Kete, e.g. https://compte.kete.africa */
+  /**
+   * The MCP servers that accept Compte Kete tokens for themselves (spec 038): https addresses,
+   * separated by commas, e.g. https://api.enterprise.kete.africa/mcp
+   */
+  get oauthResources(): string[] {
+    return (process.env.ACCOUNT_OAUTH_RESOURCES ?? '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter((value) => value.startsWith('https://'));
+  },
   get publicUrl() {
     return required('BETTER_AUTH_URL');
   },

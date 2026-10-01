@@ -164,4 +164,27 @@ pnpm --filter @kete/account test:e2e
 `pnpm --filter @kete/account build`, then `pnpm --filter @kete/account start` (srvx, port 3000).
 Environment: `ACCOUNT_DATABASE_URL` (application role), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`
 (public origin), `ACCOUNT_STORAGE_*` (object storage of the same branch), `PAYMENTS_CHARIOW_*`, `KETE_ENVIRONMENT`, and
-optionally `KETE_TOOL_*_URL` for the tools that are live.
+optionally `KETE_TOOL_*_URL` for the tools that are live, and `ACCOUNT_OAUTH_RESOURCES`: the MCP
+servers (comma-separated https addresses) a copilot may ask a token for (spec 038).
+
+### Copilots (spec 038)
+
+An MCP client such as Claude signs a person in here and asks a token bound to the MCP server's own
+address (RFC 8707). The Compte Kete issues it, with the Kete claims, only for the servers listed in
+`ACCOUNT_OAUTH_RESOURCES`; the copilot is registered as a public client (no secret, PKCE), and the
+person sees the consent screen.
+
+```mermaid
+sequenceDiagram
+  participant C as Copilot
+  participant M as MCP server
+  participant K as Compte Kete
+  C->>M: tools/list
+  M-->>C: 401 + resource metadata (authorization server: Compte Kete)
+  C->>K: authorize (client, PKCE, resource = the server's address)
+  K-->>C: the person signs in and consents
+  C->>K: token (code, verifier)
+  K-->>C: access token, audience = the server's address
+  C->>M: tools/call + token
+  M->>M: verified: issuer, its own address, the Kete claims
+```

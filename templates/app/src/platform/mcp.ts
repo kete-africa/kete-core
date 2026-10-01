@@ -12,7 +12,11 @@ let verify: ((token: string) => Promise<KeteIdentity>) | undefined;
 async function identityOf(request: Request): Promise<KeteIdentity | null> {
   const header = request.headers.get('authorization') ?? '';
   if (!header.startsWith('Bearer ')) return null;
-  verify ??= createTokenVerifier({ issuer: env.accountUrl });
+  // A token for Kete apps, or one an MCP client asked for this endpoint itself (RFC 8707).
+  verify ??= createTokenVerifier({
+    issuer: env.accountUrl,
+    audience: ['urn:kete:apps', `${env.publicUrl}/mcp`],
+  });
   try {
     return await verify(header.slice('Bearer '.length));
   } catch {
@@ -58,5 +62,7 @@ export function mcpResourceMetadata(): Response {
   return protectedResourceMetadata({
     resource: `${env.publicUrl}/mcp`,
     authorizationServers: [env.accountUrl],
+    // offline_access: the copilot keeps its access without asking the person again every 15 min.
+    scopes: ['openid', 'profile', 'email', 'offline_access'],
   })();
 }
