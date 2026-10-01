@@ -25,7 +25,7 @@ interface CreatedClient {
   redirect_uris: string[];
 }
 
-// The OAuth plugin's endpoints are not in the inferred API type (see src/platform/oauth.ts).
+// The OAuth plugin's endpoints are not in the inferred API type (see packages/identity/src/identity.ts).
 const api = auth.api as unknown as {
   adminCreateOAuthClient(input: {
     body: Record<string, unknown>;

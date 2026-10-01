@@ -48,6 +48,7 @@ flowchart LR
 | `packages/capabilities/` | `@kete/capabilities` — see its [README](../packages/capabilities/README.md)                   |
 | `packages/ai/`           | `@kete/ai` — see its [README](../packages/ai/README.md)                                       |
 | `packages/notify/`       | `@kete/notify` — see its [README](../packages/notify/README.md)                               |
+| `packages/identity/`     | `@kete/identity` — see its [README](../packages/identity/README.md)                           |
 | `apps/cockpit/`          | Kete Cockpit — see its [README](../apps/cockpit/README.md)                                    |
 | `apps/account/`          | Compte Kete and Mon espace Kete — see its [README](../apps/account/README.md)                 |
 | `apps/docs/`             | The documentation site, built from this repository — see its [README](../apps/docs/README.md) |

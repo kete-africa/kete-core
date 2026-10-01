@@ -23,9 +23,9 @@ The doctrine is written in French; everything in this repository is written in E
 
 ```
 contracts/        versioned JSON Schema contracts (source of truth)
-packages/         sdk · auth · records · commands · drafts · capabilities · admin ·
-                  payments · notify · files · ai · sequences · offline · feedback ·
-                  design · testing
+packages/         sdk · auth · identity · tenancy · records · commands · drafts ·
+                  capabilities · admin · payments · notify · files · ai · sequences ·
+                  offline · feedback · design · testing
 apps/account/     Compte Kete + Mon espace Kete
 apps/docs/        the documentation site, built from this repository (decision 0006)
 templates/app/    the template of a new Kete app

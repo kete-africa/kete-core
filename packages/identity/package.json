@@ -1,0 +1,49 @@
+{
+  "name": "@kete-africa/identity",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete identity: the Compte Kete's rules on Better Auth — people, organizations and their roles, passkeys, second factor, sign-in links, and the OpenID provider every Kete app signs in with.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/identity"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@better-auth/oauth-provider": "1.7.6",
+    "@better-auth/passkey": "1.7.6",
+    "@simplewebauthn/server": "^13.3.3",
+    "zod": "^4.6.5"
+  },
+  "peerDependencies": {
+    "better-auth": "^1.7.6",
+    "drizzle-orm": ">=0.45"
+  },
+  "devDependencies": {
+    "better-auth": "^1.7.6",
+    "drizzle-orm": "^0.45.3"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      },
+      "./schema": {
+        "types": "./dist/src/schema.d.ts",
+        "default": "./dist/src/schema.js"
+      }
+    }
+  }
+}

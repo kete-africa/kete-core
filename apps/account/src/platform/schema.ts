@@ -14,11 +14,11 @@ import {
   timestamp,
 } from 'drizzle-orm/pg-core';
 import { organizationIsolation } from '@kete/tenancy/drizzle';
-import { organization, user } from './auth-schema';
+import { organization, user } from '@kete/identity/schema';
 
 // Identity tables (Better Auth) — see docs/decisions/0003: global by nature, reachable only by
 // this service's application role.
-export * from './auth-schema';
+export * from '@kete/identity/schema';
 
 /** The application role: no BYPASSRLS, created once per Neon project (scripts/bootstrap.sql). */
 export const accountApp = pgRole('account_app').existing();

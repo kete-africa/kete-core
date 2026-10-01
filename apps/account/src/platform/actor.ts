@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import { auth } from './auth';
-import { contactOf } from './contact';
+import { contactOf } from '@kete/identity';
 import { db } from './db';
 import { member } from './schema';
 

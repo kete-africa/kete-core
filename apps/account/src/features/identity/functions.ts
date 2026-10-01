@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm';
 import { actorFromHeaders, ForbiddenError, requireMember } from '@/platform/actor';
 import { auth } from '@/platform/auth';
 import { db } from '@/platform/db';
-import { removePassword, signInMethods } from '@/platform/strength';
+import { removePassword, signInMethods } from '@/platform/auth';
 import { passkey, user } from '@/platform/schema';
 import { readInvitation, readMembers, readViewer } from './viewer';
 

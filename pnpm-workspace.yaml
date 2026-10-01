@@ -9,3 +9,7 @@ allowBuilds:
   cpu-features: false
   protobufjs: false
   ssh2: false
+
+overrides:
+  # starlight-openapi's httpsnippet pins a form-data with a known flaw (GHSA-hmw2-7cc7-3qxx).
+  httpsnippet>form-data: ^4.0.6

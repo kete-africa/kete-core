@@ -1,7 +1,7 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { db } from './db';
 import { member } from './schema';
-import { signsInStrongly } from './strength';
+import { signInMethodsOf } from '@kete/identity';
 
 /**
  * Kete operators are owners or administrators of Kete's own organization (named by
@@ -12,6 +12,8 @@ import { signsInStrongly } from './strength';
 export function operatorsOrganizationId(): string | null {
   return process.env.KETE_OPERATORS_ORGANIZATION_ID || null;
 }
+
+const { signsInStrongly } = signInMethodsOf(db);
 
 export async function isOperator(userId: string): Promise<boolean> {
   const organizationId = operatorsOrganizationId();
