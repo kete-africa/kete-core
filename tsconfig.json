@@ -45,6 +45,18 @@
     },
     {
       "path": "packages/views"
+    },
+    {
+      "path": "packages/jobs"
+    },
+    {
+      "path": "packages/admin"
+    },
+    {
+      "path": "packages/feedback"
+    },
+    {
+      "path": "packages/create-app"
     }
   ]
 }

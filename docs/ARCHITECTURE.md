@@ -49,6 +49,12 @@ flowchart LR
 | `packages/ai/`           | `@kete/ai` — see its [README](../packages/ai/README.md)                                       |
 | `packages/notify/`       | `@kete/notify` — see its [README](../packages/notify/README.md)                               |
 | `packages/identity/`     | `@kete/identity` — see its [README](../packages/identity/README.md)                           |
+| `packages/views/`        | `@kete/views` — see its [README](../packages/views/README.md)                                 |
+| `packages/jobs/`         | `@kete/jobs` — see its [README](../packages/jobs/README.md)                                   |
+| `packages/admin/`        | `@kete/admin` — see its [README](../packages/admin/README.md)                                 |
+| `packages/feedback/`     | `@kete/feedback` — see its [README](../packages/feedback/README.md)                           |
+| `packages/create-app/`   | `@kete/create-app` — see its [README](../packages/create-app/README.md)                       |
+| `templates/app/`         | The template of a new Kete App — see its [README](../templates/app/README.md)                 |
 | `apps/cockpit/`          | Kete Cockpit — see its [README](../apps/cockpit/README.md)                                    |
 | `apps/account/`          | Compte Kete and Mon espace Kete — see its [README](../apps/account/README.md)                 |
 | `apps/docs/`             | The documentation site, built from this repository — see its [README](../apps/docs/README.md) |

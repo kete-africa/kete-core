@@ -1,0 +1,47 @@
+{
+  "name": "@kete-africa/jobs",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete background jobs on Postgres (pg-boss): queues with retries, schedules, and the standard jobs of a Kete app — e-mails, the event relay.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/jobs"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  },
+  "dependencies": {
+    "pg-boss": "12.35.0"
+  },
+  "devDependencies": {
+    "@kete/notify": "workspace:@kete-africa/notify@*",
+    "@kete/testing": "workspace:@kete-africa/testing@*",
+    "@types/pg": "^8.23.1",
+    "pg": "^8.23.0"
+  },
+  "peerDependencies": {
+    "@kete/notify": "workspace:@kete-africa/notify@*"
+  },
+  "peerDependenciesMeta": {
+    "@kete/notify": {
+      "optional": true
+    }
+  }
+}

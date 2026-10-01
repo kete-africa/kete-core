@@ -1,0 +1,17 @@
+{
+  "extends": "../../tooling/tsconfig/base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"]
+  },
+  "include": ["src", "tests"],
+  "references": [
+    { "path": "../auth" },
+    { "path": "../commands" },
+    { "path": "../design" },
+    { "path": "../tenancy" }
+  ]
+}

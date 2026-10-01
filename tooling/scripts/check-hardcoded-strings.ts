@@ -6,7 +6,9 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
 
-const APPS = fileURLToPath(new URL('../../apps', import.meta.url));
+const ROOT = fileURLToPath(new URL('../..', import.meta.url));
+// The apps, and the template every new app starts from.
+const SCOPES = ['apps', 'templates'];
 const ALLOWED = new Set(['kete', 'Kete']);
 const VISIBLE_ATTRIBUTES = ['title', 'alt', 'placeholder', 'aria-label', 'aria-description'];
 const LETTERS = /\p{L}{2,}/u;
@@ -33,12 +35,15 @@ function lineOf(source: string, index: number): number {
 }
 
 const problems: string[] = [];
-const apps = existsSync(APPS) ? readdirSync(APPS) : [];
+const apps = SCOPES.flatMap((scope) => {
+  const folder = join(ROOT, scope);
+  return existsSync(folder) ? readdirSync(folder).map((name) => join(folder, name)) : [];
+});
 for (const app of apps) {
-  const src = join(APPS, app, 'src');
+  const src = join(app, 'src');
   if (!existsSync(src)) continue;
   for (const file of files(src)) {
-    const where = relative(APPS, file).split(sep).join('/');
+    const where = relative(ROOT, file).split(sep).join('/');
     const source = readFileSync(file, 'utf8');
     // Text nodes: after a tag's closing ">" and before the next "<" or "{". The ">" of an arrow
     // function (=>) opens no text.

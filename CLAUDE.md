@@ -24,11 +24,11 @@ The doctrine is written in French; everything in this repository is written in E
 ```
 contracts/        versioned JSON Schema contracts (source of truth)
 packages/         sdk · auth · identity · tenancy · records · commands · drafts ·
-                  capabilities · admin · payments · notify · files · ai · sequences ·
-                  offline · feedback · design · testing
+                  capabilities · views · admin · payments · notify · jobs · files · ai ·
+                  feedback · design · testing · create-app (later: sequences · offline)
 apps/account/     Compte Kete + Mon espace Kete
 apps/docs/        the documentation site, built from this repository (decision 0006)
-templates/app/    the template of a new Kete app
+templates/app/    the template of a new Kete app (pnpm create @kete-africa/app)
 tooling/          shared TypeScript, lint and code generation configuration
 docs/             architecture, decisions, flows, generated references
 specs/            Spec Kit features

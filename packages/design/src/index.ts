@@ -33,6 +33,7 @@ export {
   type DesignName,
   type Mode,
   type SemanticColor,
+  type SemanticMapping,
 } from './semantic.js';
 export {
   AppCard,

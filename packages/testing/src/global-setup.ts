@@ -7,6 +7,8 @@ import { CONTAINER_APP_URL, CONTAINER_OWNER_URL, startPostgres } from './postgre
  */
 export default async function setup(): Promise<(() => Promise<void>) | undefined> {
   if (process.env['KETE_TEST_POSTGRES'] !== 'container') return undefined;
+  // Declared by a repository and by one of its projects: one container still.
+  if (process.env[CONTAINER_OWNER_URL]) return undefined;
   const postgres = await startPostgres();
   process.env[CONTAINER_OWNER_URL] = postgres.ownerUrl;
   process.env[CONTAINER_APP_URL] = postgres.appUrl;

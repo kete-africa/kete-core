@@ -1,0 +1,36 @@
+{
+  "name": "@kete-africa/create-app",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Creates a Kete App from kete-core's template: `pnpm create @kete-africa/app my-app`.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/create-app"
+  },
+  "bin": {
+    "create-app": "./dist/src/cli.js"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "prepack": "tsx scripts/pack.ts",
+    "test": "vitest run"
+  },
+  "files": [
+    "dist/src",
+    "template",
+    "versions.json",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}
