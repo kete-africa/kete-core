@@ -18,6 +18,8 @@ flowchart LR
 ## Run locally
 
 ```bash
+# Once per machine: a GitHub token with read:packages, kept in your user configuration.
+pnpm config set "//npm.pkg.github.com/:_authToken" <token>
 pnpm install
 cp .env.example .env   # then fill it: database, Compte Kete registration, session secret
 pnpm db:migrate
@@ -34,7 +36,9 @@ pnpm typecheck
 
 ## Deploy
 
-One image, two roles (doctrine ARCHITECTURE_APP §9): the web process (`pnpm start`, migrations at
+The repository's secret `KETE_PACKAGES_TOKEN` (read:packages) lets CI read kete-core's packages;
+the image receives it as the build secret `node_auth_token`. One image, two roles (doctrine
+ARCHITECTURE_APP §9): the web process (`pnpm start`, migrations at
 start-up) and the worker (`pnpm worker`). An operator registers the app at the Compte Kete
 (client id and secret) and declares it in Kete Cockpit (its events key).
 

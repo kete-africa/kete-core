@@ -52,6 +52,10 @@ export function createApp(options: CreateAppOptions): void {
   for (const file of ['npmrc', 'gitignore']) {
     if (existsSync(join(target, file))) renameSync(join(target, file), join(target, `.${file}`));
   }
+  // Its pnpm settings (approved build scripts), kept under another name inside kete-core.
+  if (existsSync(join(target, 'pnpm-workspace.app.yaml'))) {
+    renameSync(join(target, 'pnpm-workspace.app.yaml'), join(target, 'pnpm-workspace.yaml'));
+  }
 
   const product = `prd_${name.replaceAll('-', '_')}`;
   edit(join(target, 'package.json'), (text) => {
