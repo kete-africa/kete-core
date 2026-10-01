@@ -69,6 +69,9 @@ try {
 }
 ```
 
+An MCP server also accepts tokens bound to its own address, which copilots ask for (RFC 8707,
+spec 038): `createTokenVerifier({ issuer, audience: ['urn:kete:apps', 'https://nettio.kete.africa/mcp'] })`.
+
 Tokens come from the sign-in above, or from the Compte Kete itself (`GET /api/auth/token`, with the
 person's session); they live 15 minutes and are meant for the audience `urn:kete:apps`.
 

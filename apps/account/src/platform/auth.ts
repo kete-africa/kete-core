@@ -56,6 +56,8 @@ export const {
     ),
   signInLinks: { expiresIn: SIGN_IN_LINK_SECONDS, deliver: async (url) => deliverSignInLink(url) },
   scopes: [PEOPLE_SCOPE],
+  // MCP servers (Kete Enterprise's gateway…) whose clients ask for a token bound to them.
+  resources: env.oauthResources,
   // Must stay last: lets server functions set the session cookies.
   plugins: [tanstackStartCookies()],
 });
