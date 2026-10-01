@@ -19,6 +19,7 @@
       "ignoreDependencies": [
         "@fontsource-variable/archivo",
         "@fontsource-variable/instrument-sans",
+        "@fontsource-variable/inter",
         "@fontsource-variable/jetbrains-mono"
       ]
     }

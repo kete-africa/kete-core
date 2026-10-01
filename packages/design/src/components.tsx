@@ -1,47 +1,23 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
-import { useId } from 'react';
+import { useEffect, useId, useRef } from 'react';
 
-function cx(...classes: (string | false | undefined)[]): string {
+// Every component uses semantic tokens only (src/semantic.ts): the same code wears the `kete` and
+// the `workspace` designs, both modes, and a client's brand.
+
+export function cx(...classes: (string | false | undefined)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-/** The K whose leg becomes a root. Decorative: pair it with the word "kete" or an accessible name. */
-export function KeteMark({ size = 32, color = 'currentColor' }: { size?: number; color?: string }) {
-  return (
-    <svg viewBox="0 0 120 120" width={size} height={size} aria-hidden="true" focusable="false">
-      <g fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M42 12 L42 64" strokeWidth={14} />
-        <path d="M42 58 L90 14" strokeWidth={14} />
-        <path d="M42 62 C62 66 82 82 94 108" strokeWidth={12} />
-        <path d="M42 64 C42 84 30 94 16 108" strokeWidth={10} />
-        <path d="M42 66 C44 86 52 96 54 110" strokeWidth={9} />
-      </g>
-    </svg>
-  );
-}
-
-/** The kete band: a strip of rectangular blocks. Never behind text. */
-export function KeteBand({ height = 8 }: { height?: number }) {
-  const blocks: [string, number][] = [
-    ['bg-primary', 8],
-    ['bg-ochre', 2],
-    ['bg-ink', 5],
-    ['bg-root', 3],
-    ['bg-primary', 6],
-    ['bg-ember', 2],
-    ['bg-primary', 9],
-  ];
-  return (
-    <div className="flex" style={{ height }} aria-hidden="true">
-      {blocks.map(([color, grow], i) => (
-        <div key={i} className={color} style={{ flexGrow: grow }} />
-      ))}
-    </div>
-  );
-}
+/** Small section labels: spaced capitals in `kete`, sentence case in `workspace`. */
+export const labelClassName =
+  'font-heading text-label-caps [text-transform:var(--label-transform)] tracking-(--label-tracking) text-fg-muted';
 
 type ButtonVariant = 'primary' | 'secondary';
 
+/**
+ * Primary: the action's fill. Secondary: outlined, on the control surface (in `workspace`, the
+ * toolbar's buttons).
+ */
 export function Button({
   variant = 'primary',
   className,
@@ -52,10 +28,11 @@ export function Button({
     <button
       type={type}
       className={cx(
-        'inline-flex h-12 items-center justify-center gap-2 rounded-control px-6 font-body font-semibold',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        variant === 'primary' && 'bg-primary text-sand hover:bg-primary-strong',
-        variant === 'secondary' && 'border border-ink bg-paper text-ink hover:bg-clay',
+        'inline-flex h-(--control-height) items-center justify-center gap-2 rounded-control px-(--control-padding) font-ui font-semibold whitespace-nowrap',
+        'transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50',
+        variant === 'primary' && 'bg-action text-on-action hover:bg-action-strong',
+        variant === 'secondary' &&
+          'border border-line-control bg-surface-control text-fg hover:bg-surface-hover',
         className,
       )}
       {...props}
@@ -63,15 +40,47 @@ export function Button({
   );
 }
 
+/** A button that holds only an icon: its name is said to assistive technology. */
+export function IconButton({
+  label,
+  children,
+  className,
+  type = 'button',
+  ...props
+}: Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-label'> & {
+  /** What it does, for those who do not see the icon. */
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type={type}
+      aria-label={label}
+      title={label}
+      className={cx(
+        'inline-flex size-(--icon-button-size) shrink-0 items-center justify-center rounded-control p-1 text-fg',
+        'transition-colors duration-150 hover:bg-surface-hover [&_svg]:size-[18px]',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
 export type TagTone = 'agent' | 'verify' | 'validated' | 'error' | 'info' | 'neutral';
 
 const tagStyles: Record<TagTone, { box: string; marker?: string }> = {
-  agent: { box: 'bg-ink text-sand' },
-  verify: { box: 'bg-verify-surface text-verify-ink', marker: 'bg-verify' },
-  validated: { box: 'bg-success-surface text-success-ink', marker: 'bg-success' },
-  error: { box: 'bg-error-surface text-error-ink', marker: 'bg-error' },
-  info: { box: 'bg-info-surface text-info-ink', marker: 'bg-info' },
-  neutral: { box: 'bg-clay text-bark' },
+  agent: { box: 'bg-agent text-on-agent' },
+  verify: { box: 'bg-state-verify-surface text-state-verify-fg', marker: 'bg-state-verify' },
+  validated: {
+    box: 'bg-state-success-surface text-state-success-fg',
+    marker: 'bg-state-success',
+  },
+  error: { box: 'bg-state-error-surface text-state-error-fg', marker: 'bg-state-error' },
+  info: { box: 'bg-state-info-surface text-state-info-fg', marker: 'bg-state-info' },
+  neutral: { box: 'bg-surface-selected text-fg-soft' },
 };
 
 /** A state tag: a word, and a square marker so it reads without color. */
@@ -111,7 +120,7 @@ export function TextField({
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
     <div className={cx('flex flex-col gap-1.5', className)}>
-      <label htmlFor={id} className="text-body-sm font-semibold">
+      <label htmlFor={id} className="text-body-sm font-semibold text-fg">
         {label}
       </label>
       <input
@@ -119,24 +128,24 @@ export function TextField({
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
         className={cx(
-          'h-[46px] rounded-control border px-3.5 text-body text-ink',
+          'h-(--control-height) rounded-control border px-3.5 font-ui text-body text-fg',
           error
-            ? 'border-2 border-error bg-paper'
+            ? 'border-2 border-state-error bg-surface-control'
             : uncertain
-              ? 'border-verify bg-verify-surface'
-              : 'border-rule-strong bg-paper',
+              ? 'border-state-verify bg-state-verify-surface'
+              : 'border-line-strong bg-surface-control',
         )}
         {...props}
       />
       {error ? (
-        <p id={`${id}-error`} className="flex items-center gap-2 text-body-sm text-error-ink">
-          <span className="inline-block size-2 bg-error" aria-hidden="true" />
+        <p id={`${id}-error`} className="flex items-center gap-2 text-body-sm text-state-error-fg">
+          <span className="inline-block size-2 bg-state-error" aria-hidden="true" />
           {error}
         </p>
       ) : hint ? (
         <p
           id={`${id}-hint`}
-          className={cx('text-body-sm', uncertain ? 'text-verify-ink' : 'text-bark')}
+          className={cx('text-body-sm', uncertain ? 'text-state-verify-fg' : 'text-fg-muted')}
         >
           {hint}
         </p>
@@ -145,16 +154,68 @@ export function TextField({
   );
 }
 
-/** A panel: paper, a 1 px rule, no radius, a label-caps title. */
+/** A panel: a surface, a 1 px line, the design's corners, a small label for title. */
 export function Panel({ title, children }: { title?: string; children: ReactNode }) {
   return (
-    <section className="border border-rule bg-paper p-6">
-      {title && (
-        <h2 className="mb-4 font-label-caps text-label-caps uppercase tracking-label-caps text-bark">
-          {title}
-        </h2>
-      )}
+    <section className="rounded-box border border-line bg-surface p-6 text-fg">
+      {title && <h2 className={cx('mb-4', labelClassName)}>{title}</h2>}
       {children}
     </section>
+  );
+}
+
+/** Dialogs: the overlay's corners and line, 440 px at most, 32 px inside, a darkened page. */
+export const dialogClassName =
+  'm-auto w-[calc(100%-32px)] max-w-[440px] rounded-overlay border border-line-overlay bg-surface p-8 text-fg backdrop:bg-black/60';
+
+/**
+ * A modal dialog: a title, its content, a close button in its corner. Escape and a click outside
+ * close it.
+ */
+export function Dialog({
+  open,
+  onClose,
+  title,
+  closeLabel,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: ReactNode;
+  /** The name of the close button. */
+  closeLabel: string;
+  children: ReactNode;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
+  return (
+    <dialog
+      ref={ref}
+      aria-labelledby={titleId}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+      className={dialogClassName}
+    >
+      <IconButton label={closeLabel} onClick={onClose} className="absolute top-3 right-3">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth={1.6} />
+        </svg>
+      </IconButton>
+      <h2 id={titleId} className="my-4 font-heading text-title font-semibold">
+        {title}
+      </h2>
+      <div className="text-body leading-[1.6] text-fg-soft">{children}</div>
+    </dialog>
   );
 }

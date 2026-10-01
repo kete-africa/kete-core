@@ -3,12 +3,19 @@
  *   @import 'tailwindcss';
  *   @import '@kete/design/styles.css';
  *   @source '../node_modules/@kete/design/src';
- * Tokens come from DESIGN.md (theme.gen.css); this file only adds fonts and base rules.
+ * The page chooses its design and mode on <html>: data-design="kete" (default) or "workspace";
+ * data-theme="light" (default), "dark" (or "night") or "auto". A client's brand adds
+ * data-brand="<id>" and the CSS of `brandCss` (workspace only).
+ *
+ * Layers (doctrine D-035): theme.gen.css holds the `kete` base tokens (its apps' utilities);
+ * semantic.gen.css the semantic tokens of both designs, which components use exclusively.
  */
 @import '@fontsource-variable/archivo/wdth.css';
 @import '@fontsource-variable/instrument-sans/index.css';
+@import '@fontsource-variable/inter/index.css';
 @import '@fontsource-variable/jetbrains-mono/index.css';
 @import './theme.gen.css';
+@import './semantic.gen.css';
 
 /* The self-hosted fonts are published as "Variable" families. */
 @theme {
@@ -24,9 +31,9 @@
 
 @layer base {
   html {
-    background: var(--color-sand);
-    color: var(--color-ink);
-    font-family: var(--font-body);
+    background: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-ui);
     font-size: 16px;
     line-height: 1.55;
     -webkit-text-size-adjust: 100%;
@@ -42,24 +49,36 @@
     font-stretch: 118%;
   }
 
+  [data-design='workspace'] {
+    line-height: 1.4;
+  }
+
+  [data-design='workspace'] :is(h1, h2, h3, .font-heading) {
+    font-stretch: normal;
+  }
+
+  /* On a touch screen, a target is at least 44 px (kete controls are 48 px already). */
+  @media (pointer: coarse) {
+    [data-design='workspace'] {
+      --control-height: 44px;
+      --icon-button-size: 44px;
+    }
+  }
+
   .font-number {
     font-variant-numeric: tabular-nums;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
+    outline: 2px solid var(--color-focus);
+    outline-offset: var(--focus-offset);
   }
 
-  @media (prefers-color-scheme: dark) {
-    html[data-theme='auto'] {
-      background: var(--color-night);
-      color: var(--color-night-text);
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      transition: none !important;
     }
-  }
-
-  html[data-theme='night'] {
-    background: var(--color-night);
-    color: var(--color-night-text);
   }
 }

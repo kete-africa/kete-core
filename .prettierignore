@@ -4,6 +4,7 @@ pnpm-lock.yaml
 .claude/
 specs/
 **/*.gen.css
+**/*.gen.json
 **/src/paraglide
 **/.tanstack
 **/test-results

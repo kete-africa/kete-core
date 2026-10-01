@@ -9,7 +9,7 @@
   "scripts": {
     "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm contracts:check && pnpm events:check && pnpm openapi:check && pnpm design:check && pnpm docs:check && pnpm i18n:check && pnpm knip && pnpm audit:check",
     "lint": "eslint .",
-    "typecheck": "tsc -b && pnpm --filter @kete/account typecheck && pnpm --filter @kete/cockpit typecheck",
+    "typecheck": "tsc -b && pnpm --filter @kete/account typecheck && pnpm --filter @kete/cockpit typecheck && pnpm --filter @kete/design-preview typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
