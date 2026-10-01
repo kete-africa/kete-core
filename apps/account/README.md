@@ -9,6 +9,8 @@ client's single place for their tools, their organization and its generic settin
 | Path                            | What it is for                                                                                   |
 | ------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `/connexion`, `/inscription`    | Sign in, create an account (e-mail and password)                                                 |
+| `/forgot-password`              | Ask for a link to choose a new password (spec 025)                                               |
+| `/reset-password`               | Choose the new password from the e-mailed link; every other session is closed                    |
 | `/espace`                       | My tools: the Kete apps of the active organization                                               |
 | `/espace/nouvelle-organisation` | Create an organization (the creator becomes its owner)                                           |
 | `/espace/abonnements`           | Subscriptions: offers, paying, access per tool                                                   |
@@ -66,9 +68,10 @@ clients`); they sign people in with `@kete/auth`. Discovery at `/.well-known/ope
 - **Events** (spec 010): `account.created` and `payment.succeeded` go to Kete Cockpit through the
   `@kete/sdk` outbox (written in the same transaction as the change) and its relay, signed with
   the key the Cockpit handed out (`KETE_EVENTS_*`). `/health` reports the backlog.
-- E-mails go through a port (`platform/email.ts`). No mail provider yet: invitations work through
-  their link, shown to the person who invites; e-mail verification and password reset wait for a
-  provider, and so does the verified-address requirement on invitations.
+- E-mails go through `@kete/notify` (`platform/email.ts`, see E-mails below): invitations work through
+  their link, shown to the person who invites, and e-mailed through @kete/notify (spec 025).
+  E-mail verification and the verified-address requirement on invitations remain a separate
+  decision: turning them on would lock out existing unverified accounts.
 
 ### Invitation
 
@@ -79,7 +82,7 @@ sequenceDiagram
   participant I as Invited person
   O->>C: invite e-mail + role (member | admin)
   C-->>O: invitation link (valid 7 days)
-  O->>I: shares the link
+  C-->>I: e-mail with the link (also shareable by hand)
   I->>C: opens the link, signs up or signs in
   I->>C: accepts (only the invited address, only once)
   C-->>I: member of the organization, which becomes active
@@ -87,6 +90,22 @@ sequenceDiagram
 
 A member can neither invite nor change roles nor change settings: refused by the server, not only
 hidden.
+
+### E-mails (spec 025)
+
+Sent through `@kete/notify` (`src/platform/email.ts`): MailKite when `MAILKITE_API_KEY` is set,
+otherwise nothing leaves and only the subject is logged. Templates are React Email
+(`src/features/emails/templates.tsx`), their words in the catalogs, in the request's language.
+
+| Template                     | When                                                                         |
+| ---------------------------- | ---------------------------------------------------------------------------- |
+| `invitation`                 | An owner or admin invites someone (link valid 7 days)                        |
+| `password-reset`             | A new password is asked for an account that has one (link valid 1 hour)      |
+| `password-reset-unavailable` | The same, for an account without a password: it learns why, nothing is added |
+
+Better Auth would add a password to an account that has none; a passkey-only account chose to have
+none (spec 016), so it never gets a link. An unknown address gets nothing, and the screen says the
+same thing in every case.
 
 ## Run locally
 

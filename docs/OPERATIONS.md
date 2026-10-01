@@ -29,8 +29,8 @@ flowchart LR
 
 `ACCOUNT_DATABASE_URL` (application role), `BETTER_AUTH_SECRET` (staging's own; it encrypts the
 signing keys stored on the branch — losing it means new keys and new sessions), `BETTER_AUTH_URL`
-(the address above), `ACCOUNT_STORAGE_*`, `KETE_ENVIRONMENT=staging`. All runtime-only, none
-available at build time.
+(the address above), `ACCOUNT_STORAGE_*`, `KETE_ENVIRONMENT=staging`, `MAILKITE_API_KEY` and `ACCOUNT_MAIL_FROM` (see E-mails). All
+runtime-only, none available at build time.
 
 ### Deploying
 
@@ -66,6 +66,17 @@ runs them after a green push on `dev`. The instance-wide token is never stored i
   `KETE_OPERATORS_ORGANIZATION_ID`. The script asks nothing more: it runs with the service's own
   secrets, checks that the named person is an operator, and acts as her with a session it closes
   (`scripts/operator-session.ts`).
+
+### E-mails (MailKite, doctrine D-031)
+
+1. In MailKite, add and **verify the sending domain** (SPF, DKIM, DMARC records at the DNS host).
+2. Create an API key **restricted to that domain** for the Compte Kete; never use the account key
+   (unrestricted) in a service.
+3. In Coolify, set `MAILKITE_API_KEY` and `ACCOUNT_MAIL_FROM` (an address of the verified domain),
+   then redeploy.
+4. Check: ask for a new password on `/forgot-password` with a real address, and follow the link.
+5. Prefer the zero-retention or encryption-at-rest option; check the data processing agreement
+   before sending e-mails for a client.
 
 ### Storage CORS
 

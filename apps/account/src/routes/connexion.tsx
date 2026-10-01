@@ -93,6 +93,9 @@ function SignIn() {
         <Button type="submit" disabled={pending || !hydrated}>
           {pending ? m.common_loading() : m.auth_sign_in_submit()}
         </Button>
+        <a href="/forgot-password" className="text-body-sm text-primary underline">
+          {m.auth_forgot_password()}
+        </a>
       </form>
       <p className="text-body-sm">
         {m.auth_no_account()}{' '}

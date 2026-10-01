@@ -36,6 +36,9 @@
     },
     {
       "path": "packages/ai"
+    },
+    {
+      "path": "packages/notify"
     }
   ]
 }
