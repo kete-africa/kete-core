@@ -88,7 +88,9 @@ with the branch's `ACCOUNT_STORAGE_*` variables.
 
 ## Kete Cockpit — staging
 
-Created: Coolify application `kete-cockpit-staging` (branch `dev`, `apps/cockpit/Dockerfile`),
+Kete Cockpit lives in `kete-africa/kete-cockpit` (spec 030): its operations are in its own
+repository. Created: Coolify application `kete-cockpit-staging` (branch `dev` of that repository,
+its `Dockerfile`, build secret `node_auth_token`),
 Neon `kete-cockpit` branch `dev` migrated, `KETE_ACCOUNT_URL`, `COCKPIT_URL`,
 `COCKPIT_SESSION_SECRET`, `COCKPIT_ENCRYPTION_KEY` (kept also in the local `.env`: losing it means
 new keys for every app) and `COCKPIT_DATABASE_URL` (app role) set — runtime only.

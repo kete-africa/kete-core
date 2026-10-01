@@ -2,7 +2,7 @@
 
 **Feature Branch**: `030-cockpit-repository`
 **Created**: 2026-10-01
-**Status**: Moved (2026-10-01) — `kete-africa/kete-cockpit` is green; Coolify and the removal remain
+**Status**: Delivered (2026-10-01) — kete-core no longer holds the Cockpit; the staging Coolify application switches to its repository
 **Input**: Doctrine D-033 (the Cockpit leaves kete-core with its history and consumes the published
 packages), D-022 (it stays in kete-core while the packages are not published), D-034 (lanes).
 
@@ -37,8 +37,9 @@ Cockpit stays in kete-core (D-022): nothing is created on GitHub before.
   `.npmrc`; the repository's own token cannot read another repository's packages
   (`KETE_PACKAGES_TOKEN`); `pnpm-workspace.yaml` (approved builds) and `.dockerignore` travel
   with the app; `@types/node` came from kete-core's root.
-- Left: the Coolify GitHub App installed on the new repository, the staging application built
-  from it (build secret `node_auth_token`), then the removal of `apps/cockpit` from kete-core.
+- Removed from kete-core: `apps/cockpit`, its CI steps, its workspace entries.
+- Left to the author: the Coolify GitHub App installed on the new repository, and the staging
+  application built from it (build secret `node_auth_token`).
 
 ## The move, in order
 
