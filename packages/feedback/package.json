@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/feedback",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Kete feedback: the button every Kete app has, to tell what goes wrong, an idea or what works — kept per organization, read by the team.",
   "repository": {

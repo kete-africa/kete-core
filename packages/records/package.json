@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/records",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Kete records: one Zod schema per record, field metadata (label, personal data, to verify), lifecycle, prefixed identifiers and money.",
   "repository": {

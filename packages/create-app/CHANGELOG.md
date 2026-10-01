@@ -1,5 +1,19 @@
 # @kete-africa/create-app
 
+## 0.2.0
+
+### Minor Changes
+
+- 09f35ee: `manifest.v1` carries an app's identity card (doctrine D-040), optional and additive: `governance`
+  with its owner, data categories, use of AI and criticality. `createApp` and
+  `pnpm create @kete-africa/app` now require `--owner`, written into the new app's card.
+
+### Patch Changes
+
+- a875218: A new app reads kete-core's packages the way the Cockpit's move proved: the token never in a
+  committed `.npmrc` (user configuration, CI's `KETE_PACKAGES_TOKEN`, the image's build secret), its
+  approved build scripts in `pnpm-workspace.yaml`, a `.dockerignore`.
+
 ## 0.1.0
 
 ### Minor Changes
