@@ -1,4 +1,4 @@
-import { type FormEvent, useId, useState } from 'react';
+import { type FormEvent, useEffect, useId, useState } from 'react';
 import { useRouter } from '@tanstack/react-router';
 import { Button, Panel } from '@kete/design';
 import { Notice, useHydrated } from '@/lib/ui';
@@ -23,6 +23,26 @@ const errorText = {
   missing: m.file_error_missing,
   generic: m.error_generic,
 };
+
+/**
+ * An image just written to storage may not be readable at once: the browser tries again, a few
+ * times, a little later each time, before giving up.
+ */
+function StoredImage({ src, alt, className }: { src: string; alt: string; className: string }) {
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => setAttempt(0), [src]);
+  return (
+    <img
+      key={`${src}#${attempt}`}
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => {
+        if (attempt < 4) setTimeout(() => setAttempt(attempt + 1), 500 * 2 ** attempt);
+      }}
+    />
+  );
+}
 
 /**
  * The organization's logo: the browser sends the image straight to storage through a short-lived
@@ -87,7 +107,7 @@ export function LogoPanel({ logoUrl, canEdit }: { logoUrl: string | null; canEdi
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="flex size-32 shrink-0 items-center justify-center border border-rule bg-sand">
           {logoUrl ? (
-            <img
+            <StoredImage
               src={logoUrl}
               alt={m.settings_logo_alt()}
               className="max-h-full max-w-full object-contain"
