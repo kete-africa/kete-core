@@ -33,6 +33,20 @@ colors:
   night-text: '#F4E6DA'
   night-text-muted: '#BFA799'
   night-link: '#F08A63'
+  night-surface-quiet: '#2C2019'
+  night-rule-strong: '#7A6356'
+  night-success: '#4FA873'
+  night-success-ink: '#A6DDBA'
+  night-success-surface: '#1C3025'
+  night-verify: '#D9A04A'
+  night-verify-ink: '#F2CC8A'
+  night-verify-surface: '#3A2A12'
+  night-error: '#D0546F'
+  night-error-ink: '#F4B0BF'
+  night-error-surface: '#3E1620'
+  night-info: '#5C8FC2'
+  night-info-ink: '#AFCDEB'
+  night-info-surface: '#172A3D'
 typography:
   display:
     fontFamily: Archivo
@@ -171,6 +185,48 @@ components:
     typography: '{typography.body-sm}'
   night-link:
     textColor: '{colors.night-link}'
+  night-section-quiet:
+    backgroundColor: '{colors.night-surface-quiet}'
+    textColor: '{colors.night-text}'
+  night-field-border:
+    backgroundColor: '{colors.night-rule-strong}'
+    height: 1px
+  night-tag-verify:
+    backgroundColor: '{colors.night-verify-surface}'
+    textColor: '{colors.night-verify-ink}'
+    typography: '{typography.body-sm}'
+    rounded: '{rounded.control}'
+    padding: 4px 10px
+  night-tag-validated:
+    backgroundColor: '{colors.night-success-surface}'
+    textColor: '{colors.night-success-ink}'
+    typography: '{typography.body-sm}'
+    rounded: '{rounded.control}'
+    padding: 4px 10px
+  night-tag-error:
+    backgroundColor: '{colors.night-error-surface}'
+    textColor: '{colors.night-error-ink}'
+    typography: '{typography.body-sm}'
+    rounded: '{rounded.control}'
+    padding: 4px 10px
+  night-tag-info:
+    backgroundColor: '{colors.night-info-surface}'
+    textColor: '{colors.night-info-ink}'
+    typography: '{typography.body-sm}'
+    rounded: '{rounded.control}'
+    padding: 4px 10px
+  night-marker-success:
+    backgroundColor: '{colors.night-success}'
+    size: 8px
+  night-marker-verify:
+    backgroundColor: '{colors.night-verify}'
+    size: 8px
+  night-marker-error:
+    backgroundColor: '{colors.night-error}'
+    size: 8px
+  night-marker-info:
+    backgroundColor: '{colors.night-info}'
+    size: 8px
   night-divider:
     backgroundColor: '{colors.night-rule}'
     height: 1px
@@ -238,8 +294,8 @@ Voice: simple, true, warm. "Your quote is ready", not "The document was generate
 - **Ember** and **root** are illustration and band colors; ember is never used for text.
 - **States** each have an ink (text), a surface (background) and a base color: success, verify
   ("to be checked", ochre), error (**wine**), info (indigo).
-- **Night** tokens form the dark theme: the primary button keeps laterite; states use lighter tints
-  so they stay readable.
+- **Night** tokens form the dark theme: the primary button keeps laterite; states use lighter inks
+  on deep surfaces so they stay readable.
 - The brand is red, so **an error is never shown in laterite**: always wine, with an icon and a
   word. A negative amount or a debt is never shown in laterite either ("being in the red").
 

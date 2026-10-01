@@ -1,4 +1,4 @@
-/* Generated from DESIGN.md by `pnpm design:generate`. Do not edit. */
+/* Generated from designs/kete/DESIGN.md by `pnpm design:generate`. Do not edit. */
 @theme {
   --color-primary: #b83a1b;
   --color-primary-strong: #962e14;
@@ -30,6 +30,20 @@
   --color-night-text: #f4e6da;
   --color-night-text-muted: #bfa799;
   --color-night-link: #f08a63;
+  --color-night-surface-quiet: #2c2019;
+  --color-night-rule-strong: #7a6356;
+  --color-night-success: #4fa873;
+  --color-night-success-ink: #a6ddba;
+  --color-night-success-surface: #1c3025;
+  --color-night-verify: #d9a04a;
+  --color-night-verify-ink: #f2cc8a;
+  --color-night-verify-surface: #3a2a12;
+  --color-night-error: #d0546f;
+  --color-night-error-ink: #f4b0bf;
+  --color-night-error-surface: #3e1620;
+  --color-night-info: #5c8fc2;
+  --color-night-info-ink: #afcdeb;
+  --color-night-info-surface: #172a3d;
   --font-display: "Archivo";
   --font-headline: "Archivo";
   --font-title: "Archivo";

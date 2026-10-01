@@ -39,7 +39,16 @@ function pages(): Page[] {
     { source: 'docs/ROADMAP.md', slug: 'explanation/roadmap', order: 2 },
     { source: 'docs/decisions/README.md', slug: 'explanation/decisions', order: 0 },
     { source: 'contracts/README.md', slug: 'reference/contracts', order: 0 },
-    { source: 'packages/design/DESIGN.md', slug: 'reference/packages/design/design-md', order: 1 },
+    {
+      source: 'packages/design/designs/kete/DESIGN.md',
+      slug: 'reference/packages/design/kete',
+      order: 1,
+    },
+    {
+      source: 'packages/design/designs/workspace/DESIGN.md',
+      slug: 'reference/packages/design/workspace',
+      order: 2,
+    },
   ];
   for (const name of list('docs/flows', /\.md$/)) {
     result.push({

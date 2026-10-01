@@ -6,6 +6,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@kete/account", "dev"],
       "port": 3100
+    },
+    {
+      "name": "design-preview",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@kete/design-preview", "dev"],
+      "port": 3300
     }
   ]
 }

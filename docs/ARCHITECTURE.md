@@ -10,7 +10,7 @@ flowchart LR
     S --> A1[Kete apps<br/>outbox, relay, manifest, health]
     S --> K[Kete Cockpit<br/>receiver]
     A1 -->|signed batches| K
-    D[packages/design/DESIGN.md] -->|pnpm design:generate| DS[@kete/design]
+    D[packages/design/designs/*/DESIGN.md] -->|pnpm design:generate| DS[@kete/design]
     DS --> ACC
     DS --> A1
     ACC[Compte Kete<br/>apps/account] -->|token + published keys| AU[@kete/auth]
