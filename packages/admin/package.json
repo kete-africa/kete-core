@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/admin",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "Kete operator space: who is a Kete operator, operator gestures as journaled commands, and the audit of what happened.",
   "repository": {
