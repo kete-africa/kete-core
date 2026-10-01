@@ -45,8 +45,8 @@ its tables, the sign-in methods, the OpenID provider.
 ## Out of scope
 
 - An OpenAPI description of Kete Cockpit's API: the Cockpit moves to its own repository (spec 029).
-- Renaming the Compte Kete's French route files (`connexion.tsx`, …) in English: a change of
-  addresses, with redirects, for its own spec.
+- Renaming the Compte Kete's French route files (`connexion.tsx`, …) in English: done by spec 036,
+  without changing any address (virtual routes).
 - Validating the description in CI with a linter: validated once with Redocly (valid, no error).
 
 ## Success Criteria

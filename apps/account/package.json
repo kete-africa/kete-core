@@ -49,6 +49,7 @@
     "@kete/auth": "workspace:@kete-africa/auth@*",
     "@playwright/test": "1.63.0",
     "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/virtual-file-routes": "^1.162.0",
     "@types/pg": "^8.23.1",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.3.0",
