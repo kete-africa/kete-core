@@ -1,0 +1,45 @@
+{
+  "name": "@kete-africa/ai",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete AI: one model port for every provider (DeepSeek, OpenAI, Anthropic, Mistral, any OpenAI-compatible host), capabilities as tools, usage measured and budgets enforced per organization and per agent.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/ai"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.68",
+    "@ai-sdk/deepseek": "^3.0.56",
+    "@ai-sdk/mistral": "^4.0.54",
+    "@ai-sdk/openai": "^4.0.81",
+    "@ai-sdk/openai-compatible": "^3.0.59",
+    "@kete/capabilities": "workspace:@kete-africa/capabilities@*",
+    "@kete/commands": "workspace:@kete-africa/commands@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "ai": "^7.0.122",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  }
+}

@@ -79,7 +79,7 @@ jobs:
       - name: Pull the Postgres image once (with retries), before the tests start
         run: for attempt in 1 2 3; do docker pull pgvector/pgvector:pg17 && break; sleep 10; done
       - name: The packages' tests on a plain Postgres in a container (doctrine D-029)
-        run: pnpm exec vitest run --project tenancy --project testing --project commands --project records --project drafts --project capabilities --project sdk
+        run: pnpm exec vitest run --project tenancy --project testing --project commands --project records --project drafts --project capabilities --project ai --project sdk
         env:
           KETE_TEST_POSTGRES: container
 
