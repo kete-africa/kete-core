@@ -57,6 +57,7 @@
   "journal_what": "Quoi",
   "journal_channel": "Par",
   "journal_on_behalf_of": "pour {name}",
+  "journal_delegated_by": "à la demande de {names}",
   "journal_reversible": "Réversible",
   "journal_empty": "Rien encore.",
   "journal_you": "Vous",

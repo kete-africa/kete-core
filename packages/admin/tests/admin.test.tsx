@@ -90,6 +90,8 @@ describe('the audit', () => {
             reason: null,
             actor: { kind: 'agent', id: 'agt_1' },
             onBehalfOf: { kind: 'person', id: 'usr_ama' },
+            delegatedBy: [{ kind: 'agent', id: 'agt_ama' }],
+            traceId: 'trc_offers-review',
             channel: 'mcp',
             reversible: true,
             inverse: 'disable-offer',
@@ -103,15 +105,23 @@ describe('the audit', () => {
           what: 'Quoi',
           channel: 'Par',
           onBehalfOf: (name) => `pour ${name}`,
+          delegatedBy: (names) => `à la demande de ${names}`,
           reversible: 'Réversible',
           empty: 'Rien encore.',
         }}
-        nameOf={(actor) => (actor.id === 'usr_ama' ? 'Ama' : 'Agent commercial')}
+        nameOf={(actor) =>
+          actor.id === 'usr_ama'
+            ? 'Ama'
+            : actor.id === 'agt_ama'
+              ? "L'agent d'Ama"
+              : 'Agent commercial'
+        }
         formatDate={(date) => date.toISOString().slice(0, 10)}
       />,
     );
     expect(html).toContain('Agent commercial');
     expect(html).toContain('pour Ama');
+    expect(html).toContain('à la demande de L&#x27;agent d&#x27;Ama');
     expect(html).toContain('Offre nettio, 30 jours');
     expect(html).toContain('2026-10-01');
     expect(html).toContain('<th scope="col"');

@@ -38,12 +38,13 @@ of D-039 that every Kete App needs: the agents, their tokens and their narrowing
 - **FR-003**: `executeCommand` journals the chain; `readJournal` returns it and filters by trace.
 - **FR-004**: the app template runs the migration (`0002_kete_delegation`); the package README
   documents the chain with its diagram.
+- **FR-005**: `AuditLog` (`@kete/admin/ui`) shows "at the request of …" when given the label; the
+  template's journal screen does, in both languages.
 
 ## Out of scope
 
 - Issuing narrowed tokens to agents (OAuth token exchange and its `act` claim): `kete-enterprise`.
-- Showing the chain on a draft's review and in the journal screens: when the first delegated
-  agent prepares a draft.
+- Showing the chain on a draft's review: when the first delegated agent prepares a draft.
 
 ## Success Criteria
 

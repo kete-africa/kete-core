@@ -11,6 +11,8 @@ export interface AuditLabels {
   channel: string;
   /** "for {name}", when an agent acted on behalf of a person. */
   onBehalfOf(name: string): string;
+  /** "at the request of {names}", when other agents asked (doctrine D-039). Shown when given. */
+  delegatedBy?(names: string): string;
   reversible: string;
   empty: string;
 }
@@ -65,6 +67,13 @@ export function AuditLog({
                     {entry.onBehalfOf && (
                       <span className="block text-body-sm text-fg-muted">
                         {labels.onBehalfOf(String(nameOf(entry.onBehalfOf)))}
+                      </span>
+                    )}
+                    {labels.delegatedBy && entry.delegatedBy.length > 0 && (
+                      <span className="block text-body-sm text-fg-muted">
+                        {labels.delegatedBy(
+                          entry.delegatedBy.map((agent) => String(nameOf(agent))).join(' → '),
+                        )}
                       </span>
                     )}
                   </td>
