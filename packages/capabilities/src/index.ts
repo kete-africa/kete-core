@@ -7,16 +7,26 @@ export {
   type CapabilityContext,
   type CapabilityDefinition,
   type DecisionCapability,
+  type DecisionResult,
+  type DraftReview,
   type InvocationResult,
   type ReadCapability,
   type ReversibleCapability,
 } from './capability.js';
-export { createMcpHandler, type McpHandlerOptions } from './mcp.js';
+export {
+  createMcpHandler,
+  protectedResourceMetadata,
+  VIEW_MIME_TYPE,
+  type McpHandlerOptions,
+  type ViewResource,
+} from './mcp.js';
 export {
   createCapabilityRegistry,
+  DRAFT_REVIEW_VIEW,
   type Caller,
   type CapabilityHost,
   type CapabilityRegistry,
   type CapabilityTool,
+  type Decision,
   type Invocation,
 } from './registry.js';

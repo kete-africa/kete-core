@@ -9,6 +9,8 @@ export const channels = [
   'web',
   'api',
   'mcp',
+  /** A view an MCP host shows (MCP Apps): what a person does in it, not the model. */
+  'view',
   'chat',
   'whatsapp',
   'telegram',

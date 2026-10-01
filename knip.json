@@ -15,13 +15,8 @@
     "apps/docs": {
       "entry": ["scripts/*.ts"]
     },
-    "packages/design": {
-      "ignoreDependencies": [
-        "@fontsource-variable/archivo",
-        "@fontsource-variable/instrument-sans",
-        "@fontsource-variable/inter",
-        "@fontsource-variable/jetbrains-mono"
-      ]
+    "packages/views": {
+      "entry": ["app/main.tsx"]
     }
   }
 }

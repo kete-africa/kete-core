@@ -1,0 +1,50 @@
+{
+  "name": "@kete-africa/views",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete's generic views for copilots (MCP Apps, doctrine D-037): a draft to verify, a form, a table, a detail — one self-contained page, in the product's design.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/views"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run"
+  },
+  "files": [
+    "dist/src",
+    "dist/views.html",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  },
+  "dependencies": {
+    "@kete/capabilities": "workspace:@kete-africa/capabilities@*"
+  },
+  "devDependencies": {
+    "@kete/design": "workspace:@kete-africa/design@*",
+    "@modelcontextprotocol/ext-apps": "1.7.5",
+    "@modelcontextprotocol/sdk": "1.31.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.3",
+    "vite": "^7.3.6",
+    "vite-plugin-singlefile": "^2.3.0",
+    "zod": "^4.6.5"
+  }
+}

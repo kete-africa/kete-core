@@ -1,10 +1,26 @@
 import { randomUUID } from 'node:crypto';
-import { executeCommand, type Actor } from '@kete/commands';
-import { prepareDraft, type FieldProvenance } from '@kete/drafts';
+import { CommandError, executeCommand, isHuman, type Actor } from '@kete/commands';
+import {
+  correctDraft,
+  DraftError,
+  getDraft,
+  prepareDraft,
+  refuseDraft,
+  validateDraft,
+  type Draft,
+  type FieldProvenance,
+} from '@kete/drafts';
 import type { Capability } from '@kete/sdk';
 import type { SqlExecutor } from '@kete/tenancy';
 import { z } from 'zod';
-import { modeFor, type CapabilityDefinition, type InvocationResult } from './capability.js';
+import {
+  modeFor,
+  type CapabilityDefinition,
+  type DecisionCapability,
+  type DecisionResult,
+  type DraftReview,
+  type InvocationResult,
+} from './capability.js';
 
 /** Who calls, for which organization. */
 export interface Caller {
@@ -39,8 +55,22 @@ export interface CapabilityTool {
   description: string;
   input: z.ZodObject;
   jsonSchema: Record<string, unknown>;
+  autonomy: 1 | 2 | 3 | 4;
+  /** The view a copilot shows with the result (MCP Apps). */
+  view?: string;
   execute(input: unknown): Promise<InvocationResult>;
 }
+
+/** A person's decision on a draft: validate it (with her corrections) or refuse it. */
+export type Decision = Caller & {
+  draftId: string;
+  /** For level 4, given only by the product's own screen, after its confirmation. */
+  confirmed?: boolean;
+  idempotencyKey?: string;
+} & (
+    | { action: 'validate'; corrections?: Record<string, unknown> }
+    | { action: 'refuse'; reason: string }
+  );
 
 export interface CapabilityRegistry {
   /** The capabilities this caller may use, as the `capability.v1` contract describes them. */
@@ -51,6 +81,40 @@ export interface CapabilityRegistry {
   tools(caller: Caller): Promise<CapabilityTool[]>;
   /** Every capability, for a manifest (no filtering by caller). */
   describeAll(): Capability[];
+  /** A draft as a view shows it, for a caller allowed to decide it (null otherwise). */
+  review(caller: Caller, draftId: string): Promise<DraftReview | null>;
+  /**
+   * A person decides a draft: the same command as the screen runs, journaled with her as actor.
+   * Level 4 needs `confirmed`, which only the product's own screen gives.
+   */
+  decide(decision: Decision): Promise<DecisionResult>;
+}
+
+/** The generic view of a draft to verify (doctrine D-037), served by @kete/views. */
+export const DRAFT_REVIEW_VIEW = 'ui://kete/review';
+
+/** A capability's view: its own, or the draft review for a decision. */
+function viewOf(definition: CapabilityDefinition): string | undefined {
+  return definition.view ?? (definition.autonomy >= 3 ? DRAFT_REVIEW_VIEW : undefined);
+}
+
+function viewEntry(definition: CapabilityDefinition): { view?: string } {
+  const view = viewOf(definition);
+  return view ? { view } : {};
+}
+
+function reviewOf(definition: DecisionCapability<z.ZodObject, unknown>, draft: Draft): DraftReview {
+  return {
+    draftId: draft.draftId,
+    capability: definition.name,
+    description: definition.description,
+    autonomy: definition.autonomy,
+    recordType: draft.recordType,
+    status: draft.status,
+    values: draft.proposed,
+    provenance: draft.provenance,
+    schema: z.toJSONSchema(definition.input) as Record<string, unknown>,
+  };
 }
 
 function describe(definition: CapabilityDefinition): Capability {
@@ -64,6 +128,7 @@ function describe(definition: CapabilityDefinition): Capability {
     reversible: reversibility.reversible,
     ...(reversibility.inverse ? { inverse: reversibility.inverse } : {}),
     permission: definition.permission,
+    ...viewEntry(definition),
     input: z.toJSONSchema(definition.input) as Record<string, unknown>,
     ...(definition.output
       ? { output: z.toJSONSchema(definition.output) as Record<string, unknown> }
@@ -83,6 +148,16 @@ export function createCapabilityRegistry(
   for (const definition of definitions) {
     if (byName.has(definition.name)) throw new Error(`Duplicate capability: ${definition.name}`);
     byName.set(definition.name, definition);
+  }
+  // A draft knows its record type; one decision capability per record type finds its command.
+  const byRecordType = new Map<string, DecisionCapability<z.ZodObject, unknown>>();
+  for (const definition of definitions) {
+    if (definition.autonomy !== 3 && definition.autonomy !== 4) continue;
+    const decision = definition as DecisionCapability<z.ZodObject, unknown>;
+    if (byRecordType.has(decision.draft.recordType)) {
+      throw new Error(`Two capabilities prepare drafts of ${decision.draft.recordType}.`);
+    }
+    byRecordType.set(decision.draft.recordType, decision);
   }
 
   async function allowed(caller: Caller): Promise<CapabilityDefinition[]> {
@@ -137,6 +212,7 @@ export function createCapabilityRegistry(
           status: 'draft',
           draftId: draft.draftId,
           message: 'A draft was prepared; it waits for a person to verify and validate it.',
+          review: reviewOf(definition as DecisionCapability<z.ZodObject, unknown>, draft),
         };
       }
       const result = await executeCommand(db, definition.command, {
@@ -166,9 +242,79 @@ export function createCapabilityRegistry(
         description: definition.description,
         input: definition.input,
         jsonSchema: z.toJSONSchema(definition.input) as Record<string, unknown>,
+        autonomy: definition.autonomy,
+        ...viewEntry(definition),
         execute: (input) => invoke({ ...caller, name: definition.name, input }),
       }));
     },
     describeAll: () => definitions.map(describe),
+    review,
+    decide,
   };
+
+  async function review(caller: Caller, draftId: string): Promise<DraftReview | null> {
+    return host.transaction(caller.organizationId, async (db) => {
+      const draft = await getDraft(db, draftId);
+      const definition = draft ? byRecordType.get(draft.recordType) : undefined;
+      if (!draft || !definition) return null;
+      if (!(await host.authorize(caller, definition.permission))) return null;
+      return reviewOf(definition, draft);
+    });
+  }
+
+  async function decide(decision: Decision): Promise<DecisionResult> {
+    const { actor, organizationId, draftId } = decision;
+    if (!isHuman(actor)) return { status: 'not_possible', reason: 'not_a_person' };
+    return host.transaction(organizationId, async (db): Promise<DecisionResult> => {
+      const draft = await getDraft(db, draftId);
+      const definition = draft ? byRecordType.get(draft.recordType) : undefined;
+      if (!draft || !definition) return { status: 'not_possible', reason: 'not_found' };
+      if (!(await host.authorize(decision, definition.permission))) {
+        return { status: 'not_possible', reason: 'not_allowed' };
+      }
+      if (draft.status !== 'prepared') return { status: 'not_possible', reason: 'already_decided' };
+      try {
+        if (decision.action === 'refuse') {
+          const refused = await refuseDraft(db, { draftId, actor, reason: decision.reason });
+          return { status: 'refused', review: reviewOf(definition, refused) };
+        }
+        if (definition.autonomy === 4 && decision.confirmed !== true) {
+          return { status: 'open_in_app', review: reviewOf(definition, draft) };
+        }
+        if (decision.corrections && Object.keys(decision.corrections).length > 0) {
+          const parsed = definition.input.partial().safeParse(decision.corrections);
+          if (!parsed.success) {
+            return { status: 'not_possible', reason: 'invalid_input', issues: parsed.error.issues };
+          }
+          await correctDraft(db, { draftId, actor, changes: parsed.data });
+        }
+        const { draft: validated, result } = await validateDraft(db, {
+          draftId,
+          actor,
+          apply: async (values) =>
+            (
+              await executeCommand(db, definition.command, {
+                organizationId,
+                actor,
+                idempotencyKey: decision.idempotencyKey ?? `draft-${draftId}`,
+                input: values,
+              })
+            ).output,
+        });
+        return { status: 'validated', review: reviewOf(definition, validated), output: result };
+      } catch (error) {
+        if (error instanceof DraftError && error.code === 'already_decided') {
+          return { status: 'not_possible', reason: 'already_decided' };
+        }
+        if (error instanceof CommandError && error.code === 'invalid_input') {
+          return {
+            status: 'not_possible',
+            reason: 'invalid_input',
+            ...(error.issues ? { issues: error.issues } : {}),
+          };
+        }
+        throw error;
+      }
+    });
+  }
 }

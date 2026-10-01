@@ -55,3 +55,50 @@ export const mcp = createMcpHandler({ registry, server: { name: 'firmo', version
   structure. For an agent acting on behalf of a person, the host checks both.
 - The MCP endpoint is **stateless**: each request lists only the caller's tools. The host
   authenticates the request (OAuth access token) in `caller`.
+
+## Views in a copilot (MCP Apps, doctrine D-037)
+
+A capability names the **view** a copilot shows with its result — an MCP Apps resource, `ui://…`,
+which the host (Kete Enterprise's copilot, Claude, ChatGPT) displays in the conversation, sandboxed.
+A decision (levels 3 and 4) shows `ui://kete/review` by default: the draft, each value with its
+provenance, and the person's gestures.
+
+```ts
+export const mcp = createMcpHandler({
+  registry,
+  server: { name: 'nettio', version },
+  caller,
+  views: keteViews({ design: 'kete' }), // @kete/views: review, form, table, detail
+  draftUrl: (id) => `https://nettio.kete.africa/review/${id}`, // the screen, always the way back
+  resourceMetadataUrl: 'https://nettio.kete.africa/.well-known/oauth-protected-resource',
+});
+export const resourceMetadata = protectedResourceMetadata({
+  resource: 'https://nettio.kete.africa/mcp',
+  authorizationServers: ['https://compte.kete.africa'],
+});
+```
+
+```mermaid
+sequenceDiagram
+  participant M as Model (agent)
+  participant H as Host (copilot)
+  participant S as App's /mcp
+  participant V as View ui://kete/review
+  M->>S: quotes_issue (level 3)
+  S-->>H: draft + review, _meta.ui.resourceUri
+  H->>V: shows the view with the result
+  V->>S: kete_draft_validate (visibility: app only)
+  S->>S: the person (onBehalfOf), channel "view": the screen's command, journaled
+  S-->>V: validated
+```
+
+- **The person decides, not the model.** `kete_draft_review`, `kete_draft_validate` and
+  `kete_draft_refuse` are visible to the view only (`visibility: ["app"]`); hosts keep them out of
+  the model's tools. They run as the person the agent acts for, through the `view` channel; the
+  drafts layer refuses any actor who is not a person.
+- **Level 4 is decided in the product's own screen**, with its confirmation: in the view, validating
+  answers `open_in_app` with the screen's address. Refusing is possible everywhere.
+- `registry.review(caller, draftId)` and `registry.decide(decision)` serve the product's screens
+  too; a screen passes `confirmed: true` for level 4 after its confirmation.
+- `protectedResourceMetadata` (RFC 9728) and the `WWW-Authenticate` header tell MCP clients which
+  identity issues the tokens.

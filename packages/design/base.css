@@ -1,0 +1,72 @@
+/*
+ * @kete/design without its font files: the tokens, the theme and the base rules. For a page that
+ * must stay self-contained (an MCP Apps view, doctrine D-037); apps import styles.css instead.
+ */
+@import './theme.gen.css';
+@import './semantic.gen.css';
+
+/* The self-hosted fonts are published as "Variable" families. */
+@theme {
+  --font-display: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-headline: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-title: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-label-caps: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-body: 'Instrument Sans Variable', 'Instrument Sans', system-ui, sans-serif;
+  --font-body-lg: 'Instrument Sans Variable', 'Instrument Sans', system-ui, sans-serif;
+  --font-body-sm: 'Instrument Sans Variable', 'Instrument Sans', system-ui, sans-serif;
+  --font-number: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    background: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display,
+  .font-headline,
+  .font-title,
+  .font-label-caps {
+    font-stretch: 118%;
+  }
+
+  [data-design='workspace'] {
+    line-height: 1.4;
+  }
+
+  [data-design='workspace'] :is(h1, h2, h3, .font-heading) {
+    font-stretch: normal;
+  }
+
+  /* On a touch screen, a target is at least 44 px (kete controls are 48 px already). */
+  @media (pointer: coarse) {
+    [data-design='workspace'] {
+      --control-height: 44px;
+      --icon-button-size: 44px;
+    }
+  }
+
+  .font-number {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      transition: none !important;
+    }
+  }
+}

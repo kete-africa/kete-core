@@ -32,6 +32,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Build the packages (JavaScript and types in dist/)
         run: pnpm exec tsc -b
+      - name: The generic views' page (@kete/views)
+        run: pnpm --filter @kete-africa/views build
       - name: Publish each package whose version is not in the registry yet
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
