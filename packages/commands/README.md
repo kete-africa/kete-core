@@ -57,8 +57,40 @@ await inOrganizationTx(db, organizationId, (tx) =>
 - **Append-only journal, enforced by the database.** `commandsMigrationSql` creates `kete_commands`
   with its RLS policy; the application role may insert and read it, never update or delete it.
 - **Its own organization only.** A command refuses a transaction set for another organization.
-- `readJournal(db, { name, limit })` gives the active organization's latest commands.
+- `readJournal(db, { name, traceId, limit })` gives the active organization's latest commands.
 
-| Actor kinds                         | Channels                                                                         |
-| ----------------------------------- | -------------------------------------------------------------------------------- |
-| `person`, `agent`, `service`, `app` | `web`, `api`, `mcp`, `chat`, `whatsapp`, `telegram`, `email`, `worker`, `script` |
+## A chain of agents (doctrine D-039)
+
+An agent may work for another agent. The gesture then carries its chain: `delegatedBy` lists the
+agents that asked, from the first (the one the person asked) to the last, and `traceId` ties
+together every gesture of the delegated task. The actor is refused (`invalid_actor`) unless:
+
+- the actor is an agent, acting `onBehalfOf` a **person**: a chain always goes back to a human;
+- every agent appears once, and at most `MAX_DELEGATION_DEPTH` (4) agents asked.
+
+```mermaid
+flowchart LR
+    P[Ama<br/>person] -->|asks| A[agt_ama<br/>her agent]
+    A -->|delegates a narrower task| B[agt_analyst]
+    B -->|create-deposit| J[(kete_commands<br/>actor agt_analyst · onBehalfOf Ama<br/>delegatedBy agt_ama · traceId)]
+```
+
+```ts
+actor: {
+  kind: 'agent',
+  id: 'agt_analyst',
+  channel: 'mcp',
+  onBehalfOf: { kind: 'person', id: 'usr_ama' },
+  delegatedBy: [{ kind: 'agent', id: 'agt_ama' }],
+  traceId: 'trc_pipeline-review',
+}
+```
+
+The chain only records who asked: narrowing the rights at each step is the job of whoever issues
+the agents' tokens (`kete-enterprise`), and a draft is still decided by a person, never by an
+agent. Apps created before this add `commandsDelegationMigrationSql` to their migrations
+(additive, idempotent).
+
+| Actor kinds                         | Channels                                                                                 |
+| ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| `person`, `agent`, `service`, `app` | `web`, `api`, `mcp`, `view`, `chat`, `whatsapp`, `telegram`, `email`, `worker`, `script` |

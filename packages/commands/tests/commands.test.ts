@@ -3,8 +3,11 @@ import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import {
+  actorSchema,
   CommandError,
+  commandsDelegationMigrationSql,
   commandsMigrationSql,
+  MAX_DELEGATION_DEPTH,
   defineCommand,
   executeCommand,
   readJournal,
@@ -17,6 +20,9 @@ beforeAll(async () => {
   db = await createTestSchema({
     migrate: async (owner, { schema, appRole }) => {
       await owner.query(commandsMigrationSql({ schema, appRole }));
+      await owner.query(commandsDelegationMigrationSql({ schema }));
+      // Idempotent: an app may run it again.
+      await owner.query(commandsDelegationMigrationSql({ schema }));
       await owner.query(`create table deposits (id text primary key, organization_id text not null,
           items integer not null, state text not null default 'open');
         alter table deposits enable row level security;
@@ -175,6 +181,63 @@ describe('executeCommand', () => {
         handler: async () => null,
       }),
     ).toThrow();
+  });
+});
+
+describe('a chain of agents (doctrine D-039)', () => {
+  const analyst: Actor = {
+    kind: 'agent',
+    id: 'agt_analyst',
+    channel: 'mcp',
+    onBehalfOf: { kind: 'person', id: 'usr_ama' },
+    delegatedBy: [{ kind: 'agent', id: 'agt_ama' }],
+    traceId: 'trc_pipeline-review',
+  };
+
+  it('journals the agents that asked and the trace of the task', async () => {
+    await inOrganization(db.app, 'org_a', (tx) =>
+      executeCommand(tx, createDeposit, {
+        organizationId: 'org_a',
+        actor: analyst,
+        idempotencyKey: 'key-chain-1',
+        input: { id: 'dep_chain', items: 2 },
+      }),
+    );
+    const [entry] = await inOrganization(db.app, 'org_a', (tx) =>
+      readJournal(tx, { traceId: 'trc_pipeline-review' }),
+    );
+    expect(entry).toMatchObject({
+      actor: { kind: 'agent', id: 'agt_analyst' },
+      onBehalfOf: { kind: 'person', id: 'usr_ama' },
+      delegatedBy: [{ kind: 'agent', id: 'agt_ama' }],
+      traceId: 'trc_pipeline-review',
+    });
+    // A gesture nobody delegated keeps an empty chain.
+    const journal = await inOrganization(db.app, 'org_a', (tx) => readJournal(tx));
+    const direct = journal.find((e) => e.actor.id === 'agt_sales');
+    expect(direct).toMatchObject({ delegatedBy: [], traceId: null });
+  });
+
+  it('refuses a chain that does not go back to a person, repeats an agent or is too long', () => {
+    const refused = (actor: Record<string, unknown>) =>
+      expect(actorSchema.safeParse({ ...analyst, ...actor }).success).toBe(false);
+    refused({ onBehalfOf: undefined });
+    refused({ onBehalfOf: { kind: 'agent', id: 'agt_boss' } });
+    refused({ kind: 'person', id: 'usr_kofi' });
+    refused({ delegatedBy: [{ kind: 'person', id: 'usr_kofi' }] });
+    refused({ delegatedBy: [{ kind: 'agent', id: 'agt_analyst' }] });
+    refused({ delegatedBy: [] });
+    refused({
+      delegatedBy: Array.from({ length: MAX_DELEGATION_DEPTH + 1 }, (_, i) => ({
+        kind: 'agent',
+        id: `agt_${i}`,
+      })),
+    });
+    refused({ traceId: 'short' });
+    expect(actorSchema.safeParse(analyst).success).toBe(true);
+    // An agent alone, or a person, is still an actor as before.
+    expect(actorSchema.safeParse(agent).success).toBe(true);
+    expect(actorSchema.safeParse(person).success).toBe(true);
   });
 });
 

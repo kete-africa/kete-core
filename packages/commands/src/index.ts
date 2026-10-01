@@ -5,6 +5,7 @@ export {
   actorSchema,
   channels,
   isHuman,
+  MAX_DELEGATION_DEPTH,
   type Actor,
   type ActorKind,
   type ActorRef,
@@ -21,4 +22,8 @@ export {
   type Reversibility,
 } from './command.js';
 export { readJournal, type JournalEntry, type JournalQuery } from './journal.js';
-export { commandsMigrationSql, type CommandsMigrationOptions } from './migration.js';
+export {
+  commandsDelegationMigrationSql,
+  commandsMigrationSql,
+  type CommandsMigrationOptions,
+} from './migration.js';

@@ -56,3 +56,22 @@ revoke all on ${t} from ${app};
 grant select, insert on ${t} to ${app};
 `;
 }
+
+/**
+ * The journal learns the chain of agents (doctrine D-039): which agents asked, and the trace that
+ * ties a delegated task together. Additive and idempotent; it runs after `commandsMigrationSql`.
+ * The table's RLS policy and its append-only grants are unchanged.
+ */
+export function commandsDelegationMigrationSql(
+  options: Pick<CommandsMigrationOptions, 'schema'>,
+): string {
+  const t = `${checkIdentifier(options.schema ?? 'public')}.kete_commands`;
+  return `
+alter table ${t}
+  add column if not exists delegated_by jsonb
+    check (delegated_by is null or jsonb_typeof(delegated_by) = 'array'),
+  add column if not exists trace_id text;
+create index if not exists kete_commands_trace on ${t} (organization_id, trace_id)
+  where trace_id is not null;
+`;
+}
