@@ -17,6 +17,12 @@
     },
     "packages/views": {
       "entry": ["app/main.tsx"]
+    },
+    "templates/app": {
+      "entry": ["src/routes/**/*.{ts,tsx}", "src/routes.ts", "scripts/*.ts", "tests/**/*.ts"]
+    },
+    "packages/design": {
+      "ignoreDependencies": ["@google/design.md"]
     }
   }
 }

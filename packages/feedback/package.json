@@ -1,0 +1,52 @@
+{
+  "name": "@kete-africa/feedback",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete feedback: the button every Kete app has, to tell what goes wrong, an idea or what works — kept per organization, read by the team.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/feedback"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./button": "./src/button.tsx"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      },
+      "./button": {
+        "types": "./dist/src/button.d.ts",
+        "default": "./dist/src/button.js"
+      }
+    }
+  },
+  "dependencies": {
+    "@kete/commands": "workspace:@kete-africa/commands@*",
+    "@kete/design": "workspace:@kete-africa/design@*",
+    "@kete/records": "workspace:@kete-africa/records@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0"
+  }
+}

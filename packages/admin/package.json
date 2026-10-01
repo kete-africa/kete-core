@@ -1,0 +1,51 @@
+{
+  "name": "@kete-africa/admin",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete operator space: who is a Kete operator, operator gestures as journaled commands, and the audit of what happened.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/admin"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./ui": "./src/ui.tsx"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      },
+      "./ui": {
+        "types": "./dist/src/ui.d.ts",
+        "default": "./dist/src/ui.js"
+      }
+    }
+  },
+  "dependencies": {
+    "@kete/auth": "workspace:@kete-africa/auth@*",
+    "@kete/commands": "workspace:@kete-africa/commands@*",
+    "@kete/design": "workspace:@kete-africa/design@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0"
+  }
+}

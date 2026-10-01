@@ -1,6 +1,8 @@
+import { createOperatorGuard, runOperatorGesture, type OperatorGesture } from '@kete/admin';
 import { createTokenVerifier, type KeteIdentity } from '@kete/auth';
-import { defineCommand, executeCommand, type CommandDefinition } from '@kete/commands';
+import { defineCommand, type CommandDefinition } from '@kete/commands';
 import { KETE_APPS_AUDIENCE } from '@kete/identity';
+import type { SqlExecutor } from '@kete/tenancy';
 import { inOrganizationTx, sqlExecutorOf } from '@kete/tenancy/drizzle';
 import { asc } from 'drizzle-orm';
 import type { JSONWebKeySet } from 'jose';
@@ -14,15 +16,7 @@ import { getPaymentProvider } from '@/platform/payments';
 import { offers } from '@/platform/schema';
 import { disableOfferInput, offerInput } from './inputs';
 
-export class AdminError extends Error {
-  constructor(
-    readonly status: 400 | 401 | 403,
-    readonly code: string,
-  ) {
-    super(code);
-    this.name = 'AdminError';
-  }
-}
+export { AdminError, type OperatorGesture } from '@kete/admin';
 
 /**
  * Verifies a token this Compte Kete issued, against its own published keys — read each time, so
@@ -37,27 +31,11 @@ async function verify(token: string): Promise<KeteIdentity> {
  * The caller of the admin API: a Kete operator's token (spec 007, FR-005) — Kete's organization,
  * owner or admin, two-factor — and still an operator in the database now (a token lives 15 min).
  */
-export async function requireOperator(request: Request): Promise<KeteIdentity> {
-  const header = request.headers.get('authorization') ?? '';
-  const token = header.startsWith('Bearer ') ? header.slice('Bearer '.length) : '';
-  if (!token) throw new AdminError(401, 'unauthenticated');
-  let identity: KeteIdentity;
-  try {
-    identity = await verify(token);
-  } catch {
-    throw new AdminError(401, 'invalid_token');
-  }
-  const operators = operatorsOrganizationId();
-  const claimsSayOperator =
-    operators !== null &&
-    identity.organizationId === operators &&
-    (identity.role === 'owner' || identity.role === 'admin') &&
-    identity.twoFactor;
-  if (!claimsSayOperator || !(await isOperator(identity.userId))) {
-    throw new AdminError(403, 'not_an_operator');
-  }
-  return identity;
-}
+export const { requireOperator } = createOperatorGuard({
+  verify,
+  operatorsOrganizationId,
+  stillOperator: isOperator,
+});
 
 /** Products the store sells (for choosing), and the current catalog. */
 export async function readCatalog() {
@@ -129,28 +107,15 @@ const disableOfferCommand = defineCommand({
   summarize: ({ productId }, output) => `Offer ${productId} disabled (${output.disabled})`,
 });
 
-/** Who changes the catalog, and the key that makes a retried request harmless. */
-export interface OperatorGesture {
-  identity: KeteIdentity;
-  idempotencyKey: string;
-}
-
-function runAsOperator<Input extends z.ZodType, Output>(
+/** An operator gesture on the catalog: a journaled command, in Kete's own organization. */
+async function runAsOperator<Input extends z.ZodType, Output>(
   command: CommandDefinition<Input, Output>,
   gesture: OperatorGesture,
   input: z.input<Input>,
 ): Promise<Output> {
-  const organizationId = gesture.identity.organizationId;
-  if (!organizationId) throw new AdminError(403, 'not_an_operator');
-  return inOrganizationTx(db, organizationId, async (tx) => {
-    const { output } = await executeCommand(sqlExecutorOf(tx), command, {
-      organizationId,
-      actor: { kind: 'person', id: gesture.identity.userId, channel: 'api' },
-      idempotencyKey: gesture.idempotencyKey,
-      input,
-    });
-    return output;
-  });
+  const transaction = <T>(organizationId: string, work: (db: SqlExecutor) => Promise<T>) =>
+    inOrganizationTx(db, organizationId, (tx) => work(sqlExecutorOf(tx)));
+  return (await runOperatorGesture(transaction, command, gesture, input)).output;
 }
 
 export function setOffer(input: z.input<typeof offerInput>, gesture: OperatorGesture) {
