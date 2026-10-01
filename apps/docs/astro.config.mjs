@@ -1,12 +1,16 @@
 // @ts-check
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
+import { existsSync, readdirSync } from 'node:fs';
+import { URL } from 'node:url';
 import mermaid from 'astro-mermaid';
 import starlightLinksValidator from 'starlight-links-validator';
 import { createStarlightTypeDocPlugin } from 'starlight-typedoc';
 
 // The API reference of each published package, generated from its public entry point.
-const packages = ['sdk', 'auth', 'files', 'payments', 'design'];
+const packages = readdirSync(new URL('../../packages/', import.meta.url)).filter((name) =>
+  existsSync(new URL(`../../packages/${name}/src/index.ts`, import.meta.url)),
+);
 const apis = packages.map((name) => {
   const [plugin, sidebar] = createStarlightTypeDocPlugin();
   return {

@@ -13,6 +13,7 @@ import {
   unique,
   timestamp,
 } from 'drizzle-orm/pg-core';
+import { organizationIsolation } from '@kete/tenancy/drizzle';
 import { organization, user } from './auth-schema';
 
 // Identity tables (Better Auth) — see docs/decisions/0003: global by nature, reachable only by
@@ -21,8 +22,6 @@ export * from './auth-schema';
 
 /** The application role: no BYPASSRLS, created once per Neon project (scripts/bootstrap.sql). */
 export const accountApp = pgRole('account_app').existing();
-
-const activeOrganization = sql`current_setting('kete.organization_id', true)`;
 
 /**
  * A one-time sign-in link an app requested for a person (spec 013). Identity data, global like the
@@ -76,13 +75,7 @@ export const files = pgTable(
     index('files_organization_idx').on(table.organizationId, table.purpose, table.status),
     // Lets other tables require that a file belongs to the same organization.
     unique('files_organization_id_id_key').on(table.organizationId, table.id),
-    pgPolicy('files_isolation', {
-      as: 'permissive',
-      for: 'all',
-      to: accountApp,
-      using: sql`organization_id = ${activeOrganization}`,
-      withCheck: sql`organization_id = ${activeOrganization}`,
-    }),
+    organizationIsolation('files_isolation', accountApp),
   ],
 ).enableRLS();
 
@@ -123,13 +116,7 @@ export const organizationSettings = pgTable(
       columns: [table.organizationId, table.logoFileId],
       foreignColumns: [files.organizationId, files.id],
     }),
-    pgPolicy('organization_settings_isolation', {
-      as: 'permissive',
-      for: 'all',
-      to: accountApp,
-      using: sql`organization_id = ${activeOrganization}`,
-      withCheck: sql`organization_id = ${activeOrganization}`,
-    }),
+    organizationIsolation('organization_settings_isolation', accountApp),
   ],
 ).enableRLS();
 
@@ -192,15 +179,7 @@ export const checkouts = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     decidedAt: timestamp('decided_at', { withTimezone: true }),
   },
-  () => [
-    pgPolicy('checkouts_isolation', {
-      as: 'permissive',
-      for: 'all',
-      to: accountApp,
-      using: sql`organization_id = ${activeOrganization}`,
-      withCheck: sql`organization_id = ${activeOrganization}`,
-    }),
-  ],
+  () => [organizationIsolation('checkouts_isolation', accountApp)],
 ).enableRLS();
 
 /** An organization's access to one app: paid until `paidUntil`, then a grace period. */
@@ -221,13 +200,7 @@ export const subscriptions = pgTable(
   },
   (table) => [
     unique('subscriptions_organization_app_key').on(table.organizationId, table.app),
-    pgPolicy('subscriptions_isolation', {
-      as: 'permissive',
-      for: 'all',
-      to: accountApp,
-      using: sql`organization_id = ${activeOrganization}`,
-      withCheck: sql`organization_id = ${activeOrganization}`,
-    }),
+    organizationIsolation('subscriptions_isolation', accountApp),
   ],
 ).enableRLS();
 
