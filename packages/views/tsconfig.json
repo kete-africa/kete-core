@@ -1,0 +1,13 @@
+{
+  "extends": "../../tooling/tsconfig/base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client"],
+    "resolveJsonModule": true
+  },
+  "include": ["src", "app", "tests", "messages/*.json"],
+  "references": [{ "path": "../capabilities" }, { "path": "../design" }]
+}

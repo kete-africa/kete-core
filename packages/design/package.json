@@ -11,6 +11,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./styles.css": "./styles.css",
+    "./base.css": "./base.css",
     "./theme.gen.css": "./theme.gen.css",
     "./semantic.gen.css": "./semantic.gen.css",
     "./DESIGN.md": "./designs/kete/DESIGN.md",
@@ -41,7 +42,8 @@
     "styles.css",
     "theme.gen.css",
     "semantic.gen.css",
-    "designs"
+    "designs",
+    "base.css"
   ],
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
@@ -51,6 +53,7 @@
         "default": "./dist/src/index.js"
       },
       "./styles.css": "./styles.css",
+      "./base.css": "./base.css",
       "./theme.gen.css": "./theme.gen.css",
       "./semantic.gen.css": "./semantic.gen.css",
       "./DESIGN.md": "./designs/kete/DESIGN.md",

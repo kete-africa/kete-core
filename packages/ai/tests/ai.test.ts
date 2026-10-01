@@ -58,6 +58,7 @@ const tagsList: CapabilityTool = {
   description: 'Lists the tags of the organization.',
   input: z.object({}),
   jsonSchema: {},
+  autonomy: 1,
   async execute() {
     listed += 1;
     return { status: 'done', output: ['vip', 'retard'] };

@@ -11,6 +11,7 @@ import {
   createCapabilityRegistry,
   createMcpHandler,
   defineCapability,
+  protectedResourceMetadata,
   type Caller,
   type CapabilityRegistry,
 } from '../src/index.js';
@@ -294,5 +295,141 @@ describe('through MCP', () => {
 
   it('refuses a caller the host does not recognize', async () => {
     await expect(connect(null)).rejects.toThrow();
+  });
+});
+
+describe('views (MCP Apps, doctrine D-037)', () => {
+  const reviewView = {
+    uri: 'ui://kete/review',
+    name: 'review',
+    html: async () => '<!doctype html><html><body>review</body></html>',
+  };
+
+  async function connect(caller: Caller): Promise<Client> {
+    const handler = createMcpHandler({
+      registry,
+      server: { name: 'kete-test', version: '0.0.0' },
+      caller: async () => caller,
+      views: [reviewView],
+      draftUrl: (id) => `https://app.kete.test/review/${id}`,
+    });
+    const client = new Client({ name: 'test-host', version: '0.0.0' });
+    const transport = new StreamableHTTPClientTransport(new URL('http://kete.test/mcp'), {
+      fetch: (url, init) => handler(new Request(url, init)),
+    });
+    await client.connect(transport as unknown as Parameters<Client['connect']>[0]);
+    return client;
+  }
+
+  it('serves its views as MCP Apps resources, and names a decision’s view on its tool', async () => {
+    const client = await connect(as(agent));
+    const { resources } = await client.listResources();
+    expect(resources).toContainEqual(
+      expect.objectContaining({ uri: 'ui://kete/review', mimeType: 'text/html;profile=mcp-app' }),
+    );
+    const read = await client.readResource({ uri: 'ui://kete/review' });
+    expect(read.contents[0]).toMatchObject({ mimeType: 'text/html;profile=mcp-app' });
+    const { tools } = await client.listTools();
+    const issue = tools.find((t) => t.name === 'quotes_issue');
+    expect(issue?._meta).toEqual({ ui: { resourceUri: 'ui://kete/review' } });
+    expect(tools.find((t) => t.name === 'tags_list')?._meta).toBeUndefined();
+    const decide = tools.find((t) => t.name === 'kete_draft_validate');
+    // Only the view may call it: hosts keep it out of the model's tools.
+    expect(decide?._meta).toEqual({
+      ui: { resourceUri: 'ui://kete/review', visibility: ['app'] },
+    });
+    await client.close();
+  });
+
+  it('lets the person validate in the view, with her corrections; it runs as the screen would', async () => {
+    const client = await connect(as(agent));
+    const prepared = await client.callTool({
+      name: 'quotes_issue',
+      arguments: { client: 'Efua', amount: 7000 },
+    });
+    const content = prepared.structuredContent as {
+      draftId: string;
+      openUrl: string;
+      review: { autonomy: number; values: Record<string, unknown> };
+    };
+    expect(content.review).toMatchObject({ autonomy: 3, values: { client: 'Efua', amount: 7000 } });
+    expect(content.openUrl).toBe(`https://app.kete.test/review/${content.draftId}`);
+    const before = await count('quotes');
+    const validated = await client.callTool({
+      name: 'kete_draft_validate',
+      arguments: { draftId: content.draftId, corrections: { amount: 7500 } },
+    });
+    expect(validated.structuredContent).toMatchObject({
+      status: 'validated',
+      output: { issued: true },
+      review: { status: 'validated', values: { amount: 7500 } },
+    });
+    expect(await count('quotes')).toBe(before + 1);
+    const draft = await inOrganization(db.app, org, (tx) => getDraft(tx, content.draftId));
+    expect(draft).toMatchObject({
+      decidedBy: { kind: 'person', id: 'usr_ama' },
+      corrections: { amount: { prepared: 7000, validated: 7500 } },
+    });
+    const journal = await inOrganization(db.app, org, (tx) => readJournal(tx));
+    expect(journal[0]).toMatchObject({ name: 'issue-quote', channel: 'view' });
+    const again = await client.callTool({
+      name: 'kete_draft_validate',
+      arguments: { draftId: content.draftId },
+    });
+    expect(again.structuredContent).toMatchObject({ reason: 'already_decided' });
+    await client.close();
+  });
+
+  it('sends a level 4 decision to the product’s own screen, and lets the person refuse', async () => {
+    const client = await connect(as(agent));
+    const prepared = await client.callTool({
+      name: 'payments_send',
+      arguments: { client: 'Kwame', amount: 90000 },
+    });
+    const { draftId } = prepared.structuredContent as { draftId: string };
+    const validate = await client.callTool({ name: 'kete_draft_validate', arguments: { draftId } });
+    expect(validate.structuredContent).toMatchObject({
+      status: 'open_in_app',
+      openUrl: `https://app.kete.test/review/${draftId}`,
+    });
+    const refused = await client.callTool({
+      name: 'kete_draft_refuse',
+      arguments: { draftId, reason: 'Pas ce mois-ci' },
+    });
+    expect(refused.structuredContent).toMatchObject({
+      status: 'refused',
+      review: { status: 'refused' },
+    });
+    await client.close();
+  });
+
+  it('never decides for an agent that acts for nobody', async () => {
+    const lone: Actor = { kind: 'agent', id: 'agt_sales', channel: 'mcp' };
+    expect(await registry.decide({ ...as(lone), draftId: 'drf_x', action: 'validate' })).toEqual({
+      status: 'not_possible',
+      reason: 'not_a_person',
+    });
+  });
+
+  it('tells MCP clients where to get a token', async () => {
+    const handler = createMcpHandler({
+      registry,
+      server: { name: 'kete-test', version: '0.0.0' },
+      caller: async () => null,
+      resourceMetadataUrl: 'https://app.kete.test/.well-known/oauth-protected-resource',
+    });
+    const response = await handler(new Request('http://kete.test/mcp', { method: 'POST' }));
+    expect(response.status).toBe(401);
+    expect(response.headers.get('www-authenticate')).toBe(
+      'Bearer, resource_metadata="https://app.kete.test/.well-known/oauth-protected-resource"',
+    );
+    const metadata = protectedResourceMetadata({
+      resource: 'https://app.kete.test/mcp',
+      authorizationServers: ['https://compte.kete.africa'],
+    })();
+    expect(await metadata.json()).toMatchObject({
+      resource: 'https://app.kete.test/mcp',
+      authorization_servers: ['https://compte.kete.africa'],
+    });
   });
 });

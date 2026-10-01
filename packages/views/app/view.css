@@ -1,0 +1,4 @@
+@import 'tailwindcss';
+@import '@kete/design/base.css';
+@source '../node_modules/@kete/design/src';
+@source './';

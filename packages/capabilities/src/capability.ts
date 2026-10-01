@@ -29,6 +29,11 @@ interface Common<Input extends z.ZodObject> {
   permission: string;
   input: Input;
   output?: z.ZodType;
+  /**
+   * The view a copilot shows with the result (MCP Apps, doctrine D-037): `ui://kete/review` for a
+   * draft (the default at levels 3 and 4), or a view of the product.
+   */
+  view?: string;
 }
 
 /** Level 1: reads, analyzes or signals. Runs for anyone allowed. */
@@ -65,6 +70,7 @@ export type CapabilityDefinition<Input extends z.ZodObject = z.ZodObject, Output
 
 const capabilityName = /^[a-z][a-z0-9_]{0,62}$/;
 const permissionPattern = /^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$/;
+const viewPattern = /^ui:\/\/[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9/_-]*$/;
 
 /** Declares a capability; its shape is checked once, at start-up. */
 export function defineCapability<Input extends z.ZodObject, Output>(
@@ -78,6 +84,9 @@ export function defineCapability<Input extends z.ZodObject, Output>(
   if (!permissionPattern.test(definition.permission)) {
     throw new Error(`A permission reads "resource:action": ${definition.permission}`);
   }
+  if (definition.view !== undefined && !viewPattern.test(definition.view)) {
+    throw new Error(`A view is an MCP Apps resource, like "ui://kete/review": ${definition.view}`);
+  }
   if (definition.autonomy === 2 && !definition.command.reversibility.reversible) {
     throw new Error(
       `${definition.name}: level 2 is for reversible gestures only; an irreversible command is level 3 or 4.`,
@@ -85,6 +94,37 @@ export function defineCapability<Input extends z.ZodObject, Output>(
   }
   return definition;
 }
+
+/**
+ * What a view needs to show a draft to a person: its values, where each one comes from, and how
+ * far the decision goes.
+ */
+export interface DraftReview {
+  draftId: string;
+  /** The capability that prepared it, and what it does. */
+  capability: string;
+  description: string;
+  /** 3: the person validates it in the view. 4: in the product's own screen, with confirmation. */
+  autonomy: 3 | 4;
+  recordType: string;
+  status: 'prepared' | 'validated' | 'refused';
+  values: Record<string, unknown>;
+  provenance: Record<string, FieldProvenance>;
+  /** The input's JSON Schema: titles, types and required fields, for a generic view. */
+  schema: Record<string, unknown>;
+}
+
+/** What a person's decision on a draft gave. */
+export type DecisionResult =
+  | { status: 'validated'; review: DraftReview; output: unknown }
+  | { status: 'refused'; review: DraftReview }
+  /** Level 4 is decided in the product's own screen, with its confirmation. */
+  | { status: 'open_in_app'; review: DraftReview }
+  | {
+      status: 'not_possible';
+      reason: 'not_found' | 'not_allowed' | 'already_decided' | 'invalid_input' | 'not_a_person';
+      issues?: z.ZodError['issues'];
+    };
 
 /** What happened when a capability was invoked. */
 export type InvocationResult<Output = unknown> =
@@ -101,6 +141,8 @@ export type InvocationResult<Output = unknown> =
       draftId: string;
       /** For a model to tell the person: a draft waits for her validation. */
       message: string;
+      /** What a view shows of it (MCP Apps, doctrine D-037). */
+      review: DraftReview;
     }
   | { status: 'confirmation_required'; message: string }
   | {

@@ -2,7 +2,7 @@
 /* eslint-disable */
 
 /**
- * A gesture or a query a Kete product exposes to agents (MCP, chat, other apps), with its autonomy level: 1 read and signal, 2 act reversibly (with a notification and undo), 3 prepare a decision (a draft a person validates), 4 irreversible, money or external (always a person, with confirmation).
+ * A gesture or a query a Kete product exposes to agents (MCP, chat, other apps), with its autonomy level: 1 read and signal, 2 act reversibly (with a notification and undo), 3 prepare a decision (a draft a person validates), 4 irreversible, money or external (always a person, with confirmation). It may name the view a copilot shows with its result (MCP Apps, doctrine D-037).
  */
 export interface Capability {
   /**
@@ -29,6 +29,10 @@ export interface Capability {
   output?: {
     [k: string]: unknown;
   };
+  /**
+   * The view a host shows with the result, as an MCP Apps UI resource: ui://kete/review for a draft to verify, or a view of the product.
+   */
+  view?: string;
 }
 
 /**

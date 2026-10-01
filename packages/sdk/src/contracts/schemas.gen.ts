@@ -4,7 +4,7 @@ export const schemas = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://kete.africa/contracts/capability.v1.schema.json",
     "title": "Capability",
-    "description": "A gesture or a query a Kete product exposes to agents (MCP, chat, other apps), with its autonomy level: 1 read and signal, 2 act reversibly (with a notification and undo), 3 prepare a decision (a draft a person validates), 4 irreversible, money or external (always a person, with confirmation).",
+    "description": "A gesture or a query a Kete product exposes to agents (MCP, chat, other apps), with its autonomy level: 1 read and signal, 2 act reversibly (with a notification and undo), 3 prepare a decision (a draft a person validates), 4 irreversible, money or external (always a person, with confirmation). It may name the view a copilot shows with its result (MCP Apps, doctrine D-037).",
     "type": "object",
     "additionalProperties": false,
     "required": [
@@ -53,6 +53,11 @@ export const schemas = {
       "output": {
         "type": "object",
         "description": "The output's JSON Schema, when declared."
+      },
+      "view": {
+        "type": "string",
+        "pattern": "^ui://[a-z0-9][a-z0-9-]*/[a-z0-9][a-z0-9/_-]*$",
+        "description": "The view a host shows with the result, as an MCP Apps UI resource: ui://kete/review for a draft to verify, or a view of the product."
       }
     }
   },
