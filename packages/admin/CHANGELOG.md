@@ -1,5 +1,12 @@
 # @kete-africa/admin
 
+## 0.2.0
+
+### Minor Changes
+
+- 90743a9: `AuditLog` shows the agents that asked for a gesture ("at the request of …", doctrine D-039) when
+  given the optional `delegatedBy` label.
+
 ## 0.1.0
 
 ### Minor Changes

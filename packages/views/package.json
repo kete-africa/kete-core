@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/views",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Kete's generic views for copilots (MCP Apps, doctrine D-037): a draft to verify, a form, a table, a detail — one self-contained page, in the product's design.",
   "repository": {

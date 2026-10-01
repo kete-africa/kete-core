@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/sdk",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "Kete SDK: outbox, signed event delivery, receiver verification, manifest and health.",
   "repository": {
