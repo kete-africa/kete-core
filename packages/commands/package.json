@@ -1,0 +1,38 @@
+{
+  "name": "@kete-africa/commands",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete commands: named gestures with their actor, idempotency, reversibility, and an append-only journal enforced by the database.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/commands"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kete/sdk": "workspace:@kete-africa/sdk@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}

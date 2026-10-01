@@ -1,5 +1,7 @@
 import { randomBytes } from 'node:crypto';
+import { readJournal } from '@kete/commands';
 import { fakeProvider } from '@kete/payments';
+import { inOrganizationTx, sqlExecutorOf } from '@kete/tenancy/drizzle';
 import { eq, inArray } from 'drizzle-orm';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -9,6 +11,7 @@ import {
   readCatalog,
   requireOperator,
   setOffer,
+  type OperatorGesture,
 } from '@/features/admin/offers';
 import { auth } from '@/platform/auth';
 import { db, getPool } from '@/platform/db';
@@ -93,6 +96,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await owner.query('delete from offers where provider_product_id = $1', [productId]);
+  await owner.query('delete from kete_commands where organization_id = $1', [operatorsOrg]);
   await db.delete(organization).where(inArray(organization.id, [operatorsOrg, otherOrg]));
   await db.delete(user).where(eq(user.id, operator));
   await owner.end();
@@ -130,9 +134,17 @@ describe('who may use the admin API', () => {
   });
 });
 
+/** An operator's gesture: the identity the admin API checked, and a fresh idempotency key. */
+async function gesture(): Promise<OperatorGesture> {
+  return {
+    identity: await requireOperator(await token({})),
+    idempotencyKey: `admin-test-${randomBytes(8).toString('hex')}`,
+  };
+}
+
 describe('the catalog', () => {
   it('sets an offer at the provider price, whatever the caller says, then disables it', async () => {
-    const saved = await setOffer({ app: 'nettio', productId, periodDays: 30 });
+    const saved = await setOffer({ app: 'nettio', productId, periodDays: 30 }, await gesture());
     expect(saved.price).toEqual({ value: 5000, currency: 'XOF' });
     const catalog = await readCatalog();
     expect(catalog.products.map((p) => p.id)).toContain(productId);
@@ -143,15 +155,42 @@ describe('the catalog', () => {
       price: { value: 5000, currency: 'XOF' },
       active: true,
     });
-    expect(await disableOffer(productId)).toEqual({ disabled: 1 });
+    expect(await disableOffer(productId, await gesture())).toEqual({ disabled: 1 });
     const [row] = await db.select().from(offers).where(eq(offers.providerProductId, productId));
     expect(row?.active).toBe(false);
   });
 
+  it('journals each gesture: the operator, the channel, and how to undo it (@kete/commands)', async () => {
+    const journal = await inOrganizationTx(db, operatorsOrg, (tx) =>
+      readJournal(sqlExecutorOf(tx), { limit: 10 }),
+    );
+    expect(journal.map((entry) => entry.name)).toEqual(['disable-offer', 'set-offer']);
+    expect(journal[1]).toMatchObject({
+      actor: { kind: 'person', id: operator },
+      channel: 'api',
+      reversible: true,
+      inverse: 'disable-offer',
+      summary: 'Offer nettio, 30 days, at 5000 XOF',
+    });
+  });
+
+  it('replays a retried gesture instead of repeating it', async () => {
+    const retried = await gesture();
+    const first = await setOffer({ app: 'nettio', productId, periodDays: 30 }, retried);
+    const again = await setOffer({ app: 'nettio', productId, periodDays: 30 }, retried);
+    expect(again).toEqual(first);
+    await expect(
+      setOffer({ app: 'nettio', productId, periodDays: 60 }, retried),
+    ).rejects.toMatchObject({ code: 'idempotency_conflict' });
+    await disableOffer(productId, await gesture());
+  });
+
   it('refuses what the database refuses: unknown app, absurd period', async () => {
     await expect(
-      setOffer({ app: 'unknown' as 'nettio', productId, periodDays: 30 }),
+      setOffer({ app: 'unknown' as 'nettio', productId, periodDays: 30 }, await gesture()),
     ).rejects.toThrow();
-    await expect(setOffer({ app: 'nettio', productId, periodDays: 0 })).rejects.toThrow();
+    await expect(
+      setOffer({ app: 'nettio', productId, periodDays: 0 }, await gesture()),
+    ).rejects.toThrow();
   });
 });

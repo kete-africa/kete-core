@@ -21,6 +21,15 @@
     },
     {
       "path": "packages/tenancy"
+    },
+    {
+      "path": "packages/records"
+    },
+    {
+      "path": "packages/commands"
+    },
+    {
+      "path": "packages/drafts"
     }
   ]
 }
