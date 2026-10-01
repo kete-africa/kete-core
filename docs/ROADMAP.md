@@ -245,6 +245,16 @@ on 2026-10-01; the template and the Cockpit move to 029 and 030.
 | `029-app-template`            | `templates/app` and `create-kete-app`, `@kete/admin`, `@kete/feedback`, the worker (pg-boss), an app's own design (D-038) | An app from the template passes CI on its first commit                                |
 | `030-cockpit-repository`      | Kete Cockpit moves to `kete-africa/kete-cockpit` (D-033)                                                                  | The Cockpit is green in its own repository and redeployed on staging                  |
 
+## What every Kete App needs from D-039 and D-040
+
+The agents, their delegations and the compliance engine live in `kete-enterprise` (D-028). Two
+small things belong to every Kete App, so to `kete-core`:
+
+| Spec                      | Delivers                                                                                           | Proof                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `034-actor-delegation`    | The actor's chain of agents (`delegatedBy`, `traceId`) in `@kete/commands` and its journal (D-039) | A delegated gesture is journaled with its chain; a broken chain is refused |
+| `035-manifest-governance` | The app's identity card in `manifest.v1`: owner, data categories, AI use, criticality (D-040)      | The template and the Compte Kete declare it; an incomplete card is refused |
+
 ---
 
 ## Phase 4 — AI-era primitives

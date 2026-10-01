@@ -1,4 +1,4 @@
-import { commandsMigrationSql } from '@kete/commands';
+import { commandsDelegationMigrationSql, commandsMigrationSql } from '@kete/commands';
 import { draftsMigrationSql } from '@kete/drafts';
 import { feedbackMigrationSql } from '@kete/feedback';
 import { outboxMigrationSql } from '@kete/sdk';
@@ -32,4 +32,6 @@ export const migrations: Migration[] = [
       ].join('\n'),
   },
   { name: '0001_tasks', sql: (context) => tasksMigrationSql(context) },
+  // The journal keeps the chain of agents behind each gesture (doctrine D-039).
+  { name: '0002_kete_delegation', sql: (context) => commandsDelegationMigrationSql(context) },
 ];

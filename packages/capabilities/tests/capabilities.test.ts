@@ -1,4 +1,10 @@
-import { commandsMigrationSql, defineCommand, readJournal, type Actor } from '@kete/commands';
+import {
+  commandsDelegationMigrationSql,
+  commandsMigrationSql,
+  defineCommand,
+  readJournal,
+  type Actor,
+} from '@kete/commands';
 import { draftsMigrationSql, getDraft } from '@kete/drafts';
 import { validateCapability } from '@kete/sdk';
 import { inOrganization } from '@kete/tenancy';
@@ -116,6 +122,7 @@ beforeAll(async () => {
   db = await createTestSchema({
     migrate: async (owner, { schema, appRole }) => {
       await owner.query(commandsMigrationSql({ schema, appRole }));
+      await owner.query(commandsDelegationMigrationSql({ schema }));
       await owner.query(draftsMigrationSql({ schema, appRole }));
       for (const table of [
         'tags (label text not null',

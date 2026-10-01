@@ -30,6 +30,7 @@ function JournalPage() {
             what: m.journal_what(),
             channel: m.journal_channel(),
             onBehalfOf: (name) => m.journal_on_behalf_of({ name }),
+            delegatedBy: (names) => m.journal_delegated_by({ names }),
             reversible: m.journal_reversible(),
             empty: m.journal_empty(),
           }}

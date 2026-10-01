@@ -105,8 +105,8 @@ interface JournalRow extends Record<string, unknown> {
 /**
  * Runs a command in the caller's transaction (organization set, see `@kete/tenancy`): validates the
  * actor and the input, replays a result already produced for the same idempotency key, otherwise
- * runs the handler and appends the journal entry — who, on behalf of whom, through which channel,
- * why, and whether it can be undone. A failing handler leaves nothing behind (a savepoint).
+ * runs the handler and appends the journal entry — who, on behalf of whom, at the request of which
+ * agents, through which channel, why, and whether it can be undone. A failing handler leaves nothing behind (a savepoint).
  */
 export async function executeCommand<Input extends z.ZodType, Output>(
   db: SqlExecutor,
@@ -177,8 +177,8 @@ export async function executeCommand<Input extends z.ZodType, Output>(
     await db.query(
       `insert into kete_commands (command_id, organization_id, name, idempotency_key, input_hash,
          input, output, summary, reason, actor_kind, actor_id, on_behalf_of_kind, on_behalf_of_id,
-         channel, reversible, inverse)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+         channel, reversible, inverse, delegated_by, trace_id)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
       [
         commandId,
         request.organizationId,
@@ -196,6 +196,8 @@ export async function executeCommand<Input extends z.ZodType, Output>(
         actor.data.channel,
         definition.reversibility.reversible,
         definition.reversibility.inverse ?? null,
+        actor.data.delegatedBy ? JSON.stringify(actor.data.delegatedBy) : null,
+        actor.data.traceId ?? null,
       ],
     );
     await db.query('release savepoint kete_command');
