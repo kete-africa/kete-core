@@ -34,6 +34,33 @@ describe('contracts', () => {
     ).toBe(true);
     expect(validateDeliveryResult({ results: [{ id: 'x', outcome: 'lost' }] }).ok).toBe(false);
   });
+
+  it("accepts an app's identity card, complete, and refuses an incomplete one (D-040)", () => {
+    const governance = {
+      owner: { name: 'Software team', contact: 'software@example.com' },
+      dataCategories: ['personal', 'financial'],
+      ai: { used: true, purpose: 'Reads delivery notes from photos' },
+      criticality: 'high',
+    };
+    expect(validateManifest({ ...manifest, governance }).ok).toBe(true);
+    // Without a card, a manifest stays valid (additive within v1).
+    expect(validateManifest(manifest).ok).toBe(true);
+    const refused = (card: Record<string, unknown>) =>
+      expect(validateManifest({ ...manifest, governance: { ...governance, ...card } }).ok).toBe(
+        false,
+      );
+    refused({ owner: undefined });
+    refused({ owner: { name: '' } });
+    refused({ owner: { name: 'Software team', contact: 'not an e-mail' } });
+    refused({ dataCategories: [] });
+    refused({ dataCategories: ['none', 'personal'] });
+    refused({ dataCategories: ['gossip'] });
+    refused({ ai: {} });
+    refused({ criticality: 'extreme' });
+    expect(
+      validateManifest({ ...manifest, governance: { ...governance, dataCategories: ['none'] } }).ok,
+    ).toBe(true);
+  });
 });
 
 describe('createEvent', () => {

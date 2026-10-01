@@ -442,6 +442,92 @@ export const schemas = {
             "format": "uri"
           }
         }
+      },
+      "governance": {
+        "type": "object",
+        "description": "The app's identity card (optional, added in v1: additive; doctrine D-040): who answers for it, what data it handles, whether it uses AI, and what an outage costs. A registry deduces from it the controls that apply.",
+        "additionalProperties": false,
+        "required": [
+          "owner",
+          "dataCategories",
+          "ai",
+          "criticality"
+        ],
+        "properties": {
+          "owner": {
+            "type": "object",
+            "description": "The person or team that answers for the app.",
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "contact": {
+                "type": "string",
+                "format": "email"
+              }
+            }
+          },
+          "dataCategories": {
+            "type": "array",
+            "description": "The kinds of data the app handles. personal: about an identifiable person; special: health, biometrics, beliefs, origin and other sensitive personal data; children: about minors; financial: amounts, accounts, invoices; payment: payment instruments; location: where someone is; credentials: secrets that open access; confidential: business data not meant to leave the organization; none: none of these.",
+            "uniqueItems": true,
+            "minItems": 1,
+            "items": {
+              "enum": [
+                "none",
+                "personal",
+                "special",
+                "children",
+                "financial",
+                "payment",
+                "location",
+                "credentials",
+                "confidential"
+              ]
+            },
+            "if": {
+              "contains": {
+                "const": "none"
+              }
+            },
+            "then": {
+              "maxItems": 1
+            }
+          },
+          "ai": {
+            "type": "object",
+            "description": "Whether the app calls AI models itself (its capabilities, used by agents, are listed apart).",
+            "additionalProperties": false,
+            "required": [
+              "used"
+            ],
+            "properties": {
+              "used": {
+                "type": "boolean"
+              },
+              "purpose": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            }
+          },
+          "criticality": {
+            "description": "What an outage costs. low: an inconvenience; medium: work slows down; high: work stops or money is lost; critical: safety, legal obligations, or every customer at once.",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          }
+        }
       }
     }
   }

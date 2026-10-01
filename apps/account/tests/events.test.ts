@@ -63,6 +63,14 @@ describe('the Compte Kete announces', () => {
     expect(manifest().events).toEqual(['account.created', 'payment.succeeded']);
   });
 
+  it('and its identity card: every Kete app signs in through it (D-040)', () => {
+    expect(manifest().governance).toMatchObject({
+      owner: { name: 'Kete' },
+      dataCategories: ['personal', 'credentials', 'financial'],
+      criticality: 'critical',
+    });
+  });
+
   it('a new organization, as account.created, in its outbox', async () => {
     const api = auth.api as unknown as {
       signUpEmail(input: {

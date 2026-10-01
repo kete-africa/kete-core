@@ -28,6 +28,8 @@ export function manifest(): Manifest {
     version: VERSION,
     environment: environment(),
     events: DECLARED_EVENTS,
+    // Who answers for the app, its data, its use of AI, its criticality (doctrine D-040).
+    governance: app.governance,
   });
 }
 

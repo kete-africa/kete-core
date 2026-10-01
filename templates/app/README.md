@@ -44,6 +44,9 @@ start-up) and the worker (`pnpm worker`). An operator registers the app at the C
 
 ## Make it yours
 
-1. Name it in `kete.json` and `messages/` (`app_name`).
+1. Name it in `kete.json` and `messages/` (`app_name`), and fill its identity card there
+   (`governance`, doctrine D-040): who answers for it, the data it handles (`personal`, `financial`,
+   `payment`, `children`…), whether it calls AI models, and what an outage costs (`low` to
+   `critical`). Kete's registry deduces from it the controls that apply.
 2. Replace `src/features/tasks` with the first real feature, keeping its layers.
 3. Choose its design in `src/platform/app.ts` — `kete`, `workspace`, or its own (`design/`).

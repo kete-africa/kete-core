@@ -17,7 +17,8 @@ does, for whom, and its first features.
 ## Layout
 
 ```
-kete.json          the manifest (contract manifest.v1): product, version, events
+kete.json          the manifest (contract manifest.v1): product, version, events, and the
+                   identity card (owner, data, AI, criticality), kept true as the app changes
 src/routes.ts      every address, once: English files, French addresses
 src/features/      one folder per feature: record, domain, commands, queries, policies,
                    infrastructure, capabilities, ui, functions, README

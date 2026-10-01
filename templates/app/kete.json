@@ -2,5 +2,15 @@
   "product": "prd_app_template",
   "name": "App template",
   "version": "0.1.0",
-  "events": []
+  "events": [],
+  "governance": {
+    "owner": {
+      "name": "Kete"
+    },
+    "dataCategories": ["personal"],
+    "ai": {
+      "used": false
+    },
+    "criticality": "low"
+  }
 }
