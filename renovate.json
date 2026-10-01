@@ -1,0 +1,31 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "baseBranchPatterns": ["dev"],
+  "timezone": "Africa/Lome",
+  "schedule": ["before 6am on monday"],
+  "labels": ["dependencies"],
+  "prConcurrentLimit": 5,
+  "minimumReleaseAge": "3 days",
+  "packageRules": [
+    {
+      "description": "Minor and patch updates, together, once the week's tests pass.",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^0/",
+      "groupName": "minor and patch updates"
+    },
+    {
+      "description": "Better Auth and its plugins are pinned together.",
+      "matchPackageNames": ["better-auth", "@better-auth/**", "better-call"],
+      "groupName": "Better Auth"
+    },
+    { "matchPackageNames": ["@tanstack/**"], "groupName": "TanStack" },
+    { "matchPackageNames": ["drizzle-orm", "drizzle-kit"], "groupName": "Drizzle" },
+    { "matchPackageNames": ["astro", "@astrojs/**", "starlight-**"], "groupName": "Docs site" },
+    {
+      "description": "Our own packages are released by Changesets, not by Renovate.",
+      "matchPackageNames": ["@kete-africa/**"],
+      "enabled": false
+    }
+  ]
+}

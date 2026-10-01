@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm contracts:check && pnpm design:check && pnpm docs:check && pnpm i18n:check",
+    "check": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm contracts:check && pnpm design:check && pnpm docs:check && pnpm i18n:check && pnpm knip && pnpm audit:check",
     "lint": "eslint .",
     "typecheck": "tsc -b && pnpm --filter @kete/account typecheck && pnpm --filter @kete/cockpit typecheck",
     "format": "prettier --write .",
@@ -20,14 +20,23 @@
     "design:generate": "tsx tooling/scripts/design-generate.ts",
     "design:check": "tsx tooling/scripts/design-generate.ts --check",
     "test:e2e": "pnpm --filter @kete/account test:e2e && pnpm --filter @kete/cockpit test:e2e",
-    "i18n:check": "tsx tooling/scripts/check-hardcoded-strings.ts"
+    "i18n:check": "tsx tooling/scripts/check-hardcoded-strings.ts",
+    "knip": "knip --no-progress",
+    "audit:check": "pnpm audit --audit-level high",
+    "changeset": "changeset",
+    "release:version": "changeset version",
+    "docs:dev": "pnpm --filter @kete/docs dev",
+    "docs:build": "pnpm --filter @kete/docs build",
+    "docs:preview": "pnpm --filter @kete/docs preview"
   },
   "devDependencies": {
+    "@changesets/cli": "^3.0.3",
     "@eslint/js": "^9.39.5",
     "@google/design.md": "^0.4.0",
     "@types/node": "^22.20.4",
     "eslint": "^9.39.5",
     "json-schema-to-typescript": "^15.0.4",
+    "knip": "^6.38.0",
     "prettier": "^3.9.9",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",

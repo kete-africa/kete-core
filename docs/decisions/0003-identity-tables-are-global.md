@@ -1,10 +1,18 @@
+---
+status: accepted
+date: 2026-09-28
+---
+
 # 0003 — Identity tables are global; business tables are isolated per organization
 
-- **Status**: accepted
-- **Date**: 2026-09-28
-- **Applies to**: `apps/account` (Compte Kete)
+## Context and Problem Statement
 
-## Decision
+Applies to `apps/account` (Compte Kete).
+
+Forcing organization-scoped RLS on identity tables would break sign-in and invitations, or require
+bypass roles — a weaker design than a strict service boundary.
+
+## Decision Outcome
 
 The Better Auth tables (`user`, `session`, `account`, `verification`, `organization`, `member`,
 `invitation`, `jwks`) are **global by nature**: signing in looks a person up by e-mail across
@@ -16,12 +24,8 @@ Every table holding **organization data** (starting with `organization_settings`
 organization and is created with its RLS policy in the same migration (constitution V). The service
 sets `kete.organization_id` on each transaction, after checking the person's membership.
 
-## Why
+## More Information
 
-Forcing organization-scoped RLS on identity tables would break sign-in and invitations, or require
-bypass roles — a weaker design than a strict service boundary.
-
-## What would reverse it
-
-A second service needing direct access to identity data (it must go through the Compte Kete
-instead), or a regulatory requirement to partition identities per organization.
+**What would reverse it**: a second service needing direct access to identity data (it must go
+through the Compte Kete instead), or a regulatory requirement to partition identities per
+organization.

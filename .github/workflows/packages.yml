@@ -1,11 +1,12 @@
 name: Packages
 
-# Publishes @kete-africa/* to GitHub Packages (decision 0005) when a package's version is not in
-# the registry yet. A published version is never overwritten: bump the version to publish again.
+# Publishes @kete-africa/* to GitHub Packages (decision 0005) with Changesets (decision 0006): every
+# package whose version is not in the registry yet. A published version is never overwritten; a
+# release branch bumps the versions with `pnpm release:version`.
 on:
   push:
     branches: [dev]
-    paths: ['packages/**', '.github/workflows/packages.yml']
+    paths: ['packages/**', '.changeset/**', '.github/workflows/packages.yml']
   workflow_dispatch:
 
 concurrency:
@@ -31,17 +32,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Build the packages (JavaScript and types in dist/)
         run: pnpm exec tsc -b
-      - name: Publish each package whose version is new
+      - name: Publish each package whose version is not in the registry yet
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          for dir in packages/*/; do
-            name=$(node -p "require('./${dir}package.json').name")
-            version=$(node -p "require('./${dir}package.json').version")
-            if npm view "${name}@${version}" version >/dev/null 2>&1; then
-              echo "${name}@${version} is already published"
-            else
-              (cd "$dir" && pnpm publish --no-git-checks)
-              echo "Published ${name}@${version}"
-            fi
-          done
+        run: pnpm changeset publish --no-git-tag

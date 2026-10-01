@@ -27,6 +27,7 @@ packages/         sdk · auth · records · commands · drafts · capabilities �
                   payments · notify · files · ai · sequences · offline · feedback ·
                   design · testing
 apps/account/     Compte Kete + Mon espace Kete
+apps/docs/        the documentation site, built from this repository (decision 0006)
 templates/app/    the template of a new Kete app
 tooling/          shared TypeScript, lint and code generation configuration
 docs/             architecture, decisions, flows, generated references
@@ -40,6 +41,20 @@ main       production — the human gesture only, through Pono's guards
 dev        integration — green CI required before merging
 NNN-slug   one Spec Kit feature, branched from dev
 ```
+
+## Work lanes (doctrine D-034)
+
+- Until the consolidation specs 020 to 029 are merged (`docs/ROADMAP.md`), one agent session owns
+  this repository: `packages/`, `contracts/`, `apps/account/`, `tooling/` and `apps/docs/`.
+- `apps/cockpit/` belongs to the apps lane, until it moves to `kete-africa/kete-cockpit` (spec 029).
+- Two sessions never share a working directory: a second one uses its own `git worktree`.
+- A need that crosses lanes is an issue; only the author merges.
+
+## Releases and documentation (decision 0006)
+
+- A change to a published package carries a changeset: `pnpm changeset`.
+- `pnpm docs:dev` reads the documentation site locally; `pnpm docs:build` builds it.
+- Technical decisions follow MADR: `docs/decisions/template.md`.
 
 ## Forbidden to agents
 
