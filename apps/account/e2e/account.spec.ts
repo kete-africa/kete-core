@@ -144,7 +144,8 @@ test('the owner gives the organization a logo; a disguised file is refused', asy
   // Storage round trips and re-encoding take a few seconds.
   await expect(page.getByText('Logo enregistré.')).toBeVisible({ timeout: 30_000 });
   const image = page.getByRole('img', { name: "Logo de l'organisation" });
-  await expect(image).toBeVisible();
+  // A just-written image may take a moment to be readable: the screen tries again (LogoPanel).
+  await expect(image).toBeVisible({ timeout: 15_000 });
   await expect
     .poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth))
     .toBe(160);

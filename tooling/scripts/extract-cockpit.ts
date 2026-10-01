@@ -74,6 +74,8 @@ edit('package.json', (text) => {
     }
   }
   delete (manifest as Record<string, unknown>)['scripts']?.['test:e2e' as never];
+  // What kete-core's workspace root used to provide.
+  (manifest['devDependencies'] ??= {})['@types/node'] ??= '^22.20.4';
   return `${JSON.stringify(manifest, null, 2)}\n`;
 });
 
@@ -112,9 +114,30 @@ Compte Kete's published image: the test then starts it (\`docker run\`) on the C
 );
 
 writeFileSync(
-  join(out, '.npmrc'),
-  '@kete-africa:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}\n',
+  join(out, '.dockerignore'),
+  [
+    'node_modules',
+    'dist',
+    '.tanstack',
+    '.env',
+    '.env.*',
+    '!.env.example',
+    'test-results',
+    'playwright-report',
+    'src/paraglide',
+    'src/routeTree.gen.ts',
+    'project.inlang/cache',
+    '.git',
+    '',
+  ].join('\n'),
 );
+
+writeFileSync(
+  join(out, 'pnpm-workspace.yaml'),
+  '# pnpm settings of this repository. Build scripts run only when approved here.\nallowBuilds:\n  esbuild: true\n',
+);
+
+writeFileSync(join(out, '.npmrc'), '@kete-africa:registry=https://npm.pkg.github.com\n');
 
 writeFileSync(
   join(out, 'Dockerfile'),
@@ -124,8 +147,11 @@ writeFileSync(
 FROM node:22.14.0-bookworm-slim AS build
 WORKDIR /app
 RUN npm install -g pnpm@11.25.0
-COPY package.json pnpm-lock.yaml .npmrc ./
-RUN --mount=type=secret,id=node_auth_token,env=NODE_AUTH_TOKEN pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+RUN --mount=type=secret,id=node_auth_token,env=NODE_AUTH_TOKEN \\
+  pnpm config set "//npm.pkg.github.com/:_authToken" "$NODE_AUTH_TOKEN" \\
+  && pnpm install --frozen-lockfile \\
+  && pnpm config delete "//npm.pkg.github.com/:_authToken"
 COPY . .
 RUN pnpm build
 
@@ -162,7 +188,8 @@ jobs:
   check:
     runs-on: ubuntu-latest
     env:
-      NODE_AUTH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+      # A token that reads kete-core's packages (read:packages): the repository's own token cannot.
+      NODE_AUTH_TOKEN: \${{ secrets.KETE_PACKAGES_TOKEN }}
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -172,6 +199,9 @@ jobs:
         with:
           node-version: 22.14.0
           cache: pnpm
+          # Writes NODE_AUTH_TOKEN into the runner's user configuration, never into the repository.
+          registry-url: https://npm.pkg.github.com
+          scope: '@kete-africa'
       - run: pnpm install --frozen-lockfile
       - name: Types (and the build)
         run: pnpm typecheck
@@ -235,7 +265,16 @@ console.log(
 
 // 3. Only when asked.
 if (args.includes('--install')) {
-  run(out, 'pnpm', ['install']);
+  // The token travels in this command's environment only, never in a file.
+  execFileSync('pnpm', ['install'], {
+    cwd: out,
+    stdio: 'inherit',
+    shell: process.platform === 'win32',
+    env: {
+      ...process.env,
+      'npm_config_//npm.pkg.github.com/:_authToken': process.env.NODE_AUTH_TOKEN,
+    },
+  });
   git(out, 'add', 'pnpm-lock.yaml');
   git(out, 'commit', '--quiet', '-m', 'chore: lockfile, from the published packages');
 }

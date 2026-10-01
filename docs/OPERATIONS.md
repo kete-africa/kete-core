@@ -41,8 +41,10 @@ runtime-only, none available at build time.
 4. Check: `/health` says `healthy`, `/.well-known/kete` says `staging`, then the journeys:
    `ACCOUNT_E2E_BASE_URL=https://compte-kete-staging.13.140.178.49.sslip.io pnpm test:e2e`.
 
-Steps 2 and 3 run from the author's machine until a **deploy-only Coolify token** exists; then CI
-runs them after a green push on `dev`. The instance-wide token is never stored in GitHub.
+Coolify also deploys on every push to `dev` (its GitHub App's webhook), one deployment after the
+other: migrate the `dev` branch **before** merging a pull request that needs a new migration.
+Step 2 runs from the author's machine until a **deploy-only Coolify token** exists. The
+instance-wide token is never stored in GitHub.
 
 ### Payments
 

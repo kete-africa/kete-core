@@ -44,6 +44,7 @@ describe('a new Kete App', () => {
       'AGENTS.md',
       'Dockerfile',
       '.gitignore',
+      'pnpm-workspace.yaml',
       '.env.example',
       '.github/workflows/ci.yml',
       'docs/ARCHITECTURE.md',

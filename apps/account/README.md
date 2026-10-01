@@ -61,7 +61,9 @@ flowchart LR
 - Identifiers are prefixed: `usr_`, `org_`, `mbr_`, `inv_`, `ses_`, `jwk_`, `fil_`.
 - **Files** (`features/files`, `@kete/files`): the logo is sent by the browser straight to the
   Neon object storage of the same branch, then read, re-encoded and made available by the server;
-  the `files` rows are under RLS and a logo can only point at a file of its organization.
+  the `files` rows are under RLS and a logo can only point at a file of its organization. A
+  just-written image may not be readable at once: the screen tries again, four times, later each
+  time.
 - **Payments** (`features/payments`, `@kete/payments`): a global catalog of offers (read-only for
   the service, set by operators with `pnpm --filter @kete/account offers`), checkouts and
   subscriptions under RLS. A notification is only a hint: the sale is re-read from the provider
