@@ -44,9 +44,9 @@ NNN-slug   one Spec Kit feature, branched from dev
 
 ## Work lanes (doctrine D-034)
 
-- Until the consolidation specs 020 to 030 are merged (`docs/ROADMAP.md`), one agent session owns
-  this repository: `packages/`, `contracts/`, `apps/account/`, `tooling/` and `apps/docs/`.
-- `apps/cockpit/` belongs to the apps lane, until it moves to `kete-africa/kete-cockpit` (spec 030).
+- The consolidation specs 020 to 030 are merged (`docs/ROADMAP.md`): the workshop (this
+  repository), the apps (Firmo, `kete-africa/kete-cockpit`, …) and Kete Enterprise run in parallel,
+  one owner each, consuming the published packages.
 - Two sessions never share a working directory: a second one uses its own `git worktree`.
 - A need that crosses lanes is an issue; only the author merges.
 

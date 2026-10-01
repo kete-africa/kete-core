@@ -9,9 +9,6 @@
     "apps/account": {
       "entry": ["src/routes/**/*.{ts,tsx}", "scripts/*.ts", "e2e/**/*.ts", "playwright.config.ts"]
     },
-    "apps/cockpit": {
-      "entry": ["src/routes/**/*.{ts,tsx}", "scripts/*.ts", "e2e/**/*.ts", "playwright.config.ts"]
-    },
     "apps/docs": {
       "entry": ["scripts/*.ts"]
     },

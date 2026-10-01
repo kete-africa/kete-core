@@ -55,7 +55,6 @@ flowchart LR
 | `packages/feedback/`     | `@kete/feedback` — see its [README](../packages/feedback/README.md)                           |
 | `packages/create-app/`   | `@kete/create-app` — see its [README](../packages/create-app/README.md)                       |
 | `templates/app/`         | The template of a new Kete App — see its [README](../templates/app/README.md)                 |
-| `apps/cockpit/`          | Kete Cockpit — see its [README](../apps/cockpit/README.md)                                    |
 | `apps/account/`          | Compte Kete and Mon espace Kete — see its [README](../apps/account/README.md)                 |
 | `apps/docs/`             | The documentation site, built from this repository — see its [README](../apps/docs/README.md) |
 | `tooling/`               | Shared TypeScript configuration, generation and checks                                        |
