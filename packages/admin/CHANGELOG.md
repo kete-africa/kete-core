@@ -1,5 +1,11 @@
 # @kete-africa/admin
 
+## 0.2.1
+
+### Patch Changes
+
+- Follows `@kete-africa/auth` 0.2.0: a published package pins its `@kete-africa` dependencies exactly.
+
 ## 0.2.0
 
 ### Minor Changes

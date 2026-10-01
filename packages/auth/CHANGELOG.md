@@ -1,4 +1,4 @@
-# @kete-africa/identity
+# @kete-africa/auth
 
 ## 0.2.0
 
@@ -8,10 +8,10 @@
   audiences, so an MCP server accepts tokens bound to its own address (RFC 8707); `createIdentity`
   takes `resources`, the MCP servers its tokens may be issued for beyond `urn:kete:apps`.
 
-## 0.1.0
+## 0.2.0
 
 ### Minor Changes
 
-- 82437c0: First release: the Compte Kete's rules on Better Auth, extracted so an instance that keeps its own
-  identity reuses them — people, organizations and roles, passkeys, second factor, sign-in links, the
-  OpenID provider, their Drizzle schema, and the OpenAPI description of their endpoints.
+- e73b8bc: Copilots can sign in to a Kete MCP server (spec 038): `createTokenVerifier` accepts several
+  audiences, so an MCP server accepts tokens bound to its own address (RFC 8707); `createIdentity`
+  takes `resources`, the MCP servers its tokens may be issued for beyond `urn:kete:apps`.
