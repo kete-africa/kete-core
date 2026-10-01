@@ -45,10 +45,6 @@ jobs:
         run: pnpm --filter @kete/account db:migrate
         env:
           ACCOUNT_OWNER_URL: ${{ secrets.ACCOUNT_TEST_OWNER_URL }}
-      - name: Migrate the Kete Cockpit "test" branch
-        run: pnpm --filter @kete/cockpit db:migrate
-        env:
-          COCKPIT_OWNER_URL: ${{ secrets.COCKPIT_TEST_OWNER_URL }}
       - name: Tests (integration on the Neon "test" branches)
         run: pnpm test
         env:
@@ -57,7 +53,6 @@ jobs:
           ACCOUNT_TEST_OWNER_URL: ${{ secrets.ACCOUNT_TEST_OWNER_URL }}
           ACCOUNT_TEST_APP_URL: ${{ secrets.ACCOUNT_TEST_APP_URL }}
           ACCOUNT_TEST_AUTH_SECRET: ${{ secrets.ACCOUNT_TEST_AUTH_SECRET }}
-          COCKPIT_TEST_APP_URL: ${{ secrets.COCKPIT_TEST_APP_URL }}
           ACCOUNT_TEST_STORAGE_ENDPOINT: ${{ secrets.ACCOUNT_TEST_STORAGE_ENDPOINT }}
           ACCOUNT_TEST_STORAGE_REGION: ${{ secrets.ACCOUNT_TEST_STORAGE_REGION }}
           ACCOUNT_TEST_STORAGE_BUCKET: ${{ secrets.ACCOUNT_TEST_STORAGE_BUCKET }}
@@ -96,12 +91,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @kete/account exec playwright install --with-deps chromium
-      - name: Compte Kete and Kete Cockpit in a browser (production builds, Neon "test" branch)
+      - name: The Compte Kete in a browser (production build, Neon "test" branch)
         run: pnpm test:e2e
         env:
           ACCOUNT_TEST_APP_URL: ${{ secrets.ACCOUNT_TEST_APP_URL }}
           ACCOUNT_TEST_OWNER_URL: ${{ secrets.ACCOUNT_TEST_OWNER_URL }}
-          COCKPIT_TEST_APP_URL: ${{ secrets.COCKPIT_TEST_APP_URL }}
           ACCOUNT_TEST_AUTH_SECRET: ${{ secrets.ACCOUNT_TEST_AUTH_SECRET }}
           ACCOUNT_TEST_STORAGE_ENDPOINT: ${{ secrets.ACCOUNT_TEST_STORAGE_ENDPOINT }}
           ACCOUNT_TEST_STORAGE_REGION: ${{ secrets.ACCOUNT_TEST_STORAGE_REGION }}
@@ -136,17 +130,7 @@ jobs:
           curl -fsS http://localhost:3000/.well-known/kete | grep -q '"environment":"preview"'
           curl -fsS -o /dev/null http://localhost:3000/connexion
           docker inspect --format '{{.State.Health.Status}}' account
-      - name: Build the Kete Cockpit image, which starts and reports healthy
-        run: |
-          docker build -f apps/cockpit/Dockerfile -t kete-cockpit:ci .
-          docker run -d --name cockpit -p 3001:3000 kete-cockpit:ci
-          for attempt in $(seq 1 30); do
-            if curl -fsS http://localhost:3001/health; then echo; break; fi
-            sleep 2
-          done
-          curl -fsS http://localhost:3001/health | grep -q '"status":"healthy"'
       - name: Container logs
         if: failure()
         run: |
           docker logs account || true
-          docker logs cockpit || true

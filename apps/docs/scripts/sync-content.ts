@@ -68,7 +68,7 @@ function pages(): Page[] {
       result.push({ source: `packages/${name}/README.md`, slug: `reference/packages/${name}` });
     }
   }
-  for (const name of ['account', 'cockpit']) {
+  for (const name of ['account']) {
     if (existsSync(resolve(root, `apps/${name}/README.md`))) {
       result.push({ source: `apps/${name}/README.md`, slug: `reference/apps/${name}` });
     }
