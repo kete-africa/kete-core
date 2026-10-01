@@ -177,4 +177,56 @@ export interface Manifest {
     repository?: string;
     documentation?: string;
   };
+  /**
+   * The app's identity card (optional, added in v1: additive; doctrine D-040): who answers for it, what data it handles, whether it uses AI, and what an outage costs. A registry deduces from it the controls that apply.
+   */
+  governance?: {
+    /**
+     * The person or team that answers for the app.
+     */
+    owner: {
+      name: string;
+      contact?: string;
+    };
+    /**
+     * The kinds of data the app handles. personal: about an identifiable person; special: health, biometrics, beliefs, origin and other sensitive personal data; children: about minors; financial: amounts, accounts, invoices; payment: payment instruments; location: where someone is; credentials: secrets that open access; confidential: business data not meant to leave the organization; none: none of these.
+     *
+     * @minItems 1
+     */
+    dataCategories: [
+      (
+        | 'none'
+        | 'personal'
+        | 'special'
+        | 'children'
+        | 'financial'
+        | 'payment'
+        | 'location'
+        | 'credentials'
+        | 'confidential'
+      ),
+      ...(
+        | 'none'
+        | 'personal'
+        | 'special'
+        | 'children'
+        | 'financial'
+        | 'payment'
+        | 'location'
+        | 'credentials'
+        | 'confidential'
+      )[],
+    ];
+    /**
+     * Whether the app calls AI models itself (its capabilities, used by agents, are listed apart).
+     */
+    ai: {
+      used: boolean;
+      purpose?: string;
+    };
+    /**
+     * What an outage costs. low: an inconvenience; medium: work slows down; high: work stops or money is lost; critical: safety, legal obligations, or every customer at once.
+     */
+    criticality: 'low' | 'medium' | 'high' | 'critical';
+  };
 }

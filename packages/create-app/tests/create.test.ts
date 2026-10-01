@@ -9,7 +9,15 @@ const read = (path: string) => readFileSync(path, 'utf8');
 describe('a new Kete App', () => {
   const target = join(mkdtempSync(join(tmpdir(), 'kete-app-')), 'nettio');
   const versions = { ...packageVersions(), sdk: '1.2.3' };
-  createApp({ name: 'nettio', design: 'workspace', target, template: templateFolder(), versions });
+  const owner = { name: 'Software team', contact: 'software@example.com' };
+  createApp({
+    name: 'nettio',
+    design: 'workspace',
+    target,
+    template: templateFolder(),
+    versions,
+    owner,
+  });
 
   it('takes its packages from the registry, never from a workspace', () => {
     const manifest = JSON.parse(read(join(target, 'package.json'))) as {
@@ -28,6 +36,8 @@ describe('a new Kete App', () => {
     expect(JSON.parse(read(join(target, 'kete.json')))).toMatchObject({
       product: 'prd_nettio',
       name: 'nettio',
+      // Its identity card names its owner from the first commit (doctrine D-040).
+      governance: { owner, dataCategories: ['personal'], ai: { used: false }, criticality: 'low' },
     });
     expect(read(join(target, 'src', 'platform', 'app.ts'))).toContain(
       "export const DESIGN: string = 'workspace';",
@@ -74,10 +84,21 @@ describe('a new Kete App', () => {
         target: join(tmpdir(), 'x'),
         template,
         versions,
+        owner,
       }),
     ).toThrow();
-    expect(() => createApp({ name: 'nettio', design: 'kete', target, template, versions })).toThrow(
-      /exists/,
-    );
+    expect(() =>
+      createApp({
+        name: 'orphan',
+        design: 'kete',
+        target: join(tmpdir(), 'orphan'),
+        template,
+        versions,
+        owner: { name: ' ' },
+      }),
+    ).toThrow(/owner/);
+    expect(() =>
+      createApp({ name: 'nettio', design: 'kete', target, template, versions, owner }),
+    ).toThrow(/exists/);
   });
 });

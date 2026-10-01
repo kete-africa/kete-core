@@ -20,6 +20,14 @@ export function manifest(): Manifest {
     version,
     environment: environment(),
     events: [...DECLARED_EVENTS],
+    // Its identity card (doctrine D-040): people's accounts and their secrets, subscriptions; every
+    // Kete app signs in through it, so an outage stops them all.
+    governance: {
+      owner: { name: 'Kete' },
+      dataCategories: ['personal', 'credentials', 'financial'],
+      ai: { used: false },
+      criticality: 'critical',
+    },
   });
 }
 

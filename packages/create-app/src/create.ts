@@ -12,6 +12,8 @@ export interface CreateAppOptions {
   template: string;
   /** The published version of each @kete-africa package, e.g. `{ sdk: '0.3.0' }`. */
   versions: Record<string, string>;
+  /** The person or team that answers for the app: its manifest's identity card (doctrine D-040). */
+  owner: { name: string; contact?: string };
 }
 
 /** What is never copied: what a build, an install or a person's machine produced. */
@@ -38,6 +40,11 @@ export function createApp(options: CreateAppOptions): void {
   const { name, design, target } = options;
   if (!/^[a-z][a-z0-9-]{1,40}$/.test(name)) {
     throw new Error(`An app's name is lowercase, with hyphens: ${name}`);
+  }
+  if (!options.owner.name.trim()) {
+    throw new Error(
+      'An app has an owner from its first commit: the person or team that answers for it.',
+    );
   }
   if (existsSync(target)) throw new Error(`${target} already exists.`);
 
@@ -77,8 +84,12 @@ export function createApp(options: CreateAppOptions): void {
     return `${JSON.stringify(manifest, null, 2)}\n`;
   });
   edit(join(target, 'kete.json'), (text) => {
-    const manifest = JSON.parse(text) as Record<string, unknown>;
-    return `${JSON.stringify({ ...manifest, product, name, version: '0.1.0' }, null, 2)}\n`;
+    const manifest = JSON.parse(text) as Record<string, unknown> & {
+      governance: Record<string, unknown>;
+    };
+    // Its identity card names who answers for it from the first commit (doctrine D-040).
+    const governance = { ...manifest.governance, owner: options.owner };
+    return `${JSON.stringify({ ...manifest, product, name, version: '0.1.0', governance }, null, 2)}\n`;
   });
   for (const locale of ['fr', 'en']) {
     edit(join(target, 'messages', `${locale}.json`), (text) => {
