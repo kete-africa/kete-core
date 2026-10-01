@@ -2,7 +2,7 @@
 
 **Feature Branch**: `030-cockpit-repository`
 **Created**: 2026-10-01
-**Status**: Delivered (2026-10-01) — kete-core no longer holds the Cockpit; the staging Coolify application switches to its repository
+**Status**: Delivered (2026-10-01) — kete-core no longer holds the Cockpit; staging builds it from `kete-africa/kete-cockpit`
 **Input**: Doctrine D-033 (the Cockpit leaves kete-core with its history and consumes the published
 packages), D-022 (it stays in kete-core while the packages are not published), D-034 (lanes).
 
@@ -38,8 +38,12 @@ Cockpit stays in kete-core (D-022): nothing is created on GitHub before.
   (`KETE_PACKAGES_TOKEN`); `pnpm-workspace.yaml` (approved builds) and `.dockerignore` travel
   with the app; `@types/node` came from kete-core's root.
 - Removed from kete-core: `apps/cockpit`, its CI steps, its workspace entries.
-- Left to the author: the Coolify GitHub App installed on the new repository, and the staging
-  application built from it (build secret `node_auth_token`).
+- Staging switched: the Coolify application `kete-cockpit-staging` builds `kete-africa/kete-cockpit`
+  (branch `dev`, its `Dockerfile`), redeployed on each merge, `/health` healthy.
+- Learned on staging: Coolify passes a build variable as a BuildKit secret only with "Use Docker
+  Build Secrets" on, and the secret's id is the variable's name (`node_auth_token`, build only);
+  a slim image (`pnpm prune --prod`) revealed `@kete/sdk` declared as a development dependency;
+  the shared server had run out of disk space, which also blocked the Compte Kete's deployments.
 
 ## The move, in order
 
