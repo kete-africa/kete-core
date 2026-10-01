@@ -22,7 +22,8 @@ export default defineConfig({
       strategy: ['cookie', 'preferredLanguage', 'baseLocale'],
     }),
     tailwindcss(),
-    tanstackStart(),
+    // English file names, French addresses: src/routes.ts.
+    tanstackStart({ router: { virtualRouteConfig: './src/routes.ts' } }),
     react(),
   ],
   resolve: {

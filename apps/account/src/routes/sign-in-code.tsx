@@ -7,7 +7,7 @@ import * as m from '@/paraglide/messages.js';
 
 // The second step of a sign-in with two-factor authentication. The page keeps the query it was
 // opened with: a Kete app's signed authorization request resumes once the code is right.
-export const Route = createFileRoute('/connexion_/code')({
+export const Route = createFileRoute('/connexion/code')({
   validateSearch: (search: Record<string, unknown>) => ({
     redirect: safeRedirect(search.redirect),
   }),

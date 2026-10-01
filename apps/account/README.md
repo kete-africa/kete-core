@@ -6,6 +6,9 @@ client's single place for their tools, their organization and its generic settin
 
 ## Screens
 
+Every address is declared once in `src/routes.ts`: the files of `src/routes` are named in English
+(`sign-in.tsx`, `space/security.tsx`, …), the addresses read in French (spec 036).
+
 | Path                            | What it is for                                                                                   |
 | ------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `/connexion`, `/inscription`    | Sign in, create an account (e-mail and password)                                                 |
