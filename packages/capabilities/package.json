@@ -1,0 +1,42 @@
+{
+  "name": "@kete-africa/capabilities",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete capabilities: what a product exposes to agents, with its autonomy level, through MCP and as model tools, under the same rights as its screens.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/capabilities"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  },
+  "dependencies": {
+    "@kete/commands": "workspace:@kete-africa/commands@*",
+    "@kete/drafts": "workspace:@kete-africa/drafts@*",
+    "@kete/records": "workspace:@kete-africa/records@*",
+    "@kete/sdk": "workspace:@kete-africa/sdk@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "@modelcontextprotocol/sdk": "1.31.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  }
+}

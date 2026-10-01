@@ -145,6 +145,49 @@ function contractPages(): void {
   }
 }
 
+/** The event catalog, read from its AsyncAPI document: one row per event, its data fields. */
+function eventsPage(): void {
+  const source = 'docs/generated/events.asyncapi.json';
+  if (!existsSync(resolve(root, source))) return;
+  const catalog = JSON.parse(readFileSync(resolve(root, source), 'utf8')) as {
+    info: { description: string };
+    components: {
+      messages: Record<
+        string,
+        {
+          name: string;
+          payload: {
+            properties: {
+              data: { properties?: Record<string, unknown>; required?: string[] };
+            };
+          };
+        }
+      >;
+    };
+  };
+  const rows = Object.values(catalog.components.messages).map((message) => {
+    const data = message.payload.properties.data;
+    const required = new Set(data.required ?? []);
+    const fields = Object.keys(data.properties ?? {})
+      .map((name) => `\`${name}\`${required.has(name) ? '' : ' (optional)'}`)
+      .join(', ');
+    return `| \`${message.name}\` | ${fields || '—'} |`;
+  });
+  const body = [
+    catalog.info.description,
+    '',
+    `The catalog is an [AsyncAPI 3.1 document](${github}/${source}), generated from the contracts`,
+    'and checked in CI. Each event is wrapped in the [event envelope](/reference/contracts/event-v1/)',
+    'and delivered in [signed batches](/reference/contracts/delivery-request-v1/).',
+    '',
+    '| Event | Data |',
+    '| ----- | ---- |',
+    ...rows,
+    '',
+  ].join('\n');
+  write('reference/events', frontmatter({ title: 'Events' }) + body);
+}
+
 function homePage(): void {
   const body = `
 The shared foundation of every Kete app: contracts, shared packages, the Compte Kete service with
@@ -152,7 +195,7 @@ Mon espace Kete, and the app template. This site is built from the repository it
 Markdown and its code are the source of truth.
 
 - **How-to guides** — [run the services](/how-to/operations/), [release the packages](/how-to/release-packages/).
-- **Reference** — [packages](/reference/packages/sdk/), [contracts](/reference/contracts/), and each package's API generated from its code.
+- **Reference** — [packages](/reference/packages/sdk/), [contracts](/reference/contracts/), [events](/reference/events/), and each package's API generated from its code.
 - **Explanation** — [architecture](/explanation/architecture/), [roadmap](/explanation/roadmap/), [flows](/explanation/flows/event-delivery/), [decisions](/explanation/decisions/).
 
 The doctrine behind it lives in the \`kete\` repository.
@@ -175,6 +218,7 @@ function main(): void {
     write(page.slug, content);
   }
   contractPages();
+  eventsPage();
   homePage();
   console.log(`Synced ${all.length} pages into ${toPosix(relative(root, out))}.`);
 }

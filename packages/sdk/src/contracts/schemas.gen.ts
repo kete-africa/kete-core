@@ -1,5 +1,61 @@
 // Generated from /contracts by `pnpm contracts:generate`. Do not edit.
 export const schemas = {
+  "capability.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/capability.v1.schema.json",
+    "title": "Capability",
+    "description": "A gesture or a query a Kete product exposes to agents (MCP, chat, other apps), with its autonomy level: 1 read and signal, 2 act reversibly (with a notification and undo), 3 prepare a decision (a draft a person validates), 4 irreversible, money or external (always a person, with confirmation).",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "name",
+      "description",
+      "autonomy",
+      "reversible",
+      "permission",
+      "input"
+    ],
+    "properties": {
+      "name": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,62}$",
+        "description": "snake_case: a valid tool name for MCP and every model provider."
+      },
+      "description": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      },
+      "autonomy": {
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "reversible": {
+        "type": "boolean"
+      },
+      "inverse": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+        "description": "The command that undoes it (a @kete/commands name, kebab-case)."
+      },
+      "permission": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$"
+      },
+      "input": {
+        "type": "object",
+        "description": "The input's JSON Schema."
+      },
+      "output": {
+        "type": "object",
+        "description": "The output's JSON Schema, when declared."
+      }
+    }
+  },
   "delivery-request.v1": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://kete.africa/contracts/delivery-request.v1.schema.json",
@@ -359,6 +415,13 @@ export const schemas = {
         "items": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        }
+      },
+      "capabilities": {
+        "type": "array",
+        "description": "What the app exposes to agents (optional, added in v1: additive).",
+        "items": {
+          "$ref": "capability.v1.schema.json"
         }
       },
       "links": {

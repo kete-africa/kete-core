@@ -1,0 +1,29 @@
+{
+  "extends": "../../tooling/tsconfig/base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "types": ["node"]
+  },
+  "include": ["src", "tests"],
+  "references": [
+    {
+      "path": "../sdk"
+    },
+    {
+      "path": "../tenancy"
+    },
+    {
+      "path": "../commands"
+    },
+    {
+      "path": "../records"
+    },
+    {
+      "path": "../drafts"
+    },
+    {
+      "path": "../testing"
+    }
+  ]
+}

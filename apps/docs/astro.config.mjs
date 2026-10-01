@@ -43,6 +43,7 @@ export default defineConfig({
           items: [
             { label: 'Packages', items: [{ autogenerate: { directory: 'reference/packages' } }] },
             { label: 'Contracts', items: [{ autogenerate: { directory: 'reference/contracts' } }] },
+            { slug: 'reference/events' },
             { label: 'Apps', items: [{ autogenerate: { directory: 'reference/apps' } }] },
             { label: 'API', items: apis.map((api) => api.sidebar) },
           ],

@@ -12,6 +12,7 @@ if the generated code no longer matches (`pnpm contracts:check`).
 | `delivery-result.v1.schema.json`  | The receiver's outcome for each event                            |
 | `manifest.v1.schema.json`         | An app's self-description (`kete.json`, `GET /.well-known/kete`) |
 | `health.v1.schema.json`           | An app's health report (`GET /health`)                           |
+| `capability.v1.schema.json`       | What an app exposes to agents, with its autonomy level (1 to 4)  |
 
 Signature headers (outside the JSON body): `Kete-Product: <product id>` and
 `Kete-Signature: t=<unix seconds>,kid=<key id>,v1=<hex HMAC-SHA256 of "{t}.{raw body}">`.

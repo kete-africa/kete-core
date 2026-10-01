@@ -14,3 +14,4 @@ specs/
 **/project.inlang/README.md
 **/.astro
 apps/docs/src/content/docs
+docs/generated
