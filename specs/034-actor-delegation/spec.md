@@ -41,6 +41,10 @@ of D-039 that every Kete App needs: the agents, their tokens and their narrowing
 - **FR-005**: `AuditLog` (`@kete/admin/ui`) shows "at the request of …" when given the label; the
   template's journal screen does, in both languages.
 
+- **FR-006**: the Compte Kete, which keeps its own journal, adds the columns in its migration
+  `0009_command_delegation`, applied to the Neon `dev` branch before merging; the `main` branch is
+  migrated before `dev` is promoted to `main`.
+
 ## Out of scope
 
 - Issuing narrowed tokens to agents (OAuth token exchange and its `act` claim): `kete-enterprise`.
