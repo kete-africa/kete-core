@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/jobs",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "Kete background jobs on Postgres (pg-boss): queues with retries, schedules, and the standard jobs of a Kete app — e-mails, the event relay.",
   "repository": {

@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/tenancy",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "Kete tenancy: the organization as the hard boundary — its transaction, its RLS policies, and checks that nothing bypasses them.",
   "repository": {

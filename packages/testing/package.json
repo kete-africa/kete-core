@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/testing",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "Kete testing kit: a real Postgres (Neon test branch or a container), one isolated schema per test file, and the proof that organizations never see each other.",
   "repository": {
