@@ -53,6 +53,77 @@
     }
   }
 
+  /* OrgChart (spec 040): top-down boxes joined by lines, drawn from the semantic line color. */
+  .kete-orgchart ul {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    padding-top: 22px;
+    margin: 0;
+    list-style: none;
+  }
+  .kete-orgchart > ul {
+    padding-top: 0;
+    width: max-content;
+    min-width: 100%;
+  }
+  .kete-orgchart li {
+    position: relative;
+    padding: 22px 6px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .kete-orgchart > ul > li {
+    padding-top: 0;
+  }
+  .kete-orgchart li::before,
+  .kete-orgchart li::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 50%;
+    width: 50%;
+    height: 22px;
+    border-top: 1px solid var(--color-line-strong);
+  }
+  .kete-orgchart li::after {
+    right: auto;
+    left: 50%;
+    border-left: 1px solid var(--color-line-strong);
+  }
+  .kete-orgchart li:only-child::before,
+  .kete-orgchart li:only-child::after,
+  .kete-orgchart > ul > li::before,
+  .kete-orgchart > ul > li::after {
+    border-top: 0;
+  }
+  .kete-orgchart > ul > li::after {
+    border-left: 0;
+  }
+  .kete-orgchart li:first-child::before,
+  .kete-orgchart li:last-child::after {
+    border-top: 0;
+  }
+  .kete-orgchart li:last-child::before {
+    border-right: 1px solid var(--color-line-strong);
+    border-radius: 0 5px 0 0;
+  }
+  .kete-orgchart li:first-child::after {
+    border-radius: 5px 0 0 0;
+  }
+  .kete-orgchart li:only-child::before {
+    border-right: 0;
+  }
+  .kete-orgchart ul ul::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 22px;
+    border-left: 1px solid var(--color-line-strong);
+  }
+
   .font-number {
     font-variant-numeric: tabular-nums;
   }
