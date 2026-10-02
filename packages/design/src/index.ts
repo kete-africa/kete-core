@@ -24,7 +24,37 @@ export {
   type AgentStateName,
   type VerificationField,
 } from './doctrine.js';
+export {
+  ChatMessage,
+  ChatThread,
+  Composer,
+  CopyButton,
+  Markdown,
+  Suggestions,
+  ToolCard,
+} from './chat.js';
 export { KeteBand, KeteMark } from './marks.js';
+export {
+  CommandBar,
+  DataTable,
+  DetailPane,
+  Drawer,
+  Facts,
+  KpiGrid,
+  KpiTile,
+  OrgChart,
+  PageHeader,
+  Row,
+  RowList,
+  SplitView,
+  Tabs,
+  ViewSwitcher,
+  type ChartNode,
+  type Column,
+  type Crumb,
+  type TabItem,
+  type ViewOption,
+} from './frame.js';
 export {
   contrastPairs,
   designNames,

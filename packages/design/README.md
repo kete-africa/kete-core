@@ -51,6 +51,24 @@ flowchart LR
 `pnpm design:check` (part of `pnpm check`, in CI) fails on a lint warning, a missed contrast, or a
 generated file out of date. Never edit a `*.gen.*` file by hand.
 
+## Page slots and chat (spec 040)
+
+An enterprise page is made of fixed slots, so that whatever is added opens an interface of the
+same shape in the same places: `PageHeader` (breadcrumb, title, status, one main action), `Tabs`
+(an object's facets), `CommandBar` with `ViewSwitcher` (the view's formats, in the address),
+`SplitView` (the content beside its `DetailPane` and `Facts`), and the contents `DataTable`,
+`RowList`, `KpiGrid`/`KpiTile` and `OrgChart`. A short form opens in a `Drawer`. The chat kit —
+`ChatThread`, `ChatMessage`, `ToolCard`, `Markdown`, `Suggestions`, `Composer`, `CopyButton` —
+meets what people expect from an assistant. See [spec 040](../../specs/040-page-slots/spec.md).
+
+```mermaid
+flowchart LR
+  PH[PageHeader] --> TA[Tabs] --> CB[CommandBar · ViewSwitcher] --> SV[SplitView]
+  SV --> C[OrgChart · DataTable · RowList · KpiGrid]
+  SV --> DP[DetailPane · Facts]
+  PH -->|main action| DR[Drawer]
+```
+
 ## Use in an app (Tailwind 4)
 
 ```css

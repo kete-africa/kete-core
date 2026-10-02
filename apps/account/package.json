@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite dev --port 3100",
     "build": "vite build",
-    "start": "srvx serve --entry dist/server/server.js --static dist/client --prod --host 0.0.0.0 --port 3000",
+    "start": "srvx serve --entry dist/server/server.js --static ../client --prod --host 0.0.0.0 --port 3000",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",

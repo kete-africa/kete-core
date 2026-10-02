@@ -29,6 +29,20 @@ const iconPaths = {
   chevron: 'M6 9l6 6 6-6',
   arrow: 'M3 12h18m-7-7 7 7-7 7',
   close: 'M6 6l12 12M18 6L6 18',
+  plus: 'M12 5v14M5 12h14',
+  list: 'M8 6h13M8 12h13M8 18h13M3 6h1M3 12h1M3 18h1',
+  table: 'M3 4h18v16H3zM3 10h18M3 15h18M9 4v16',
+  chart: 'M9 3h6v5H9zM3 16h6v5H3zM15 16h6v5h-6zM12 8v4M6 16v-4h12v4',
+  columns: 'M3 4h5v16H3zM10 4h5v12h-5zM17 4h4v8h-4z',
+  calendar: 'M3 6h18v15H3zM3 10h18M8 3v5M16 3v5',
+  send: 'M4 12l16-8-6 16-3-6zM11 14l9-10',
+  stop: 'M6 6h12v12H6z',
+  copy: 'M9 9h11v11H9zM5 15H4V4h11v1',
+  bell: 'M6 16V11a6 6 0 1 1 12 0v5l2 2H4zM10 21h4',
+  tool: 'M14 6a4 4 0 0 0 5 5l-9 9-3-3 9-9a4 4 0 0 1-2-2z',
+  up: 'M7 11v9H4v-9zM7 11l4-8a2 2 0 0 1 3 2l-1 5h6a2 2 0 0 1 2 2l-2 7a2 2 0 0 1-2 1H7',
+  down: 'M7 13V4H4v9zM7 13l4 8a2 2 0 0 0 3-2l-1-5h6a2 2 0 0 0 2-2l-2-7a2 2 0 0 0-2-1H7',
+  refresh: 'M20 11a8 8 0 1 0-2 6M20 4v7h-7',
 } as const;
 
 export type IconName = keyof typeof iconPaths;
