@@ -147,6 +147,17 @@ export function boatProvider(options: BoatOptions): SandboxProvider {
     }
   }
 
+  /** A sandbox being stopped is resumed only once it is stopped. */
+  async function waitArchived(id: string): Promise<string> {
+    const deadline = Date.now() + (options.readyTimeoutMs ?? 180_000);
+    for (;;) {
+      await new Promise((resolve) => setTimeout(resolve, options.pollMs ?? 2000));
+      const { sandbox } = await call<{ sandbox: BoatSandbox }>('GET', `/sandboxes/${id}`);
+      if (sandbox.state !== 'archiving') return sandbox.state;
+      if (Date.now() > deadline) throw new SandboxError('timeout', `Sandbox ${id} still stopping`);
+    }
+  }
+
   return {
     async create(create: CreateOptions = {}) {
       const answer = await call<{ status: string; sandbox: BoatSandbox }>(
@@ -166,13 +177,26 @@ export function boatProvider(options: BoatOptions): SandboxProvider {
       return handle(answer.sandbox.id);
     },
     async open(id: string) {
+      let state: string;
       try {
-        await call('GET', `/sandboxes/${id}`);
-        return handle(id);
+        ({
+          sandbox: { state },
+        } = await call<{ sandbox: BoatSandbox }>('GET', `/sandboxes/${id}`));
       } catch (error) {
         if (error instanceof SandboxError && error.code === 'not_found') return null;
         throw error;
       }
+      if (state === 'cancelled') return null;
+      // A stopped sandbox keeps its disk — a person's own agent sign-in among it: it comes back
+      // where it was, on a fresh machine, before it is handed out.
+      if (state === 'archiving') state = await waitArchived(id);
+      if (state === 'archived') {
+        await call('POST', `/sandboxes/${id}/resume`, {});
+        await waitReady(id);
+      } else if (!['ready', 'idle', 'running'].includes(state)) {
+        await waitReady(id);
+      }
+      return handle(id);
     },
   };
 }

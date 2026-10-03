@@ -89,7 +89,10 @@ export function memoryProvider(
     },
     async open(id) {
       const entry = sandboxes.find((s) => s.id === id && s.state !== 'deleted');
-      return entry ? handle(entry) : null;
+      if (!entry) return null;
+      // A stopped sandbox comes back with its files, as the providers resume it.
+      entry.state = 'ready';
+      return handle(entry);
     },
   };
 }

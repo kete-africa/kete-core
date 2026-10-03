@@ -10,10 +10,13 @@ flowchart LR
   P --> B[boatProvider · persistent Linux machines]
   P --> M[memoryProvider · tests]
   B --> S[Sandbox: run · writeFile · readFile · stop · destroy]
+  O[open id] -->|stopped| R[resumed · its files as they were] --> S
 ```
 
 - `create({ ttlSeconds, env, size, idempotencyKey })`: a machine **without** the account's own
   secrets; it gets only the variables the caller gives it, and stops by itself after `ttlSeconds`.
+- `open(id)`: a sandbox created earlier, ready to use — **resumed first when it was stopped**, its
+  files as they were (a person's own agent sign-in among them); null when it no longer exists.
 - `mustRun` throws when a step fails or times out.
 - **The provider's own agent**: `sandbox.prompt({ agent: 'codex', model, prompt })` starts it in
   the background, `sandbox.promptStatus(runId)` follows it — when the provider runs agents signed

@@ -65,7 +65,10 @@ export interface CreateOptions {
 
 export interface SandboxProvider {
   create(options?: CreateOptions): Promise<Sandbox>;
-  /** A sandbox created earlier, by its id; null when it no longer exists. */
+  /**
+   * A sandbox created earlier, by its id, ready to use: resumed first when it was stopped, with
+   * its files as they were. Null when it no longer exists.
+   */
   open(id: string): Promise<Sandbox | null>;
 }
 
