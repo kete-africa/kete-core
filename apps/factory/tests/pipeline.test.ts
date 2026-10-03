@@ -27,6 +27,7 @@ function fakes() {
   const calls: string[] = [];
   const reports: RequestStatus[] = [];
   let agentRuns = 0;
+  let probes = 0;
   const sandboxes = memoryProvider((command, files) => {
     if (command.includes('create @kete-africa/app')) {
       files.set(
@@ -98,6 +99,10 @@ function fakes() {
       },
       command: (prompt, log) => `agent ${prompt} > ${log}`,
     },
+    probe: async () => {
+      probes += 1;
+      return probes > 1;
+    },
     report: async (_request, status) => {
       reports.push(status);
     },
@@ -138,13 +143,22 @@ describe('the factory’s pipeline', () => {
     const { ports, calls, reports, sandboxes } = fakes();
     const { store, rows } = memoryStore();
     const waits: number[] = [];
+    const schedule = async (_id: string, _org: string, seconds: number) => {
+      waits.push(seconds);
+    };
+    // The first run deploys and finds the app not answering yet; the next one goes on.
     await work(
       { requestId: request.requestId, organizationId: request.organizationId },
       store as never,
       ports,
-      async (_id, _org, seconds) => {
-        waits.push(seconds);
-      },
+      schedule,
+    );
+    expect(rows.get(request.requestId)?.status).toBe('building');
+    await work(
+      { requestId: request.requestId, organizationId: request.organizationId },
+      store as never,
+      ports,
+      schedule,
     );
     expect(calls).toEqual([
       'repository kete-fieldwork',
@@ -157,7 +171,7 @@ describe('the factory’s pipeline', () => {
       'agent ready',
     ]);
     expect(reports).toEqual(['building', 'ready', 'coding']);
-    expect(waits).toEqual([120]);
+    expect(waits).toEqual([60, 120]);
     // The scaffold: the template, then the identity card and the request, pushed on dev.
     const scaffold = sandboxes.sandboxes[0];
     expect(
@@ -183,6 +197,12 @@ describe('the factory’s pipeline', () => {
     const { ports, calls, reports, sandboxes } = fakes();
     const { store, rows } = memoryStore();
     const schedule = async () => undefined;
+    await work(
+      { requestId: request.requestId, organizationId: request.organizationId },
+      store as never,
+      ports,
+      schedule,
+    );
     await work(
       { requestId: request.requestId, organizationId: request.organizationId },
       store as never,

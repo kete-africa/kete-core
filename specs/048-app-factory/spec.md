@@ -31,3 +31,5 @@ See [apps/factory/README.md](../../apps/factory/README.md) for the sequence.
   a pull request to `dev`; nothing is merged by the factory.
 - **FR-004**: the Compte Kete refuses a registration from any other client, on another host, on a
   plain http callback, or when the factory is not configured.
+- **FR-005**: an app is reported `ready` only once it answers at its address (`/health`), checked
+  every minute after its deploy; after 30 minutes without an answer, the request fails.

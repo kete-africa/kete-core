@@ -191,7 +191,17 @@ export async function advance(
 
   if (!done.has('deploy')) {
     await ports.hosting.deploy(progress.hostingId ?? '');
-    const next = { ...progress, url, done: [...progress.done, 'deploy' as const] };
+    return finish('deploy', { url });
+  }
+
+  if (!done.has('live')) {
+    // Ready means answering: the build takes minutes; the request says so only once it answers.
+    if (!(await ports.probe(`${url}/health`))) {
+      const probes = (progress.probes ?? 0) + 1;
+      if (probes > 30) throw new Error(`${url} does not answer after its deploy.`);
+      return { next: 'wait', progress: { ...progress, probes }, seconds: 60 };
+    }
+    const next = { ...progress, done: [...progress.done, 'live' as const] };
     await ports.report(request, 'ready', next);
     return { next: 'continue', progress: next };
   }

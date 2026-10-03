@@ -16,7 +16,7 @@ export type Schedule = (
 const statusOf = (done: string[]): RequestStatus =>
   done.includes('pull-request')
     ? 'review'
-    : done.includes('deploy')
+    : done.includes('live')
       ? 'coding'
       : done.length > 0
         ? 'building'

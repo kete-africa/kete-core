@@ -51,6 +51,7 @@ export const steps = [
   'sign-in',
   'hosting',
   'deploy',
+  'live',
   'coding',
   'pull-request',
 ] as const;
@@ -68,5 +69,7 @@ export interface Progress {
   clientId?: string;
   pullRequest?: string;
   sandboxId?: string;
+  /** How many times the app was found not answering yet, after its deploy. */
+  probes?: number;
   error?: string;
 }

@@ -69,6 +69,8 @@ export interface Ports {
   hosting: Hosting;
   sandboxes: SandboxProvider;
   agent: CodingAgent;
+  /** Whether an app answers at its address (its /health), once deployed. */
+  probe(url: string): Promise<boolean>;
   /** Tells Kete Enterprise where the request stands, signed. */
   report(request: AppRequest, status: RequestStatus, progress: Progress): Promise<void>;
   config: FactoryConfig;

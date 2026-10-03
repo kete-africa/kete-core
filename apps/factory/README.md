@@ -22,6 +22,7 @@ sequenceDiagram
   F->>N: database and roles
   F->>K: /api/apps/clients
   F->>C: environment, deploy
+  F->>C: GET <app>/health, every minute until it answers
   F-->>E: ready · url
   F->>S: clone · coding agent (Codex or Claude Code) in the background
   F-->>E: coding

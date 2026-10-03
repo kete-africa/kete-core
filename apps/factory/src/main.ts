@@ -75,6 +75,13 @@ const ports: Ports = {
   }),
   sandboxes: boatProvider({ apiKey: required('FACTORY_SANDBOX_API_KEY') }),
   agent,
+  probe: async (url) => {
+    try {
+      return (await fetch(url, { signal: AbortSignal.timeout(10_000) })).ok;
+    } catch {
+      return false;
+    }
+  },
   report: reportTo(key),
   config: {
     appsDomain: required('FACTORY_APPS_DOMAIN'),
