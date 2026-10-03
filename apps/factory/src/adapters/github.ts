@@ -1,6 +1,21 @@
 import { createSign } from 'node:crypto';
-import sodium from 'libsodium-wrappers';
+import { createRequire } from 'node:module';
+import type Sodium from 'libsodium-wrappers';
 import type { CodeHost } from '../ports.js';
+
+// libsodium-wrappers' ES module imports a file of another package, which pnpm's strict layout does
+// not expose: the factory failed at start. Its CommonJS build resolves it.
+const sodium = createRequire(import.meta.url)('libsodium-wrappers') as typeof Sodium;
+
+/** Seals a value for a repository's public key (base64): only GitHub opens it. */
+export async function sealForGitHub(value: string, publicKey: string): Promise<string> {
+  await sodium.ready;
+  const sealed = sodium.crypto_box_seal(
+    sodium.from_string(value),
+    sodium.from_base64(publicKey, sodium.base64_variants.ORIGINAL),
+  );
+  return sodium.to_base64(sealed, sodium.base64_variants.ORIGINAL);
+}
 
 // GitHub, through a GitHub App installed on the organization (spec 048): short-lived installation
 // tokens, never a person's token. The App's private key is read from a file by the caller.
@@ -86,14 +101,9 @@ export function githubApp(options: GitHubAppOptions): CodeHost {
         `/repos/${fullName}/actions/secrets/public-key`,
       );
       if (key.status !== 200) throw new Error(`GitHub secret key: ${key.status}`);
-      await sodium.ready;
       // A sealed box for the repository's key: only GitHub can open it.
-      const sealed = sodium.crypto_box_seal(
-        sodium.from_string(value),
-        sodium.from_base64(key.data.key, sodium.base64_variants.ORIGINAL),
-      );
       const put = await api('PUT', `/repos/${fullName}/actions/secrets/${name}`, {
-        encrypted_value: sodium.to_base64(sealed, sodium.base64_variants.ORIGINAL),
+        encrypted_value: await sealForGitHub(value, key.data.key),
         key_id: key.data.key_id,
       });
       if (put.status !== 201 && put.status !== 204)
