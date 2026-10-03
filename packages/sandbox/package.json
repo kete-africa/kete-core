@@ -1,0 +1,30 @@
+{
+  "name": "@kete-africa/sandbox",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "An isolated computer for an agent or a factory step, behind a neutral port: create it, run commands, write and read files, stop or delete it. One adapter per provider; the provider's name never leaves its adapter.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/sandbox"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}
