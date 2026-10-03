@@ -110,7 +110,7 @@ flowchart LR
 | ---- | ------------------------------------------------------------------------------------------ | ------------------------------------------- |
 | 1    | Permissions with their words, classification, `@kete/center` grants, the template's rights | kete-core #49; Kete Enterprise spec 022     |
 | 2    | The app's own token (`kete:center`), the directory, business events in their own outbox    | this part; Kete Enterprise specs 023, 025   |
-| 3    | The agent's mandate                                                                        | next                                        |
+| 3    | The agent's mandate                                                                        | this part; Kete Enterprise spec 024         |
 | 4    | Decisions asked by apps                                                                    | next; Kete Enterprise spec 023, part 2      |
 
 ### Part 2 in detail
@@ -125,6 +125,18 @@ flowchart LR
   and identifiers only (`event.v1`): the template's `task.created` carries the task's id and day,
   never its title.
 - **The directory**: `center.me(token)`, `center.person(token, userId)`, `center.unit(token, id)`.
+
+### Part 3 in detail
+
+- **The mandate**: `POST /api/apps/mandates` at the Compte Kete, for the center's client only
+  (`kete:mandate`). It takes the person's token and the agent (`agt_…`, its name); it gives back a
+  token signed with the same keys: the person's same claims, nothing added, and
+  `act: { sub: agent, name, client_id: center }`. Ten minutes at most, never beyond the person's
+  token; a mandate is not exchanged again.
+- **Read by every app**: `@kete/auth` gives `identity.actingAgent`; the template makes the caller
+  `{ kind: 'agent', id: agent, onBehalfOf: person }` — the registry of capabilities applies the
+  agent's autonomy (a draft where a person would act) and the journal records both.
+- **Asked by the center**: `createMandates` of `@kete/auth`, with the center's own token.
 
 ## Out of scope here
 

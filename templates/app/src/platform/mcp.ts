@@ -19,7 +19,9 @@ function mcp(): (request: Request) => Promise<Response> {
       return {
         actor: {
           kind: 'agent',
-          id: 'agt_mcp',
+          // An agent of the center carries a mandate naming it (kete-core spec 049); a copilot
+          // the person signed in with is « the copilot ».
+          id: identity.actingAgent?.id ?? 'agt_mcp',
           channel: 'mcp',
           onBehalfOf: { kind: 'person', id: identity.userId },
         },

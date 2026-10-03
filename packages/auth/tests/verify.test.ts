@@ -174,3 +174,30 @@ describe('createTokenVerifier', () => {
     }
   });
 });
+
+describe('a mandate (spec 049)', () => {
+  it('names the agent acting for the person', async () => {
+    const signer = await key('m1');
+    const verify = createTokenVerifier({ issuer, jwks: { keys: [signer.jwk] } });
+    const identity = await verify(
+      await token(signer, {
+        payload: { act: { sub: 'agt_briefing', name: 'Briefing', client_id: 'cli_center' } },
+      }),
+    );
+    expect(identity.actingAgent).toEqual({
+      id: 'agt_briefing',
+      name: 'Briefing',
+      client: 'cli_center',
+    });
+    expect(identity.userId).toBe('usr_a1');
+  });
+
+  it('refuses a malformed act claim, and a plain token has no agent', async () => {
+    const signer = await key('m2');
+    const verify = createTokenVerifier({ issuer, jwks: { keys: [signer.jwk] } });
+    await expect(verify(await token(signer, { payload: { act: 'agt_x' } }))).rejects.toThrow(
+      InvalidTokenError,
+    );
+    expect((await verify(await token(signer))).actingAgent).toBeUndefined();
+  });
+});
