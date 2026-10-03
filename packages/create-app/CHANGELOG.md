@@ -1,5 +1,20 @@
 # @kete-africa/create-app
 
+## 0.2.2
+
+### Patch Changes
+
+- 7df2401: Forms in their place and every mode (spec 044): `Drawer` opens on the right when the screen is
+  wide and centered otherwise; `FormPage` and `FormSection` give a long form its own page;
+  `ThemeChoice` and `themeFromCookies`, `themeCookie`, `applyTheme` let a person choose dark, light
+  or automatic, rendered by the server. A new app's template offers the choice and trusts Kete's own
+  packages as soon as they are published.
+- 77cfb71: The integration contract (spec 045): `dataset.v1` and the manifest's `datasets` and `endpoints`;
+  `defineDataset`, `createDatasetRegistry` and `createHttpApi` serve an app's capabilities and data
+  sets over HTTP under the caller's rights; `exposeRecord` turns a record type into `{type}_list` and
+  `{type}_get`. A new app's template exposes its tasks, mounts its API at `/api/v1` and declares
+  everything in its manifest.
+
 ## 0.2.1
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @kete-africa/capabilities
 
+## 0.2.0
+
+### Minor Changes
+
+- 77cfb71: The integration contract (spec 045): `dataset.v1` and the manifest's `datasets` and `endpoints`;
+  `defineDataset`, `createDatasetRegistry` and `createHttpApi` serve an app's capabilities and data
+  sets over HTTP under the caller's rights; `exposeRecord` turns a record type into `{type}_list` and
+  `{type}_get`. A new app's template exposes its tasks, mounts its API at `/api/v1` and declares
+  everything in its manifest.
+
 ## 0.1.1
 
 ### Patch Changes
