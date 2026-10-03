@@ -13,7 +13,9 @@ export { createKeteSignIn, SignInError, type KeteSignIn, type SignInOptions } fr
 export {
   createAppToken,
   createAppTokenVerifier,
+  createMandates,
   type AppTokenOptions,
+  type MandatesOptions,
   type AppTokenVerifier,
   type AppTokenVerifierOptions,
   type KeteApp,

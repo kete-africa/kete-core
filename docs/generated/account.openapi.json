@@ -16469,6 +16469,133 @@
         }
       }
     },
+    "/api/apps/mandates": {
+      "post": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Exchange a person's token for an agent's mandate",
+        "description": "Only the center's client (scope kete:mandate). The mandate carries the person's same claims and an act claim naming the agent; ten minutes at most, never beyond the person's token (RFC 8693).",
+        "security": [
+          {
+            "appToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The person's token and the agent she gives the mandate to",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subjectToken": {
+                    "type": "string"
+                  },
+                  "agent": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
+                },
+                "required": [
+                  "subjectToken",
+                  "agent"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The mandate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    },
+                    "expiresIn": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "token",
+                    "expiresIn"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid app token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not the center",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input, or a subject that is not a person's token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/apps/clients": {
       "post": {
         "tags": [

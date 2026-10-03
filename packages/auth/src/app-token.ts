@@ -64,6 +64,38 @@ export function createAppTokenVerifier(options: AppTokenVerifierOptions): AppTok
   };
 }
 
+export interface MandatesOptions {
+  accountUrl: string;
+  /** The center's own token, carrying `kete:mandate` (see `createAppToken`). */
+  appToken: () => Promise<string | null>;
+  fetch?: typeof fetch;
+}
+
+/**
+ * The center's side of the mandate (kete-core spec 049): exchanges a person's token for one its
+ * agent carries to an app. Null when the Compte Kete refuses or does not answer: the agent then
+ * does not call the app.
+ */
+export function createMandates(options: MandatesOptions) {
+  const call = options.fetch ?? fetch;
+  return async (
+    subjectToken: string,
+    agent: { id: string; name: string },
+  ): Promise<string | null> => {
+    const token = await options.appToken();
+    if (!token) return null;
+    const response = await call(`${options.accountUrl.replace(/\/$/, '')}/api/apps/mandates`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ subjectToken, agent }),
+      signal: AbortSignal.timeout(5000),
+    }).catch(() => null);
+    if (!response || response.status !== 201) return null;
+    const answer = (await response.json().catch(() => null)) as { token?: unknown } | null;
+    return typeof answer?.token === 'string' ? answer.token : null;
+  };
+}
+
 export interface AppTokenOptions {
   accountUrl: string;
   clientId: string;

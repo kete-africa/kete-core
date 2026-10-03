@@ -22,6 +22,25 @@ export interface KeteIdentity {
   /** Whether the person signs in with a second factor (required for Kete operators). */
   twoFactor: boolean;
   expiresAt: Date;
+  /**
+   * The agent carrying this token, when it is a mandate (kete-core spec 049, RFC 8693 `act`): the
+   * agent acts for the person, never with more rights than hers.
+   */
+  actingAgent?: { id: string; name: string | null; client: string | null };
+}
+
+/** The `act` claim of a mandate, read; anything malformed refuses the token. */
+function actingAgentOf(value: unknown): KeteIdentity['actingAgent'] | undefined {
+  if (value === undefined) return undefined;
+  const act = value as Record<string, unknown> | null;
+  if (typeof act !== 'object' || act === null || typeof act.sub !== 'string' || !act.sub) {
+    throw new InvalidTokenError('invalid');
+  }
+  return {
+    id: act.sub,
+    name: typeof act.name === 'string' ? act.name : null,
+    client: typeof act.client_id === 'string' ? act.client_id : null,
+  };
 }
 
 /** Whether the token's organization may use `app` at `now`. */
@@ -117,6 +136,7 @@ export function createTokenVerifier(options: TokenVerifierOptions): TokenVerifie
     }
     // A role without an organization, or the reverse, is not a Compte Kete token.
     if ((org === null) !== (role === null)) throw new InvalidTokenError('invalid');
+    const actingAgent = actingAgentOf(payload.act);
     return {
       userId: claim(payload, 'sub'),
       email: claim(payload, 'email'),
@@ -127,6 +147,7 @@ export function createTokenVerifier(options: TokenVerifierOptions): TokenVerifie
       apps: org === null ? {} : appsClaim(payload.apps),
       twoFactor: payload.two_factor === true,
       expiresAt: new Date((payload.exp as number) * 1000),
+      ...(actingAgent ? { actingAgent } : {}),
     };
   };
 }

@@ -22,12 +22,21 @@ export async function handleApi(request: Request): Promise<Response> {
       if (!identity?.organizationId) return null;
       return {
         organizationId: identity.organizationId,
-        actor: {
-          kind: 'app',
-          id: 'app_api',
-          channel: 'api',
-          onBehalfOf: { kind: 'person', id: identity.userId },
-        },
+        // An agent's mandate makes it the agent, for the person (kete-core spec 049): its autonomy
+        // rules apply, and the journal names it.
+        actor: identity.actingAgent
+          ? {
+              kind: 'agent',
+              id: identity.actingAgent.id,
+              channel: 'api',
+              onBehalfOf: { kind: 'person', id: identity.userId },
+            }
+          : {
+              kind: 'app',
+              id: 'app_api',
+              channel: 'api',
+              onBehalfOf: { kind: 'person', id: identity.userId },
+            },
       };
     },
   });

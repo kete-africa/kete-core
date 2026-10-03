@@ -28,6 +28,10 @@ export const FACTORY_SCOPE = 'kete:factory';
  * outcome of the decisions it asked (kete-core spec 049) — through `client_credentials` only. */
 export const CENTER_SCOPE = 'kete:center';
 
+/** `kete:mandate`: the center (Kete Enterprise) exchanges a person's token for a mandate given to
+ * one of its agents (kete-core spec 049, RFC 8693) — through `client_credentials` only. */
+export const MANDATE_SCOPE = 'kete:mandate';
+
 // The Compte Kete is @kete/identity (spec 026) with its own e-mails, events, offers and operators.
 export const {
   auth,
@@ -63,7 +67,7 @@ export const {
       record(tx, accountEvent('account.created', organizationId, {})),
     ),
   signInLinks: { expiresIn: SIGN_IN_LINK_SECONDS, deliver: async (url) => deliverSignInLink(url) },
-  scopes: [PEOPLE_SCOPE, FACTORY_SCOPE, CENTER_SCOPE],
+  scopes: [PEOPLE_SCOPE, FACTORY_SCOPE, CENTER_SCOPE, MANDATE_SCOPE],
   // MCP servers (Kete Enterprise's gateway…) whose clients ask for a token bound to them.
   resources: env.oauthResources,
   // Must stay last: lets server functions set the session cookies.

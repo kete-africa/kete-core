@@ -69,6 +69,46 @@ export const accountPaths: Record<string, Schema> = {
       },
     },
   },
+  '/api/apps/mandates': {
+    post: {
+      tags: ['Apps'],
+      summary: "Exchange a person's token for an agent's mandate",
+      description:
+        "Only the center's client (scope kete:mandate). The mandate carries the person's same claims and an act claim naming the agent; ten minutes at most, never beyond the person's token (RFC 8693).",
+      security: appToken,
+      requestBody: {
+        required: true,
+        ...json(
+          {
+            type: 'object',
+            properties: {
+              subjectToken: { type: 'string' },
+              agent: {
+                type: 'object',
+                properties: { id: { type: 'string' }, name: { type: 'string' } },
+                required: ['id', 'name'],
+              },
+            },
+            required: ['subjectToken', 'agent'],
+          },
+          "The person's token and the agent she gives the mandate to",
+        ),
+      },
+      responses: {
+        '201': json(
+          {
+            type: 'object',
+            properties: { token: { type: 'string' }, expiresIn: { type: 'integer' } },
+            required: ['token', 'expiresIn'],
+          },
+          'The mandate',
+        ),
+        '401': error('No valid app token'),
+        '403': error('Not the center'),
+        '422': error("Invalid input, or a subject that is not a person's token"),
+      },
+    },
+  },
   '/api/apps/clients': {
     post: {
       tags: ['Apps'],
