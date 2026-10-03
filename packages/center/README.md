@@ -33,6 +33,13 @@ await center.sendTask(token, { key: 'TKT-42', title: 'Rétablir le service', hre
 `center.person(token, userId)` a colleague, `center.unit(token, unitId)` a unit — null whatever she
 may not see (Kete Enterprise spec 023).
 
+## Decisions
+
+`center.requestDecision(token, { subject, reference, title, measure })` asks the organization's
+circuits, for the person; once decided, the center posts the request's id to the app's
+`callbackUrl`, and the app reads the outcome with its own token: `center.decision(appToken,
+organizationId, requestId)` (Kete Enterprise spec 023).
+
 ## Business events
 
 `center.eventsUrl` is where the app delivers its business events, with its own token

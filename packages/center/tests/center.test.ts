@@ -105,4 +105,29 @@ describe('the center, as an app sees it', () => {
     });
     expect(await hidden.person('token', 'usr_abla')).toBeNull();
   });
+
+  it('asks a decision for the person, and reads it with the app’s own token', async () => {
+    const { calls, fetcher } = fakeFetch(() =>
+      Response.json({ requestId: 'drq_1', status: 'pending' }, { status: 201 }),
+    );
+    const center = createCenter({
+      url: 'https://api.center.test',
+      product: 'prd_kete_purchases',
+      source: 'kete-purchases',
+      fetch: fetcher,
+    });
+    expect(
+      await center.requestDecision('person-token', {
+        subject: 'purchase',
+        reference: 'po_42',
+        title: 'Onduleurs, 2 000 000 FCFA',
+        measure: 2_000_000,
+      }),
+    ).toEqual({ ok: true, requestId: 'drq_1', status: 'pending' });
+    expect(calls[0]?.url).toBe('https://api.center.test/v1/apps/prd_kete_purchases/decisions');
+    await center.decision('app-token', 'org_kya', 'drq_1');
+    expect(calls[1]?.url).toBe('https://api.center.test/public/apps/org_kya/decisions/drq_1');
+    expect(new Headers(calls[1]?.init?.headers).get('authorization')).toBe('Bearer app-token');
+    expect(await center.decision(null, 'org_kya', 'drq_1')).toBeNull();
+  });
 });

@@ -111,7 +111,7 @@ flowchart LR
 | 1    | Permissions with their words, classification, `@kete/center` grants, the template's rights | kete-core #49; Kete Enterprise spec 022     |
 | 2    | The app's own token (`kete:center`), the directory, business events in their own outbox    | this part; Kete Enterprise specs 023, 025   |
 | 3    | The agent's mandate                                                                        | this part; Kete Enterprise spec 024         |
-| 4    | Decisions asked by apps                                                                    | next; Kete Enterprise spec 023, part 2      |
+| 4    | Decisions asked by apps                                                                    | this part; Kete Enterprise spec 023, part 2 |
 
 ### Part 2 in detail
 
@@ -137,6 +137,16 @@ flowchart LR
   `{ kind: 'agent', id: agent, onBehalfOf: person }` — the registry of capabilities applies the
   agent's autonomy (a draft where a person would act) and the journal records both.
 - **Asked by the center**: `createMandates` of `@kete/auth`, with the center's own token.
+
+### Part 4 in detail
+
+- **Declared**: the card's `subjects` (`purchase`, its words, the measure's words). In Kete
+  Enterprise they appear as `<product>.<subject>`, for which an administrator defines a circuit.
+- **Asked**: `center.requestDecision(token, { subject, reference, title, measure, unitId,
+  callbackUrl })` with the person's token; `no_circuit` when the organization has none — the app
+  applies its own rule.
+- **Told, then read**: once decided, the center posts `{ requestId, organizationId }` to the
+  callback — nothing else; the app reads the outcome with `center.decision(appToken, org, id)`.
 
 ## Out of scope here
 
