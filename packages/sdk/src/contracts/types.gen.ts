@@ -36,6 +36,33 @@ export interface Capability {
 }
 
 /**
+ * A set of rows a Kete product exposes to people's dashboards, to its assistant and to other apps, always under the reader's rights: its name, what it holds, the permission to read it, the JSON Schema of one row, and which fields are a date, measures or dimensions. Read at the product's API: GET {api}/datasets/{name}.
+ */
+export interface Dataset {
+  name: string;
+  description: string;
+  permission: string;
+  /**
+   * The JSON Schema of one row.
+   */
+  row: {
+    [k: string]: unknown;
+  };
+  /**
+   * The field that dates a row: the API filters on it with `from` and `to`.
+   */
+  time?: string;
+  /**
+   * Numeric fields a dashboard sums, averages or counts.
+   */
+  measures?: string[];
+  /**
+   * Fields a dashboard groups by.
+   */
+  dimensions?: string[];
+}
+
+/**
  * A signed batch of events sent to a receiver.
  */
 export interface DeliveryRequest {
@@ -173,6 +200,17 @@ export interface Manifest {
    * What the app exposes to agents (optional, added in v1: additive).
    */
   capabilities?: Capability[];
+  /**
+   * The data sets the app exposes, read at its API under the reader's rights (optional, added in v1: additive).
+   */
+  datasets?: Dataset[];
+  /**
+   * Where agents and other apps reach the app (optional, added in v1: additive): its MCP server and its API.
+   */
+  endpoints?: {
+    mcp?: string;
+    api?: string;
+  };
   links?: {
     repository?: string;
     documentation?: string;

@@ -5,6 +5,7 @@ export type {
   AccountClosed,
   AccountCreated,
   Capability,
+  Dataset,
   DeliveryRequest,
   DeliveryResult,
   HealthReport,
@@ -17,6 +18,7 @@ export type {
 } from './contracts/types.gen.js';
 export {
   validateCapability,
+  validateDataset,
   validateDeliveryRequest,
   validateDeliveryResult,
   validateEvent,

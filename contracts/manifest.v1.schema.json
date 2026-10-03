@@ -38,6 +38,28 @@
         "$ref": "capability.v1.schema.json"
       }
     },
+    "datasets": {
+      "type": "array",
+      "description": "The data sets the app exposes, read at its API under the reader's rights (optional, added in v1: additive).",
+      "items": {
+        "$ref": "dataset.v1.schema.json"
+      }
+    },
+    "endpoints": {
+      "type": "object",
+      "description": "Where agents and other apps reach the app (optional, added in v1: additive): its MCP server and its API.",
+      "additionalProperties": false,
+      "properties": {
+        "mcp": {
+          "type": "string",
+          "format": "uri"
+        },
+        "api": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
     "links": {
       "type": "object",
       "additionalProperties": false,

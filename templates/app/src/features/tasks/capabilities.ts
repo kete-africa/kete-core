@@ -1,34 +1,30 @@
 import { defineCapability } from '@kete/capabilities';
-import { tableView, VIEWS } from '@kete/views';
+import { exposeRecord } from '@kete/views';
 import { z } from 'zod';
 import * as m from '@/paraglide/messages.js';
 import { completeTask } from './commands/complete-task';
 import { createTask } from './commands/create-task';
-import { openTasks } from './queries/open-tasks';
-import { taskInput, taskRecord } from './task.record';
+import { findTask, searchTasks } from './infrastructure/task.table';
+import { taskInput, taskRecord, type Task } from './task.record';
 
 /** What agents may do with tasks — through MCP, the chat or another app — and how far alone. */
 export const taskCapabilities = [
-  // Level 1: reads, shown as a table in a copilot.
-  defineCapability({
-    name: 'tasks_list',
-    description: 'Lists the tasks still to do, soonest first.',
+  // Level 1, by the integration contract (kete-core spec 045): `task_list` and `task_get`, a table
+  // and a record a copilot shows, under the read permission — no integration code to write.
+  ...exposeRecord<Task>({
+    type: 'task',
+    description: 'the tasks of the organization, open ones first, soonest first',
     permission: 'tasks:read',
-    autonomy: 1,
-    input: z.object({}),
-    view: VIEWS.table,
-    async run(_input, { db }) {
-      const tasks = await openTasks(db);
-      return tableView({
-        title: m.tasks_table_title(),
-        empty: m.tasks_table_empty(),
-        columns: [
-          { key: 'title', label: m.task_title_label() },
-          { key: 'dueOn', label: m.task_due_label() },
-        ],
-        rows: tasks.map((task) => ({ title: task.title, dueOn: task.dueOn })),
-      });
-    },
+    title: m.tasks_table_title,
+    empty: m.tasks_table_empty,
+    columns: [
+      { key: 'title', label: m.task_title_label, value: (t) => t.title },
+      { key: 'dueOn', label: m.task_due_label, value: (t) => t.dueOn },
+      { key: 'status', label: m.task_status_label, value: (t) => t.status },
+    ],
+    list: (db, query) => searchTasks(db, query),
+    get: (db, id) => findTask(db, id),
+    label: (t) => t.title,
   }),
   // Level 2: reversible; the agent acts, the person is told and may undo.
   defineCapability({

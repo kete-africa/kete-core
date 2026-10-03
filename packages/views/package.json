@@ -30,7 +30,9 @@
     }
   },
   "dependencies": {
-    "@kete/capabilities": "workspace:@kete-africa/capabilities@*"
+    "@kete/capabilities": "workspace:@kete-africa/capabilities@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@kete/design": "workspace:@kete-africa/design@*",
@@ -44,7 +46,6 @@
     "react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3",
     "vite": "^7.3.6",
-    "vite-plugin-singlefile": "^2.3.0",
-    "zod": "^4.6.5"
+    "vite-plugin-singlefile": "^2.3.0"
   }
 }

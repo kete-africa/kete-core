@@ -13,6 +13,7 @@ if the generated code no longer matches (`pnpm contracts:check`).
 | `manifest.v1.schema.json`         | An app's self-description (`kete.json`, `GET /.well-known/kete`), with its identity card: owner, data categories, AI use, criticality (D-040) |
 | `health.v1.schema.json`           | An app's health report (`GET /health`)                                                                                                        |
 | `capability.v1.schema.json`       | What an app exposes to agents, with its autonomy level (1 to 4)                                                                               |
+| `dataset.v1.schema.json`          | A set of rows an app exposes to dashboards, the assistant and other apps, under the reader's rights                                           |
 
 Signature headers (outside the JSON body): `Kete-Product: <product id>` and
 `Kete-Signature: t=<unix seconds>,kid=<key id>,v1=<hex HMAC-SHA256 of "{t}.{raw body}">`.

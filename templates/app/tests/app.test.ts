@@ -10,8 +10,9 @@ import { migrations } from '../db/migrations';
 import { completed, reopened, TaskRuleError } from '../src/features/tasks/domain/task';
 import { listTasks } from '../src/features/tasks/infrastructure/task.table';
 import { transaction, usePool } from '../src/platform/db';
+import { validateManifest } from '@kete/sdk';
 import { manifest } from '../src/platform/events';
-import { registry } from '../src/platform/registry';
+import { datasets, registry } from '../src/platform/registry';
 import { asPerson } from '../src/platform/rights';
 import { screenActor } from '../src/platform/session';
 
@@ -129,7 +130,7 @@ describe('an agent and a person, through MCP', () => {
 
   it('the agent lists the tasks as a table its copilot shows', async () => {
     const listed = await asPerson(kofi, () =>
-      registry.invoke({ ...agentFor(kofi), name: 'tasks_list', input: {} }),
+      registry.invoke({ ...agentFor(kofi), name: 'task_list', input: {} }),
     );
     expect(listed).toMatchObject({ status: 'done', output: { view: 'table' } });
   });
@@ -155,7 +156,7 @@ describe('rights', () => {
   it('nobody signed in may do anything', async () => {
     expect(
       await asPerson(null, () =>
-        registry.invoke({ ...onScreen(ama), name: 'tasks_list', input: {} }),
+        registry.invoke({ ...onScreen(ama), name: 'task_list', input: {} }),
       ),
     ).toEqual({ status: 'refused', reason: 'not_allowed' });
   });
@@ -174,6 +175,32 @@ describe('the organization is the boundary', () => {
         );
       },
     });
+  });
+});
+
+describe('the integration contract (kete-core spec 045)', () => {
+  it('exposes the tasks as records and as a data set, under the read permission', async () => {
+    const one = await asPerson(kofi, () =>
+      registry.invoke({ ...agentFor(kofi), name: 'task_list', input: { text: 'Efua' } }),
+    );
+    expect(one).toMatchObject({ status: 'done', output: { view: 'table' } });
+    const read = await asPerson(kofi, () =>
+      datasets.read(onScreen(kofi), 'tasks', { from: '2026-01-01' }),
+    );
+    expect(read).toMatchObject({ status: 'done', dataset: 'tasks' });
+    expect(await asPerson(null, () => datasets.read(onScreen(kofi), 'tasks', {}))).toEqual({
+      status: 'refused',
+      reason: 'not_allowed',
+    });
+  });
+
+  it('declares its capabilities and data sets in its manifest', () => {
+    const card = manifest();
+    expect(validateManifest(card).ok).toBe(true);
+    expect(card.capabilities?.map((c) => c.name)).toEqual(
+      expect.arrayContaining(['task_list', 'task_get', 'tasks_complete', 'tasks_create']),
+    );
+    expect(card.datasets?.map((d) => d.name)).toEqual(['tasks']);
   });
 });
 

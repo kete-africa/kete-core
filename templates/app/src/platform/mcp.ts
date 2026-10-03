@@ -1,28 +1,10 @@
-import { createTokenVerifier, type KeteIdentity } from '@kete/auth';
 import { createMcpHandler, protectedResourceMetadata } from '@kete/capabilities';
 import { keteViews } from '@kete/views';
 import { APP_SLUG, DESIGN, VERSION } from './app';
 import { env } from './env';
+import { identityFromBearer } from './identity';
 import { registry } from './registry';
 import { asPerson, currentIdentity } from './rights';
-
-let verify: ((token: string) => Promise<KeteIdentity>) | undefined;
-
-/** A Compte Kete access token, from an MCP client the person signed in with (Claude, ChatGPT…). */
-async function identityOf(request: Request): Promise<KeteIdentity | null> {
-  const header = request.headers.get('authorization') ?? '';
-  if (!header.startsWith('Bearer ')) return null;
-  // A token for Kete apps, or one an MCP client asked for this endpoint itself (RFC 8707).
-  verify ??= createTokenVerifier({
-    issuer: env.accountUrl,
-    audience: ['urn:kete:apps', `${env.publicUrl}/mcp`],
-  });
-  try {
-    return await verify(header.slice('Bearer '.length));
-  } catch {
-    return null;
-  }
-}
 
 let handler: ((request: Request) => Promise<Response>) | undefined;
 
@@ -53,7 +35,7 @@ function mcp(): (request: Request) => Promise<Response> {
 
 /** The app's MCP endpoint: its capabilities and their views (doctrine D-037). */
 export async function handleMcp(request: Request): Promise<Response> {
-  const identity = await identityOf(request);
+  const identity = await identityFromBearer(request);
   return asPerson(identity, () => mcp()(request));
 }
 

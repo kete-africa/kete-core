@@ -55,6 +55,49 @@ export async function findTask(db: SqlExecutor, taskId: string): Promise<Task | 
   return rows[0] ? toTask(rows[0]) : null;
 }
 
+/** Tasks matching a text (or all), open first and soonest first: what `task_list` returns. */
+export async function searchTasks(
+  db: SqlExecutor,
+  query: { text?: string | undefined; limit: number },
+): Promise<Task[]> {
+  const { rows } = await db.query<Row>(
+    `select ${columns} from tasks
+      where ($1::text is null or title ilike '%' || $1 || '%')
+      order by status = 'done', due_on nulls last, created_at limit $2`,
+    [query.text ?? null, query.limit],
+  );
+  return rows.map(toTask);
+}
+
+/** The tasks created in a period, one row each: the `tasks` data set. */
+export async function taskRows(
+  db: SqlExecutor,
+  query: { from?: string; to?: string; limit: number },
+) {
+  const { rows } = await db.query<{
+    title: string;
+    status: TaskStatus;
+    due_on: string | null;
+    created_on: string;
+    done: number;
+  }>(
+    `select title, status, to_char(due_on, 'YYYY-MM-DD') as due_on,
+            to_char(created_at, 'YYYY-MM-DD') as created_on, (status = 'done')::int as done
+       from tasks
+      where ($1::date is null or created_at >= $1::date)
+        and ($2::date is null or created_at < $2::date + 1)
+      order by created_at limit $3`,
+    [query.from ?? null, query.to ?? null, query.limit],
+  );
+  return rows.map((r) => ({
+    title: r.title,
+    status: r.status,
+    dueOn: r.due_on,
+    createdOn: r.created_on,
+    done: r.done,
+  }));
+}
+
 export async function listTasks(db: SqlExecutor, status?: TaskStatus): Promise<Task[]> {
   const { rows } = await db.query<Row>(
     `select ${columns} from tasks
