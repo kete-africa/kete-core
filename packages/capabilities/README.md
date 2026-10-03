@@ -102,3 +102,11 @@ sequenceDiagram
   too; a screen passes `confirmed: true` for level 4 after its confirmation.
 - `protectedResourceMetadata` (RFC 9728) and the `WWW-Authenticate` header tell MCP clients which
   identity issues the tokens.
+
+## Data sets and the API (spec 045)
+
+`defineDataset` declares rows an app exposes (their schema, time field, measures, dimensions);
+`createDatasetRegistry` reads them under the caller's rights; `createHttpApi` serves the
+capabilities and data sets over HTTP (`/capabilities`, `/datasets`), with the same rights,
+journal and autonomy as MCP and the screens. See
+[spec 045](../../specs/045-integration-contract/spec.md).

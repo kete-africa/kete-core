@@ -30,3 +30,13 @@ export {
   type Decision,
   type Invocation,
 } from './registry.js';
+export {
+  createDatasetRegistry,
+  defineDataset,
+  describeDataset,
+  type DatasetDefinition,
+  type DatasetQuery,
+  type DatasetRead,
+  type DatasetRegistry,
+} from './datasets.js';
+export { createHttpApi, type HttpApiOptions } from './http.js';

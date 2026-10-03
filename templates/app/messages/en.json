@@ -65,5 +65,6 @@
   "theme_label": "Appearance",
   "theme_dark": "Dark",
   "theme_light": "Light",
-  "theme_auto": "Automatic"
+  "theme_auto": "Automatic",
+  "task_status_label": "Status"
 }

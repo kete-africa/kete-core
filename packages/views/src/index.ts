@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import type { ViewResource } from '@kete/capabilities';
 import { VIEWS, type ViewKind } from './contract.js';
+export { exposeRecord, type ExposedColumn, type ExposeRecordOptions } from './expose.js';
 
 export {
   detailView,

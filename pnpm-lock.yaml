@@ -589,6 +589,12 @@ importers:
       '@kete/capabilities':
         specifier: workspace:@kete-africa/capabilities@*
         version: link:../capabilities
+      '@kete/tenancy':
+        specifier: workspace:@kete-africa/tenancy@*
+        version: link:../tenancy
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
     devDependencies:
       '@kete/design':
         specifier: workspace:@kete-africa/design@*
@@ -626,9 +632,6 @@ importers:
       vite-plugin-singlefile:
         specifier: ^2.3.0
         version: 2.3.3(rollup@4.63.5)(vite@7.3.6(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))
-      zod:
-        specifier: ^4.6.5
-        version: 4.6.5
 
   templates/app:
     dependencies:

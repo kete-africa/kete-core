@@ -43,3 +43,9 @@ flowchart LR
   `createMcpHandler({ views })`.
 - **Build**: `pnpm --filter @kete-africa/views build` writes `dist/views.html` (the tests build it).
   Fonts are not embedded: `workspace` uses the system's Segoe UI, `kete` falls back to the system's.
+
+## Exposing a record (spec 045)
+
+`exposeRecord` turns a record type into two level-1 capabilities, `{type}_list` (a table) and
+`{type}_get` (a detail), under its read permission. See
+[spec 045](../../specs/045-integration-contract/spec.md).

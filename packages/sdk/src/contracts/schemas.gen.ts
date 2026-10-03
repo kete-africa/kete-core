@@ -61,6 +61,59 @@ export const schemas = {
       }
     }
   },
+  "dataset.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/dataset.v1.schema.json",
+    "title": "Dataset",
+    "description": "A set of rows a Kete product exposes to people's dashboards, to its assistant and to other apps, always under the reader's rights: its name, what it holds, the permission to read it, the JSON Schema of one row, and which fields are a date, measures or dimensions. Read at the product's API: GET {api}/datasets/{name}.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "name",
+      "description",
+      "permission",
+      "row"
+    ],
+    "properties": {
+      "name": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,62}$"
+      },
+      "description": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      },
+      "permission": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$"
+      },
+      "row": {
+        "type": "object",
+        "description": "The JSON Schema of one row."
+      },
+      "time": {
+        "type": "string",
+        "description": "The field that dates a row: the API filters on it with `from` and `to`."
+      },
+      "measures": {
+        "type": "array",
+        "description": "Numeric fields a dashboard sums, averages or counts.",
+        "uniqueItems": true,
+        "items": {
+          "type": "string"
+        }
+      },
+      "dimensions": {
+        "type": "array",
+        "description": "Fields a dashboard groups by.",
+        "uniqueItems": true,
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
   "delivery-request.v1": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://kete.africa/contracts/delivery-request.v1.schema.json",
@@ -427,6 +480,28 @@ export const schemas = {
         "description": "What the app exposes to agents (optional, added in v1: additive).",
         "items": {
           "$ref": "capability.v1.schema.json"
+        }
+      },
+      "datasets": {
+        "type": "array",
+        "description": "The data sets the app exposes, read at its API under the reader's rights (optional, added in v1: additive).",
+        "items": {
+          "$ref": "dataset.v1.schema.json"
+        }
+      },
+      "endpoints": {
+        "type": "object",
+        "description": "Where agents and other apps reach the app (optional, added in v1: additive): its MCP server and its API.",
+        "additionalProperties": false,
+        "properties": {
+          "mcp": {
+            "type": "string",
+            "format": "uri"
+          },
+          "api": {
+            "type": "string",
+            "format": "uri"
+          }
         }
       },
       "links": {
