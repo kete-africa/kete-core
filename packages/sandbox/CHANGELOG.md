@@ -1,5 +1,11 @@
 # @kete-africa/sandbox
 
+## 0.2.1
+
+### Patch Changes
+
+- bc208bb: A refusal of the provider says why (`provider_not_configured`, `subscription_required`…).
+
 ## 0.2.0
 
 ### Minor Changes

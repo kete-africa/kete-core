@@ -1,5 +1,11 @@
 # @kete-africa/design
 
+## 0.5.0
+
+### Minor Changes
+
+- 203aa3a: Icons for the chat (spec 027): `attach`, `mic`, `file`.
+
 ## 0.4.0
 
 ### Minor Changes
