@@ -9,6 +9,8 @@ import {
   DetailPane,
   Drawer,
   Facts,
+  FormPage,
+  FormSection,
   KpiGrid,
   KpiTile,
   Markdown,
@@ -19,6 +21,9 @@ import {
   SplitView,
   Suggestions,
   Tabs,
+  ThemeChoice,
+  themeCookie,
+  themeFromCookies,
   ToolCard,
   ViewSwitcher,
 } from '../src/index.js';
@@ -188,5 +193,47 @@ describe('the chat (spec 040)', () => {
     expect(html).toContain('<strong>2</strong>');
     expect(html).not.toContain('href="javascript');
     expect(html).toContain('href="https://kete.africa"');
+  });
+});
+
+describe('forms and modes (spec 044)', () => {
+  it('put a long form on its own page, with its way back and its buttons', () => {
+    const html = renderToStaticMarkup(
+      <FormPage
+        breadcrumbLabel="Fil d'Ariane"
+        breadcrumbs={[{ label: 'Organisation', href: '/administration/organisation' }]}
+        title="Nouvelle unité"
+        onSubmit={noop}
+        actions={<button type="submit">Créer</button>}
+      >
+        <FormSection title="Identité" description="Comment on la nomme.">
+          <input aria-label="Nom" />
+        </FormSection>
+      </FormPage>,
+    );
+    expect(html).not.toMatch(BASE_COLOR);
+    expect(html).toMatch(/<form novalidate=""/i);
+    expect(html).toContain('href="/administration/organisation"');
+    expect(html).toMatch(/<section aria-labelledby="([^"]+)"[\s\S]*<h2 id="\1"/);
+  });
+
+  it('offer the three modes, the current one pressed', () => {
+    const html = renderToStaticMarkup(
+      <ThemeChoice
+        label="Apparence"
+        value="light"
+        onChange={noop}
+        labels={{ dark: 'Sombre', light: 'Clair', auto: 'Automatique' }}
+      />,
+    );
+    expect(html).toMatch(/aria-pressed="true"[^>]*>Clair/);
+    expect(html).toContain('Automatique');
+  });
+
+  it('read and write the remembered mode', () => {
+    expect(themeFromCookies('a=1; kete_theme=light; b=2')).toBe('light');
+    expect(themeFromCookies('kete_theme=purple')).toBeNull();
+    expect(themeFromCookies(null)).toBeNull();
+    expect(themeCookie('auto')).toContain('kete_theme=auto; Path=/');
   });
 });

@@ -35,11 +35,21 @@ export {
 } from './chat.js';
 export { KeteBand, KeteMark } from './marks.js';
 export {
+  applyTheme,
+  THEME_COOKIE,
+  themeChoices,
+  themeCookie,
+  themeFromCookies,
+  type ThemeChoice as ThemeChoiceValue,
+} from './theme.js';
+export {
   CommandBar,
   DataTable,
   DetailPane,
   Drawer,
   Facts,
+  FormPage,
+  FormSection,
   KpiGrid,
   KpiTile,
   OrgChart,
@@ -48,6 +58,7 @@ export {
   RowList,
   SplitView,
   Tabs,
+  ThemeChoice,
   ViewSwitcher,
   type ChartNode,
   type Column,
