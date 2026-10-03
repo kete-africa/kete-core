@@ -123,8 +123,10 @@ try {
       'Usage: clients create --name --redirect [--redirect …] | grant --client <id> --center|--mandate | list',
     );
   }
-} finally {
-  await getPool().end();
+} catch (error) {
+  console.error((error as Error).message);
+  process.exit(1);
 }
-// The auth library keeps timers of its own: once everything is done, the script ends here.
+// The auth library keeps timers and starting queries of its own: closing the pool under them
+// would fail a gesture that succeeded. Once everything is done, the script ends here.
 process.exit(0);
