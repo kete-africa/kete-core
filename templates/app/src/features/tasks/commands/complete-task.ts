@@ -1,5 +1,6 @@
 import { defineCommand } from '@kete/commands';
 import { z } from 'zod';
+import { announce } from '@/platform/announce';
 import { completed, reopened, TaskRuleError } from '../domain/task';
 import { findTask, setStatus } from '../infrastructure/task.table';
 
@@ -10,10 +11,11 @@ export const completeTask = defineCommand({
   name: 'complete-task',
   input: taskRef,
   reversibility: { reversible: true, inverse: 'reopen-task' },
-  async handler({ taskId }, { db }) {
+  async handler({ taskId }, { db, organizationId }) {
     const task = await findTask(db, taskId);
     if (!task) throw new TaskRuleError('not_found');
     await setStatus(db, taskId, completed(task.status));
+    await announce(db, { type: 'task.completed', organization: organizationId, data: { taskId } });
     return { taskId, status: 'done' as const };
   },
   summarize: ({ taskId }) => `Task ${taskId} done`,

@@ -10,3 +10,11 @@ export {
   type TokenVerifierOptions,
 } from './verify.js';
 export { createKeteSignIn, SignInError, type KeteSignIn, type SignInOptions } from './signin.js';
+export {
+  createAppToken,
+  createAppTokenVerifier,
+  type AppTokenOptions,
+  type AppTokenVerifier,
+  type AppTokenVerifierOptions,
+  type KeteApp,
+} from './app-token.js';

@@ -81,4 +81,28 @@ describe('the center, as an app sees it', () => {
       source: 'kete-helpdesk',
     });
   });
+
+  it('reads the directory with her token; what she may not see is null', async () => {
+    const { calls, fetcher } = fakeFetch(() =>
+      Response.json({ personId: 'per_1', name: 'Kofi', managers: [{ name: 'Kossi' }] }),
+    );
+    const center = createCenter({
+      url: 'https://api.center.test',
+      product: 'prd_kete_helpdesk',
+      source: 'kete-helpdesk',
+      fetch: fetcher,
+    });
+    expect(await center.me('token')).toMatchObject({ managers: [{ name: 'Kossi' }] });
+    expect(calls[0]?.url).toBe('https://api.center.test/v1/directory/me');
+    await center.unit('token', 'unt_sav');
+    expect(calls[1]?.url).toBe('https://api.center.test/v1/directory/units/unt_sav');
+    expect(center.eventsUrl).toBe('https://api.center.test/public/apps/events');
+    const hidden = createCenter({
+      url: 'https://api.center.test',
+      product: 'prd_x',
+      source: 'x',
+      fetch: fakeFetch(() => Response.json({ error: 'not_found' }, { status: 404 })).fetcher,
+    });
+    expect(await hidden.person('token', 'usr_abla')).toBeNull();
+  });
 });

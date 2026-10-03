@@ -7,4 +7,7 @@ export {
   type CenterOptions,
   type CenterReading,
   type CenterTask,
+  type DirectoryCard,
+  type DirectoryPerson,
+  type DirectoryUnit,
 } from './center.js';

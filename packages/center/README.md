@@ -27,6 +27,17 @@ const grants = await center.grants(token); // null: no center, no token, or no a
 await center.sendTask(token, { key: 'TKT-42', title: 'Rétablir le service', href });
 ```
 
+## The directory
+
+`center.me(token)` gives the person's positions, units, managers (interim included) and reports;
+`center.person(token, userId)` a colleague, `center.unit(token, unitId)` a unit — null whatever she
+may not see (Kete Enterprise spec 023).
+
+## Business events
+
+`center.eventsUrl` is where the app delivers its business events, with its own token
+(`createAppToken` of `@kete/auth`, scope `kete:center`) through a named outbox of `@kete/sdk`.
+
 - **Grants** feed `createRights` of `@kete/capabilities`: until the organization manages the app's
   rights at the center (`managed: false`), the app keeps its defaults.
 - **Never a secret in a cache key**: grants are kept per token's SHA-256, five minutes at most.
