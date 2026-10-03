@@ -35,6 +35,7 @@ export function boatProvider(options: BoatOptions): SandboxProvider {
     path: string,
     body?: unknown,
     key?: string,
+    extra: Record<string, string> = {},
   ): Promise<T> => {
     const response = await http(`${base}${path}`, {
       method,
@@ -42,6 +43,7 @@ export function boatProvider(options: BoatOptions): SandboxProvider {
         authorization: `Bearer ${options.apiKey}`,
         ...(body === undefined ? {} : { 'content-type': 'application/json' }),
         ...(key ? { 'idempotency-key': key } : {}),
+        ...extra,
       },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
@@ -118,7 +120,10 @@ export function boatProvider(options: BoatOptions): SandboxProvider {
       await call('POST', `/sandboxes/${id}/stop`, {});
     },
     async destroy() {
-      await call('DELETE', `/sandboxes/${id}`);
+      // The provider asks the deletion to name its target, so that no id is deleted by mistake.
+      await call('DELETE', `/sandboxes/${id}`, undefined, undefined, {
+        'x-ascii-confirm-delete': id,
+      });
     },
   });
 

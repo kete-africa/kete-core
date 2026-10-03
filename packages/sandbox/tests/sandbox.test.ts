@@ -11,6 +11,7 @@ function fakeBoat() {
     body: unknown;
     key: string | null;
     auth: string | null;
+    confirm: string | null;
   }[] = [];
   let polls = 0;
   const fetcher = (async (url: string | URL, init?: RequestInit) => {
@@ -23,6 +24,7 @@ function fakeBoat() {
       body,
       key: headers.get('idempotency-key'),
       auth: headers.get('authorization'),
+      confirm: headers.get('x-ascii-confirm-delete'),
     });
     const json = (value: unknown, status = 200) => Response.json(value, { status });
     if (init?.method === 'POST' && path === '/sandboxes') {
@@ -36,6 +38,15 @@ function fakeBoat() {
       return json({ sandbox: { id: 'bx_1', state: polls > 1 ? 'ready' : 'provisioning' } });
     }
     if (path === '/sandboxes/bx_404') return json({ error: 'not_found' }, 404);
+    if (path === '/sandboxes/bx_1/prompt') {
+      return json({ ok: true, promptId: 'prompt_1', promptRun: { status: 'queued' } }, 202);
+    }
+    if (path === '/sandboxes/bx_1/prompts/prompt_1') {
+      return json({
+        ok: true,
+        promptRun: { promptId: 'prompt_1', status: 'finished', done: true },
+      });
+    }
     if (path === '/sandboxes/bx_1/commands') {
       const command = (body as { command: string }).command;
       if (command.startsWith('base64')) {
@@ -91,6 +102,30 @@ describe('the provider adapter', () => {
     ]);
     expect(new TextDecoder().decode(await sandbox.readFile('x.txt'))).toBe('hello');
     await expect(mustRun(sandbox, 'false')).rejects.toBeInstanceOf(SandboxError);
+  });
+
+  it('starts the provider’s own agent from a template, follows it, and deletes by naming the id', async () => {
+    const boat = fakeBoat();
+    const sandbox = await boatProvider({ apiKey: 'k', fetch: boat.fetcher, pollMs: 1 }).create({
+      template: 'kete-factory',
+    });
+    expect(boat.calls[0]?.body).toEqual({
+      type: 'default',
+      ttlSeconds: 3600,
+      environment: 'kete-factory',
+    });
+    expect(
+      await sandbox.prompt?.({ agent: 'codex', model: 'gpt-6.1-sol', prompt: 'Build it' }),
+    ).toEqual({ runId: 'prompt_1' });
+    expect(boat.calls.find((c) => c.path.endsWith('/prompt'))?.body).toEqual({
+      provider: 'codex',
+      prompt: 'Build it',
+      new: true,
+      model: 'gpt-6.1-sol',
+    });
+    expect(await sandbox.promptStatus?.('prompt_1')).toBe('finished');
+    await sandbox.destroy();
+    expect(boat.calls.at(-1)).toMatchObject({ method: 'DELETE', confirm: 'bx_1' });
   });
 
   it('says when a sandbox no longer exists', async () => {
