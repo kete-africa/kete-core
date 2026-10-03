@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/center",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "What a Kete app asks its center (Kete Enterprise), with the person's token: her grants for the app, her To do, the organization's directory and decisions. Without a center, the app works alone.",
   "repository": {
