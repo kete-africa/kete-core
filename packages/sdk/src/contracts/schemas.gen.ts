@@ -58,6 +58,15 @@ export const schemas = {
         "type": "string",
         "pattern": "^ui://[a-z0-9][a-z0-9-]*/[a-z0-9][a-z0-9/_-]*$",
         "description": "The view a host shows with the result, as an MCP Apps UI resource: ui://kete/review for a draft to verify, or a view of the product."
+      },
+      "classification": {
+        "enum": [
+          "public",
+          "internal",
+          "confidential",
+          "secret"
+        ],
+        "description": "How far the data may travel. public: anyone; internal (the default): the organization's people with the permission; confidential: a need to know, never in a shared briefing; secret: never sent to a model, a shared briefing nor a notification's text."
       }
     }
   },
@@ -111,6 +120,15 @@ export const schemas = {
         "items": {
           "type": "string"
         }
+      },
+      "classification": {
+        "enum": [
+          "public",
+          "internal",
+          "confidential",
+          "secret"
+        ],
+        "description": "How far the data may travel. public: anyone; internal (the default): the organization's people with the permission; confidential: a need to know, never in a shared briefing; secret: never sent to a model, a shared briefing nor a notification's text."
       }
     }
   },
@@ -501,6 +519,177 @@ export const schemas = {
           "api": {
             "type": "string",
             "format": "uri"
+          }
+        }
+      },
+      "client": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200,
+        "description": "The app's client id at the Compte Kete (optional, added in v1: additive; spec 049): a center accepts the app's own tokens for an organization whose registry holds it."
+      },
+      "permissions": {
+        "type": "array",
+        "description": "The permissions the app checks (optional, added in v1: additive; spec 049), each with its words for people and the Compte Kete roles that hold it by default. A center lets an administrator grant them to roles and positions.",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "label",
+            "roles"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$"
+            },
+            "label": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "fr",
+                "en"
+              ],
+              "properties": {
+                "fr": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "en": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              }
+            },
+            "description": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "fr",
+                "en"
+              ],
+              "properties": {
+                "fr": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "en": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              }
+            },
+            "roles": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "owner",
+                  "admin",
+                  "member"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "emits": {
+        "type": "array",
+        "description": "The business events the app announces (optional, added in v1: additive; spec 049): identifiers and facts only, the rest read at its API under the reader's rights.",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "description"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "maxLength": 100,
+              "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+            },
+            "description": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000
+            },
+            "classification": {
+              "enum": [
+                "public",
+                "internal",
+                "confidential",
+                "secret"
+              ],
+              "description": "How far the data may travel. public: anyone; internal (the default): the organization's people with the permission; confidential: a need to know, never in a shared briefing; secret: never sent to a model, a shared briefing nor a notification's text."
+            },
+            "data": {
+              "type": "object",
+              "description": "The JSON Schema of the event's data."
+            }
+          }
+        }
+      },
+      "subjects": {
+        "type": "array",
+        "description": "What the app asks a center to decide (optional, added in v1: additive; spec 049): a purchase, a leave. The center's circuits find the approver.",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "label"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,62}$"
+            },
+            "label": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "fr",
+                "en"
+              ],
+              "properties": {
+                "fr": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "en": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              }
+            },
+            "measure": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "fr",
+                "en"
+              ],
+              "properties": {
+                "fr": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                },
+                "en": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              }
+            }
           }
         }
       },

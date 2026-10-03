@@ -129,6 +129,7 @@ function describe(definition: CapabilityDefinition): Capability {
     ...(reversibility.inverse ? { inverse: reversibility.inverse } : {}),
     permission: definition.permission,
     ...viewEntry(definition),
+    ...(definition.classification ? { classification: definition.classification } : {}),
     input: z.toJSONSchema(definition.input) as Record<string, unknown>,
     ...(definition.output
       ? { output: z.toJSONSchema(definition.output) as Record<string, unknown> }

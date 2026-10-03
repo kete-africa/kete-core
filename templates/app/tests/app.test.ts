@@ -5,7 +5,7 @@ import { readJournal } from '@kete/commands';
 import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '@kete/testing';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { migrations } from '../db/migrations';
 import { completed, reopened, TaskRuleError } from '../src/features/tasks/domain/task';
 import { listTasks } from '../src/features/tasks/infrastructure/task.table';
@@ -201,6 +201,49 @@ describe('the integration contract (kete-core spec 045)', () => {
       expect.arrayContaining(['task_list', 'task_get', 'tasks_complete', 'tasks_create']),
     );
     expect(card.datasets?.map((d) => d.name)).toEqual(['tasks']);
+  });
+});
+
+describe('the app contract (kete-core spec 049)', () => {
+  it('declares its permissions with their words and default roles', () => {
+    const card = manifest();
+    expect(validateManifest(card).ok).toBe(true);
+    const create = card.permissions?.find((p) => p.name === 'tasks:create');
+    expect(create).toMatchObject({ roles: ['owner', 'admin'] });
+    expect(create?.label.fr).toBeTruthy();
+    expect(create?.label.en).toBeTruthy();
+    expect(card.datasets?.[0]?.classification).toBe('internal');
+  });
+
+  it('follows the grants of Kete Enterprise once it manages the app’s rights', async () => {
+    process.env.ENTERPRISE_API_URL = 'https://api.center.test';
+    const asked: string[] = [];
+    vi.stubGlobal('fetch', async (url: string) => {
+      asked.push(url);
+      return Response.json({
+        managed: true,
+        permissions: [{ permission: 'tasks:create', everywhere: false, units: ['unt_sav'] }],
+      });
+    });
+    try {
+      // Kofi is a member: by default he may not add a task; his position at the center may.
+      const added = await asPerson(
+        kofi,
+        () =>
+          registry.invoke({ ...onScreen(kofi), name: 'tasks_create', input: { title: 'Relevé' } }),
+        'kofi-token',
+      );
+      expect(added).toMatchObject({ status: 'done' });
+      expect(asked).toEqual(['https://api.center.test/v1/apps/prd_app_template/grants']);
+      // Without a token, his last grants stand in, not his defaults: reading was not granted.
+      const read = await asPerson(kofi, () =>
+        registry.invoke({ ...onScreen(kofi), name: 'task_list', input: {} }),
+      );
+      expect(read).toEqual({ status: 'refused', reason: 'not_allowed' });
+    } finally {
+      vi.unstubAllGlobals();
+      delete process.env.ENTERPRISE_API_URL;
+    }
   });
 });
 

@@ -8,16 +8,22 @@ let verify: ((token: string) => Promise<KeteIdentity>) | undefined;
  * ChatGPT…), or from another Kete app acting for her through this app's API.
  */
 export async function identityFromBearer(request: Request): Promise<KeteIdentity | null> {
-  const header = request.headers.get('authorization') ?? '';
-  if (!header.startsWith('Bearer ')) return null;
+  const token = bearerOf(request);
+  if (!token) return null;
   // A token for Kete apps, or one an MCP client asked for this endpoint itself (RFC 8707).
   verify ??= createTokenVerifier({
     issuer: env.accountUrl,
     audience: ['urn:kete:apps', `${env.publicUrl}/mcp`],
   });
   try {
-    return await verify(header.slice('Bearer '.length));
+    return await verify(token);
   } catch {
     return null;
   }
+}
+
+/** The bearer token of a request, if any. */
+export function bearerOf(request: Request): string | null {
+  const header = request.headers.get('authorization') ?? '';
+  return header.startsWith('Bearer ') ? header.slice('Bearer '.length) : null;
 }

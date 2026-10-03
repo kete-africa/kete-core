@@ -4,16 +4,16 @@ The source of truth for every exchange between Kete services. TypeScript types i
 `packages/sdk/src/contracts/` are generated from these files (`pnpm contracts:generate`); CI fails
 if the generated code no longer matches (`pnpm contracts:check`).
 
-| File                              | Contract                                                                                                                                      |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `event.v1.schema.json`            | The integration event envelope                                                                                                                |
-| `event-data.v1.schema.json`       | The `data` of each standard event type                                                                                                        |
-| `delivery-request.v1.schema.json` | A signed batch of events sent to a receiver                                                                                                   |
-| `delivery-result.v1.schema.json`  | The receiver's outcome for each event                                                                                                         |
-| `manifest.v1.schema.json`         | An app's self-description (`kete.json`, `GET /.well-known/kete`), with its identity card: owner, data categories, AI use, criticality (D-040) |
-| `health.v1.schema.json`           | An app's health report (`GET /health`)                                                                                                        |
-| `capability.v1.schema.json`       | What an app exposes to agents, with its autonomy level (1 to 4)                                                                               |
-| `dataset.v1.schema.json`          | A set of rows an app exposes to dashboards, the assistant and other apps, under the reader's rights                                           |
+| File                              | Contract                                                                                                                                                                                                                   |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `event.v1.schema.json`            | The integration event envelope                                                                                                                                                                                             |
+| `event-data.v1.schema.json`       | The `data` of each standard event type                                                                                                                                                                                     |
+| `delivery-request.v1.schema.json` | A signed batch of events sent to a receiver                                                                                                                                                                                |
+| `delivery-result.v1.schema.json`  | The receiver's outcome for each event                                                                                                                                                                                      |
+| `manifest.v1.schema.json`         | An app's self-description (`kete.json`, `GET /.well-known/kete`), with its identity card: owner, data categories, AI use, criticality (D-040); its permissions, events emitted, decision subjects and client id (spec 049) |
+| `health.v1.schema.json`           | An app's health report (`GET /health`)                                                                                                                                                                                     |
+| `capability.v1.schema.json`       | What an app exposes to agents, with its autonomy level (1 to 4)                                                                                                                                                            |
+| `dataset.v1.schema.json`          | A set of rows an app exposes to dashboards, the assistant and other apps, under the reader's rights                                                                                                                        |
 
 Signature headers (outside the JSON body): `Kete-Product: <product id>` and
 `Kete-Signature: t=<unix seconds>,kid=<key id>,v1=<hex HMAC-SHA256 of "{t}.{raw body}">`.

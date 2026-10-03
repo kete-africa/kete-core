@@ -66,5 +66,13 @@
   "theme_dark": "Sombre",
   "theme_light": "Clair",
   "theme_auto": "Automatique",
-  "task_status_label": "Statut"
+  "task_status_label": "Statut",
+  "perm_tasks_read": "Voir les tâches",
+  "perm_tasks_read_body": "Lire les tâches de l’organisation et leurs échéances.",
+  "perm_tasks_write": "Terminer et rouvrir les tâches",
+  "perm_tasks_write_body": "Marquer une tâche faite, ou la rouvrir.",
+  "perm_tasks_create": "Ajouter des tâches",
+  "perm_tasks_create_body": "Créer une tâche pour l’organisation.",
+  "perm_journal_read": "Lire le journal",
+  "perm_journal_read_body": "Voir qui a fait quoi dans l’app, agents compris."
 }

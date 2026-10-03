@@ -2,7 +2,7 @@ import { createMcpHandler, protectedResourceMetadata } from '@kete/capabilities'
 import { keteViews } from '@kete/views';
 import { APP_SLUG, DESIGN, VERSION } from './app';
 import { env } from './env';
-import { identityFromBearer } from './identity';
+import { bearerOf, identityFromBearer } from './identity';
 import { registry } from './registry';
 import { asPerson, currentIdentity } from './rights';
 
@@ -36,7 +36,7 @@ function mcp(): (request: Request) => Promise<Response> {
 /** The app's MCP endpoint: its capabilities and their views (doctrine D-037). */
 export async function handleMcp(request: Request): Promise<Response> {
   const identity = await identityFromBearer(request);
-  return asPerson(identity, () => mcp()(request));
+  return asPerson(identity, () => mcp()(request), bearerOf(request));
 }
 
 /** Where MCP clients learn that the Compte Kete issues this endpoint's tokens (RFC 9728). */

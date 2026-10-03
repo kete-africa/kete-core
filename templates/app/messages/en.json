@@ -66,5 +66,13 @@
   "theme_dark": "Dark",
   "theme_light": "Light",
   "theme_auto": "Automatic",
-  "task_status_label": "Status"
+  "task_status_label": "Status",
+  "perm_tasks_read": "See tasks",
+  "perm_tasks_read_body": "Read the organization’s tasks and their deadlines.",
+  "perm_tasks_write": "Complete and reopen tasks",
+  "perm_tasks_write_body": "Mark a task done, or reopen it.",
+  "perm_tasks_create": "Add tasks",
+  "perm_tasks_create_body": "Create a task for the organization.",
+  "perm_journal_read": "Read the journal",
+  "perm_journal_read_body": "See who did what in the app, agents included."
 }

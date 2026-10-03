@@ -12,12 +12,19 @@ export function getSignIn(): KeteSignIn {
     clientSecret: env.clientSecret,
     redirectUri: `${env.publicUrl}/auth/callback`,
     sessionSecret: env.sessionSecret,
+    // The person's token stays on the server: the app asks Kete Enterprise for her grants with it.
+    keepAccessToken: true,
   });
   return signIn;
 }
 
 export function personOf(request: Request): Promise<KeteIdentity | null> {
   return getSignIn().session(request);
+}
+
+/** The person's own token, kept on the server; never sent to the browser. */
+export function tokenOf(request: Request): Promise<string | null> {
+  return getSignIn().accessToken(request);
 }
 
 /** The person, acting on a screen of this app. */

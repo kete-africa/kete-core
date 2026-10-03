@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Status**: `candidate`
-- **Last updated**: `2026-09-28`
+- **Last updated**: `2026-10-03`
 - **Product boundary**: the shared foundation of every Kete app — contracts, shared packages, the
   Compte Kete service with Mon espace Kete, and the app template.
 - **Planning axis**: `DEPENDENCIES_AND_EVIDENCE_NOT_TIME`
@@ -329,19 +329,39 @@ libraries and standards), never rebuilt.
 
 ### Specs, in order
 
-| Spec                       | Delivers                                                                                        | Built on                        |
-| -------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------- |
-| `040-page-slots` (done)    | Page slots, view formats, the chat kit                                                          | —                               |
-| `044-forms-and-modes`      | Responsive dialog, `FormPage`, `ThemeChoice`, the template in every mode                        | —                               |
-| `045-integration-contract` | Records → read tools, read API, data sets, events, identity card                                | MCP, JSON Schema                |
-| `046-agents`               | `@kete/agents`: job description, task given, delegation, budgets, kill switch, A2A              | Mastra, A2A                     |
-| `047-sandbox`              | `@kete/sandbox`: an isolated computer for an agent, behind a neutral port                       | boat.dev, E2B                   |
-| `048-knowledge`            | `@kete/knowledge`: indexing, hybrid search filtered by rights, citations                        | pgvector, Docling               |
-| `049-files-and-documents`  | `@kete/files`: storage, reading, final documents from templates                                 | S3/R2, docxtemplater, Gotenberg |
-| `050-skills`               | `@kete/skills`: Agent Skills folders, versions, test cases, progressive reading                 | Agent Skills                    |
-| `051-channels`             | `@kete/notify`: in-app notifications, Web Push, WhatsApp                                        | Web Push, WhatsApp Cloud API    |
-| `052-chat`                 | The chat of the current era: attachments, side canvas, citations, mentions, commands, dictation | assistant-ui, AI SDK            |
-| `053-observability`        | Traces, costs and evaluations of models and agents                                              | Langfuse                        |
+| Spec                              | Delivers                                                                                        | Built on                          |
+| --------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------- |
+| `040-page-slots` (done)           | Page slots, view formats, the chat kit                                                          | —                                 |
+| `044-forms-and-modes` (done)      | Responsive dialog, `FormPage`, `ThemeChoice`, the template in every mode                        | —                                 |
+| `045-integration-contract` (done) | Records → read tools, read API, data sets, identity card                                        | MCP, JSON Schema                  |
+| `047-sandbox` (done)              | `@kete/sandbox`: an isolated computer for an agent, behind a neutral port                       | boat.dev, E2B                     |
+| `048-app-factory`                 | From an approved request to a running app, its first version coded by an agent                  | GitHub App, Neon, Coolify         |
+| `049-app-contract`                | What an app declares and what the center offers it — see below                                  | OAuth token exchange, CloudEvents |
+| `050-interactive-views`           | An app's views shown in the chat and on the home page, its forms filled there                   | MCP Apps                          |
+| `051-references`                  | A record of one app linked from another; external ids kept through a migration                  | —                                 |
+| `052-knowledge`                   | `@kete/knowledge`: indexing, hybrid search filtered by rights, citations                        | pgvector, Docling                 |
+| `053-files-and-documents`         | `@kete/files`: storage, reading, final documents from templates                                 | S3/R2, docxtemplater, Gotenberg   |
+| `054-skills`                      | `@kete/skills`: Agent Skills folders, versions, test cases, progressive reading                 | Agent Skills                      |
+| `055-channels`                    | `@kete/notify`: in-app notifications, Web Push, WhatsApp                                        | Web Push, WhatsApp Cloud API      |
+| `056-chat`                        | The chat of the current era: attachments, side canvas, citations, mentions, commands, dictation | assistant-ui, AI SDK              |
+| `057-agents`                      | `@kete/agents`: job description, task given, delegation, budgets, kill switch, A2A              | Mastra, A2A                       |
+| `058-observability`               | Traces, costs and evaluations of models and agents                                              | Langfuse                          |
+
+### The app contract (spec 049)
+
+An app enters the system through its identity card and what the center answers. Five gaps closed
+at once, each declared by the template so that an app created by the factory carries them from its
+first commit:
+
+| Concept                 | The app declares                                                               | The center offers                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| **Permissions**         | Each permission with its label (fr, en), its description and its default roles | Grants per role and position, ticked in Administration › Rights, read by the app   |
+| **Events**              | The events it emits (`ticket.opened`…), with their schema and data class       | Signed delivery to the subscribers: agents, briefings, notifications, other apps   |
+| **Data classification** | The class of each record type, data set and event (public → secret)            | Secret data never reaches a model nor a shared briefing                            |
+| **Directory**           | —                                                                              | The organization read by apps: units, positions, managers, scopes (API and MCP)    |
+| **Approvals**           | A request for a decision (amount, subject, requester)                          | The right approver from the structure and thresholds, interim included, the Inbox  |
+| **Agent mandate**       | —                                                                              | A token that says « agent X for person Y », never more rights than Y (`act` claim) |
+| **Unified journal**     | Its gestures, with their chain                                                 | One journal: who did what, in which app, which agent for whom                      |
 
 ### Proof
 
@@ -349,6 +369,10 @@ libraries and standards), never rebuilt.
   a line of integration code, under the person's rights.
 - `[agent]` An agent given a task delegates part of it to another agent; every gesture carries its
   chain up to the person; the person decides the drafts.
+- `[agent]` A permission declared by an app is ticked for a role in Kete Enterprise and changes what
+  the app lets a person do, without a deploy.
+- `[agent]` An event emitted by an app reaches its subscriber signed; an agent's call carries its
+  mandate, and the app records the agent and the person.
 
 ---
 

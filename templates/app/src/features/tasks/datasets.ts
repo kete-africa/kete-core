@@ -11,6 +11,8 @@ export const taskDatasets = [
     name: 'tasks',
     description: 'One row per task: its title, status, due day, creation day, and 1 when done.',
     permission: 'tasks:read',
+    // How far its rows may travel (kete-core spec 049): the organization's people, not beyond.
+    classification: 'internal',
     row: z.object({
       title: z.string(),
       status: z.enum(['open', 'done']),

@@ -32,13 +32,21 @@
       "type": "array",
       "description": "Numeric fields a dashboard sums, averages or counts.",
       "uniqueItems": true,
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "dimensions": {
       "type": "array",
       "description": "Fields a dashboard groups by.",
       "uniqueItems": true,
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
+    },
+    "classification": {
+      "enum": ["public", "internal", "confidential", "secret"],
+      "description": "How far the data may travel. public: anyone; internal (the default): the organization's people with the permission; confidential: a need to know, never in a shared briefing; secret: never sent to a model, a shared briefing nor a notification's text."
     }
   }
 }
