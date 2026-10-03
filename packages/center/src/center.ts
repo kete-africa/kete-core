@@ -50,6 +50,29 @@ export interface DirectoryUnit {
   people: (DirectoryPerson & { positionTitle: string })[];
 }
 
+/** A decision the app asks the center's circuits (Kete Enterprise spec 023). */
+export interface DecisionAsked {
+  /** A subject the app's card declares (`subjects`): `purchase`. */
+  subject: string;
+  /** The app's own id of what is to be decided: one request per subject and reference. */
+  reference: string;
+  title: string;
+  /** The amount or level the circuit's thresholds read. */
+  measure?: number;
+  unitId?: string;
+  /** Where the app is told it was decided: only the request's id is sent. */
+  callbackUrl?: string;
+}
+
+export interface CenterDecision {
+  requestId: string;
+  subject: string;
+  reference: string;
+  status: 'pending' | 'approved' | 'refused';
+  decidedBy: string | null;
+  reason: string | null;
+}
+
 export interface CenterOptions {
   /** The center's API, `https://api.enterprise.example`; empty when the app works alone. */
   url: string | null | undefined;
@@ -80,6 +103,23 @@ export interface Center {
   person(token: string | null | undefined, userId: string): Promise<DirectoryCard | null>;
   /** A unit, its place and its people; null when the person may not see it. */
   unit(token: string | null | undefined, unitId: string): Promise<DirectoryUnit | null>;
+  /**
+   * Asks the center's circuits to decide, for the person: who decides is found by the structure
+   * and the thresholds, interim included. `no_circuit`: the organization has none for the subject,
+   * the app applies its own rule.
+   */
+  requestDecision(
+    token: string | null | undefined,
+    decision: DecisionAsked,
+  ): Promise<
+    { ok: true; requestId: string; status: CenterDecision['status'] } | { ok: false; error: string }
+  >;
+  /** Where a decision stands, read with the app's own token (`kete:center`). */
+  decision(
+    appToken: string | null | undefined,
+    organizationId: string,
+    requestId: string,
+  ): Promise<CenterDecision | null>;
   /** Sends an indicator's reading for her quarter's review. */
   sendReading(
     token: string | null | undefined,
@@ -125,6 +165,35 @@ export function createCenter(options: CenterOptions): Center {
   return {
     connected: base !== null,
     eventsUrl: base ? `${base}/public/apps/events` : null,
+
+    async requestDecision(token, decision) {
+      if (!base) return { ok: false, error: 'not_connected' };
+      if (!token) return { ok: false, error: 'signed_out' };
+      const response = await post(
+        token,
+        `/v1/apps/${encodeURIComponent(options.product)}/decisions`,
+        decision,
+      );
+      if (!response) return { ok: false, error: 'unreachable' };
+      const answer = (await response.json().catch(() => ({}))) as {
+        requestId?: string;
+        status?: CenterDecision['status'];
+        error?: string;
+      };
+      return response.ok && answer.requestId && answer.status
+        ? { ok: true, requestId: answer.requestId, status: answer.status }
+        : { ok: false, error: answer.error ?? `http_${response.status}` };
+    },
+
+    async decision(appToken, organizationId, requestId) {
+      if (!base || !appToken) return null;
+      const response = await call(
+        `${base}/public/apps/${encodeURIComponent(organizationId)}/decisions/${encodeURIComponent(requestId)}`,
+        { headers: { authorization: `Bearer ${appToken}` }, signal: AbortSignal.timeout(4000) },
+      ).catch(() => null);
+      if (!response?.ok) return null;
+      return ((await response.json().catch(() => null)) as CenterDecision | null) ?? null;
+    },
 
     me: (token) => read<DirectoryCard>(token, '/v1/directory/me'),
     person: (token, userId) =>
