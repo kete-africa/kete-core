@@ -34,7 +34,10 @@ export interface CallingApp {
  * The calling app: a `client_credentials` token this Compte Kete issued, carrying `kete:people`,
  * from a client still granted that scope and not disabled.
  */
-export async function requireApp(request: Request): Promise<CallingApp> {
+export async function requireApp(
+  request: Request,
+  scope: string = PEOPLE_SCOPE,
+): Promise<CallingApp> {
   const header = request.headers.get('authorization') ?? '';
   const token = header.startsWith('Bearer ') ? header.slice('Bearer '.length) : '';
   if (!token) throw new AppApiError(401, 'unauthenticated');
@@ -53,7 +56,7 @@ export async function requireApp(request: Request): Promise<CallingApp> {
   const clientId = text(payload.azp) || text(payload.client_id);
   // A person's token never provisions people: only the app itself, with no person behind it.
   const personBehind = typeof payload.sub === 'string' && payload.sub !== clientId;
-  if (!clientId || personBehind || !scopes.includes(PEOPLE_SCOPE)) {
+  if (!clientId || personBehind || !scopes.includes(scope)) {
     throw new AppApiError(403, 'not_allowed');
   }
   const [client] = await db
@@ -64,7 +67,7 @@ export async function requireApp(request: Request): Promise<CallingApp> {
     })
     .from(oauthClient)
     .where(eq(oauthClient.clientId, clientId));
-  if (!client || client.disabled || !client.scopes?.includes(PEOPLE_SCOPE)) {
+  if (!client || client.disabled || !client.scopes?.includes(scope)) {
     throw new AppApiError(403, 'not_allowed');
   }
   const redirectOrigins = client.redirectUris.flatMap((uri) => {

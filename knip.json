@@ -15,6 +15,10 @@
         "playwright.config.ts"
       ]
     },
+    "apps/factory": {
+      "entry": ["tests/**/*.ts"],
+      "ignoreDependencies": ["@types/libsodium-wrappers"]
+    },
     "apps/docs": {
       "entry": ["scripts/*.ts"]
     },

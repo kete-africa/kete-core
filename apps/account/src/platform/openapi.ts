@@ -69,6 +69,42 @@ export const accountPaths: Record<string, Schema> = {
       },
     },
   },
+  '/api/apps/clients': {
+    post: {
+      tags: ['Apps'],
+      summary: 'Register an app the factory created',
+      description:
+        "Only the app factory's client (scope kete:factory). A trusted app (no consent, PKCE), on an https callback of the hosts allowed; its secret is returned once.",
+      security: appToken,
+      requestBody: {
+        required: true,
+        ...json(
+          {
+            type: 'object',
+            properties: {
+              name: { type: 'string', maxLength: 80 },
+              redirectUri: { type: 'string', format: 'uri' },
+            },
+            required: ['name', 'redirectUri'],
+          },
+          'The app and its sign-in callback',
+        ),
+      },
+      responses: {
+        '201': json(
+          {
+            type: 'object',
+            properties: { clientId: { type: 'string' }, clientSecret: { type: 'string' } },
+            required: ['clientId', 'clientSecret'],
+          },
+          'The registered app, its secret given once',
+        ),
+        '401': error('No valid app token'),
+        '403': error('Not the factory, a host not allowed, or the factory not configured'),
+        '422': error('Invalid input'),
+      },
+    },
+  },
   '/api/apps/sign-in-links': {
     post: {
       tags: ['Apps'],

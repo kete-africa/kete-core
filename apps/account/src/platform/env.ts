@@ -35,6 +35,20 @@ export const env = {
       pulseSecret: process.env.PAYMENTS_CHARIOW_PULSE_SECRET ?? '',
     };
   },
+  /**
+   * The app factory (spec 048): the operator it registers apps as — an operator's e-mail — and the
+   * hosts its apps' sign-in callbacks may live on (suffixes, comma-separated, e.g.
+   * `.staging.kete.africa`). Without both, the factory registers nothing.
+   */
+  get factory(): { operator: string; hosts: string[] } {
+    return {
+      operator: (process.env.KETE_FACTORY_OPERATOR ?? '').trim(),
+      hosts: (process.env.KETE_FACTORY_HOSTS ?? '')
+        .split(',')
+        .map((value) => value.trim().toLowerCase())
+        .filter((value) => value.startsWith('.')),
+    };
+  },
   /** Object storage of the same Neon branch as the database (decision 0002). */
   get storage() {
     return {

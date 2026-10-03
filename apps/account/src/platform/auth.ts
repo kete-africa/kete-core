@@ -20,6 +20,10 @@ import {
  * 013) — through `client_credentials` only, granted per client by an operator. */
 export const PEOPLE_SCOPE = 'kete:people';
 
+/** `kete:factory`: the app factory registers the apps it creates (spec 048) — through
+ * `client_credentials` only, granted to the factory's own client by an operator. */
+export const FACTORY_SCOPE = 'kete:factory';
+
 // The Compte Kete is @kete/identity (spec 026) with its own e-mails, events, offers and operators.
 export const {
   auth,
@@ -55,7 +59,7 @@ export const {
       record(tx, accountEvent('account.created', organizationId, {})),
     ),
   signInLinks: { expiresIn: SIGN_IN_LINK_SECONDS, deliver: async (url) => deliverSignInLink(url) },
-  scopes: [PEOPLE_SCOPE],
+  scopes: [PEOPLE_SCOPE, FACTORY_SCOPE],
   // MCP servers (Kete Enterprise's gateway…) whose clients ask for a token bound to them.
   resources: env.oauthResources,
   // Must stay last: lets server functions set the session cookies.
