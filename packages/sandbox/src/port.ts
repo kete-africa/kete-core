@@ -67,9 +67,10 @@ export interface SandboxProvider {
   create(options?: CreateOptions): Promise<Sandbox>;
   /**
    * A sandbox created earlier, by its id, ready to use: resumed first when it was stopped, with
-   * its files as they were. Null when it no longer exists.
+   * its files as they were. Null when it no longer exists. With `resume: false`, it is handed
+   * out as it is — to delete it, say, without waking it first.
    */
-  open(id: string): Promise<Sandbox | null>;
+  open(id: string, options?: { resume?: boolean }): Promise<Sandbox | null>;
 }
 
 export class SandboxError extends Error {

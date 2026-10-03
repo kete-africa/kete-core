@@ -17,6 +17,7 @@ flowchart LR
   secrets; it gets only the variables the caller gives it, and stops by itself after `ttlSeconds`.
 - `open(id)`: a sandbox created earlier, ready to use — **resumed first when it was stopped**, its
   files as they were (a person's own agent sign-in among them); null when it no longer exists.
+  `open(id, { resume: false })` hands it out as it is, to delete it without waking it.
 - `mustRun` throws when a step fails or times out.
 - **The provider's own agent**: `sandbox.prompt({ agent: 'codex', model, prompt })` starts it in
   the background, `sandbox.promptStatus(runId)` follows it — when the provider runs agents signed

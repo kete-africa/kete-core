@@ -157,6 +157,16 @@ describe('the provider adapter', () => {
       'GET /sandboxes/bx_2',
     ]);
   });
+
+  it('hands a stopped sandbox out as it is when asked, to delete it without waking it', async () => {
+    const boat = fakeBoat();
+    const provider = boatProvider({ apiKey: 'k', fetch: boat.fetcher, pollMs: 1 });
+    await (await provider.open('bx_2', { resume: false }))?.destroy();
+    expect(boat.calls.map((c) => `${c.method} ${c.path}`)).toEqual([
+      'GET /sandboxes/bx_2',
+      'DELETE /sandboxes/bx_2',
+    ]);
+  });
 });
 
 describe('the sandbox in memory, for tests', () => {

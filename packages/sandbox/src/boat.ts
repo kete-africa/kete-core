@@ -176,7 +176,7 @@ export function boatProvider(options: BoatOptions): SandboxProvider {
       if (answer.sandbox.state !== 'ready') await waitReady(answer.sandbox.id);
       return handle(answer.sandbox.id);
     },
-    async open(id: string) {
+    async open(id: string, open: { resume?: boolean } = {}) {
       let state: string;
       try {
         ({
@@ -187,6 +187,7 @@ export function boatProvider(options: BoatOptions): SandboxProvider {
         throw error;
       }
       if (state === 'cancelled') return null;
+      if (open.resume === false) return handle(id);
       // A stopped sandbox keeps its disk — a person's own agent sign-in among it: it comes back
       // where it was, on a fresh machine, before it is handed out.
       if (state === 'archiving') state = await waitArchived(id);
