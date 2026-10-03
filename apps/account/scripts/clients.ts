@@ -5,6 +5,8 @@
  *     --redirect https://cockpit…/auth/callback
  *   pnpm clients create … --people    (the app may provision people by phone — spec 013)
  *   pnpm clients create … --factory   (the app factory: registers the apps it creates — spec 048)
+ *   pnpm clients create … --center    (the app speaks to its center as itself — spec 049)
+ *   pnpm clients center --client <id> (an app registered before: let it speak to its center)
  *   pnpm clients list
  *
  * Only a Kete operator (owner or admin of Kete's organization, signing in strongly: two-factor on
@@ -44,6 +46,9 @@ const { positionals, values } = parseArgs({
     people: { type: 'boolean', default: false },
     // The app factory registers the apps it creates (spec 048).
     factory: { type: 'boolean', default: false },
+    // The app speaks to its center (Kete Enterprise) as itself: its events (spec 049).
+    center: { type: 'boolean', default: false },
+    client: { type: 'string' },
   },
 });
 
@@ -69,7 +74,7 @@ try {
           redirect_uris: redirects,
           token_endpoint_auth_method: 'client_secret_post',
           grant_types:
-            values.people || values.factory
+            values.people || values.factory || values.center
               ? ['authorization_code', 'refresh_token', 'client_credentials']
               : ['authorization_code', 'refresh_token'],
           response_types: ['code'],
@@ -78,18 +83,36 @@ try {
           client_credentials_scopes: [
             ...(values.people ? ['kete:people'] : []),
             ...(values.factory ? ['kete:factory'] : []),
+            ...(values.center ? ['kete:center'] : []),
           ],
         },
       })
       .finally(() => session.close());
     console.log(JSON.stringify(client, null, 2));
+  } else if (positionals[0] === 'center') {
+    // An app registered before spec 049: it may now ask a token of its own for its center.
+    if (!values.client) throw new Error('--client is required');
+    const { rowCount } = await getPool().query(
+      `update oauth_client
+          set client_credentials_scopes = (
+                select array_agg(distinct s) from unnest(
+                  coalesce(client_credentials_scopes, '{}') || array['kete:center']) s),
+              grant_types = (
+                select array_agg(distinct g) from unnest(grant_types || array['client_credentials']) g)
+        where client_id = $1`,
+      [values.client],
+    );
+    if (rowCount !== 1) throw new Error(`${values.client}: no such client`);
+    console.log(`${values.client} may now speak to its center (kete:center).`);
   } else if (positionals[0] === 'list') {
     const { rows } = await getPool().query(
       'select client_id, name, redirect_uris, skip_consent, disabled from oauth_client order by created_at',
     );
     console.table(rows);
   } else {
-    throw new Error('Usage: clients create --name --redirect [--redirect …] | list');
+    throw new Error(
+      'Usage: clients create --name --redirect [--redirect …] | center --client <id> | list',
+    );
   }
 } finally {
   await getPool().end();

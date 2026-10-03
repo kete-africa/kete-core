@@ -104,6 +104,28 @@ flowchart LR
   classification of its capabilities and data sets.
 - **FR-006**: `secret` is never sent to a model by the center (its spec on apps' permissions).
 
+## Delivered
+
+| Part | What                                                                                       | Where                                       |
+| ---- | ------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| 1    | Permissions with their words, classification, `@kete/center` grants, the template's rights | kete-core #49; Kete Enterprise spec 022     |
+| 2    | The app's own token (`kete:center`), the directory, business events in their own outbox    | this part; Kete Enterprise specs 023, 025   |
+| 3    | The agent's mandate                                                                        | next                                        |
+| 4    | Decisions asked by apps                                                                    | next; Kete Enterprise spec 023, part 2      |
+
+### Part 2 in detail
+
+- **The app's own token**: the Compte Kete grants `kete:center` (`client_credentials`) to the apps
+  the factory registers, and to an app registered before with `pnpm clients center --client <id>`.
+  `createAppToken` asks it and keeps it until a minute before it expires;
+  `createAppTokenVerifier` refuses a person's token or one without the scope.
+- **Business events**: `outboxMigrationSql({ name: 'kete_center_outbox' })` gives the app a second
+  outbox; `announce(db, …)` records a fact in it with the change; the worker delivers it every
+  minute to `{center}/public/apps/events` with the app's token, no signature, no shared key. Facts
+  and identifiers only (`event.v1`): the template's `task.created` carries the task's id and day,
+  never its title.
+- **The directory**: `center.me(token)`, `center.person(token, userId)`, `center.unit(token, id)`.
+
 ## Out of scope here
 
 Interactive views (spec 050), references between records (051), the unified journal (with the

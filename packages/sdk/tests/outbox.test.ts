@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   buildHealthReport,
+  httpTransport,
+  recordEvent,
   createEmitter,
   createOutboxRelay,
   memoryDedupeStore,
@@ -203,5 +205,51 @@ describe('health (US3, FR-016)', () => {
     expect(report.dependencies.find((d) => d.name === 'storage')?.status).toBe('down');
     expect(typeof report.outbox.pending).toBe('number');
     expect(JSON.stringify(report)).not.toMatch(/postgres(ql)?:\/\//);
+  });
+});
+
+describe('an outbox to the center (spec 049)', () => {
+  it('keeps its own rows, and goes with the app’s own token instead of a signature', async () => {
+    await clearOutbox();
+    const event = emitter.build({ type: 'account.created', organization: orgA, data: {} });
+    await inOrganization(db.app, orgA, (tx) =>
+      recordEvent(tx, event, { outbox: 'kete_center_outbox' }),
+    );
+    expect(await countRows()).toBe(0);
+    expect(await outboxBacklog(db.app, 'kete_center_outbox')).toMatchObject({ pending: 1 });
+    const seen: Headers[] = [];
+    const relay = createOutboxRelay({
+      pool: db.app,
+      product: manifest.product,
+      outbox: 'kete_center_outbox',
+      transport: httpTransport({
+        url: 'https://center.test/public/apps/events',
+        token: async () => 'app-token',
+        fetch: (async (_url: string, init?: RequestInit) => {
+          seen.push(new Headers(init?.headers));
+          const { events } = JSON.parse(String(init?.body)) as { events: { id: string }[] };
+          return Response.json({ results: events.map((e) => ({ id: e.id, outcome: 'accepted' })) });
+        }) as unknown as typeof fetch,
+      }),
+    });
+    expect(await relay.flush()).toMatchObject({ claimed: 1, delivered: 1 });
+    expect(seen[0]?.get('authorization')).toBe('Bearer app-token');
+    expect(seen[0]?.has('kete-signature')).toBe(false);
+    expect(await outboxBacklog(db.app, 'kete_center_outbox')).toEqual({ pending: 0 });
+  });
+
+  it('waits while the app has no token', async () => {
+    const event = emitter.build({ type: 'account.created', organization: orgA, data: {} });
+    await inOrganization(db.app, orgA, (tx) =>
+      recordEvent(tx, event, { outbox: 'kete_center_outbox' }),
+    );
+    const relay = createOutboxRelay({
+      pool: db.app,
+      product: manifest.product,
+      outbox: 'kete_center_outbox',
+      retryDelaySeconds: () => 0,
+      transport: httpTransport({ url: 'https://center.test/x', token: async () => null }),
+    });
+    expect(await relay.flush()).toMatchObject({ retried: 1 });
   });
 });

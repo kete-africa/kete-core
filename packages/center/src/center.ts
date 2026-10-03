@@ -25,6 +25,31 @@ export interface CenterReading {
   proof: string;
 }
 
+/** A person as the directory shows her (Kete Enterprise spec 023). */
+export interface DirectoryPerson {
+  personId: string;
+  name: string;
+  email: string | null;
+  /** Her Compte Kete account: what the apps know her by. */
+  userId: string | null;
+}
+
+export interface DirectoryCard extends DirectoryPerson {
+  positions: { positionId: string; title: string; unitId: string; unitName: string }[];
+  /** Whoever holds the position hers reports to, past vacant ones, interim included. */
+  managers: DirectoryPerson[];
+  reports: DirectoryPerson[];
+}
+
+export interface DirectoryUnit {
+  unitId: string;
+  name: string;
+  country: string | null;
+  ancestors: { unitId: string; name: string }[];
+  children: { unitId: string; name: string }[];
+  people: (DirectoryPerson & { positionTitle: string })[];
+}
+
 export interface CenterOptions {
   /** The center's API, `https://api.enterprise.example`; empty when the app works alone. */
   url: string | null | undefined;
@@ -41,12 +66,20 @@ export interface CenterOptions {
 export interface Center {
   /** Whether a center is configured. */
   readonly connected: boolean;
+  /** Where the app delivers its business events, with its own token (null without a center). */
+  readonly eventsUrl: string | null;
   /** The person's grants for this app; null without a center, a token, or an answer. */
   grants(token: string | null | undefined): Promise<CenterGrants | null>;
   /** Puts a task in the person's To do; sending it again updates it. */
   sendTask(token: string | null | undefined, task: CenterTask): Promise<void>;
   /** Takes a task out of her To do, once done here. */
   closeTask(token: string | null | undefined, key: string): Promise<void>;
+  /** Who the person is in the organization: her positions, managers and reports. */
+  me(token: string | null | undefined): Promise<DirectoryCard | null>;
+  /** A colleague by her Compte Kete account; null when the person may not see her. */
+  person(token: string | null | undefined, userId: string): Promise<DirectoryCard | null>;
+  /** A unit, its place and its people; null when the person may not see it. */
+  unit(token: string | null | undefined, unitId: string): Promise<DirectoryUnit | null>;
   /** Sends an indicator's reading for her quarter's review. */
   sendReading(
     token: string | null | undefined,
@@ -79,8 +112,25 @@ export function createCenter(options: CenterOptions): Center {
     }).catch(() => null);
   }
 
+  async function read<T>(token: string | null | undefined, path: string): Promise<T | null> {
+    if (!base || !token) return null;
+    const response = await call(`${base}${path}`, {
+      headers: headers(token),
+      signal: AbortSignal.timeout(4000),
+    }).catch(() => null);
+    if (!response?.ok) return null;
+    return ((await response.json().catch(() => null)) as T | null) ?? null;
+  }
+
   return {
     connected: base !== null,
+    eventsUrl: base ? `${base}/public/apps/events` : null,
+
+    me: (token) => read<DirectoryCard>(token, '/v1/directory/me'),
+    person: (token, userId) =>
+      read<DirectoryCard>(token, `/v1/directory/people/${encodeURIComponent(userId)}`),
+    unit: (token, unitId) =>
+      read<DirectoryUnit>(token, `/v1/directory/units/${encodeURIComponent(unitId)}`),
 
     async grants(token) {
       if (!base || !token) return null;

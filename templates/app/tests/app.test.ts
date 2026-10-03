@@ -21,7 +21,7 @@ import { screenActor } from '../src/platform/session';
 
 let db: TestSchema;
 
-const person = (userId: string, role: KeteIdentity['role'], organizationId = 'org_a') =>
+const person = (userId: string, role: KeteIdentity['role'], organizationId = 'org_acme') =>
   ({
     userId,
     email: `${userId}@example.test`,
@@ -98,20 +98,20 @@ describe('an agent and a person, through MCP', () => {
     const { draftId, openUrl } = prepared.structuredContent as { draftId: string; openUrl: string };
     expect(prepared.structuredContent).toMatchObject({ status: 'draft' });
     expect(openUrl).toBe(`https://app.test/verification/${draftId}`);
-    expect(await transaction('org_a', (tx) => listTasks(tx))).toHaveLength(0);
+    expect(await transaction('org_acme', (tx) => listTasks(tx))).toHaveLength(0);
 
     const validated = await client.callTool({
       name: 'kete_draft_validate',
       arguments: { draftId },
     });
     expect(validated.structuredContent).toMatchObject({ status: 'validated' });
-    const [task] = await transaction('org_a', (tx) => listTasks(tx));
+    const [task] = await transaction('org_acme', (tx) => listTasks(tx));
     expect(task).toMatchObject({ title: 'Relancer Efua', dueOn: '2026-10-15', status: 'open' });
     await client.close();
   });
 
   it('the agent completes a task alone, and the journal says how to undo it', async () => {
-    const [task] = await transaction('org_a', (tx) => listTasks(tx, 'open'));
+    const [task] = await transaction('org_acme', (tx) => listTasks(tx, 'open'));
     const done = await asPerson(ama, () =>
       registry.invoke({
         ...agentFor(ama),
@@ -120,7 +120,7 @@ describe('an agent and a person, through MCP', () => {
       }),
     );
     expect(done).toMatchObject({ status: 'done', undo: 'reopen-task' });
-    const [entry] = await transaction('org_a', (tx) => readJournal(tx));
+    const [entry] = await transaction('org_acme', (tx) => readJournal(tx));
     expect(entry).toMatchObject({
       name: 'complete-task',
       actor: { kind: 'agent' },
@@ -213,6 +213,22 @@ describe('the app contract (kete-core spec 049)', () => {
     expect(create?.label.fr).toBeTruthy();
     expect(create?.label.en).toBeTruthy();
     expect(card.datasets?.[0]?.classification).toBe('internal');
+  });
+
+  it('announces its business facts to the center, in their own outbox', async () => {
+    expect(manifest().emits?.map((e) => e.type)).toEqual(['task.created', 'task.completed']);
+    await asPerson(ama, () =>
+      registry.invoke({ ...onScreen(ama), name: 'tasks_create', input: { title: 'Annoncée' } }),
+    );
+    const { rows } = await db.owner.query<{ envelope: { type: string; data: object } }>(
+      `select envelope from ${db.schema}.kete_center_outbox order by created_at desc limit 1`,
+    );
+    expect(rows[0]?.envelope).toMatchObject({
+      type: 'task.created',
+      data: { taskId: expect.stringMatching(/^tsk_/) },
+    });
+    // Facts only: no title, no name, travels to the center.
+    expect(JSON.stringify(rows[0]?.envelope)).not.toContain('Annoncée');
   });
 
   it('follows the grants of Kete Enterprise once it manages the app’s rights', async () => {

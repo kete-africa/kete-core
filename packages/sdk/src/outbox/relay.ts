@@ -18,7 +18,13 @@ export interface RelayOptions {
   pool: Pool;
   transport: Transport;
   product: string;
-  key: SigningKey;
+  /**
+   * Signs each batch (Kete Cockpit). Without it, the transport authenticates the app otherwise —
+   * its own token, for its center (spec 049).
+   */
+  key?: SigningKey;
+  /** The outbox to deliver (default `kete_outbox`). */
+  outbox?: string;
   batchSize?: number;
   leaseSeconds?: number;
   /** Overrides the retry delay (tests). */
@@ -69,6 +75,8 @@ function splitBatches(events: KeteEvent[]): KeteEvent[][] {
  * At-least-once from the app; the receiver makes it exactly-once (research R-06).
  */
 export function createOutboxRelay(options: RelayOptions) {
+  const outbox = options.outbox ?? 'kete_outbox';
+  if (!/^[a-z_][a-z0-9_]*$/.test(outbox)) throw new Error(`Invalid outbox: ${outbox}`);
   const batchSize = options.batchSize ?? MAX_BATCH_EVENTS;
   const leaseSeconds = options.leaseSeconds ?? 60;
   const delayFor = options.retryDelaySeconds ?? ((attempts: number) => backoffSeconds(attempts));
@@ -88,7 +96,7 @@ export function createOutboxRelay(options: RelayOptions) {
       result = await options.transport.send({
         body,
         product: options.product,
-        signature: sign(body, options.key),
+        signature: options.key ? sign(body, options.key) : '',
       });
     } catch (error) {
       return batch.map((e) => retry(e.id, (error as Error).message));
@@ -106,10 +114,10 @@ export function createOutboxRelay(options: RelayOptions) {
 
   async function flushOnce(): Promise<FlushReport> {
     const report: FlushReport = { claimed: 0, delivered: 0, refused: 0, retried: 0 };
-    const { rows } = await options.pool.query<ClaimedRow>(
-      'select * from kete_outbox_claim($1, $2)',
-      [batchSize, leaseSeconds],
-    );
+    const { rows } = await options.pool.query<ClaimedRow>(`select * from ${outbox}_claim($1, $2)`, [
+      batchSize,
+      leaseSeconds,
+    ]);
     if (rows.length === 0) return report;
     report.claimed = rows.length;
     const attempts = new Map(rows.map((r) => [r.event_id, r.attempts]));
@@ -117,7 +125,7 @@ export function createOutboxRelay(options: RelayOptions) {
     for (const batch of splitBatches(rows.map((r) => r.envelope))) {
       settlements.push(...(await deliver(batch, attempts)));
     }
-    await options.pool.query('select kete_outbox_settle($1::jsonb)', [JSON.stringify(settlements)]);
+    await options.pool.query(`select ${outbox}_settle($1::jsonb)`, [JSON.stringify(settlements)]);
     for (const s of settlements) {
       if (s.outcome === 'delivered') report.delivered++;
       else if (s.outcome === 'refused') report.refused++;

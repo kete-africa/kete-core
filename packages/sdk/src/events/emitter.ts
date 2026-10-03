@@ -26,12 +26,16 @@ export function createEmitter(manifest: Manifest) {
     /** Builds and validates an event without recording it. */
     build,
     /**
-     * Records an event in the caller's transaction, with the business change it announces.
-     * Returns the recorded event.
+     * Records an event in the caller's transaction, with the business change it announces — in
+     * `kete_outbox`, or the outbox named (spec 049). Returns the recorded event.
      */
-    async record<T extends string>(db: SqlExecutor, input: EmitInput<T>): Promise<KeteEvent> {
+    async record<T extends string>(
+      db: SqlExecutor,
+      input: EmitInput<T>,
+      options: { outbox?: string } = {},
+    ): Promise<KeteEvent> {
       const event = build(input);
-      await recordEvent(db, event);
+      await recordEvent(db, event, options);
       return event;
     },
   };

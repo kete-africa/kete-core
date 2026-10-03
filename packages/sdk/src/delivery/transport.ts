@@ -24,10 +24,17 @@ export function httpTransport(options: {
   url: string;
   timeoutMs?: number;
   fetch?: typeof fetch;
+  /**
+   * The app's own token, for a receiver that authenticates apps by it (a center, spec 049). Null:
+   * no credentials yet, the batch waits.
+   */
+  token?: () => Promise<string | null>;
 }): Transport {
   const doFetch = options.fetch ?? fetch;
   return {
     async send({ body, product, signature }) {
+      const token = options.token ? await options.token() : undefined;
+      if (token === null) throw new TransientDeliveryError('no token for the receiver');
       let response: Response;
       try {
         response = await doFetch(options.url, {
@@ -35,7 +42,8 @@ export function httpTransport(options: {
           headers: {
             'content-type': 'application/json',
             [PRODUCT_HEADER]: product,
-            [SIGNATURE_HEADER]: signature,
+            ...(signature ? { [SIGNATURE_HEADER]: signature } : {}),
+            ...(token ? { authorization: `Bearer ${token}` } : {}),
           },
           body,
           signal: AbortSignal.timeout(options.timeoutMs ?? 10_000),

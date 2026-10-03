@@ -5,6 +5,11 @@ export interface OutboxMigrationOptions {
   appRole: string;
   /** The migration role owning the table and the relay functions. */
   ownerRole: string;
+  /**
+   * The outbox's name (default `kete_outbox`, to Kete Cockpit). An app keeps one outbox per
+   * destination: `kete_center_outbox` for its business events to its center (spec 049).
+   */
+  name?: string;
 }
 
 const identifier = /^[a-z_][a-z0-9_]*$/;
@@ -23,7 +28,8 @@ export function outboxMigrationSql(options: OutboxMigrationOptions): string {
   const schema = checkIdentifier(options.schema ?? 'public');
   const app = checkIdentifier(options.appRole);
   const owner = checkIdentifier(options.ownerRole);
-  const t = `${schema}.kete_outbox`;
+  const name = checkIdentifier(options.name ?? 'kete_outbox');
+  const t = `${schema}.${name}`;
   return `
 create table ${t} (
   event_id text primary key,
@@ -37,25 +43,25 @@ create table ${t} (
   created_at timestamptz not null default now(),
   settled_at timestamptz
 );
-create index kete_outbox_due on ${t} (next_attempt_at) where status = 'pending';
+create index ${name}_due on ${t} (next_attempt_at) where status = 'pending';
 
 alter table ${t} enable row level security;
 alter table ${t} force row level security;
-create policy kete_outbox_organization on ${t} to ${app}
+create policy ${name}_organization on ${t} to ${app}
   using (organization_id = current_setting('kete.organization_id', true))
   with check (organization_id = current_setting('kete.organization_id', true));
-create policy kete_outbox_relay on ${t} to ${owner} using (true) with check (true);
+create policy ${name}_relay on ${t} to ${owner} using (true) with check (true);
 grant usage on schema ${schema} to ${app};
 grant select, insert on ${t} to ${app};
 
-create function ${schema}.kete_outbox_claim(batch_size integer, lease_seconds integer)
+create function ${schema}.${name}_claim(batch_size integer, lease_seconds integer)
 returns table (event_id text, envelope jsonb, attempts integer)
 language sql security definer set search_path = ${schema}, pg_temp as $fn$
-  update kete_outbox o
+  update ${name} o
      set leased_until = now() + make_interval(secs => lease_seconds),
          attempts = o.attempts + 1
    where o.event_id in (
-     select c.event_id from kete_outbox c
+     select c.event_id from ${name} c
       where c.status = 'pending'
         and c.next_attempt_at <= now()
         and (c.leased_until is null or c.leased_until < now())
@@ -66,10 +72,10 @@ language sql security definer set search_path = ${schema}, pg_temp as $fn$
 $fn$;
 
 -- results: [{ "event_id", "outcome": "delivered" | "refused" | "retry", "reason", "delay_seconds" }]
-create function ${schema}.kete_outbox_settle(results jsonb)
+create function ${schema}.${name}_settle(results jsonb)
 returns void
 language sql security definer set search_path = ${schema}, pg_temp as $fn$
-  update kete_outbox o
+  update ${name} o
      set status = case r.outcome when 'retry' then 'pending' else r.outcome end,
          settled_at = case when r.outcome in ('delivered', 'refused') then now() end,
          last_error = r.reason,
@@ -81,18 +87,18 @@ language sql security definer set search_path = ${schema}, pg_temp as $fn$
    where o.event_id = r.event_id and o.status = 'pending';
 $fn$;
 
-create function ${schema}.kete_outbox_backlog()
+create function ${schema}.${name}_backlog()
 returns table (pending bigint, oldest_pending_age_seconds integer)
 language sql security definer set search_path = ${schema}, pg_temp as $fn$
   select count(*), extract(epoch from now() - min(created_at))::integer
-    from kete_outbox where status = 'pending';
+    from ${name} where status = 'pending';
 $fn$;
 
-revoke all on function ${schema}.kete_outbox_claim(integer, integer) from public;
-revoke all on function ${schema}.kete_outbox_settle(jsonb) from public;
-revoke all on function ${schema}.kete_outbox_backlog() from public;
-grant execute on function ${schema}.kete_outbox_claim(integer, integer) to ${app};
-grant execute on function ${schema}.kete_outbox_settle(jsonb) to ${app};
-grant execute on function ${schema}.kete_outbox_backlog() to ${app};
+revoke all on function ${schema}.${name}_claim(integer, integer) from public;
+revoke all on function ${schema}.${name}_settle(jsonb) from public;
+revoke all on function ${schema}.${name}_backlog() from public;
+grant execute on function ${schema}.${name}_claim(integer, integer) to ${app};
+grant execute on function ${schema}.${name}_settle(jsonb) to ${app};
+grant execute on function ${schema}.${name}_backlog() to ${app};
 `;
 }

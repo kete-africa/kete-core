@@ -23,10 +23,17 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
-/** Reads the pending delivery backlog across organizations, through its definer function. */
-export async function outboxBacklog(db: SqlExecutor): Promise<HealthReport['outbox']> {
+/**
+ * Reads the pending delivery backlog across organizations, through its definer function: of
+ * `kete_outbox` by default, or of a named outbox (spec 049).
+ */
+export async function outboxBacklog(
+  db: SqlExecutor,
+  outbox = 'kete_outbox',
+): Promise<HealthReport['outbox']> {
+  if (!/^[a-z_][a-z0-9_]*$/.test(outbox)) throw new Error(`Invalid outbox: ${outbox}`);
   const { rows } = await db.query<{ pending: string; oldest_pending_age_seconds: number | null }>(
-    'select * from kete_outbox_backlog()',
+    `select * from ${outbox}_backlog()`,
   );
   const row = rows[0];
   const pending = Number(row?.pending ?? 0);

@@ -11,6 +11,10 @@ export function createTestDatabase(): Promise<TestDatabase> {
   return createTestSchema({
     migrate: async (owner, { schema, appRole, ownerRole }) => {
       await owner.query(outboxMigrationSql({ schema, appRole, ownerRole }));
+      // A second outbox, for an app's center (spec 049).
+      await owner.query(
+        outboxMigrationSql({ schema, appRole, ownerRole, name: 'kete_center_outbox' }),
+      );
       await owner.query(receivedEventsMigrationSql);
     },
   });
