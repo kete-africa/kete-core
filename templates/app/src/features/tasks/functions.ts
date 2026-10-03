@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { transaction } from '@/platform/db';
 import { registry } from '@/platform/registry';
 import { asPerson, holds } from '@/platform/rights';
-import { personOf, screenActor } from '@/platform/session';
+import { personOf, screenActor, tokenOf } from '@/platform/session';
 import { reopenTask } from './commands/complete-task';
 import { findTask, listTasks } from './infrastructure/task.table';
 import { taskInput } from './task.record';
@@ -56,12 +56,16 @@ export class ScreenError extends Error {
 
 /** The person on this screen, in her organization, with her rights for what follows. */
 async function signedIn() {
-  const identity = await personOf(getRequest());
+  const request = getRequest();
+  const identity = await personOf(request);
   if (!identity) throw new ScreenError('signed_out');
   if (!identity.organizationId) throw new ScreenError('no_organization');
+  const token = await tokenOf(request);
   return {
     identity,
     caller: { actor: screenActor(identity), organizationId: identity.organizationId },
+    /** Runs `work` with her rights: her grants at the center, or her role's defaults. */
+    as: <T>(work: () => T | Promise<T>) => asPerson(identity, work, token),
   };
 }
 
@@ -71,8 +75,8 @@ export const fetchPerson = createServerFn({ method: 'GET' }).handler(async () =>
 });
 
 export const fetchTasks = createServerFn({ method: 'GET' }).handler(async () => {
-  const { identity, caller } = await signedIn();
-  return asPerson(identity, async () => {
+  const { caller, as } = await signedIn();
+  return as(async () => {
     if (!holds('tasks:read')) throw new ScreenError('forbidden');
     return transaction(caller.organizationId, (db) => listTasks(db));
   });
@@ -81,8 +85,8 @@ export const fetchTasks = createServerFn({ method: 'GET' }).handler(async () => 
 export const fetchTask = createServerFn({ method: 'GET' })
   .validator((input: unknown) => z.object({ taskId: z.string().min(1).max(64) }).parse(input))
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    return asPerson(identity, async () => {
+    const { caller, as } = await signedIn();
+    return as(async () => {
       if (!holds('tasks:read')) throw new ScreenError('forbidden');
       return transaction(caller.organizationId, (db) => findTask(db, data.taskId));
     });
@@ -92,8 +96,8 @@ export const fetchTask = createServerFn({ method: 'GET' })
 export const addTask = createServerFn({ method: 'POST' })
   .validator((input: unknown) => taskInput.parse(input))
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    const result = await asPerson(identity, () =>
+    const { caller, as } = await signedIn();
+    const result = await as(() =>
       registry.invoke({ ...caller, name: 'tasks_create', input: data }),
     );
     return { status: result.status };
@@ -104,8 +108,8 @@ export const setTaskDone = createServerFn({ method: 'POST' })
     z.object({ taskId: z.string().min(1).max(64), done: z.boolean() }).parse(input),
   )
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    return asPerson(identity, async () => {
+    const { caller, as } = await signedIn();
+    return as(async () => {
       if (data.done) {
         const result = await registry.invoke({
           ...caller,
@@ -130,8 +134,8 @@ export const setTaskDone = createServerFn({ method: 'POST' })
 export const fetchReview = createServerFn({ method: 'GET' })
   .validator((input: unknown) => z.object({ draftId: z.string().min(1).max(128) }).parse(input))
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    const review = await asPerson(identity, () => registry.review(caller, data.draftId));
+    const { caller, as } = await signedIn();
+    const review = await as(() => registry.review(caller, data.draftId));
     return review ? toScreen(review) : null;
   });
 
@@ -154,8 +158,8 @@ export const decideReview = createServerFn({ method: 'POST' })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    const { identity, caller } = await signedIn();
-    const decided = await asPerson(identity, () =>
+    const { caller, as } = await signedIn();
+    const decided = await as(() =>
       data.action === 'validate'
         ? registry.decide({
             ...caller,

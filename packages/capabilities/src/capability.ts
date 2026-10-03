@@ -34,7 +34,15 @@ interface Common<Input extends z.ZodObject> {
    * draft (the default at levels 3 and 4), or a view of the product.
    */
   view?: string;
+  /**
+   * How far its results may travel (spec 049): `internal` by default; `secret` never reaches a
+   * model, a shared briefing nor a notification's text.
+   */
+  classification?: Classification;
 }
+
+/** How far data may travel, from anyone to no model at all (kete-core spec 049). */
+export type Classification = 'public' | 'internal' | 'confidential' | 'secret';
 
 /** Level 1: reads, analyzes or signals. Runs for anyone allowed. */
 export interface ReadCapability<Input extends z.ZodObject, Output> extends Common<Input> {

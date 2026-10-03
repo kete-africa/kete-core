@@ -5,6 +5,7 @@ export {
   modeFor,
   type Autonomy,
   type CapabilityContext,
+  type Classification,
   type CapabilityDefinition,
   type DecisionCapability,
   type DecisionResult,
@@ -40,3 +41,15 @@ export {
   type DatasetRegistry,
 } from './datasets.js';
 export { createHttpApi, type HttpApiOptions } from './http.js';
+export {
+  createRights,
+  definePermissions,
+  describePermissions,
+  type Grants,
+  type PermissionDefinition,
+  type Rights,
+  type RightsPerson,
+  type RightsOptions,
+  type Role,
+  type Words,
+} from './permissions.js';

@@ -1,6 +1,7 @@
 import type { Dataset } from '@kete/sdk';
 import type { SqlExecutor } from '@kete/tenancy';
 import { z } from 'zod';
+import type { Classification } from './capability.js';
 import type { Caller, CapabilityHost } from './registry.js';
 
 // Data sets (spec 045): what a product exposes to people's dashboards, to its assistant and to
@@ -27,6 +28,8 @@ export interface DatasetDefinition<Row extends z.ZodObject = z.ZodObject> {
   time?: keyof z.output<Row> & string;
   measures?: (keyof z.output<Row> & string)[];
   dimensions?: (keyof z.output<Row> & string)[];
+  /** How far its rows may travel (spec 049): `internal` by default. */
+  classification?: Classification;
   /** The rows, in the caller's organization (RLS applies), filtered by the query. */
   rows(query: DatasetQuery, context: { db: SqlExecutor; caller: Caller }): Promise<z.output<Row>[]>;
 }
@@ -67,6 +70,7 @@ export function describeDataset(definition: DatasetDefinition): Dataset {
     ...(definition.time ? { time: definition.time } : {}),
     ...(definition.measures?.length ? { measures: definition.measures } : {}),
     ...(definition.dimensions?.length ? { dimensions: definition.dimensions } : {}),
+    ...(definition.classification ? { classification: definition.classification } : {}),
   };
 }
 

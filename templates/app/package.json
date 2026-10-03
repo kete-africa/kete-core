@@ -17,6 +17,7 @@
     "@kete/admin": "workspace:@kete-africa/admin@*",
     "@kete/auth": "workspace:@kete-africa/auth@*",
     "@kete/capabilities": "workspace:@kete-africa/capabilities@*",
+    "@kete/center": "workspace:@kete-africa/center@*",
     "@kete/commands": "workspace:@kete-africa/commands@*",
     "@kete/design": "workspace:@kete-africa/design@*",
     "@kete/drafts": "workspace:@kete-africa/drafts@*",

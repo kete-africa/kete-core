@@ -388,6 +388,8 @@ importers:
         specifier: workspace:@kete-africa/testing@*
         version: link:../testing
 
+  packages/center: {}
+
   packages/commands:
     dependencies:
       '@kete/sdk':
@@ -689,6 +691,9 @@ importers:
       '@kete/capabilities':
         specifier: workspace:@kete-africa/capabilities@*
         version: link:../../packages/capabilities
+      '@kete/center':
+        specifier: workspace:@kete-africa/center@*
+        version: link:../../packages/center
       '@kete/commands':
         specifier: workspace:@kete-africa/commands@*
         version: link:../../packages/commands

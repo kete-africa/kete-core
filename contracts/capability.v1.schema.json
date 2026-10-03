@@ -44,6 +44,10 @@
       "type": "string",
       "pattern": "^ui://[a-z0-9][a-z0-9-]*/[a-z0-9][a-z0-9/_-]*$",
       "description": "The view a host shows with the result, as an MCP Apps UI resource: ui://kete/review for a draft to verify, or a view of the product."
+    },
+    "classification": {
+      "enum": ["public", "internal", "confidential", "secret"],
+      "description": "How far the data may travel. public: anyone; internal (the default): the organization's people with the permission; confidential: a need to know, never in a shared briefing; secret: never sent to a model, a shared briefing nor a notification's text."
     }
   }
 }

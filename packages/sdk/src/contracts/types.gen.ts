@@ -33,6 +33,10 @@ export interface Capability {
    * The view a host shows with the result, as an MCP Apps UI resource: ui://kete/review for a draft to verify, or a view of the product.
    */
   view?: string;
+  /**
+   * How far the data may travel. public: anyone; internal (the default): the organization's people with the permission; confidential: a need to know, never in a shared briefing; secret: never sent to a model, a shared briefing nor a notification's text.
+   */
+  classification?: 'public' | 'internal' | 'confidential' | 'secret';
 }
 
 /**
@@ -60,6 +64,10 @@ export interface Dataset {
    * Fields a dashboard groups by.
    */
   dimensions?: string[];
+  /**
+   * How far the data may travel. public: anyone; internal (the default): the organization's people with the permission; confidential: a need to know, never in a shared briefing; secret: never sent to a model, a shared briefing nor a notification's text.
+   */
+  classification?: 'public' | 'internal' | 'confidential' | 'secret';
 }
 
 /**
@@ -211,6 +219,56 @@ export interface Manifest {
     mcp?: string;
     api?: string;
   };
+  /**
+   * The app's client id at the Compte Kete (optional, added in v1: additive; spec 049): a center accepts the app's own tokens for an organization whose registry holds it.
+   */
+  client?: string;
+  /**
+   * The permissions the app checks (optional, added in v1: additive; spec 049), each with its words for people and the Compte Kete roles that hold it by default. A center lets an administrator grant them to roles and positions.
+   */
+  permissions?: {
+    name: string;
+    label: {
+      fr: string;
+      en: string;
+    };
+    description?: {
+      fr: string;
+      en: string;
+    };
+    roles: ('owner' | 'admin' | 'member')[];
+  }[];
+  /**
+   * The business events the app announces (optional, added in v1: additive; spec 049): identifiers and facts only, the rest read at its API under the reader's rights.
+   */
+  emits?: {
+    type: string;
+    description: string;
+    /**
+     * How far the data may travel. public: anyone; internal (the default): the organization's people with the permission; confidential: a need to know, never in a shared briefing; secret: never sent to a model, a shared briefing nor a notification's text.
+     */
+    classification?: 'public' | 'internal' | 'confidential' | 'secret';
+    /**
+     * The JSON Schema of the event's data.
+     */
+    data?: {
+      [k: string]: unknown;
+    };
+  }[];
+  /**
+   * What the app asks a center to decide (optional, added in v1: additive; spec 049): a purchase, a leave. The center's circuits find the approver.
+   */
+  subjects?: {
+    name: string;
+    label: {
+      fr: string;
+      en: string;
+    };
+    measure?: {
+      fr: string;
+      en: string;
+    };
+  }[];
   links?: {
     repository?: string;
     documentation?: string;

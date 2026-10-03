@@ -53,6 +53,28 @@ export const mcp = createMcpHandler({ registry, server: { name: 'firmo', version
   (`@kete/ai`).
 - **Rights come from the host**: an app maps them from its roles, Kete Enterprise from its
   structure. For an agent acting on behalf of a person, the host checks both.
+
+## Permissions (spec 049)
+
+`definePermissions` declares what an app checks, with its words in French and English and the
+Compte Kete roles that hold it by default; `describePermissions` gives them to the manifest.
+`createRights({ permissions, grants })` answers what a person holds: her grants at the center (Kete
+Enterprise, read with `@kete/center`) once it manages the app's rights; when the center is silent,
+her last grants known (24 h); otherwise her role's defaults. A capability and a data set also
+declare their `classification`: `public`, `internal` (the default), `confidential` or `secret`.
+
+```ts
+const permissions = definePermissions([
+  {
+    name: 'tickets:manage',
+    label: { fr: 'Gérer les files', en: 'Manage queues' },
+    roles: ['owner', 'admin'],
+  },
+]);
+const rights = createRights({ permissions, grants: (token) => center.grants(token) });
+const held = await rights.permissionsOf({ userId, role }, token);
+```
+
 - The MCP endpoint is **stateless**: each request lists only the caller's tools. The host
   authenticates the request (OAuth access token) in `caller`.
 

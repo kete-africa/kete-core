@@ -1,6 +1,6 @@
 import { createHttpApi } from '@kete/capabilities';
 import { env } from './env';
-import { identityFromBearer } from './identity';
+import { bearerOf, identityFromBearer } from './identity';
 import { datasets, registry } from './registry';
 import { asPerson } from './rights';
 
@@ -32,5 +32,6 @@ export async function handleApi(request: Request): Promise<Response> {
     },
   });
   const current = handler;
-  return asPerson(identity, () => current(request));
+  // Her grants are read with the token the calling app holds for her.
+  return asPerson(identity, () => current(request), bearerOf(request));
 }
