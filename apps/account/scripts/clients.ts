@@ -4,6 +4,7 @@
  *   pnpm clients create --operator me@kete.africa --name "Kete Cockpit"
  *     --redirect https://cockpit…/auth/callback
  *   pnpm clients create … --people    (the app may provision people by phone — spec 013)
+ *   pnpm clients create … --factory   (the app factory: registers the apps it creates — spec 048)
  *   pnpm clients list
  *
  * Only a Kete operator (owner or admin of Kete's organization, signing in strongly: two-factor on
@@ -41,6 +42,8 @@ const { positionals, values } = parseArgs({
     operator: { type: 'string' },
     // The app may provision people by phone and ask their sign-in links (spec 013).
     people: { type: 'boolean', default: false },
+    // The app factory registers the apps it creates (spec 048).
+    factory: { type: 'boolean', default: false },
   },
 });
 
@@ -65,13 +68,17 @@ try {
           application_type: local ? 'native' : 'web',
           redirect_uris: redirects,
           token_endpoint_auth_method: 'client_secret_post',
-          grant_types: values.people
-            ? ['authorization_code', 'refresh_token', 'client_credentials']
-            : ['authorization_code', 'refresh_token'],
+          grant_types:
+            values.people || values.factory
+              ? ['authorization_code', 'refresh_token', 'client_credentials']
+              : ['authorization_code', 'refresh_token'],
           response_types: ['code'],
           skip_consent: true,
           require_pkce: true,
-          client_credentials_scopes: values.people ? ['kete:people'] : [],
+          client_credentials_scopes: [
+            ...(values.people ? ['kete:people'] : []),
+            ...(values.factory ? ['kete:factory'] : []),
+          ],
         },
       })
       .finally(() => session.close());

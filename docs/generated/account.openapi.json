@@ -16469,6 +16469,123 @@
         }
       }
     },
+    "/api/apps/clients": {
+      "post": {
+        "tags": [
+          "Apps"
+        ],
+        "summary": "Register an app the factory created",
+        "description": "Only the app factory's client (scope kete:factory). A trusted app (no consent, PKCE), on an https callback of the hosts allowed; its secret is returned once.",
+        "security": [
+          {
+            "appToken": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The app and its sign-in callback",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "redirectUri": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                },
+                "required": [
+                  "name",
+                  "redirectUri"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The registered app, its secret given once",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "clientId": {
+                      "type": "string"
+                    },
+                    "clientSecret": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "clientId",
+                    "clientSecret"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid app token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not the factory, a host not allowed, or the factory not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/apps/sign-in-links": {
       "post": {
         "tags": [

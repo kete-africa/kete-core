@@ -1,0 +1,28 @@
+{
+  "name": "@kete/factory",
+  "private": true,
+  "type": "module",
+  "description": "The app factory (spec 048): from an approved request, a new Kete app — its repository from the template, its database, its sign-in, its hosting, its first version coded by an agent in a sandbox, a pull request for a person to review.",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.5",
+    "@kete/jobs": "workspace:@kete-africa/jobs@*",
+    "@kete/sandbox": "workspace:@kete-africa/sandbox@*",
+    "@kete/sdk": "workspace:@kete-africa/sdk@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "hono": "^4.13.12",
+    "libsodium-wrappers": "^0.7.15",
+    "pg": "^8.23.0",
+    "tsx": "^4.23.15",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/libsodium-wrappers": "^0.7.14",
+    "@types/node": "^22.20.4",
+    "@types/pg": "^8.23.1"
+  }
+}
