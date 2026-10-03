@@ -43,10 +43,17 @@ export interface Hosting {
 
 /** The agent that codes the first version, inside a sandbox. */
 export interface CodingAgent {
-  /** Installs and signs the agent in, inside the sandbox (its credentials never leave it). */
-  prepare(sandbox: Sandbox): Promise<void>;
-  /** The shell command that runs it on a prompt file, writing its log to a file. */
-  command(promptFile: string, logFile: string): string;
+  /**
+   * The sandbox provider's template the coding sandbox starts from: the provider's own agent's
+   * sign-in, and nothing else of its account. Without it, the sandbox gets nothing of the account.
+   */
+  template?: string;
+  /** Starts the agent on the prompt, in the background, on the clone in `app/`: its run's id. */
+  start(sandbox: Sandbox, prompt: string): Promise<string>;
+  /** Where its run stands. */
+  status(sandbox: Sandbox, run: string): Promise<'running' | 'finished' | 'failed'>;
+  /** What it last wrote, for the report of a failure. */
+  log(sandbox: Sandbox, run: string): Promise<string>;
 }
 
 export interface FactoryConfig {

@@ -4,7 +4,7 @@ import { createJobs, defineJob } from '@kete/jobs';
 import { boatProvider } from '@kete/sandbox';
 import pg from 'pg';
 import { compteKete } from './adapters/account.js';
-import { claudeCode, codex } from './adapters/agents.js';
+import { claudeCode, codex, integratedAgent } from './adapters/agents.js';
 import { neon } from './adapters/databases.js';
 import { githubApp } from './adapters/github.js';
 import { coolify } from './adapters/hosting.js';
@@ -43,10 +43,21 @@ const key = {
   secret: required('FACTORY_ENTERPRISE_SECRET'),
 };
 
+// The coding agent: the sandbox provider's own Codex, on the subscription its owner signed in with
+// (the default); or Codex with an auth.json, or Claude Code with an API key, installed by the
+// factory itself.
+const agentKind = process.env.FACTORY_AGENT ?? 'integrated';
 const agent =
-  (process.env.FACTORY_AGENT ?? 'codex') === 'claude'
+  agentKind === 'claude'
     ? claudeCode({ apiKey: required('FACTORY_ANTHROPIC_API_KEY') })
-    : codex({ authJson: fileOrValue('FACTORY_CODEX_AUTH_JSON') });
+    : agentKind === 'codex'
+      ? codex({ authJson: fileOrValue('FACTORY_CODEX_AUTH_JSON') })
+      : integratedAgent({
+          agent: 'codex',
+          template: required('FACTORY_SANDBOX_TEMPLATE'),
+          ...(process.env.FACTORY_AGENT_MODEL ? { model: process.env.FACTORY_AGENT_MODEL } : {}),
+          reasoningEffort: 'high',
+        });
 
 const ports: Ports = {
   code: githubApp({

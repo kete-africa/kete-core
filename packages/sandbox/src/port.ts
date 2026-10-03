@@ -23,11 +23,29 @@ export interface Sandbox {
   writeFile(path: string, content: string | Uint8Array): Promise<void>;
   /** Reads a file as bytes. */
   readFile(path: string): Promise<Uint8Array>;
+  /**
+   * Starts the provider's own coding agent on a prompt, in the background, when the provider runs
+   * agents itself (signed in once by the account's owner). Absent otherwise.
+   */
+  prompt?(input: AgentPrompt): Promise<{ runId: string }>;
+  /** Where a run of the provider's agent stands. */
+  promptStatus?(runId: string): Promise<AgentRunStatus>;
   /** Pauses it (kept, not billed); `resume` brings it back. */
   stop(): Promise<void>;
   /** Deletes it and everything in it. */
   destroy(): Promise<void>;
 }
+
+export interface AgentPrompt {
+  /** The coding agent: `codex` or `claude-code`. */
+  agent: 'codex' | 'claude-code';
+  /** Its model, as the agent names it; the account's default when absent. */
+  model?: string;
+  reasoningEffort?: 'low' | 'medium' | 'high' | 'xhigh';
+  prompt: string;
+}
+
+export type AgentRunStatus = 'queued' | 'running' | 'finished' | 'failed' | 'interrupted';
 
 export interface CreateOptions {
   /** Seconds after which the sandbox stops by itself (a safety net; default one hour). */
@@ -37,6 +55,12 @@ export interface CreateOptions {
   size?: 'small' | 'default' | 'large';
   /** The same key never creates two sandboxes. */
   idempotencyKey?: string;
+  /**
+   * A template of the provider that gives the sandbox the agents' sign-in, and nothing else of
+   * the account (no repositories, secrets nor provider keys). Without it, the sandbox gets nothing
+   * of the account at all.
+   */
+  template?: string;
 }
 
 export interface SandboxProvider {

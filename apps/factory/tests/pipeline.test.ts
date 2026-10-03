@@ -1,5 +1,6 @@
 import { memoryProvider } from '@kete/sandbox';
 import { describe, expect, it } from 'vitest';
+import { integratedAgent } from '../src/adapters/agents.js';
 import { agentPrompt, advance, requestDocument } from '../src/pipeline.js';
 import type { Ports } from '../src/ports.js';
 import type { AppRequest, Progress, RequestStatus } from '../src/request.js';
@@ -26,7 +27,6 @@ const request: AppRequest = {
 function fakes() {
   const calls: string[] = [];
   const reports: RequestStatus[] = [];
-  let agentRuns = 0;
   let probes = 0;
   const sandboxes = memoryProvider((command, files) => {
     if (command.includes('create @kete-africa/app')) {
@@ -44,10 +44,6 @@ function fakes() {
           }),
         ),
       );
-    }
-    if (command.startsWith('cat /tmp/kete-agent.done')) {
-      agentRuns += 1;
-      return { stdout: agentRuns < 2 ? 'running\n' : '0\n' };
     }
     return undefined;
   });
@@ -93,12 +89,21 @@ function fakes() {
       },
     },
     sandboxes,
-    agent: {
-      prepare: async () => {
-        calls.push('agent ready');
-      },
-      command: (prompt, log) => `agent ${prompt} > ${log}`,
-    },
+    agent: (() => {
+      // The sandbox provider's own Codex, on its owner's subscription (memory: done on the 2nd look).
+      const real = integratedAgent({
+        agent: 'codex',
+        template: 'kete-factory',
+        model: 'gpt-6.1-sol',
+      });
+      return {
+        ...real,
+        start: async (sandbox: Parameters<typeof real.start>[0], prompt: string) => {
+          calls.push('agent ready');
+          return real.start(sandbox, prompt);
+        },
+      };
+    })(),
     probe: async () => {
       probes += 1;
       return probes > 1;
@@ -229,6 +234,13 @@ describe('the factory’s pipeline', () => {
       progress: { pullRequest: 'https://github.com/kete-africa/kete-fieldwork/pull/1' },
     });
     const coding = sandboxes.sandboxes[1];
+    // The coding sandbox gets the agent's sign-in only; the agent works on the clone.
+    expect(coding?.template).toBe('kete-factory');
+    expect(coding?.prompts[0]).toMatchObject({ agent: 'codex', model: 'gpt-6.1-sol' });
+    expect(coding?.prompts[0]?.prompt).toContain('~/app');
+    // The push token never appears in a command, and leaves the remote's address after the clone.
+    expect(coding?.commands.join('\n')).not.toContain('ghs_token');
+    expect(coding?.commands.some((c) => c.includes('git remote set-url origin'))).toBe(true);
     expect(
       coding?.commands.some((c) => c.includes('git push') && c.includes('factory/first-version')),
     ).toBe(true);
