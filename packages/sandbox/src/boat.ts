@@ -52,7 +52,14 @@ export function boatProvider(options: BoatOptions): SandboxProvider {
       throw new SandboxError('refused', `${method} ${path}: ${response.status}`);
     }
     if (!response.ok) {
-      throw new SandboxError('unavailable', `${method} ${path}: ${response.status}`);
+      // The provider says why (`provider_not_configured`, `subscription_required`…): kept, so a
+      // failure tells what to fix.
+      const answer = (await response.json().catch(() => null)) as {
+        code?: string;
+        message?: string;
+      } | null;
+      const why = answer?.code ? ` ${answer.code}: ${answer.message ?? ''}`.trimEnd() : '';
+      throw new SandboxError('unavailable', `${method} ${path}: ${response.status}${why}`);
     }
     return (await response.json()) as T;
   };
