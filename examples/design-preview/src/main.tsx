@@ -30,6 +30,7 @@ import {
 import { StrictMode, useEffect, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './app.css';
+import { ChatPage, SlotsPage } from './slots';
 
 // The workspace page of copilot-demo, rebuilt with @kete/design: same structure and behavior,
 // Kete's own content (no third-party name or icon). Words are literal: a preview, not an app.
@@ -418,6 +419,16 @@ const frames: Record<
     label: `workspace · ${brand.name} · clair`,
     attributes: { 'data-design': 'workspace', 'data-brand': brand.id, 'data-theme': 'light' },
     page: <Workspace branded={brand} />,
+  },
+  'slots-dark': {
+    label: 'emplacements',
+    attributes: { 'data-design': 'workspace' },
+    page: <SlotsPage />,
+  },
+  'chat-dark': {
+    label: 'assistant',
+    attributes: { 'data-design': 'workspace' },
+    page: <ChatPage />,
   },
   'kete-light': { label: 'kete · clair', attributes: {}, page: <KetePage /> },
   'kete-dark': {
