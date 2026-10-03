@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/sandbox",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "An isolated computer for an agent or a factory step, behind a neutral port: create it, run commands, write and read files, stop or delete it. One adapter per provider; the provider's name never leaves its adapter.",
   "repository": {
