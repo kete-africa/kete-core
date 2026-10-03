@@ -533,6 +533,8 @@ importers:
         specifier: ^4.6.5
         version: 4.6.5
 
+  packages/sandbox: {}
+
   packages/sdk:
     dependencies:
       ajv:

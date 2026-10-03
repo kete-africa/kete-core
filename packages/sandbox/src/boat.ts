@@ -1,0 +1,140 @@
+import {
+  SandboxError,
+  type CommandResult,
+  type CreateOptions,
+  type RunOptions,
+  type Sandbox,
+  type SandboxProvider,
+} from './port.js';
+
+// The boat.dev adapter (spec 047): persistent Linux machines with Docker, git and Node, billed by
+// the second. Its name stays in this file; the rest of Kete speaks of « a sandbox ».
+
+export interface BoatOptions {
+  apiKey: string;
+  /** Default `https://boat.dev/api/v1`. */
+  baseUrl?: string;
+  fetch?: typeof fetch;
+  /** How long to wait for a new machine to be ready (default 180 s). */
+  readyTimeoutMs?: number;
+  /** Pause between readiness checks (default 2 s). */
+  pollMs?: number;
+}
+
+interface BoatSandbox {
+  id: string;
+  state: string;
+}
+
+export function boatProvider(options: BoatOptions): SandboxProvider {
+  const base = (options.baseUrl ?? 'https://boat.dev/api/v1').replace(/\/$/, '');
+  const http = options.fetch ?? fetch;
+  const call = async <T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    key?: string,
+  ): Promise<T> => {
+    const response = await http(`${base}${path}`, {
+      method,
+      headers: {
+        authorization: `Bearer ${options.apiKey}`,
+        ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+        ...(key ? { 'idempotency-key': key } : {}),
+      },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+    if (response.status === 404) throw new SandboxError('not_found', `${method} ${path}: 404`);
+    if (response.status === 401 || response.status === 403) {
+      throw new SandboxError('refused', `${method} ${path}: ${response.status}`);
+    }
+    if (!response.ok) {
+      throw new SandboxError('unavailable', `${method} ${path}: ${response.status}`);
+    }
+    return (await response.json()) as T;
+  };
+
+  const handle = (id: string): Sandbox => ({
+    id,
+    async run(command: string, run: RunOptions = {}): Promise<CommandResult> {
+      const answer = await call<{
+        exitCode: number | null;
+        stdout: string;
+        stderr: string;
+        timedOut: boolean;
+      }>('POST', `/sandboxes/${id}/commands`, {
+        command,
+        timeoutSeconds: Math.min(Math.max(run.timeoutSeconds ?? 120, 1), 600),
+        ...(run.cwd ? { cwd: run.cwd } : {}),
+      });
+      return {
+        exitCode: answer.exitCode,
+        stdout: answer.stdout ?? '',
+        stderr: answer.stderr ?? '',
+        timedOut: Boolean(answer.timedOut),
+      };
+    },
+    async writeFile(path: string, content: string | Uint8Array) {
+      await call('PUT', `/sandboxes/${id}/files`, {
+        path,
+        ...(typeof content === 'string'
+          ? { content, encoding: 'utf8' }
+          : { content: Buffer.from(content).toString('base64'), encoding: 'base64' }),
+      });
+    },
+    async readFile(path: string) {
+      // Read through a command: the bytes come back in base64, whatever the file holds.
+      const quoted = `'${path.replace(/'/g, `'\\''`)}'`;
+      const result = await this.run(`base64 -w0 ${quoted}`, { timeoutSeconds: 60 });
+      if (result.exitCode !== 0) throw new SandboxError('not_found', `No file at ${path}`);
+      return new Uint8Array(Buffer.from(result.stdout.trim(), 'base64'));
+    },
+    async stop() {
+      await call('POST', `/sandboxes/${id}/stop`, {});
+    },
+    async destroy() {
+      await call('DELETE', `/sandboxes/${id}`);
+    },
+  });
+
+  async function waitReady(id: string): Promise<void> {
+    const deadline = Date.now() + (options.readyTimeoutMs ?? 180_000);
+    for (;;) {
+      const { sandbox } = await call<{ sandbox: BoatSandbox }>('GET', `/sandboxes/${id}`);
+      if (sandbox.state === 'ready' || sandbox.state === 'running') return;
+      if (sandbox.state === 'failed' || sandbox.state === 'deleted') {
+        throw new SandboxError('unavailable', `Sandbox ${id}: ${sandbox.state}`);
+      }
+      if (Date.now() > deadline) throw new SandboxError('timeout', `Sandbox ${id} not ready`);
+      await new Promise((resolve) => setTimeout(resolve, options.pollMs ?? 2000));
+    }
+  }
+
+  return {
+    async create(create: CreateOptions = {}) {
+      const answer = await call<{ status: string; sandbox: BoatSandbox }>(
+        'POST',
+        '/sandboxes',
+        {
+          type: create.size ?? 'default',
+          ttlSeconds: create.ttlSeconds ?? 3600,
+          // Never the account's own secrets: the sandbox gets only what the caller gives it.
+          noEnv: true,
+          ...(create.env ? { env: create.env } : {}),
+        },
+        create.idempotencyKey,
+      );
+      if (answer.sandbox.state !== 'ready') await waitReady(answer.sandbox.id);
+      return handle(answer.sandbox.id);
+    },
+    async open(id: string) {
+      try {
+        await call('GET', `/sandboxes/${id}`);
+        return handle(id);
+      } catch (error) {
+        if (error instanceof SandboxError && error.code === 'not_found') return null;
+        throw error;
+      }
+    },
+  };
+}
