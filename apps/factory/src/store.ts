@@ -19,6 +19,8 @@ create table if not exists ${s}.factory_requests (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+-- The factory migrates at each start: its policy is made again, never twice.
+drop policy if exists factory_requests_isolation on ${s}.factory_requests;
 ${organizationPolicySql({ schema: s, table: 'factory_requests', appRole: options.appRole })}
 grant select, insert, update on ${s}.factory_requests to ${options.appRole};
 `;
