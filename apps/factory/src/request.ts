@@ -69,6 +69,8 @@ export interface Progress {
   clientId?: string;
   pullRequest?: string;
   sandboxId?: string;
+  /** The coding agent's run in that sandbox, to follow it. */
+  agentRun?: string;
   /** How many times the app was found not answering yet, after its deploy. */
   probes?: number;
   error?: string;

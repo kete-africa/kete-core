@@ -13,8 +13,6 @@ export type Advance =
   | { next: 'done'; progress: Progress };
 
 const BRANCH = 'factory/first-version';
-const AGENT_LOG = '/tmp/kete-agent.log';
-const AGENT_DONE = '/tmp/kete-agent.done';
 
 export const repositoryName = (request: AppRequest) => `kete-${request.app.slug}`;
 
@@ -213,6 +211,7 @@ export async function advance(
         ttlSeconds: 4 * 3600,
         size: 'large',
         idempotencyKey: `${request.requestId}-coding`,
+        ...(ports.agent.template ? { template: ports.agent.template } : {}),
       });
       const token = await ports.code.pushToken();
       await sandbox.writeFile(
@@ -225,38 +224,35 @@ export async function advance(
       );
       await mustRun(
         sandbox,
-        `chmod 600 .factory-env && . ./.factory-env && git clone -q -b dev "https://x-access-token:$PUSH_TOKEN@github.com/${repository}.git" app && cd app && git checkout -q -b ${BRANCH}`,
+        // The push token stays out of the clone and leaves before the agent starts: the agent never
+        // holds it; the factory writes a fresh one when it pushes.
+        `chmod 600 .factory-env && . ./.factory-env && git clone -q -b dev "https://x-access-token:$PUSH_TOKEN@github.com/${repository}.git" app && cd app && git remote set-url origin "https://github.com/${repository}.git" && git checkout -q -b ${BRANCH} && cd .. && printf "export NODE_AUTH_TOKEN='%s'\\n" "$NODE_AUTH_TOKEN" > .factory-env`,
         { timeoutSeconds: 300 },
       );
-      await ports.agent.prepare(sandbox);
-      await sandbox.writeFile('prompt.md', agentPrompt(request));
-      await mustRun(
-        sandbox,
-        `cd app && (. ../.factory-env && ${ports.agent.command('../prompt.md', AGENT_LOG)}; echo $? > ${AGENT_DONE}) > /dev/null 2>&1 &`,
-        { timeoutSeconds: 30 },
-      );
-      const next = { ...progress, sandboxId: sandbox.id };
+      const run = await ports.agent.start(sandbox, agentPrompt(request));
+      const next = { ...progress, sandboxId: sandbox.id, agentRun: run };
       await ports.report(request, 'coding', next);
       return { next: 'wait', progress: next, seconds: 120 };
     }
     const sandbox = await ports.sandboxes.open(progress.sandboxId);
     if (!sandbox) throw new Error('The coding sandbox is gone.');
-    const status = await sandbox.run(`cat ${AGENT_DONE} 2>/dev/null || echo running`, {
-      timeoutSeconds: 20,
-    });
-    if (status.stdout.trim() === 'running') return { next: 'wait', progress, seconds: 120 };
-    if (status.stdout.trim() !== '0') {
-      const log = await sandbox.run(`tail -c 3000 ${AGENT_LOG}`, { timeoutSeconds: 20 });
-      throw new Error(`The coding agent stopped (${status.stdout.trim()}): ${log.stdout}`);
+    const run = progress.agentRun ?? 'shell';
+    const state = await ports.agent.status(sandbox, run);
+    if (state === 'running') return { next: 'wait', progress, seconds: 120 };
+    if (state === 'failed') {
+      throw new Error(`The coding agent stopped: ${await ports.agent.log(sandbox, run)}`);
     }
+    // A fresh push token, written for this push only: the agent's run may have outlived the first.
+    await sandbox.writeFile('.push-env', `export PUSH_TOKEN='${await ports.code.pushToken()}'\n`);
     await mustRun(
       sandbox,
-      `cd app && . ../.factory-env && git add -A && (git diff --cached --quiet || git commit -q -m "feat: first version of ${request.app.name}") && git push -q "https://x-access-token:$PUSH_TOKEN@github.com/${repository}.git" ${BRANCH}`,
+      `chmod 600 .push-env && cd app && . ../.push-env && git add -A && (git diff --cached --quiet || git commit -q -m "feat: first version of ${request.app.name}") && git push -q "https://x-access-token:$PUSH_TOKEN@github.com/${repository}.git" ${BRANCH}; code=$?; rm -f ../.push-env; exit $code`,
       { timeoutSeconds: 300 },
     );
     await sandbox.destroy();
-    const { sandboxId: _gone, ...rest } = progress;
+    const { sandboxId: _gone, agentRun: _run, ...rest } = progress;
     void _gone;
+    void _run;
     return { next: 'continue', progress: { ...rest, done: [...progress.done, 'coding'] } };
   }
 

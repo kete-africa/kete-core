@@ -44,8 +44,16 @@ sequenceDiagram
 `pnpm start` with the variables of `.env.example`. Tests: `pnpm test` (every outside service is a
 fake).
 
-## The Codex agent with a ChatGPT subscription
+## The coding agent
 
-`FACTORY_CODEX_AUTH_JSON` holds the `auth.json` that `codex login` writes. Treat it as a password.
-It refreshes itself inside each sandbox; when the subscription asks to sign in again, run
-`codex login` and replace it. For unattended runs, an API key is steadier.
+- **`FACTORY_AGENT=integrated`** (the default): the sandbox provider's own Codex, on the ChatGPT
+  subscription its owner signed in with on the provider's Agents page — the provider keeps the
+  sign-in alive. `FACTORY_SANDBOX_TEMPLATE` names the provider's environment that passes the
+  agents' sign-in and nothing else (repositories, secrets and provider keys off).
+  `FACTORY_AGENT_MODEL` picks the model (`gpt-6.1-sol`).
+- **`codex`**: Codex installed by the factory, with the `auth.json` of `codex login`
+  (`FACTORY_CODEX_AUTH_JSON`, treated as a password).
+- **`claude`**: Claude Code installed by the factory, with an API key.
+
+Whatever the agent, the push token never stays in the sandbox while it works: it leaves the
+clone's remote, and a fresh one is written for the push only, then removed.

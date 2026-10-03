@@ -33,3 +33,6 @@ See [apps/factory/README.md](../../apps/factory/README.md) for the sequence.
   plain http callback, or when the factory is not configured.
 - **FR-005**: an app is reported `ready` only once it answers at its address (`/health`), checked
   every minute after its deploy; after 30 minutes without an answer, the request fails.
+- **FR-006**: the coding agent may be the sandbox provider's own, on its owner's subscription; its
+  sandbox then starts from a template passing the agents' sign-in and nothing else of the account.
+  The push token never stays in the sandbox while an agent works.

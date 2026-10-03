@@ -15,4 +15,9 @@ flowchart LR
 - `create({ ttlSeconds, env, size, idempotencyKey })`: a machine **without** the account's own
   secrets; it gets only the variables the caller gives it, and stops by itself after `ttlSeconds`.
 - `mustRun` throws when a step fails or times out.
+- **The provider's own agent**: `sandbox.prompt({ agent: 'codex', model, prompt })` starts it in
+  the background, `sandbox.promptStatus(runId)` follows it — when the provider runs agents signed
+  in once by the account's owner (a ChatGPT subscription). `create({ template })` names the
+  provider's template that passes that sign-in and **nothing else** of the account; without a
+  template, the sandbox gets nothing of the account at all.
 - `memoryProvider` keeps files in memory and answers commands from a script: nothing runs.

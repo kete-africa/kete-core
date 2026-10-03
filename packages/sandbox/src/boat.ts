@@ -1,5 +1,6 @@
 import {
   SandboxError,
+  type AgentRunStatus,
   type CommandResult,
   type CreateOptions,
   type RunOptions,
@@ -89,6 +90,30 @@ export function boatProvider(options: BoatOptions): SandboxProvider {
       if (result.exitCode !== 0) throw new SandboxError('not_found', `No file at ${path}`);
       return new Uint8Array(Buffer.from(result.stdout.trim(), 'base64'));
     },
+    async prompt(input) {
+      const answer = await call<{ promptId?: string; promptRun?: { promptId?: string } }>(
+        'POST',
+        `/sandboxes/${id}/prompt`,
+        {
+          provider: input.agent,
+          prompt: input.prompt,
+          new: true,
+          ...(input.model ? { model: input.model } : {}),
+          ...(input.reasoningEffort ? { reasoningEffort: input.reasoningEffort } : {}),
+        },
+      );
+      const runId = answer.promptId ?? answer.promptRun?.promptId;
+      if (!runId) throw new SandboxError('failed', `Sandbox ${id}: the prompt was not queued`);
+      return { runId };
+    },
+    async promptStatus(runId) {
+      const { promptRun } = await call<{ promptRun: { status: string } }>(
+        'GET',
+        `/sandboxes/${id}/prompts/${encodeURIComponent(runId)}`,
+      );
+      const status = promptRun.status;
+      return status === 'sending' ? 'queued' : (status as AgentRunStatus);
+    },
     async stop() {
       await call('POST', `/sandboxes/${id}/stop`, {});
     },
@@ -101,8 +126,8 @@ export function boatProvider(options: BoatOptions): SandboxProvider {
     const deadline = Date.now() + (options.readyTimeoutMs ?? 180_000);
     for (;;) {
       const { sandbox } = await call<{ sandbox: BoatSandbox }>('GET', `/sandboxes/${id}`);
-      if (sandbox.state === 'ready' || sandbox.state === 'running') return;
-      if (sandbox.state === 'failed' || sandbox.state === 'deleted') {
+      if (['ready', 'idle', 'running'].includes(sandbox.state)) return;
+      if (['error', 'archiving', 'archived', 'failed', 'deleted'].includes(sandbox.state)) {
         throw new SandboxError('unavailable', `Sandbox ${id}: ${sandbox.state}`);
       }
       if (Date.now() > deadline) throw new SandboxError('timeout', `Sandbox ${id} not ready`);
@@ -118,8 +143,9 @@ export function boatProvider(options: BoatOptions): SandboxProvider {
         {
           type: create.size ?? 'default',
           ttlSeconds: create.ttlSeconds ?? 3600,
-          // Never the account's own secrets: the sandbox gets only what the caller gives it.
-          noEnv: true,
+          // Never the account's own secrets: the sandbox gets only what the caller gives it — or,
+          // with a template, the agents' sign-in that template passes, and nothing else.
+          ...(create.template ? { environment: create.template } : { noEnv: true }),
           ...(create.env ? { env: create.env } : {}),
         },
         create.idempotencyKey,
