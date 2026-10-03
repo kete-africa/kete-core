@@ -1,5 +1,14 @@
 # @kete-africa/sdk
 
+## 0.6.0
+
+### Minor Changes
+
+- bead1c9: The app contract, part 2 (spec 049): an app's own token for its center (`createAppToken`,
+  `createAppTokenVerifier`, scope `kete:center`); named outboxes and a token transport, so business
+  events reach the center without a shared key; the directory in `@kete/center`; the template
+  announces `task.created` and `task.completed`.
+
 ## 0.5.0
 
 ### Minor Changes

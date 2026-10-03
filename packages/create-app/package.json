@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/create-app",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "type": "module",
   "description": "Creates a Kete App from kete-core's template: `pnpm create @kete-africa/app my-app`.",
   "repository": {
