@@ -321,8 +321,10 @@ export function DataTable<Row>({
 }
 
 /**
- * The side panel where a short form opens (an addition, a quick change): the list stays visible
- * behind it. Escape and a click on the backdrop close it; its footer holds the form's buttons.
+ * The dialog where a short form opens (an addition, a quick change; six fields at most): on the
+ * right when the screen is wide (above 1100 px), the list still visible behind it; centered
+ * otherwise. A longer form has its own page (`FormPage`). Escape and a click on the backdrop close
+ * it; its footer holds the form's buttons.
  */
 export function Drawer({
   open,
@@ -359,8 +361,15 @@ export function Drawer({
         if (event.target === event.currentTarget) onClose();
       }}
       className={cx(
-        'fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-dvh w-[440px] max-w-full',
-        'flex-col border-l border-line-overlay bg-surface p-0 text-fg backdrop:bg-black/50 open:flex',
+        'flex-col bg-surface p-0 text-fg backdrop:bg-black/50 open:flex',
+        // Wide screens: a panel on the right, the page visible beside it.
+        'min-[1101px]:fixed min-[1101px]:inset-y-0 min-[1101px]:right-0 min-[1101px]:left-auto',
+        'min-[1101px]:m-0 min-[1101px]:h-dvh min-[1101px]:max-h-dvh min-[1101px]:w-[440px]',
+        'min-[1101px]:border-l min-[1101px]:border-line-overlay',
+        // Narrower: a centered dialog, its height following its content.
+        'max-[1100px]:m-auto max-[1100px]:max-h-[85dvh] max-[1100px]:w-[calc(100%-32px)]',
+        'max-[1100px]:max-w-[520px] max-[1100px]:rounded-overlay max-[1100px]:border',
+        'max-[1100px]:border-line-overlay',
       )}
     >
       <header className="flex items-center justify-between gap-3 border-b border-line px-6 py-4">
@@ -668,5 +677,105 @@ export function Row({
         <div className={className}>{content}</div>
       )}
     </li>
+  );
+}
+
+/**
+ * A long form on its own page (spec 044): the header with the way back, sections of fields, and
+ * its buttons pinned at the bottom. A form never shares its page with a list.
+ */
+export function FormPage({
+  breadcrumbLabel,
+  breadcrumbs,
+  title,
+  description,
+  onSubmit,
+  actions,
+  children,
+}: {
+  breadcrumbLabel?: string;
+  breadcrumbs: Crumb[];
+  title: ReactNode;
+  description?: ReactNode;
+  onSubmit: () => void;
+  /** The form's buttons: one main action (type submit), the others secondary. */
+  actions: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="mx-auto flex max-w-3xl flex-col">
+      <PageHeader
+        breadcrumbs={breadcrumbs}
+        title={title}
+        {...(breadcrumbLabel ? { breadcrumbLabel } : {})}
+        {...(description ? { description } : {})}
+      />
+      <form
+        noValidate
+        className="flex flex-col gap-8"
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit();
+        }}
+      >
+        {children}
+        <div className="sticky bottom-0 -mx-1 flex flex-wrap gap-2 border-t border-line bg-canvas px-1 py-4">
+          {actions}
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/** A group of fields of a form page, with its title and what it is for. */
+export function FormSection({
+  title,
+  description,
+  children,
+}: {
+  title: ReactNode;
+  description?: ReactNode;
+  children: ReactNode;
+}) {
+  const titleId = useId();
+  return (
+    <section aria-labelledby={titleId} className="grid gap-4">
+      <div>
+        <h2 id={titleId} className="font-heading text-title font-semibold">
+          {title}
+        </h2>
+        {description && <p className="text-body-sm text-fg-muted">{description}</p>}
+      </div>
+      <div className="grid gap-4">{children}</div>
+    </section>
+  );
+}
+
+/**
+ * The person's choice of mode: dark, light or the device's own, as a group of three buttons. The
+ * page applies it (`applyTheme`) and remembers it in a cookie the server reads.
+ */
+export function ThemeChoice({
+  label,
+  value,
+  onChange,
+  labels,
+}: {
+  label: string;
+  value: 'dark' | 'light' | 'auto';
+  onChange: (choice: 'dark' | 'light' | 'auto') => void;
+  labels: { dark: string; light: string; auto: string };
+}) {
+  return (
+    <ViewSwitcher
+      label={label}
+      value={value}
+      onChange={(key) => onChange(key as 'dark' | 'light' | 'auto')}
+      options={[
+        { key: 'dark', label: labels.dark },
+        { key: 'light', label: labels.light },
+        { key: 'auto', label: labels.auto },
+      ]}
+    />
   );
 }

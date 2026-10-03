@@ -307,6 +307,51 @@ Phase 4.
 
 ---
 
+## Phase 6 — The complete system (decided 2026-10-03)
+
+### Objective
+
+What every Kete app and Kete Enterprise need to offer, at the minimum, what Microsoft 365 Copilot
+and OpenAI's Dots offer today: an assistant of the current era, the company's knowledge with its
+sources, files and final documents, agents working in the background and with one another, apps
+created from a person's space that integrate by themselves. Built on what exists (open source
+libraries and standards), never rebuilt.
+
+### Rules decided with it
+
+- **A form never shares its page with a list.** A short form (six fields at most) opens in a
+  dialog — on the right when the screen is wide, centered otherwise; a longer one has its page.
+- **Every mode.** Dark, light or the device's own, chosen by the person, rendered by the server.
+- **Integrated by construction.** An app declares its record types; its tools, its read API, its
+  data sets and its events follow, declared in its identity card.
+- **Agents under the doctrine.** A chain up to a person, rights that only narrow, budgets, levels
+  of autonomy, a person decides every draft; external content is data, never an instruction.
+
+### Specs, in order
+
+| Spec                       | Delivers                                                                                        | Built on                        |
+| -------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------- |
+| `040-page-slots` (done)    | Page slots, view formats, the chat kit                                                          | —                               |
+| `044-forms-and-modes`      | Responsive dialog, `FormPage`, `ThemeChoice`, the template in every mode                        | —                               |
+| `045-integration-contract` | Records → read tools, read API, data sets, events, identity card                                | MCP, JSON Schema                |
+| `046-agents`               | `@kete/agents`: job description, task given, delegation, budgets, kill switch, A2A              | Mastra, A2A                     |
+| `047-sandbox`              | `@kete/sandbox`: an isolated computer for an agent, behind a neutral port                       | boat.dev, E2B                   |
+| `048-knowledge`            | `@kete/knowledge`: indexing, hybrid search filtered by rights, citations                        | pgvector, Docling               |
+| `049-files-and-documents`  | `@kete/files`: storage, reading, final documents from templates                                 | S3/R2, docxtemplater, Gotenberg |
+| `050-skills`               | `@kete/skills`: Agent Skills folders, versions, test cases, progressive reading                 | Agent Skills                    |
+| `051-channels`             | `@kete/notify`: in-app notifications, Web Push, WhatsApp                                        | Web Push, WhatsApp Cloud API    |
+| `052-chat`                 | The chat of the current era: attachments, side canvas, citations, mentions, commands, dictation | assistant-ui, AI SDK            |
+| `053-observability`        | Traces, costs and evaluations of models and agents                                              | Langfuse                        |
+
+### Proof
+
+- `[agent]` An app created from the template exposes its records to the central assistant without
+  a line of integration code, under the person's rights.
+- `[agent]` An agent given a task delegates part of it to another agent; every gesture carries its
+  chain up to the person; the person decides the drafts.
+
+---
+
 ## Later, when a real need appears
 
 `@kete/offline` (local command queue) · `@kete/sequences` (legal numbering) ·

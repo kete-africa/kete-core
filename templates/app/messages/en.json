@@ -61,5 +61,9 @@
   "journal_reversible": "Reversible",
   "journal_empty": "Nothing yet.",
   "journal_you": "You",
-  "journal_agent": "An agent"
+  "journal_agent": "An agent",
+  "theme_label": "Appearance",
+  "theme_dark": "Dark",
+  "theme_light": "Light",
+  "theme_auto": "Automatic"
 }

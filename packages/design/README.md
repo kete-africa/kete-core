@@ -69,6 +69,14 @@ flowchart LR
   PH -->|main action| DR[Drawer]
 ```
 
+## Forms and modes (spec 044)
+
+**A form never shares its page with a list.** A short form (six fields at most) opens in a
+`Drawer`: on the right above 1100 px, centered below. A longer one has its own `FormPage`, made of
+`FormSection`s, its buttons pinned at the bottom. A person chooses dark, light or automatic with
+`ThemeChoice`; `themeFromCookies` lets the server render the chosen mode at once. See
+[spec 044](../../specs/044-forms-and-modes/spec.md).
+
 ## Use in an app (Tailwind 4)
 
 ```css
