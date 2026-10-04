@@ -1,0 +1,23 @@
+{
+  "extends": "../../tooling/tsconfig/base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "types": ["node"]
+  },
+  "include": ["src", "tests"],
+  "references": [
+    {
+      "path": "../ai"
+    },
+    {
+      "path": "../records"
+    },
+    {
+      "path": "../tenancy"
+    },
+    {
+      "path": "../testing"
+    }
+  ]
+}
