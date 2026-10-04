@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/knowledge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Kete knowledge: an organization's documents indexed in Postgres (pgvector), searched by words and by meaning, filtered by who may read each source, answered with citations.",
   "repository": {
