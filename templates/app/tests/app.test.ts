@@ -3,8 +3,7 @@ import type { KeteIdentity } from '@kete/auth';
 import { createMcpHandler, type Caller } from '@kete/capabilities';
 import { readJournal } from '@kete/commands';
 import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '@kete/testing';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { migrations } from '../db/migrations';
 import { completed, reopened, TaskRuleError } from '../src/features/tasks/domain/task';
@@ -71,11 +70,14 @@ async function connect(identity: KeteIdentity): Promise<Client> {
     views: [{ uri: 'ui://kete/review', name: 'review', html: async () => '<!doctype html>' }],
     draftUrl: (id) => `https://app.test/verification/${id}`,
   });
-  const client = new Client({ name: 'copilot', version: '0.0.0' });
+  const client = new Client(
+    { name: 'copilot', version: '0.0.0' },
+    { versionNegotiation: { mode: { pin: '2026-07-28' } } },
+  );
   const transport = new StreamableHTTPClientTransport(new URL('https://app.test/mcp'), {
     fetch: (url, init) => asPerson(identity, () => handler(new Request(url, init))),
   });
-  await client.connect(transport as unknown as Parameters<Client['connect']>[0]);
+  await client.connect(transport);
   return client;
 }
 

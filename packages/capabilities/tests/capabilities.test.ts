@@ -9,8 +9,12 @@ import { draftsMigrationSql, getDraft } from '@kete/drafts';
 import { validateCapability } from '@kete/sdk';
 import { inOrganization } from '@kete/tenancy';
 import { createTestSchema, type TestSchema } from '@kete/testing';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import {
+  Client,
+  StreamableHTTPClientTransport,
+  type ClientOptions,
+  type ElicitResult,
+} from '@modelcontextprotocol/client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import {
@@ -263,20 +267,41 @@ describe('the autonomy scale', () => {
   });
 });
 
+/** An MCP client over the handler: the 2026-07-28 revision unless `legacy`, a form if `answer`. */
+async function clientOf(
+  handler: (request: Request) => Promise<Response>,
+  options: { legacy?: boolean; answer?: (message: string) => ElicitResult } = {},
+): Promise<Client> {
+  const settings: ClientOptions = {
+    ...(options.legacy ? {} : { versionNegotiation: { mode: { pin: '2026-07-28' } } }),
+    ...(options.answer ? { capabilities: { elicitation: { form: {} } } } : {}),
+  };
+  const client = new Client({ name: 'test-client', version: '0.0.0' }, settings);
+  const answer = options.answer;
+  if (answer) {
+    client.setRequestHandler('elicitation/create', async (request) =>
+      answer(String((request.params as { message?: string }).message ?? '')),
+    );
+  }
+  const transport = new StreamableHTTPClientTransport(new URL('http://kete.test/mcp'), {
+    fetch: (url, init) => handler(new Request(url, init)),
+  });
+  await client.connect(transport);
+  return client;
+}
+
 describe('through MCP', () => {
-  async function connect(caller: Caller | null): Promise<Client> {
+  async function connect(
+    caller: Caller | null,
+    options: Parameters<typeof clientOf>[1] = {},
+  ): Promise<Client> {
     const handler = createMcpHandler({
       registry,
       server: { name: 'kete-test', version: '0.0.0' },
       caller: async () => caller,
+      draftUrl: (id) => `https://app.kete.test/review/${id}`,
     });
-    const client = new Client({ name: 'test-client', version: '0.0.0' });
-    const transport = new StreamableHTTPClientTransport(new URL('http://kete.test/mcp'), {
-      fetch: (url, init) => handler(new Request(url, init)),
-    });
-    // The SDK's types predate exactOptionalPropertyTypes (its sessionId may be undefined).
-    await client.connect(transport as unknown as Parameters<Client['connect']>[0]);
-    return client;
+    return clientOf(handler, options);
   }
 
   it('lists the caller’s tools and invokes them under the same rules', async () => {
@@ -303,6 +328,72 @@ describe('through MCP', () => {
   it('refuses a caller the host does not recognize', async () => {
     await expect(connect(null)).rejects.toThrow();
   });
+
+  it('serves 2025-era clients as well', async () => {
+    const client = await connect(as(agent), { legacy: true });
+    const { tools } = await client.listTools();
+    expect(tools.map((t) => t.name)).toContain('quotes_issue');
+    await client.close();
+  });
+
+  it('asks the person in her client, never the model, and decides the draft as she said', async () => {
+    const asked: string[] = [];
+    const client = await connect(as(agent), {
+      answer: (message) => {
+        asked.push(message);
+        return { action: 'accept', content: { decision: 'validate' } };
+      },
+    });
+    const before = await count('quotes');
+    const called = await client.callTool({
+      name: 'quotes_issue',
+      arguments: { client: 'Abena', amount: 4200 },
+    });
+    expect(asked[0]).toContain('"client": "Abena"');
+    expect(called.structuredContent).toMatchObject({
+      status: 'validated',
+      output: { issued: true },
+      review: { status: 'validated' },
+    });
+    expect(await count('quotes')).toBe(before + 1);
+    const journal = await inOrganization(db.app, org, (tx) => readJournal(tx));
+    expect(journal[0]).toMatchObject({ name: 'issue-quote', channel: 'view' });
+    await client.close();
+  });
+
+  it('keeps the draft when the person refuses or does not answer, and level 4 for the screen', async () => {
+    const refusing = await connect(as(agent), {
+      answer: () => ({ action: 'accept', content: { decision: 'refuse', reason: 'Trop cher' } }),
+    });
+    const refused = await refusing.callTool({
+      name: 'quotes_issue',
+      arguments: { client: 'Yaw', amount: 99000 },
+    });
+    expect(refused.structuredContent).toMatchObject({ status: 'refused' });
+    const declining = await connect(as(agent), { answer: () => ({ action: 'decline' }) });
+    const waiting = await declining.callTool({
+      name: 'quotes_issue',
+      arguments: { client: 'Esi', amount: 1000 },
+    });
+    expect(waiting.structuredContent).toMatchObject({
+      status: 'draft',
+      openUrl: expect.stringContaining('https://app.kete.test/review/'),
+    });
+    let askedForPayment = false;
+    const paying = await connect(as(agent), {
+      answer: () => {
+        askedForPayment = true;
+        return { action: 'accept', content: { decision: 'validate' } };
+      },
+    });
+    const payment = await paying.callTool({
+      name: 'payments_send',
+      arguments: { client: 'Kofi', amount: 50000 },
+    });
+    expect(askedForPayment).toBe(false);
+    expect(payment.structuredContent).toMatchObject({ status: 'draft' });
+    for (const c of [refusing, declining, paying]) await c.close();
+  });
 });
 
 describe('views (MCP Apps, doctrine D-037)', () => {
@@ -320,12 +411,7 @@ describe('views (MCP Apps, doctrine D-037)', () => {
       views: [reviewView],
       draftUrl: (id) => `https://app.kete.test/review/${id}`,
     });
-    const client = new Client({ name: 'test-host', version: '0.0.0' });
-    const transport = new StreamableHTTPClientTransport(new URL('http://kete.test/mcp'), {
-      fetch: (url, init) => handler(new Request(url, init)),
-    });
-    await client.connect(transport as unknown as Parameters<Client['connect']>[0]);
-    return client;
+    return clientOf(handler);
   }
 
   it('serves its views as MCP Apps resources, and names a decision’s view on its tool', async () => {

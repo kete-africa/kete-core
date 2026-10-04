@@ -75,8 +75,36 @@ const rights = createRights({ permissions, grants: (token) => center.grants(toke
 const held = await rights.permissionsOf({ userId, role }, token);
 ```
 
-- The MCP endpoint is **stateless**: each request lists only the caller's tools. The host
-  authenticates the request (OAuth access token) in `caller`.
+- The MCP endpoint is **stateless** and speaks the **2026-07-28 revision** (official SDK v2,
+  `@modelcontextprotocol/server`) as well as 2025-era clients: each request lists only the caller's
+  tools, and its lists carry private cache hints (a minute). The host authenticates the request
+  (OAuth access token) in `caller`.
+
+### The person decides in her client (2026-07-28, multi-round-trip)
+
+When an agent prepares a level 3 draft through a client that can show a form to its person
+(it declared form elicitation), the tool does not answer « draft » and stop: it answers
+`input_required` with a form — the draft's values, « validate or refuse ». Her client shows it to
+her, never to the model; its retry carries her answer and the draft's id, and the draft is decided
+as she said, by her, through the `view` channel, after the same rights check as the screen. A
+declined form leaves the draft waiting, with the screen's address. Level 4 is never asked there.
+
+```mermaid
+sequenceDiagram
+  participant M as Model (agent)
+  participant C as MCP client (Claude, ChatGPT, Kete)
+  participant P as Person
+  participant S as App's /mcp
+  M->>C: quotes_issue (level 3)
+  C->>S: tools/call
+  S->>S: draft prepared
+  S-->>C: input_required · form « validate or refuse? » · requestState = draft id
+  C->>P: the form, with the draft's values
+  P-->>C: validate
+  C->>S: tools/call retried · inputResponses · requestState
+  S->>S: the person, channel "view": rights checked, the screen's command, journaled
+  S-->>C: validated
+```
 
 ## Views in a copilot (MCP Apps, doctrine D-037)
 
