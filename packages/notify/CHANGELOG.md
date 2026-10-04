@@ -1,5 +1,12 @@
 # @kete-africa/notify
 
+## 0.2.0
+
+### Minor Changes
+
+- 3db5622: In-app notifications (read or not, with row-level security) and Web Push through `web-push` with
+  VAPID keys, behind a port; devices the push service forgot are removed.
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/notify",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Kete messages: e-mails rendered with React Email and sent through a port, in-app notifications and Web Push, verified provider webhooks, and the port of chat channels.",
   "repository": {
