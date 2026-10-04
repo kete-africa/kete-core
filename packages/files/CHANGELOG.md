@@ -1,5 +1,11 @@
 # @kete-africa/files
 
+## 0.4.0
+
+### Minor Changes
+
+- `readSheets` and `readTable`: a workbook (Excel, OpenDocument) or a CSV read as grids, then one sheet typed as a table — numbers in French or English notation, days, texts.
+
 ## 0.3.1
 
 ### Patch Changes

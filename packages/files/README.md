@@ -101,6 +101,10 @@ flowchart LR
   or a PDF whose pages hold almost no text — is read by the `transcribe` port when the caller gives
   one (a multimodal model, through `@kete/ai`); without it an image stays an image.
   `readable(contentType)` says whether it is read.
+- `readSheets(contentType, bytes)` gives a workbook's (Excel, OpenDocument) or a CSV's sheets as
+  grids of text (the CSV's separator found from its first line); `readTable` types one sheet: its
+  first row names the columns, a column of numbers (`1 200,50`, `1,200.50`, `25 000 FCFA`) is a
+  number, a column of days (`15/11/2026`, `2026-11-15`) a date, the rest text.
 - `templateFields(template)` lists what a template asks for; `fillTemplate(template, values)` fills
   it — a missing value stays empty, never « undefined ». The company keeps its layout and logo.
 - `gotenbergConverter({ url })` turns a Word document, HTML or Markdown into PDF through Gotenberg;
