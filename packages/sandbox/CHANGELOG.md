@@ -1,5 +1,13 @@
 # @kete-africa/sandbox
 
+## 0.3.0
+
+### Minor Changes
+
+- 31fe2a0: `open(id)` resumes a stopped sandbox before handing it out, with its files as they were — a
+  person's own agent sign-in among them.
+  `open(id, { resume: false })` hands it out as it is.
+
 ## 0.2.1
 
 ### Patch Changes
