@@ -47,3 +47,35 @@ await mailer.send(invitation, { to, values, locale: 'fr' });
 - An e-mail's metadata carries facts (the template's name), never personal data.
 - A secret link (sign-in, new password) never reaches a log: without a provider, only the subject
   is logged.
+
+## Notifications in the product and on devices (spec 055)
+
+A notification informs a person; what asks for an action lives in the product's « To do ». It is kept
+in her list (`kete_notifications`, row-level security) and sent to every device she subscribed with
+Web Push — the browsers' standard, with VAPID keys, through the `web-push` library. A device the
+push service no longer knows (404, 410) is forgotten.
+
+```mermaid
+flowchart LR
+  E[a product event: a decision waits for her] --> N[notify]
+  N --> L[(kete_notifications · read or not)]
+  N --> P{PushSender}
+  P -->|KETE_VAPID_* set| W[webPushSender · web-push]
+  P -->|none| X[stays in the product]
+  W -->|404 · 410| G[device forgotten]
+  B[her browser: PushManager.subscribe] --> S[(kete_push_subscriptions)]
+```
+
+```ts
+await savePushSubscription(tx, { organizationId, userId }, subscription); // from the browser
+await notify(
+  tx,
+  { organizationId, userId, kind: 'decision.waiting', title, href: '/a-faire' },
+  pushSenderFromEnv(),
+);
+const unread = await unreadCount(tx, userId);
+await markRead(tx, userId, 'all');
+```
+
+`generatePushKeys()` gives an instance its VAPID pair (`KETE_VAPID_PUBLIC_KEY`,
+`KETE_VAPID_PRIVATE_KEY`, `KETE_VAPID_SUBJECT`).

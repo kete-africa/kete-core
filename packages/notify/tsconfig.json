@@ -7,5 +7,16 @@
     "lib": ["ES2023", "DOM"],
     "types": ["node"]
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests"],
+  "references": [
+    {
+      "path": "../records"
+    },
+    {
+      "path": "../tenancy"
+    },
+    {
+      "path": "../testing"
+    }
+  ]
 }
