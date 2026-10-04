@@ -14,6 +14,7 @@ function fakeBoat() {
     confirm: string | null;
   }[] = [];
   let polls = 0;
+  let resumed = false;
   const fetcher = (async (url: string | URL, init?: RequestInit) => {
     const path = new URL(String(url)).pathname.replace('/api/v1', '');
     const body = init?.body ? JSON.parse(String(init.body)) : undefined;
@@ -38,6 +39,17 @@ function fakeBoat() {
       return json({ sandbox: { id: 'bx_1', state: polls > 1 ? 'ready' : 'provisioning' } });
     }
     if (path === '/sandboxes/bx_404') return json({ error: 'not_found' }, 404);
+    // bx_2 was stopped: it comes back on a fresh machine once resumed.
+    if (path === '/sandboxes/bx_2/resume') {
+      resumed = true;
+      return json(
+        { ok: true, status: 'resuming', sandbox: { id: 'bx_2', state: 'provisioning' } },
+        202,
+      );
+    }
+    if (init?.method === 'GET' && path === '/sandboxes/bx_2') {
+      return json({ sandbox: { id: 'bx_2', state: resumed ? 'ready' : 'archived' } });
+    }
     if (path === '/sandboxes/bx_1/prompt') {
       return json({ ok: true, promptId: 'prompt_1', promptRun: { status: 'queued' } }, 202);
     }
@@ -131,6 +143,29 @@ describe('the provider adapter', () => {
   it('says when a sandbox no longer exists', async () => {
     const boat = fakeBoat();
     expect(await boatProvider({ apiKey: 'k', fetch: boat.fetcher }).open('bx_404')).toBeNull();
+  });
+
+  it('resumes a stopped sandbox before handing it out', async () => {
+    const boat = fakeBoat();
+    const sandbox = await boatProvider({ apiKey: 'k', fetch: boat.fetcher, pollMs: 1 }).open(
+      'bx_2',
+    );
+    expect(sandbox?.id).toBe('bx_2');
+    expect(boat.calls.map((c) => `${c.method} ${c.path}`)).toEqual([
+      'GET /sandboxes/bx_2',
+      'POST /sandboxes/bx_2/resume',
+      'GET /sandboxes/bx_2',
+    ]);
+  });
+
+  it('hands a stopped sandbox out as it is when asked, to delete it without waking it', async () => {
+    const boat = fakeBoat();
+    const provider = boatProvider({ apiKey: 'k', fetch: boat.fetcher, pollMs: 1 });
+    await (await provider.open('bx_2', { resume: false }))?.destroy();
+    expect(boat.calls.map((c) => `${c.method} ${c.path}`)).toEqual([
+      'GET /sandboxes/bx_2',
+      'DELETE /sandboxes/bx_2',
+    ]);
   });
 });
 
