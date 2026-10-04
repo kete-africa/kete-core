@@ -1,5 +1,13 @@
 # @kete-africa/identity
 
+## 0.3.0
+
+### Minor Changes
+
+- 31653d6: MCP clients (Claude, ChatGPT, Codex) identify by their metadata document (Client ID Metadata
+  Documents, MCP 2026-07-28) through Better Auth's `cimd` plugin: on by default, fetched safely, each
+  person still consenting; `clientMetadataDocuments` limits the hosts or turns it off.
+
 ## 0.2.0
 
 ### Minor Changes

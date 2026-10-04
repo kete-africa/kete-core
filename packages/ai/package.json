@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/ai",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "type": "module",
   "description": "Kete AI: one model port for every provider (DeepSeek, OpenAI, Anthropic, Mistral, any OpenAI-compatible host), capabilities as tools, usage measured and budgets enforced per organization and per agent.",
   "repository": {
