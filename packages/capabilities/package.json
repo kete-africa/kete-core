@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/capabilities",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "description": "Kete capabilities: what a product exposes to agents, with its autonomy level, through MCP and as model tools, under the same rights as its screens.",
   "repository": {

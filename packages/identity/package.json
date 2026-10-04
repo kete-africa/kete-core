@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/identity",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "Kete identity: the Compte Kete's rules on Better Auth — people, organizations and their roles, passkeys, second factor, sign-in links, and the OpenID provider every Kete app signs in with.",
   "repository": {

@@ -1,5 +1,13 @@
 # @kete-africa/views
 
+## 0.2.1
+
+### Patch Changes
+
+- 3465b45: MCP 2026-07-28 through the official SDK v2 (`@modelcontextprotocol/server`), 2025-era clients still
+  served: stateless answers with private cache hints, and a level 3 draft put to the person in her
+  client's form (`input_required`), decided as she says, never by the model.
+
 ## 0.2.0
 
 ### Minor Changes

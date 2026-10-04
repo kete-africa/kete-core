@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/skills",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "Kete skills: Agent Skills folders read and validated, versioned in Postgres, offered to a model progressively, carried to a provider's sandbox for their scripts, and checked against their own test cases.",
   "repository": {
