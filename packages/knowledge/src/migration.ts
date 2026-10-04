@@ -30,7 +30,11 @@ export function knowledgeMigrationSql(options: KnowledgeMigrationOptions): strin
   }
   const policy = (table: string) => organizationPolicySql({ schema: s, table, appRole: app });
   return `
-create extension if not exists vector with schema public;
+-- Two migrations at once (tests in parallel, two instances starting) may both create it.
+do $$ begin
+  create extension if not exists vector with schema public;
+exception when unique_violation or duplicate_object then null;
+end $$;
 
 create table ${s}.kete_knowledge_sources (
   organization_id text not null,
