@@ -3,7 +3,7 @@ import { createDeepSeek } from '@ai-sdk/deepseek';
 import { createMistral } from '@ai-sdk/mistral';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import type { EmbeddingModel, LanguageModel, TranscriptionModel } from 'ai';
+import type { EmbeddingModel, LanguageModel, ToolSet, TranscriptionModel } from 'ai';
 
 /**
  * The model providers Kete can use (doctrine D-029: the model is chosen by configuration, never
@@ -98,6 +98,47 @@ export function transcriptionModel(config: ModelConfig): TranscriptionModel {
     throw new ModelConfigError(`${config.provider} offers no transcription model here.`);
   }
   return createOpenAI(settings(config)).transcription(config.model);
+}
+
+/** A skill a provider's sandbox installs: its name, description and .zip (`@kete/skills`). */
+export interface HostedSkill {
+  name: string;
+  description: string;
+  archive: Uint8Array;
+}
+
+/**
+ * The provider's own sandbox, where a model runs commands and skills' scripts — Word, Excel,
+ * PowerPoint, PDF made there — with no container of ours. Its network is off unless domains are
+ * allowed. Null when the configured provider offers none here.
+ */
+export function hostedShell(
+  config: ModelConfig,
+  options: { skills?: readonly HostedSkill[]; allowedDomains?: string[] } = {},
+): ToolSet | null {
+  checkConfig(config);
+  if (config.provider !== 'openai') return null;
+  const skills = (options.skills ?? []).map((s) => ({
+    type: 'inline' as const,
+    name: s.name,
+    description: s.description,
+    source: {
+      type: 'base64' as const,
+      mediaType: 'application/zip' as const,
+      data: Buffer.from(s.archive).toString('base64'),
+    },
+  }));
+  return {
+    shell: createOpenAI(settings(config)).tools.shell({
+      environment: {
+        type: 'containerAuto',
+        networkPolicy: options.allowedDomains?.length
+          ? { type: 'allowlist', allowedDomains: options.allowedDomains }
+          : { type: 'disabled' },
+        ...(skills.length ? { skills } : {}),
+      },
+    }),
+  };
 }
 
 /**

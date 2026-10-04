@@ -657,6 +657,34 @@ importers:
         specifier: ^8.23.1
         version: 8.23.1
 
+  packages/skills:
+    dependencies:
+      '@kete/ai':
+        specifier: workspace:@kete-africa/ai@*
+        version: link:../ai
+      '@kete/records':
+        specifier: workspace:@kete-africa/records@*
+        version: link:../records
+      '@kete/tenancy':
+        specifier: workspace:@kete-africa/tenancy@*
+        version: link:../tenancy
+      ai:
+        specifier: ^7.0.122
+        version: 7.0.122(zod@4.6.5)
+      fflate:
+        specifier: ^0.8.3
+        version: 0.8.3
+      skills-ref:
+        specifier: ^0.1.5
+        version: 0.1.5
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@kete/testing':
+        specifier: workspace:@kete-africa/testing@*
+        version: link:../testing
+
   packages/tenancy:
     dependencies:
       '@kete/sdk':
@@ -4530,6 +4558,10 @@ packages:
     resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
 
+  commander@12.1.0:
+    resolution: {integrity: sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA==}
+    engines: {node: '>=18'}
+
   commander@7.2.0:
     resolution: {integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==}
     engines: {node: '>= 10'}
@@ -6953,6 +6985,11 @@ packages:
   sitemap@9.0.1:
     resolution: {integrity: sha512-S6hzjGJSG3d6if0YoF5kTyeRJvia6FSTBroE5fQ0bu1QNxyJqhhinfUsXi9fH3MgtXODWvwo2BDyQSnhPQ88uQ==}
     engines: {node: '>=20.19.5', npm: '>=10.8.2'}
+    hasBin: true
+
+  skills-ref@0.1.5:
+    resolution: {integrity: sha512-C2vyZbUQqt3PXA9vcdUmJ0lwbH9jK19C9fwQjl/ICPy2e5bzV3CaropViakJCv+HLt/9zsgjZ/NLJ5xEri0jSA==}
+    engines: {node: '>=18.0.0'}
     hasBin: true
 
   smol-toml@1.9.0:
@@ -11473,6 +11510,8 @@ snapshots:
 
   commander@11.1.0: {}
 
+  commander@12.1.0: {}
+
   commander@7.2.0: {}
 
   commander@8.3.0: {}
@@ -14253,6 +14292,11 @@ snapshots:
       '@types/sax': 1.2.7
       arg: 5.0.2
       sax: 1.6.1
+
+  skills-ref@0.1.5:
+    dependencies:
+      commander: 12.1.0
+      js-yaml: 4.3.2
 
   smol-toml@1.9.0: {}
 

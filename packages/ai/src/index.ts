@@ -14,11 +14,13 @@ export {
 } from './budget.js';
 export {
   embeddingModel,
+  hostedShell,
   languageModel,
   ModelConfigError,
   modelConfigFromEnv,
   modelProviders,
   transcriptionModel,
+  type HostedSkill,
   type ModelConfig,
   type ModelProvider,
 } from './providers.js';
