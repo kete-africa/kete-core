@@ -18,7 +18,7 @@
     "@aws-sdk/client-s3": "^3.1141.0",
     "@aws-sdk/s3-request-presigner": "^3.1141.0",
     "docxtemplater": "^3.71.0",
-    "mammoth": "^1.13.0",
+    "officeparser": "^8.1.0",
     "pizzip": "^3.3.0",
     "sharp": "^0.35.5",
     "unpdf": "^1.8.1"

@@ -87,15 +87,20 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-  F[a file] --> R[readDocument · unpdf, mammoth] --> T[text page by page]
+  F[a file] --> R[readDocument · unpdf, officeparser] --> T[text page by page]
+  S[a scan · image, PDF without text] --> TR[transcribe · the caller's model] --> T
   W[a company's Word template · {client} {#lines}] --> FT[fillTemplate · docxtemplater] --> D[a final .docx]
   D & M[Markdown · HTML] --> P{PdfConverter}
   P -->|KETE_GOTENBERG_URL| G[gotenbergConverter · LibreOffice, Chromium]
   P -->|none| X[no PDF: the .docx or .md stays]
 ```
 
-- `readDocument(contentType, bytes)` reads PDF, Word, text, CSV, Markdown, JSON; a PDF page by
-  page, so that a citation names its page. `readable(contentType)` says whether it is read.
+- `readDocument(contentType, bytes, { transcribe? })` reads PDF (unpdf); Word, Excel, PowerPoint,
+  OpenDocument and RTF (officeparser); text, CSV, Markdown, JSON. A PDF's pages, a workbook's sheets
+  and a presentation's slides are its pages, so that a citation names its page. A scan — an image,
+  or a PDF whose pages hold almost no text — is read by the `transcribe` port when the caller gives
+  one (a multimodal model, through `@kete/ai`); without it an image stays an image.
+  `readable(contentType)` says whether it is read.
 - `templateFields(template)` lists what a template asks for; `fillTemplate(template, values)` fills
   it — a missing value stays empty, never « undefined ». The company keeps its layout and logo.
 - `gotenbergConverter({ url })` turns a Word document, HTML or Markdown into PDF through Gotenberg;

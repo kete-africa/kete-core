@@ -52,6 +52,7 @@ const { value } = await extract({ model, schema: quote.schema, prompt: message, 
 | `languageModel`, `embeddingModel`, `transcriptionModel` | A model from a `ModelConfig` (`modelConfigFromEnv` reads it from the environment)  |
 | `ask`, `askStream`                                      | A conversation turn with tools (at most `maxSteps` model steps), metered           |
 | `extract`                                               | A structured value of a Zod schema, metered                                        |
+| `scanReader`                                            | A scan (image, PDF without text) read page by page: `@kete/files`' transcriber     |
 | `toolsFrom`                                             | Capabilities (`registry.tools(caller)`) as AI SDK tools                            |
 | `postgresBudgetStore`, `aiMigrationSql`                 | Usage (append-only) and monthly token budgets in the product's Postgres, under RLS |
 
