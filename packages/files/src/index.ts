@@ -17,3 +17,11 @@ export {
   type PreparedImage,
   type PrepareImageOptions,
 } from './images.js';
+export { readable, readDocument, WORD, type ReadDocument, type ReadKind } from './read.js';
+export { fillTemplate, TemplateError, templateFields } from './templates.js';
+export {
+  ConversionError,
+  gotenbergConverter,
+  pdfConverterFromEnv,
+  type PdfConverter,
+} from './pdf.js';
