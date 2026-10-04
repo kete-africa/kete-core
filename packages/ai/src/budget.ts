@@ -1,5 +1,6 @@
 import type { Actor } from '@kete/commands';
 import { ACTIVE_ORGANIZATION_SQL, inOrganization, type ClientPool } from '@kete/tenancy';
+import { costOf, type ModelPrices } from './observability.js';
 
 /** What a model call cost, in tokens: the unit budgets are counted in. */
 export interface Usage {
@@ -110,13 +111,47 @@ grant usage on schema ${schema} to ${app};
 }
 
 /**
- * Budgets and usage in the product's Postgres (`aiMigrationSql`). A scope without a budget row is
- * not limited; `setBudget` sets one.
+ * What each call cost, in millionths of a dollar (spec 058): a column added to the usage journal,
+ * run after `aiMigrationSql` (idempotent). Null for a model without a price.
  */
-export function postgresBudgetStore(pool: ClientPool): BudgetStore & {
+export function aiCostMigrationSql(options: AiMigrationOptions): string {
+  const schema = checkIdentifier(options.schema ?? 'public');
+  return `
+alter table ${schema}.kete_ai_usage add column if not exists cost_micro_usd bigint
+  check (cost_micro_usd >= 0);
+create index if not exists kete_ai_usage_purpose on ${schema}.kete_ai_usage (organization_id, purpose, created_at);
+`;
+}
+
+/** One line of a usage report: calls of one purpose, model and actor over the period. */
+export interface UsageLine {
+  purpose: string;
+  model: string;
+  actorKind: string;
+  actorId: string;
+  onBehalfOfId: string | null;
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+  /** Millionths of a dollar; null when none of these calls had a price. */
+  costMicroUsd: number | null;
+}
+
+/**
+ * Budgets and usage in the product's Postgres (`aiMigrationSql`). A scope without a budget row is
+ * not limited; `setBudget` sets one. With `prices` (and `aiCostMigrationSql`), each call also
+ * records what it cost.
+ */
+export function postgresBudgetStore(
+  pool: ClientPool,
+  options: { prices?: ModelPrices } = {},
+): BudgetStore & {
   setBudget(organizationId: string, scope: BudgetScope, monthlyTokens: number): Promise<void>;
   spent(organizationId: string, scope: BudgetScope): Promise<number>;
+  /** Usage over a period (default: this month), by purpose, model and actor, its cost included. */
+  report(organizationId: string, period?: { from?: Date; to?: Date }): Promise<UsageLine[]>;
 } {
+  const prices = options.prices;
   async function spent(organizationId: string, scope: BudgetScope): Promise<number> {
     return inOrganization(pool, organizationId, async (db) => {
       const { rows } = await db.query<{ spent: string }>(
@@ -157,24 +192,69 @@ export function postgresBudgetStore(pool: ClientPool): BudgetStore & {
       }
     },
     async record(context, usage) {
+      const values = [
+        context.organizationId,
+        context.actor.kind,
+        context.actor.id,
+        context.actor.onBehalfOf?.id ?? null,
+        context.purpose,
+        context.model,
+        usage.inputTokens,
+        usage.outputTokens,
+        usage.modelCalls,
+      ];
       await inOrganization(pool, context.organizationId, (db) =>
-        db.query(
-          `insert into kete_ai_usage (organization_id, actor_kind, actor_id, on_behalf_of_id, purpose,
-             model, input_tokens, output_tokens, model_calls)
-           values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-          [
-            context.organizationId,
-            context.actor.kind,
-            context.actor.id,
-            context.actor.onBehalfOf?.id ?? null,
-            context.purpose,
-            context.model,
-            usage.inputTokens,
-            usage.outputTokens,
-            usage.modelCalls,
-          ],
-        ),
+        prices
+          ? db.query(
+              `insert into kete_ai_usage (organization_id, actor_kind, actor_id, on_behalf_of_id,
+                 purpose, model, input_tokens, output_tokens, model_calls, cost_micro_usd)
+               values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+              [...values, costOf(context.model, usage, prices)],
+            )
+          : db.query(
+              `insert into kete_ai_usage (organization_id, actor_kind, actor_id, on_behalf_of_id,
+                 purpose, model, input_tokens, output_tokens, model_calls)
+               values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+              values,
+            ),
       );
+    },
+    async report(organizationId, period = {}) {
+      return inOrganization(pool, organizationId, async (db) => {
+        const { rows } = await db.query<{
+          purpose: string;
+          model: string;
+          actor_kind: string;
+          actor_id: string;
+          on_behalf_of_id: string | null;
+          calls: string;
+          input_tokens: string;
+          output_tokens: string;
+          cost: string | null;
+        }>(
+          `select purpose, model, actor_kind, actor_id, on_behalf_of_id,
+                  sum(model_calls)::text as calls, sum(input_tokens)::text as input_tokens,
+                  sum(output_tokens)::text as output_tokens,
+                  ${prices ? 'sum(cost_micro_usd)::text' : 'null::text'} as cost
+             from kete_ai_usage
+            where created_at >= coalesce($1, date_trunc('month', now()))
+              and created_at < coalesce($2, 'infinity'::timestamptz)
+            group by purpose, model, actor_kind, actor_id, on_behalf_of_id
+            order by sum(input_tokens + output_tokens) desc`,
+          [period.from ?? null, period.to ?? null],
+        );
+        return rows.map((r) => ({
+          purpose: r.purpose,
+          model: r.model,
+          actorKind: r.actor_kind,
+          actorId: r.actor_id,
+          onBehalfOfId: r.on_behalf_of_id,
+          calls: Number(r.calls),
+          inputTokens: Number(r.input_tokens),
+          outputTokens: Number(r.output_tokens),
+          costMicroUsd: r.cost === null ? null : Number(r.cost),
+        }));
+      });
     },
   };
 }

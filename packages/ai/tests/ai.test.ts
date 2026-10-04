@@ -1,17 +1,22 @@
 import type { CapabilityTool } from '@kete/capabilities';
 import type { Actor } from '@kete/commands';
 import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '@kete/testing';
+import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { MockLanguageModelV4 } from 'ai/test';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import {
+  aiCostMigrationSql,
   aiMigrationSql,
   ask,
   BudgetExceededError,
+  costOf,
   extract,
   languageModel,
   ModelConfigError,
   modelConfigFromEnv,
+  modelPricesFromEnv,
+  observeModels,
   postgresBudgetStore,
   scanReader,
   type Metering,
@@ -24,6 +29,7 @@ beforeAll(async () => {
   db = await createTestSchema({
     migrate: async (owner, { schema, appRole }) => {
       await owner.query(aiMigrationSql({ schema, appRole }));
+      await owner.query(aiCostMigrationSql({ schema, appRole }));
     },
   });
   store = postgresBudgetStore(db.app);
@@ -201,6 +207,98 @@ describe('scans', () => {
     const sent = JSON.stringify(model.doGenerateCalls[0]?.prompt);
     expect(sent).toContain('application/pdf');
     expect(sent).toContain('Transcribe this document exactly');
+  });
+});
+
+describe('observability', () => {
+  it('traces each call, its tokens and purpose, never what people wrote unless allowed', async () => {
+    expect(observeModels({ env: {} }).enabled).toBe(false);
+    const exporter = new InMemorySpanExporter();
+    const observed = observeModels({
+      spanProcessors: [new SimpleSpanProcessor(exporter)],
+      env: {},
+    });
+    expect(observed.enabled).toBe(true);
+    await ask({
+      model: new MockLanguageModelV4({
+        doGenerate: {
+          content: [{ type: 'text', text: 'Réponse privée' }],
+          finishReason: stop,
+          usage,
+          warnings: [],
+        },
+      }),
+      prompt: 'Question confidentielle',
+      metering: {
+        store: postgresBudgetStore(db.app),
+        context: { organizationId: 'org_traces', actor: person, purpose: 'chat', model: '' },
+      },
+    });
+    const spans = exporter.getFinishedSpans();
+    expect(spans.length).toBeGreaterThan(0);
+    const attributes = spans.map((span) => span.attributes);
+    const all = JSON.stringify(attributes);
+    expect(all).toContain('chat');
+    expect(all).toMatch(/input_tokens|inputTokens/);
+    expect(all).not.toContain('Question confidentielle');
+    expect(all).not.toContain('Réponse privée');
+    await observed.shutdown();
+  });
+
+  it('prices calls from the configuration, by full model name or by its id', () => {
+    const prices = modelPricesFromEnv({
+      KETE_AI_PRICES: '{"gpt-6.1-sol":{"input":1.25,"output":10}}',
+    });
+    const used = { inputTokens: 1_000_000, outputTokens: 100_000, modelCalls: 1 };
+    expect(costOf('openai.responses:gpt-6.1-sol', used, prices)).toBe(2_250_000);
+    expect(costOf('deepseek:deepseek-chat', used, prices)).toBeNull();
+    expect(modelPricesFromEnv({})).toEqual({});
+    expect(() => modelPricesFromEnv({ KETE_AI_PRICES: '{"x":{"input":-1,"output":1}}' })).toThrow();
+  });
+
+  it('records what each call cost, and reports usage by purpose, model and actor', async () => {
+    const priced = postgresBudgetStore(db.app, {
+      prices: { 'gpt-6.1-sol': { input: 1.25, output: 10 } },
+    });
+    const context = { organizationId: 'org_costs', purpose: 'chat' };
+    await priced.record(
+      { ...context, actor: person, model: 'openai.responses:gpt-6.1-sol' },
+      { inputTokens: 2000, outputTokens: 500, modelCalls: 1 },
+    );
+    await priced.record(
+      { ...context, actor: person, model: 'openai.responses:gpt-6.1-sol' },
+      { inputTokens: 1000, outputTokens: 100, modelCalls: 2 },
+    );
+    await priced.record(
+      { ...context, actor: agent, model: 'deepseek:deepseek-chat' },
+      { inputTokens: 10, outputTokens: 10, modelCalls: 1 },
+    );
+    const report = await priced.report('org_costs');
+    expect(report).toEqual([
+      {
+        purpose: 'chat',
+        model: 'openai.responses:gpt-6.1-sol',
+        actorKind: 'person',
+        actorId: 'usr_ama',
+        onBehalfOfId: null,
+        calls: 3,
+        inputTokens: 3000,
+        outputTokens: 600,
+        costMicroUsd: 9750,
+      },
+      {
+        purpose: 'chat',
+        model: 'deepseek:deepseek-chat',
+        actorKind: 'agent',
+        actorId: 'agt_sales',
+        onBehalfOfId: 'usr_ama',
+        calls: 1,
+        inputTokens: 10,
+        outputTokens: 10,
+        costMicroUsd: null,
+      },
+    ]);
+    expect(await priced.report('org_costs', { from: new Date(Date.now() + 60_000) })).toEqual([]);
   });
 });
 

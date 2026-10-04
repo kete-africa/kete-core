@@ -2,6 +2,7 @@
 
 export { ask, askStream, extract, toolsFrom, usageOf, type Answer, type Metering } from './ask.js';
 export {
+  aiCostMigrationSql,
   aiMigrationSql,
   BudgetExceededError,
   postgresBudgetStore,
@@ -11,7 +12,18 @@ export {
   type BudgetStore,
   type Usage,
   type UsageContext,
+  type UsageLine,
 } from './budget.js';
+export {
+  costOf,
+  modelPrice,
+  modelPricesFromEnv,
+  observeModels,
+  tracesContent,
+  type ModelPrice,
+  type ModelPrices,
+  type ObservedModels,
+} from './observability.js';
 export {
   embeddingModel,
   hostedShell,
