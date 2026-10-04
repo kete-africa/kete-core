@@ -47,14 +47,45 @@ return stream.toUIMessageStreamResponse();
 const { value } = await extract({ model, schema: quote.schema, prompt: message, metering });
 ```
 
-| Export                                                  | What it does                                                                       |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `languageModel`, `embeddingModel`, `transcriptionModel` | A model from a `ModelConfig` (`modelConfigFromEnv` reads it from the environment)  |
-| `ask`, `askStream`                                      | A conversation turn with tools (at most `maxSteps` model steps), metered           |
-| `extract`                                               | A structured value of a Zod schema, metered                                        |
-| `scanReader`                                            | A scan (image, PDF without text) read page by page: `@kete/files`' transcriber     |
-| `toolsFrom`                                             | Capabilities (`registry.tools(caller)`) as AI SDK tools                            |
-| `postgresBudgetStore`, `aiMigrationSql`                 | Usage (append-only) and monthly token budgets in the product's Postgres, under RLS |
+| Export                                                                | What it does                                                                       |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `languageModel`, `embeddingModel`, `transcriptionModel`               | A model from a `ModelConfig` (`modelConfigFromEnv` reads it from the environment)  |
+| `ask`, `askStream`                                                    | A conversation turn with tools (at most `maxSteps` model steps), metered           |
+| `extract`                                                             | A structured value of a Zod schema, metered                                        |
+| `scanReader`                                                          | A scan (image, PDF without text) read page by page: `@kete/files`' transcriber     |
+| `toolsFrom`                                                           | Capabilities (`registry.tools(caller)`) as AI SDK tools                            |
+| `postgresBudgetStore`, `aiMigrationSql`                               | Usage (append-only) and monthly token budgets in the product's Postgres, under RLS |
+| `observeModels`, `aiCostMigrationSql`, `modelPricesFromEnv`, `costOf` | Traces (OpenTelemetry, Langfuse), each call's cost, `store.report`                 |
+
+## Observing models: traces and costs (spec 058)
+
+```mermaid
+flowchart LR
+  C[ask · askStream · extract · any AI SDK call] --> O[@ai-sdk/otel · GenAI spans]
+  O -->|LANGFUSE_* set| L[LangfuseSpanProcessor → Langfuse]
+  O -->|spanProcessors| X[any OpenTelemetry processor]
+  C --> R[BudgetStore.record]
+  P[KETE_AI_PRICES] --> R
+  R --> U[(kete_ai_usage · tokens · cost_micro_usd)]
+  U --> Q[report · by purpose, model, actor]
+```
+
+```ts
+import { modelPricesFromEnv, observeModels, postgresBudgetStore } from '@kete/ai';
+
+// Once at startup: traces to Langfuse when LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY are set.
+const observed = observeModels();
+// Each call's cost, in millionths of a dollar (migration: aiCostMigrationSql after aiMigrationSql).
+const store = postgresBudgetStore(pool, { prices: modelPricesFromEnv() });
+const thisMonth = await store.report(organizationId);
+```
+
+- **Traces** follow OpenTelemetry's GenAI conventions (model, tokens, duration, purpose as
+  `functionId`), through the AI SDK's own integration. **What people wrote is not traced** unless
+  `KETE_AI_TRACE_CONTENT=true`: Langfuse is a third party.
+- **Costs** come from `KETE_AI_PRICES` (US dollars per million tokens, by model id), recorded with
+  each call, so a later price change does not rewrite history. A model without a price costs `null`.
+- No service of ours: Langfuse Cloud, one's own Langfuse, or any OpenTelemetry processor.
 
 ## Choosing the provider (doctrine D-029)
 

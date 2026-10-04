@@ -12,6 +12,7 @@ import {
 } from 'ai';
 import type { z } from 'zod';
 import type { BudgetStore, Usage, UsageContext } from './budget.js';
+import { tracesContent } from './observability.js';
 
 /** Who pays for a call, and where its usage is recorded. */
 export interface Metering {
@@ -72,9 +73,19 @@ function input(conversation: Conversation) {
   throw new TypeError('Give messages or a prompt.');
 }
 
+/** How a call appears in the traces: its purpose, and its content only when allowed. */
+const telemetryOf = (metering: Metering | undefined) => ({
+  telemetry: {
+    ...(metering ? { functionId: metering.context.purpose } : {}),
+    recordInputs: tracesContent(),
+    recordOutputs: tracesContent(),
+  },
+});
+
 function shared(conversation: Conversation) {
   return {
     model: conversation.model,
+    ...telemetryOf(conversation.metering),
     ...(conversation.system ? { system: conversation.system } : {}),
     ...input(conversation),
     ...(conversation.tools?.length ? { tools: toolsFrom(conversation.tools) } : {}),
@@ -142,6 +153,7 @@ export async function extract<T>(options: {
     ...(options.system ? { system: options.system } : {}),
     ...input(options),
     output: Output.object({ schema: options.schema }),
+    ...telemetryOf(options.metering),
   });
   const usage = usageOf(result.totalUsage, result.steps.length);
   await meter(options.metering, usage, options.model);
