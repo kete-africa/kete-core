@@ -60,8 +60,17 @@ export const { auth, claimsOf, signInMethods, signsInStrongly, removePassword } 
 | Sign-in links: never e-mailed, single attempt, stored hashed, never for a sign-up                | 013      |
 | Tokens: 15 minutes, audience `urn:kete:apps`, claims `org`, `role`, `apps`, `two_factor`         | 007, 016 |
 | Registered clients only, PKCE, no dynamic registration; operators manage the clients             | 007      |
+| MCP clients identify by their metadata document (CIMD), fetched safely; each person consents     | 060      |
 
 `two_factor` is true for a person who always signs in strongly: a second factor, or passkeys only.
+
+**MCP clients (spec 060).** Claude, ChatGPT or Codex identify by the HTTPS address of a document
+describing them (Client ID Metadata Documents, the MCP 2026-07-28 way) through Better Auth's
+`cimd` plugin: the document is fetched once per hour at most, through a transport that resolves the
+host once, refuses private addresses and redirects, and checked by the MCP profile (name, redirect
+addresses). Such a client is kept with its provenance — it can never take over a client an operator
+registered — has no `client_credentials`, and each person signs in and consents to it.
+`clientMetadataDocuments: { allow }` limits the hosts; `false` turns it off.
 
 ## Schema and migrations
 
