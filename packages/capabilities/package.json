@@ -33,10 +33,11 @@
     "@kete/records": "workspace:@kete-africa/records@*",
     "@kete/sdk": "workspace:@kete-africa/sdk@*",
     "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
-    "@modelcontextprotocol/sdk": "1.31.0",
+    "@modelcontextprotocol/server": "2.3.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@kete/testing": "workspace:@kete-africa/testing@*"
+    "@kete/testing": "workspace:@kete-africa/testing@*",
+    "@modelcontextprotocol/client": "2.3.0"
   }
 }
