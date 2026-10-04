@@ -22,3 +22,4 @@ export {
   type ModelConfig,
   type ModelProvider,
 } from './providers.js';
+export { scanReader } from './scans.js';

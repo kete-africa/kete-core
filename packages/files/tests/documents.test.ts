@@ -1,38 +1,40 @@
-import PizZip from 'pizzip';
 import { describe, expect, it } from 'vitest';
 import {
   ConversionError,
+  EXCEL,
   fillTemplate,
   gotenbergConverter,
   pdfConverterFromEnv,
+  POWERPOINT,
   readable,
   readDocument,
   TemplateError,
   templateFields,
   WORD,
 } from '../src/index.js';
+import { presentation, word, workbook } from './office-fixtures.js';
 
 // Spec 053: documents read page by page, final documents from the company's Word templates, PDF
 // through a conversion service.
 
-/** A minimal Word document whose body is these paragraphs. */
-function word(...paragraphs: string[]): Uint8Array {
-  const zip = new PizZip();
-  zip.file(
-    '[Content_Types].xml',
-    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>',
-  );
-  zip.file(
-    '_rels/.rels',
-    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
-  );
-  zip.file(
-    'word/document.xml',
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${paragraphs
-      .map((p) => `<w:p><w:r><w:t xml:space="preserve">${p}</w:t></w:r></w:p>`)
-      .join('')}</w:body></w:document>`,
-  );
-  return zip.generate({ type: 'uint8array' });
+/** A one-page PDF with no text: what a scanner without OCR produces, as far as text goes. */
+function blankPdf(): Uint8Array {
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] >>',
+  ];
+  let body = '%PDF-1.4\n';
+  const offsets: number[] = [];
+  objects.forEach((o, i) => {
+    offsets.push(body.length);
+    body += `${i + 1} 0 obj\n${o}\nendobj\n`;
+  });
+  const xref = body.length;
+  body += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${offsets
+    .map((o) => `${String(o).padStart(10, '0')} 00000 n \n`)
+    .join('')}trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return new TextEncoder().encode(body);
 }
 
 const letter = word(
@@ -54,6 +56,58 @@ describe('reading', () => {
     });
     const read = await readDocument(WORD, word('Procédure qualité', 'Fiche sous 48 heures.'));
     expect(read.text).toContain('Fiche sous 48 heures.');
+  });
+  it('reads a workbook sheet by sheet and a presentation slide by slide', async () => {
+    const sheets = await readDocument(
+      EXCEL,
+      workbook({
+        Ventes: [
+          ['Mois', 'Montant'],
+          ['Janvier', '1200'],
+        ],
+        Stocks: [
+          ['Article', 'Quantité'],
+          ['Batterie', '14'],
+        ],
+      }),
+    );
+    expect(sheets).toMatchObject({ kind: 'text', pages: 2 });
+    expect(sheets.pageTexts[0]).toBe('Ventes\nMois\tMontant\nJanvier\t1200');
+    expect(sheets.pageTexts[1]).toContain('Batterie\t14');
+    const slides = await readDocument(
+      POWERPOINT,
+      presentation([
+        ['Revue SAV', 'Octobre'],
+        ['Délais', '48 heures en moyenne'],
+      ]),
+    );
+    expect(slides).toMatchObject({ kind: 'text', pages: 2 });
+    expect(slides.pageTexts).toEqual(['Revue SAV\nOctobre', 'Délais\n48 heures en moyenne']);
+    expect(readable('application/vnd.oasis.opendocument.text')).toBe(true);
+  });
+
+  it('gives a scan to the transcriber, and keeps an image as it is without one', async () => {
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+    expect(await readDocument('image/png', png)).toMatchObject({ kind: 'image', text: '' });
+    const seen: string[] = [];
+    const transcribe = async (d: { contentType: string }) => {
+      seen.push(d.contentType);
+      return [' Bon de livraison n° 42 '];
+    };
+    expect(await readDocument('image/png', png, { transcribe })).toEqual({
+      kind: 'text',
+      text: 'Bon de livraison n° 42',
+      pages: null,
+      pageTexts: ['Bon de livraison n° 42'],
+    });
+    const scanned = await readDocument('application/pdf', blankPdf(), { transcribe });
+    expect(scanned).toMatchObject({ kind: 'text', pages: 1, text: 'Bon de livraison n° 42' });
+    expect(seen).toEqual(['image/png', 'application/pdf']);
+    // Without a transcriber, a scanned PDF says it has a page and no text.
+    expect(await readDocument('application/pdf', blankPdf())).toMatchObject({
+      pages: 1,
+      text: '',
+    });
   });
 });
 

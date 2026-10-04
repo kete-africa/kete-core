@@ -13,6 +13,7 @@ import {
   ModelConfigError,
   modelConfigFromEnv,
   postgresBudgetStore,
+  scanReader,
   type Metering,
 } from '../src/index.js';
 
@@ -176,6 +177,30 @@ describe('extract', () => {
     });
     expect(value).toEqual({ client: 'Ama', amount: 50000 });
     expect(used).toEqual({ inputTokens: 10, outputTokens: 5, modelCalls: 1 });
+  });
+});
+
+describe('scans', () => {
+  it('reads a scan page by page, the file given to the model as it is', async () => {
+    const model = new MockLanguageModelV4({
+      doGenerate: {
+        content: [
+          { type: 'text', text: '{"pages":["Bon de livraison n° 42","Signature : A. Mensah"]}' },
+        ],
+        finishReason: stop,
+        usage,
+        warnings: [],
+      },
+    });
+    const read = scanReader({ model });
+    const pdf = new TextEncoder().encode('%PDF-1.4');
+    expect(await read({ data: pdf, contentType: 'application/pdf' })).toEqual([
+      'Bon de livraison n° 42',
+      'Signature : A. Mensah',
+    ]);
+    const sent = JSON.stringify(model.doGenerateCalls[0]?.prompt);
+    expect(sent).toContain('application/pdf');
+    expect(sent).toContain('Transcribe this document exactly');
   });
 });
 

@@ -10,6 +10,8 @@ allowBuilds:
   cpu-features: false
   protobufjs: false
   ssh2: false
+  # officeparser brings Tesseract for its optional OCR, which Kete does not use (scans go to the model).
+  tesseract.js: false
 
 overrides:
   # starlight-openapi's httpsnippet pins a form-data with a known flaw (GHSA-hmw2-7cc7-3qxx).

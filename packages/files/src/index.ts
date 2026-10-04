@@ -17,7 +17,17 @@ export {
   type PreparedImage,
   type PrepareImageOptions,
 } from './images.js';
-export { readable, readDocument, WORD, type ReadDocument, type ReadKind } from './read.js';
+export {
+  EXCEL,
+  POWERPOINT,
+  readable,
+  readDocument,
+  WORD,
+  type ReadDocument,
+  type ReadKind,
+  type ReadOptions,
+  type Transcriber,
+} from './read.js';
 export { fillTemplate, TemplateError, templateFields } from './templates.js';
 export {
   ConversionError,
