@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/files",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "Kete files: a storage port with an S3-compatible adapter, presigned transfers, images made safe, documents read page by page, final documents from Word templates, and PDF through a conversion service.",
   "repository": {

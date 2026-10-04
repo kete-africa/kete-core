@@ -1,5 +1,11 @@
 # @kete-africa/files
 
+## 0.3.1
+
+### Patch Changes
+
+- `templateFields` reads a template's fields through docxtemplater's parser hook instead of its inspection module, which needs lodash without declaring it: a production install (pnpm, strict) failed to start.
+
 ## 0.3.0
 
 ### Minor Changes
