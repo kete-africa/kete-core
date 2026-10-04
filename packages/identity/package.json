@@ -16,6 +16,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@better-auth/cimd": "1.7.6",
     "@better-auth/oauth-provider": "1.7.6",
     "@better-auth/passkey": "1.7.6",
     "@simplewebauthn/server": "^13.3.3",

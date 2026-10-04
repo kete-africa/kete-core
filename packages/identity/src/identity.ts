@@ -1,4 +1,6 @@
-import { oauthProvider } from '@better-auth/oauth-provider';
+import { cimd } from '@better-auth/cimd';
+import { fetchClientMetadataResource } from '@better-auth/cimd/node';
+import { oauthProvider, type ClientMetadataResourceFetch } from '@better-auth/oauth-provider';
 import { passkey } from '@better-auth/passkey';
 import { betterAuth, type BetterAuthPlugin } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
@@ -63,6 +65,21 @@ export interface IdentityOptions {
    * servers whose clients (Claude, ChatGPT…) ask for a token bound to the server's address.
    */
   resources?: string[];
+  /**
+   * MCP clients — Claude, ChatGPT, Codex — that identify by the address of their metadata document
+   * (Client ID Metadata Documents, the MCP 2026-07-28 way) instead of being registered by hand: on
+   * by default, each person still consenting to each client. `false` turns it off.
+   */
+  clientMetadataDocuments?:
+    | false
+    | {
+        /** Which `client_id` addresses may be fetched (default: any public HTTPS address). */
+        allow?(clientIdUrl: string): boolean | Promise<boolean>;
+        /** The network transport; default: resolve once, refuse private addresses and redirects. */
+        fetch?: ClientMetadataResourceFetch;
+        /** A client seen for the first time: an audit trail, a notice. */
+        onClientCreated?(client: { clientId: string; name: string | null }): Promise<void>;
+      };
   /** The framework's cookie plugin, which must stay last. */
   plugins?: BetterAuthPlugin[];
 }
@@ -212,6 +229,7 @@ export function createIdentity(options: IdentityOptions) {
         },
       }),
       openIdProvider(options, claimsOf),
+      ...clientDocumentsOf(options),
       ...(options.plugins ?? []),
     ],
   });
@@ -252,6 +270,34 @@ function openIdProvider(
     customIdTokenClaims: async ({ user }) => ({ name: user.name, email: user.email }),
   });
   return plugin as unknown as BetterAuthPlugin;
+}
+
+/**
+ * Client ID Metadata Documents (MCP 2026-07-28): an MCP client's `client_id` is the HTTPS address
+ * of a document describing it, fetched safely and checked by the MCP profile (name, redirect
+ * addresses). The client is kept with its provenance, so it can never take over a client registered
+ * by an operator; it has no `client_credentials` and each person consents to it.
+ */
+function clientDocumentsOf(options: IdentityOptions): BetterAuthPlugin[] {
+  const settings = options.clientMetadataDocuments;
+  if (settings === false) return [];
+  const plugin = cimd({
+    fetchClientMetadataResource: settings?.fetch ?? fetchClientMetadataResource,
+    metadataProfile: 'mcp-2026-07-28',
+    ...(settings?.allow
+      ? { isMetadataDocumentUrlAllowed: (url: string) => settings.allow?.(url) ?? false }
+      : {}),
+    ...(settings?.onClientCreated
+      ? {
+          onClientCreated: async ({ client }) =>
+            settings.onClientCreated?.({
+              clientId: client.clientId,
+              name: (client as { name?: string | null }).name ?? null,
+            }),
+        }
+      : {}),
+  });
+  return [plugin as unknown as BetterAuthPlugin];
 }
 
 export type Identity = ReturnType<typeof createIdentity>;

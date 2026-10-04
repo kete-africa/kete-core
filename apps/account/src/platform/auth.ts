@@ -1,4 +1,4 @@
-import { createIdentity } from '@kete/identity';
+import { createIdentity, type IdentityOptions } from '@kete/identity';
 import { tanstackStartCookies } from 'better-auth/tanstack-start';
 import { db } from './db';
 import { sendEmail } from './email';
@@ -33,13 +33,7 @@ export const CENTER_SCOPE = 'kete:center';
 export const MANDATE_SCOPE = 'kete:mandate';
 
 // The Compte Kete is @kete/identity (spec 026) with its own e-mails, events, offers and operators.
-export const {
-  auth,
-  claimsOf: keteClaims,
-  signInMethods,
-  signsInStrongly,
-  removePassword,
-} = createIdentity({
+export const accountIdentityOptions = (): IdentityOptions => ({
   appName: 'Kete',
   baseURL: env.publicUrl,
   secret: env.authSecret,
@@ -70,8 +64,17 @@ export const {
   scopes: [PEOPLE_SCOPE, FACTORY_SCOPE, CENTER_SCOPE, MANDATE_SCOPE],
   // MCP servers (Kete Enterprise's gateway…) whose clients ask for a token bound to them.
   resources: env.oauthResources,
+  // MCP clients (Claude, ChatGPT…) identify by their metadata document (CIMD): on by default.
   // Must stay last: lets server functions set the session cookies.
   plugins: [tanstackStartCookies()],
 });
+
+export const {
+  auth,
+  claimsOf: keteClaims,
+  signInMethods,
+  signsInStrongly,
+  removePassword,
+} = createIdentity(accountIdentityOptions());
 
 export type Session = typeof auth.$Infer.Session;
