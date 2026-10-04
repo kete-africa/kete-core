@@ -1,0 +1,42 @@
+{
+  "name": "@kete-africa/knowledge",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete knowledge: an organization's documents indexed in Postgres (pgvector), searched by words and by meaning, filtered by who may read each source, answered with citations.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/knowledge"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kete/records": "workspace:@kete-africa/records@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "@langchain/core": "^1.2.14",
+    "@langchain/textsplitters": "^1.0.2",
+    "ai": "^7.0.122",
+    "pgvector": "^0.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}
