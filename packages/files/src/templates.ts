@@ -1,10 +1,5 @@
 import Docxtemplater from 'docxtemplater';
-import inspectModule from 'docxtemplater/js/inspect-module.js';
 import PizZip from 'pizzip';
-
-/** docxtemplater's inspection module, which its types do not describe as a class. */
-type Inspector = { getAllTags(): Record<string, unknown> };
-const InspectModule = inspectModule as unknown as new () => Inspector;
 
 // Final documents from the company's own templates (spec 053), with docxtemplater: a Word file
 // written by the company, with `{client}`, `{date}`, `{#lines}…{/lines}` where the values go. Its
@@ -28,30 +23,44 @@ function open(template: Uint8Array): PizZip {
   }
 }
 
-/** The fields a template asks for, as its author wrote them (`client`, `lines.label`…). */
+/**
+ * The fields a template asks for, as its author wrote them (`client`, `lines.label`…): read by
+ * rendering it once through docxtemplater's own parser hook, each loop visited once. (Its
+ * inspection module needs lodash without declaring it, so it is not used.)
+ */
 export function templateFields(template: Uint8Array): string[] {
-  const inspect = new InspectModule();
+  const leaves = new Set<string>();
+  const loops = new Set<string>();
   try {
-    new Docxtemplater(open(template), {
-      modules: [inspect as never],
+    const doc = new Docxtemplater(open(template), {
       paragraphLoop: true,
       linebreaks: true,
+      nullGetter: () => '',
+      parser: (tag: string) => ({
+        get(
+          _scope: unknown,
+          context: { scopePath?: string[]; meta?: { part?: { module?: string } } },
+        ) {
+          if (tag === '.' || !tag.trim()) return '';
+          const name = [...(context.scopePath ?? []), tag.trim()].join('.');
+          if (context.meta?.part?.module === 'loop') {
+            loops.add(name);
+            return [{}];
+          }
+          leaves.add(name);
+          return '';
+        },
+      }),
     });
+    doc.render({});
   } catch (error) {
     throw new TemplateError('invalid_template', (error as Error).message);
   }
-  const tags = inspect.getAllTags() as Record<string, unknown>;
-  const names: string[] = [];
-  const walk = (node: Record<string, unknown>, prefix: string) => {
-    for (const [key, value] of Object.entries(node)) {
-      const name = prefix ? `${prefix}.${key}` : key;
-      if (value && typeof value === 'object' && Object.keys(value).length) {
-        walk(value as Record<string, unknown>, name);
-      } else names.push(name);
-    }
-  };
-  walk(tags, '');
-  return names.sort();
+  // A loop without fields inside is a field of its own (a condition, a list of text).
+  for (const loop of loops) {
+    if (![...leaves].some((leaf) => leaf.startsWith(`${loop}.`))) leaves.add(loop);
+  }
+  return [...leaves].sort();
 }
 
 /**
