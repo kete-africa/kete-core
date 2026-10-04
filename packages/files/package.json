@@ -2,7 +2,7 @@
   "name": "@kete-africa/files",
   "version": "0.1.0",
   "type": "module",
-  "description": "Kete files: a storage port with an S3-compatible adapter, presigned transfers, and images made safe before they are served.",
+  "description": "Kete files: a storage port with an S3-compatible adapter, presigned transfers, images made safe, documents read page by page, final documents from Word templates, and PDF through a conversion service.",
   "repository": {
     "type": "git",
     "url": "https://github.com/kete-africa/kete-core.git",
@@ -17,7 +17,11 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1141.0",
     "@aws-sdk/s3-request-presigner": "^3.1141.0",
-    "sharp": "^0.35.5"
+    "docxtemplater": "^3.71.0",
+    "mammoth": "^1.13.0",
+    "pizzip": "^3.3.0",
+    "sharp": "^0.35.5",
+    "unpdf": "^1.8.1"
   },
   "files": [
     "dist/src",
