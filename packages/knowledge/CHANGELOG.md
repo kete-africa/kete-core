@@ -1,5 +1,11 @@
 # @kete-africa/knowledge
 
+## 0.1.1
+
+### Patch Changes
+
+- 570f350: Two migrations running at once no longer fail on creating pgvector.
+
 ## 0.1.0
 
 ### Minor Changes
