@@ -28,6 +28,8 @@ sequenceDiagram
 - **FR-001b**: a scan — an image, or a PDF whose pages hold almost no text — goes to the caller's
   `transcribe` port; `@kete/ai`'s `scanReader(model)` is one, metered. Without it, an image stays an
   image. officeparser's own OCR (Tesseract) is not used: a multimodal model reads scans better.
+- **FR-001c**: `readSheets` reads a workbook or a CSV as grids of text; `readTable` types a sheet
+  (numbers in French or English notation, days, texts) for a product to store and chart.
 - **FR-002**: `templateFields` lists a template's fields; `fillTemplate` fills it, a missing value
   empty; `TemplateError` for a file that is not a template.
 - **FR-003**: `PdfConverter` port; `gotenbergConverter` (Word, HTML, Markdown); `pdfConverterFromEnv`

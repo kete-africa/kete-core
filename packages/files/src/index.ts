@@ -28,6 +28,17 @@ export {
   type ReadOptions,
   type Transcriber,
 } from './read.js';
+export {
+  dayOf,
+  numberOf,
+  readSheets,
+  readTable,
+  SheetError,
+  tabular,
+  type ColumnType,
+  type Sheet,
+  type Table,
+} from './sheets.js';
 export { fillTemplate, TemplateError, templateFields } from './templates.js';
 export {
   ConversionError,
