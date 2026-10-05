@@ -2,7 +2,7 @@ import { type FormEvent, useState } from 'react';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { Button, Panel, Tag, TextField } from '@kete/design';
 import QRCode from 'qrcode';
-import { fetchSecurity, removeMyPassword } from '@/features/identity/functions';
+import { addMyPassword, fetchSecurity, removeMyPassword } from '@/features/identity/functions';
 import { authClient } from '@/lib/auth-client';
 import { Notice, useHydrated } from '@/lib/ui';
 import * as m from '@/paraglide/messages.js';
@@ -165,7 +165,16 @@ function Passkeys({
   const router = useRouter();
   const hydrated = useHydrated();
   const [state, setState] = useState<
-    'idle' | 'pending' | 'added' | 'refused' | 'removed' | 'password_removed' | 'last_passkey'
+    | 'idle'
+    | 'pending'
+    | 'added'
+    | 'refused'
+    | 'removed'
+    | 'password_removed'
+    | 'last_passkey'
+    | 'password_added'
+    | 'password_invalid'
+    | 'password_mismatch'
   >('idle');
   const busy = state === 'pending' || !hydrated;
 
@@ -209,6 +218,34 @@ function Passkeys({
     await router.invalidate();
   }
 
+  /** Spec 016: a password again, for a browser that offers no passkey — after a fresh passkey. */
+  async function addPassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const first = String(form.get('new-password'));
+    if (first !== String(form.get('new-password-again'))) {
+      setState('password_mismatch');
+      return;
+    }
+    setState('pending');
+    const signedIn = await authClient.signIn.passkey();
+    if (!signedIn || signedIn.error) {
+      setState('refused');
+      return;
+    }
+    const outcome = await addMyPassword({ data: { password: first } }).catch(() => null);
+    if (!outcome) {
+      setState('password_invalid');
+      return;
+    }
+    if (!outcome.ok) {
+      setState(outcome.reason === 'invalid_password' ? 'password_invalid' : 'refused');
+      return;
+    }
+    setState('password_added');
+    await router.invalidate();
+  }
+
   return (
     <Panel title={m.security_passkeys()}>
       <p className="mb-4 text-body-sm text-bark">{m.security_passkeys_intro()}</p>
@@ -219,6 +256,13 @@ function Passkeys({
       )}
       {state === 'refused' && <Notice tone="error">{m.security_passkey_refused()}</Notice>}
       {state === 'last_passkey' && <Notice tone="error">{m.security_last_passkey()}</Notice>}
+      {state === 'password_added' && <Notice tone="success">{m.security_password_added()}</Notice>}
+      {state === 'password_invalid' && (
+        <Notice tone="error">{m.security_password_invalid()}</Notice>
+      )}
+      {state === 'password_mismatch' && (
+        <Notice tone="error">{m.security_password_mismatch()}</Notice>
+      )}
       {passkeys.length > 0 && (
         <ul className="my-4 flex flex-col gap-2">
           {passkeys.map((key) => (
@@ -255,6 +299,36 @@ function Passkeys({
         )}
         {!password && <p className="text-body-sm">{m.security_passkey_only()}</p>}
       </div>
+      {!password && (
+        <form
+          className="mt-6 flex flex-col gap-3 sm:max-w-md"
+          onSubmit={(e) => void addPassword(e)}
+        >
+          <h3 className="font-semibold">{m.security_password_add()}</h3>
+          <p className="text-body-sm text-bark">{m.security_password_add_intro()}</p>
+          <TextField
+            label={m.security_new_password()}
+            name="new-password"
+            type="password"
+            autoComplete="new-password"
+            minLength={10}
+            maxLength={128}
+            required
+          />
+          <TextField
+            label={m.security_new_password_again()}
+            name="new-password-again"
+            type="password"
+            autoComplete="new-password"
+            minLength={10}
+            maxLength={128}
+            required
+          />
+          <Button type="submit" variant="secondary" disabled={busy}>
+            {m.security_password_add()}
+          </Button>
+        </form>
+      )}
     </Panel>
   );
 }

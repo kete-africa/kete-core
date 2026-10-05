@@ -7,6 +7,7 @@ import { db, getPool } from '@/platform/db';
 import { isOperator } from '@/platform/operators';
 import { account, member, organization, passkey, user } from '@/platform/schema';
 import { removePassword, signInMethods, signsInStrongly } from '@/platform/auth';
+import { addPasswordFor } from '@/features/identity/password';
 import { openOperatorSession } from '../scripts/operator-session';
 
 // Spec 016: a passkey-only account signs in strongly — like two-factor — and so may be a Kete
@@ -20,6 +21,7 @@ const people = {
   twoFactor: `usr_pk_2fa_${run}`,
   both: `usr_pk_both_${run}`,
   passkeyOnly: `usr_pk_only_${run}`,
+  addsPassword: `usr_pk_add_${run}`,
 };
 const ids = Object.values(people);
 
@@ -81,6 +83,7 @@ beforeAll(async () => {
   await addPassword(people.both);
   await addPasskey(people.both, 'both');
   await addPasskey(people.passkeyOnly, 'only');
+  await addPasskey(people.addsPassword, 'add');
   await db
     .insert(organization)
     .values({ id: operatorsOrg, name: 'Kete', slug: `pk-ops-${run}`, createdAt: now });
@@ -144,6 +147,23 @@ describe('dropping the password', () => {
       );
     expect(refused).toBe('last_passkey');
     expect((await signInMethods(people.passkeyOnly)).passkeys).toBe(1);
+  });
+});
+
+describe('adding a password back', () => {
+  it('gives a passkey-only account a password, which no longer signs in strongly alone', async () => {
+    const headers = await sessionOf(people.addsPassword);
+    expect(await addPasswordFor(headers, 'short')).toBe('invalid_password');
+    expect(await addPasswordFor(headers, 'a long enough password')).toBe('added');
+    expect(await signInMethods(people.addsPassword)).toEqual({ passkeys: 1, password: true });
+    expect(await signsInStrongly(people.addsPassword)).toBe(false);
+  });
+
+  it('refuses an account that already has one, and a visitor', async () => {
+    expect(await addPasswordFor(await sessionOf(people.password), 'another long password')).toBe(
+      'has_password',
+    );
+    expect(await addPasswordFor(new Headers(), 'another long password')).toBe('sign_in_again');
   });
 });
 

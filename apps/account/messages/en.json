@@ -193,5 +193,12 @@
   "email_reset_action": "Choose a new password",
   "email_reset_unavailable_subject": "Your Kete account has no password",
   "email_reset_unavailable_body": "A new password was requested for your Kete account. Your account signs in with a passkey or your phone number: it has no password to reset. You can add one from Mon espace Kete, once signed in.",
-  "email_brand": "Kete"
+  "email_brand": "Kete",
+  "security_password_add": "Add a password",
+  "security_password_add_intro": "To sign in where your password manager does not offer your passkeys. Your passkey is asked to confirm. With a password, your account no longer counts as signing in strongly: then turn on two-factor authentication, required of Kete operators.",
+  "security_new_password": "New password (10 characters at least)",
+  "security_new_password_again": "The same, once more",
+  "security_password_mismatch": "The two passwords differ.",
+  "security_password_added": "Password added. Remember to turn on two-factor authentication.",
+  "security_password_invalid": "This password does not fit: 10 characters at least."
 }
