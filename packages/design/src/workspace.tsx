@@ -46,6 +46,17 @@ const iconPaths = {
   attach: 'M21 11l-8.5 8.5a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7',
   mic: 'M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3M5 11a7 7 0 0 0 14 0M12 18v3',
   file: 'M6 2h8l5 5v15H6zM14 2v5h5',
+  home: 'M3 11l9-8 9 8M5 9v12h14V9M10 21v-6h4v6',
+  sparkle:
+    'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7z',
+  people:
+    'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M2 21v-1a6 6 0 0 1 12 0v1M16 3.5a4 4 0 0 1 0 7M18 14a6 6 0 0 1 4 6v1',
+  folder: 'M3 6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z',
+  layers: 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5',
+  flag: 'M5 21V4M5 4h11l-2 4 2 4H5',
+  external: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
+  menu: 'M4 6h16M4 12h16M4 18h16',
+  clock: 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',
 } as const;
 
 export type IconName = keyof typeof iconPaths;
@@ -83,6 +94,8 @@ export function Shell({
   navLabel,
   showNavLabel,
   hideNavLabel,
+  search,
+  tabBar,
   children,
 }: {
   /** The name at the top of the sidebar. */
@@ -100,6 +113,10 @@ export function Shell({
   /** The names of the buttons that show and hide the sidebar. */
   showNavLabel: string;
   hideNavLabel: string;
+  /** The command bar, at the left of the toolbar (a CommandTrigger). */
+  search?: ReactNode;
+  /** Below 760 px, a bar of tabs fixed at the bottom of the screen (a TabBar). */
+  tabBar?: ReactNode;
   children: ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -146,6 +163,7 @@ export function Shell({
       <main
         className={cx(
           'min-h-dvh pb-7 transition-[margin] duration-150',
+          Boolean(tabBar) && 'max-[760px]:pb-[calc(88px+env(safe-area-inset-bottom,0px))]',
           collapsed ? 'min-[761px]:ml-0' : 'ml-[262px] max-[1100px]:ml-[230px]',
           'max-[760px]:ml-0',
         )}
@@ -160,13 +178,94 @@ export function Shell({
           >
             <Icon name="panel" />
           </IconButton>
+          {search && <div className="mr-auto min-w-0 flex-1 max-[760px]:hidden">{search}</div>}
           {toolbar}
         </div>
         <div className="mx-auto mt-3 max-w-[1050px] max-[1400px]:mx-[6%] max-[1100px]:mx-7 max-[1100px]:mt-[15px] max-[760px]:mx-5 max-[760px]:mt-3 min-[1450px]:mr-8 min-[1450px]:ml-[122px]">
           {children}
         </div>
       </main>
+      {tabBar}
     </div>
+  );
+}
+
+/** The phone's bar of tabs (below 760 px): four or five places, the middle one raised. */
+export function TabBar({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <nav
+      aria-label={label}
+      className="fixed inset-x-0 bottom-0 z-10 hidden border-t border-line bg-surface pb-[env(safe-area-inset-bottom,0px)] max-[760px]:block"
+    >
+      <ul className="grid auto-cols-fr grid-flow-col items-end">{children}</ul>
+    </nav>
+  );
+}
+
+/** A tab of the TabBar: an icon above its name; `primary`, the raised round action. */
+export function TabBarItem({
+  href,
+  onClick,
+  icon,
+  current = false,
+  primary = false,
+  count,
+  children,
+}: {
+  href?: string;
+  onClick?: () => void;
+  icon: IconName;
+  current?: boolean;
+  primary?: boolean;
+  /** A number in a badge on the icon: what waits. */
+  count?: number;
+  children: ReactNode;
+}) {
+  const className = cx(
+    'flex w-full flex-col items-center gap-1 pt-2 pb-1.5 text-[11px] leading-none text-fg-muted no-underline',
+    current && 'font-semibold text-accent',
+  );
+  const content = (
+    <>
+      <span
+        className={cx(
+          'relative inline-flex',
+          primary &&
+            '-mt-6 size-14 items-center justify-center rounded-full bg-action text-on-action shadow-[0_4px_14px_#0004]',
+        )}
+      >
+        <Icon name={icon} size={primary ? 24 : 20} />
+        {count !== undefined && count > 0 && <CountBadge count={count} floating />}
+      </span>
+      <span>{children}</span>
+    </>
+  );
+  return (
+    <li>
+      {href ? (
+        <a href={href} aria-current={current ? 'page' : undefined} className={className}>
+          {content}
+        </a>
+      ) : (
+        <button type="button" onClick={onClick} className={className}>
+          {content}
+        </button>
+      )}
+    </li>
+  );
+}
+
+/** A count of what waits: a small round badge, beside a label or on an icon. */
+export function CountBadge({ count, floating = false }: { count: number; floating?: boolean }) {
+  return (
+    <span
+      className={cx(
+        'inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-fg px-1.5 font-number text-[11px] font-semibold text-canvas tabular-nums',
+        floating && 'absolute -top-1.5 -right-2.5',
+      )}
+    >
+      {count > 99 ? '99+' : count}
+    </span>
   );
 }
 
@@ -207,11 +306,17 @@ export function NavItem({
   icon,
   accent = false,
   current = false,
+  count,
+  external = false,
   children,
 }: {
   href?: string;
   onClick?: () => void;
   icon?: IconName;
+  /** What waits there, in a badge at the end of the line. */
+  count?: number;
+  /** A link to another app: a new tab, and a mark that says so. */
+  external?: boolean;
   /** The icon in the accent, as for a featured assistant. */
   accent?: boolean;
   current?: boolean;
@@ -224,7 +329,13 @@ export function NavItem({
           <Icon name={icon} />
         </span>
       )}
-      <span className="min-w-0 truncate">{children}</span>
+      <span className="min-w-0 flex-1 truncate">{children}</span>
+      {count !== undefined && count > 0 && <CountBadge count={count} />}
+      {external && (
+        <span className="inline-flex shrink-0 pr-1 text-fg-muted">
+          <Icon name="external" size={16} />
+        </span>
+      )}
     </>
   );
   return (
@@ -233,6 +344,7 @@ export function NavItem({
         <a
           href={href}
           aria-current={current ? 'page' : undefined}
+          {...(external ? { target: '_blank', rel: 'noopener' } : {})}
           className={navItemClassName(current)}
         >
           {content}

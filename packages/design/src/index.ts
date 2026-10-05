@@ -84,6 +84,9 @@ export {
   Icon,
   Menu,
   NavItem,
+  CountBadge,
+  TabBar,
+  TabBarItem,
   navItemClassName,
   NavSection,
   PageSection,
@@ -94,3 +97,10 @@ export {
   type IconName,
   type MenuItem,
 } from './workspace.js';
+export {
+  CommandPalette,
+  CommandTrigger,
+  useCommandShortcut,
+  type CommandGroup,
+  type CommandItem,
+} from './command.js';

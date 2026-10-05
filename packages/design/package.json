@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/design",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "description": "Kete designs (doctrine D-035): kete and workspace, in three layers — base tokens (one DESIGN.md each), semantic tokens, React components that use semantic tokens only — and client brands with their contrasts checked.",
   "repository": {
@@ -29,7 +29,8 @@
     "@fontsource-variable/instrument-sans": "^5.3.0",
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
-    "@google/design.md": "^0.4.0"
+    "@google/design.md": "^0.4.0",
+    "cmdk": "1.1.1"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",

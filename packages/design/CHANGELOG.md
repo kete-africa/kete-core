@@ -1,5 +1,14 @@
 # @kete-africa/design
 
+## 0.6.0
+
+### Minor Changes
+
+- The shell of Kete 2026: a command palette (Ctrl K) on cmdk — search, ask and act from one field —
+  with its trigger in the toolbar; a phone's bar of tabs with a raised « ask » action; counts of
+  what waits beside the sidebar's items; links to another app marked and opened in a new tab; new
+  icons (home, sparkle, people, folder, layers, flag, external, menu, clock).
+
 ## 0.5.0
 
 ### Minor Changes
