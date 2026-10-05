@@ -9,6 +9,7 @@ import { auth } from '@/platform/auth';
 import { db } from '@/platform/db';
 import { removePassword, signInMethods } from '@/platform/auth';
 import { passkey, user } from '@/platform/schema';
+import { addPasswordFor, FRESH_SIGN_IN_MS } from './password';
 import { readInvitation, readMembers, readViewer } from './viewer';
 
 export const fetchViewer = createServerFn({ method: 'GET' }).handler(async () =>
@@ -54,9 +55,6 @@ export const fetchSecurity = createServerFn({ method: 'GET' }).handler(async () 
   };
 });
 
-/** How recent a sign-in must be to remove the password: the passkey was just used (spec 016). */
-const FRESH_SIGN_IN_MS = 5 * 60 * 1000;
-
 /** Removes her password once she has a passkey and has just signed in with it (spec 016). */
 export const removeMyPassword = createServerFn({ method: 'POST' }).handler(async () => {
   const session = await auth.api.getSession({ headers: getRequestHeaders() });
@@ -69,3 +67,14 @@ export const removeMyPassword = createServerFn({ method: 'POST' }).handler(async
     ? { ok: true as const }
     : { ok: false as const, reason: 'passkey_required' as const };
 });
+
+/**
+ * Gives a passkey-only account a password again (spec 016), once she has just signed in with her
+ * passkey: for a browser where her password manager offers no passkey.
+ */
+export const addMyPassword = createServerFn({ method: 'POST' })
+  .validator((input: unknown) => z.object({ password: z.string().min(10).max(128) }).parse(input))
+  .handler(async ({ data }) => {
+    const outcome = await addPasswordFor(new Headers(getRequestHeaders()), data.password);
+    return outcome === 'added' ? { ok: true as const } : { ok: false as const, reason: outcome };
+  });

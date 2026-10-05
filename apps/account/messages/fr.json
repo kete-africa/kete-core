@@ -193,5 +193,12 @@
   "email_reset_action": "Choisir un nouveau mot de passe",
   "email_reset_unavailable_subject": "Ton Compte Kete n'a pas de mot de passe",
   "email_reset_unavailable_body": "Une demande de nouveau mot de passe a été faite pour ton Compte Kete. Ton compte se connecte avec une clé d'accès ou par ton numéro : il n'a pas de mot de passe à réinitialiser. Tu peux en ajouter un depuis Mon espace Kete, une fois connecté.",
-  "email_brand": "Kete"
+  "email_brand": "Kete",
+  "security_password_add": "Ajouter un mot de passe",
+  "security_password_add_intro": "Pour te connecter là où ton gestionnaire ne propose pas tes clés d'accès. Ta clé d'accès te sera demandée pour confirmer. Avec un mot de passe, ton compte ne compte plus comme une connexion forte : active ensuite la double authentification, exigée des opérateurs Kete.",
+  "security_new_password": "Nouveau mot de passe (10 caractères au moins)",
+  "security_new_password_again": "Le même, une seconde fois",
+  "security_password_mismatch": "Les deux mots de passe diffèrent.",
+  "security_password_added": "Mot de passe ajouté. Pense à activer la double authentification.",
+  "security_password_invalid": "Ce mot de passe ne convient pas : 10 caractères au moins."
 }

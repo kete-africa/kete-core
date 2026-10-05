@@ -21,6 +21,21 @@ passkeys; an authenticator app for codes is not an option for him.
    passkey — **Then** her account signs in with passkeys only; her old password opens nothing.
 2. **Given** a passkey-only account, **Then** its last passkey cannot be removed.
 3. **Given** no passkey, **Then** her password cannot be dropped.
+4. **Given** a passkey-only account, **When** she adds a password in Sécurité — right after using
+   her passkey — **Then** she can sign in with it where no passkey is offered (a browser without
+   her password manager); the screen warns her that her account no longer signs in strongly until
+   she turns on two-factor. An account that has a password cannot add another one this way.
+
+```mermaid
+stateDiagram-v2
+  [*] --> Password: sign up
+  Password --> Both: add a passkey
+  Both --> PasskeysOnly: drop the password (fresh passkey)
+  PasskeysOnly --> Both: add a password (fresh passkey)
+  Both --> Password: remove the last passkey
+  note right of PasskeysOnly: strong — operator possible
+  note right of Both: strong only with two-factor
+```
 
 ### User Story 3 — Strong enough to run Kete (P1)
 
@@ -44,11 +59,14 @@ passkeys; an authenticator app for codes is not an option for him.
   password; used by the claims, the operators and the sign-in links.
 - **FR-003**: Removing the password: a server function, only with a passkey and a sign-in less
   than five minutes old; the last passkey of a passkey-only account is kept (a hook).
+- **FR-003b**: Adding a password back (2026-10-05): `features/identity/password.ts`,
+  `addPasswordFor` — Better Auth's server-only `setPassword`, with a sign-in less than five minutes
+  old, refused when a password exists; 10 to 128 characters.
 - **FR-004**: `scripts/operator-session.ts` for the operator scripts.
 - **FR-005**: Catalogs French and English.
 
 ## Success Criteria
 
-- **SC-001**: `tests/passkeys.test.ts` (rule, claims, operators, password, last passkey, scripts)
+- **SC-001**: `tests/passkeys.test.ts` (rule, claims, operators, password, last passkey, password added back, scripts)
   and `e2e/passkeys.spec.ts` (a virtual authenticator: add, drop the password, sign in again, the
   old password refused) pass.

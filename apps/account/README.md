@@ -19,7 +19,7 @@ Every address is declared once in `src/routes.ts`: the files of `src/routes` are
 | `/espace/abonnements`           | Subscriptions: offers, paying, access per tool                                                   |
 | `/espace/organisation`          | Members, roles, invitations                                                                      |
 | `/espace/parametres`            | Logo, and generic settings: identity, legal identifiers, language, time zone, currency, channels |
-| `/espace/securite`              | Two-factor authentication (authenticator app, backup codes)                                      |
+| `/espace/securite`              | Two-factor authentication, passkeys, dropping or adding back the password (spec 016)             |
 | `/connexion/code`               | The second step of a sign-in with two-factor                                                     |
 | `/invitation/$id`               | Accept an invitation                                                                             |
 
@@ -116,7 +116,8 @@ otherwise nothing leaves and only the subject is logged. Templates are React Ema
 | `password-reset-unavailable` | The same, for an account without a password: it learns why, nothing is added |
 
 Better Auth would add a password to an account that has none; a passkey-only account chose to have
-none (spec 016), so it never gets a link. An unknown address gets nothing, and the screen says the
+none (spec 016), so it never gets a link; it adds one itself in Sécurité, right after using a
+passkey. An unknown address gets nothing, and the screen says the
 same thing in every case.
 
 ## Run locally
