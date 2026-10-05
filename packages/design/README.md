@@ -109,12 +109,26 @@ The page chooses its design and mode on `<html>`:
 | `UndoNotice`                                        | What an agent did reversibly, with « Annuler » (level 2)                                |
 | `EmptyState`                                        | An empty page: what will be here, the gesture that fills it                             |
 | `Shell`, `NavSection`, `NavItem`, `Icon`            | The workspace frame: collapsible sidebar, toolbar, line icons                           |
+| `CountBadge`, `TabBar`, `TabBarItem`                | What waits, as a count; the phone's bar of tabs, its raised « ask » in the middle       |
+| `CommandTrigger`, `CommandPalette`                  | Ctrl K: one field to search, ask and act (cmdk), the answer under it with its sources   |
 | `PageTitle`, `PageSection`, `AppGrid`, `AppCard`    | The page: its title, sections, the company's apps (featured, row, list)                 |
 | `Chip`, `ChipGroup`, `Menu`, `SearchField`          | Filters by category, menus, the search field                                            |
 | `Swatches`                                          | The client's colors, at the bottom of the sidebar                                       |
 | `KeteMark`, `KeteBand`                              | The marks of the `kete` design, in Kete's own palette                                   |
 
 Every visible string comes from the app's translation catalogs, through props.
+
+### The shell of Kete 2026
+
+```mermaid
+flowchart TB
+  K[Ctrl K · CommandTrigger] --> P[CommandPalette]
+  P -->|a place, a record| N[navigate]
+  P -->|an action| A[onSelect]
+  P -->|« ask » the words typed| Q[the app's assistant] -->|answer + sources| P
+  S[Shell] --- SB[sidebar · NavItem count, external]
+  S --- TB[TabBar below 760 px]
+```
 
 ## A client's brand
 

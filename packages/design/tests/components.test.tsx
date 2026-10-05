@@ -7,6 +7,7 @@ import {
   Button,
   Chip,
   ChipGroup,
+  CommandTrigger,
   ConfirmDialog,
   Dialog,
   EmptyState,
@@ -21,6 +22,8 @@ import {
   SearchField,
   Shell,
   Swatches,
+  TabBar,
+  TabBarItem,
   Tag,
   TextField,
   UndoNotice,
@@ -39,6 +42,20 @@ const everyComponent = (
     navLabel="Navigation"
     showNavLabel="Afficher la navigation"
     hideNavLabel="Réduire le panneau"
+    search={<CommandTrigger label="Demandez, cherchez ou agissez…" onOpen={noop} />}
+    tabBar={
+      <TabBar label="Onglets">
+        <TabBarItem href="/" icon="home" current>
+          Aujourd’hui
+        </TabBarItem>
+        <TabBarItem href="/a-faire" icon="check" count={8}>
+          À faire
+        </TabBarItem>
+        <TabBarItem icon="sparkle" primary onClick={noop}>
+          Demander
+        </TabBarItem>
+      </TabBar>
+    }
     toolbar={<Menu label="Installer" icon="download" items={[{ label: 'Bureau', href: '#' }]} />}
     footer={
       <Swatches label="Couleurs de la charte" colors={[{ value: '#1ca18c', name: 'Vert' }]} />
@@ -53,6 +70,12 @@ const everyComponent = (
         <NavSection label="Conversations">
           <NavItem href="/c/1" current>
             Devis du jour
+          </NavItem>
+          <NavItem href="/a-faire" icon="check" count={8}>
+            À faire
+          </NavItem>
+          <NavItem href="https://support.example.test" icon="apps" external>
+            Support
           </NavItem>
         </NavSection>
       </>
@@ -114,6 +137,19 @@ describe('components', () => {
     const html = renderToStaticMarkup(everyComponent);
     expect(html).not.toMatch(BASE_COLOR);
     expect(html).toContain('bg-action');
+  });
+
+  it('show what waits in a badge, and open another app in a new tab', () => {
+    const html = renderToStaticMarkup(everyComponent);
+    expect(html).toContain('>8</span>');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('aria-keyshortcuts="Control+K"');
+  });
+
+  it('keep the palette on semantic tokens too', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const source = await readFile(new URL('../src/command.tsx', import.meta.url), 'utf8');
+    expect(source).not.toMatch(BASE_COLOR);
   });
 
   it('render buttons as real buttons, never submitting by accident', () => {
