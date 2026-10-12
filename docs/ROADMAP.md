@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Status**: `candidate`
-- **Last updated**: `2026-10-03`
+- **Last updated**: `2026-10-12`
 - **Product boundary**: the shared foundation of every Kete app — contracts, shared packages, the
   Compte Kete service with Mon espace Kete, and the app template.
 - **Planning axis**: `DEPENDENCIES_AND_EVIDENCE_NOT_TIME`
@@ -335,17 +335,34 @@ libraries and standards), never rebuilt.
 | `044-forms-and-modes` (done)      | Responsive dialog, `FormPage`, `ThemeChoice`, the template in every mode                        | —                                 |
 | `045-integration-contract` (done) | Records → read tools, read API, data sets, identity card                                        | MCP, JSON Schema                  |
 | `047-sandbox` (done)              | `@kete/sandbox`: an isolated computer for an agent, behind a neutral port                       | boat.dev, E2B                     |
-| `048-app-factory`                 | From an approved request to a running app, its first version coded by an agent                  | GitHub App, Neon, Coolify         |
-| `049-app-contract`                | What an app declares and what the center offers it — see below                                  | OAuth token exchange, CloudEvents |
+| `048-app-factory` (done)          | From an approved request to a running app, its first version coded by an agent                  | GitHub App, Neon, Coolify         |
+| `049-app-contract` (done)         | What an app declares and what the center offers it — see below                                  | OAuth token exchange, CloudEvents |
 | `050-interactive-views`           | An app's views shown in the chat and on the home page, its forms filled there                   | MCP Apps                          |
 | `051-references`                  | A record of one app linked from another; external ids kept through a migration                  | —                                 |
-| `052-knowledge`                   | `@kete/knowledge`: indexing, hybrid search filtered by rights, citations                        | pgvector, Docling                 |
-| `053-files-and-documents`         | `@kete/files`: storage, reading, final documents from templates                                 | S3/R2, docxtemplater, Gotenberg   |
-| `054-skills`                      | `@kete/skills`: Agent Skills folders, versions, test cases, progressive reading                 | Agent Skills                      |
-| `055-channels`                    | `@kete/notify`: in-app notifications, Web Push, WhatsApp                                        | Web Push, WhatsApp Cloud API      |
+| `052-knowledge` (done)            | `@kete/knowledge`: indexing, hybrid search filtered by rights, citations                        | pgvector, Docling                 |
+| `053-files-and-documents` (done)  | `@kete/files`: storage, reading, final documents from templates                                 | S3/R2, docxtemplater, Gotenberg   |
+| `054-skills` (done)               | `@kete/skills`: Agent Skills folders, versions, test cases, progressive reading                 | Agent Skills                      |
+| `055-channels` (partly)           | `@kete/notify`: in-app notifications, Web Push, WhatsApp                                        | Web Push, WhatsApp Cloud API      |
 | `056-chat`                        | The chat of the current era: attachments, side canvas, citations, mentions, commands, dictation | assistant-ui, AI SDK              |
 | `057-agents`                      | `@kete/agents`: job description, task given, delegation, budgets, kill switch, A2A              | Mastra, A2A                       |
-| `058-observability`               | Traces, costs and evaluations of models and agents                                              | Langfuse                          |
+| `058-observability` (done)        | Traces, costs and evaluations of models and agents                                              | Langfuse                          |
+| `059-mcp-2026` (done)             | MCP 2026-07-28 through the SDK v2                                                               | MCP                               |
+| `060-mcp-client-documents` (done) | MCP clients identified by their metadata document                                               | OAuth client metadata             |
+
+### State on 2026-10-12
+
+- **Delivered since 2026-10-03**: the factory (048), the app contract in four parts (049),
+  knowledge (052), documents read, filled and turned into PDF, spreadsheets as typed tables (053),
+  skills (054), notifications in the product and on devices (055), traces and costs of model calls
+  (058), MCP 2026-07-28 (059), MCP client documents (060), a password added back to a passkey-only
+  account, the Kete 2026 shell (`@kete/design` 0.6.0). Decision 0008 (durable workflows) is
+  proposed.
+- **`055` is partly delivered**: the chat channels have their port and no adapter. Firmo and Nettio
+  each carry a copy of the WhatsApp and Telegram adapters (decision 0009).
+- **Not opened in this repository**: `050`, `051`, `056`, `057`. Kete Enterprise shows apps' views
+  and a chat on `assistant-ui` (its specs 027 and 029b), and wrote its agents by hand on the AI SDK
+  (its spec 036) — not on the library named above.
+- **Evaluations** of models (058) are not delivered: Nettio has two evaluation scripts of its own.
 
 ### The app contract (spec 049)
 
@@ -376,8 +393,57 @@ first commit:
 
 ---
 
+## Phase 7 — Finished capabilities (decided 2026-10-12)
+
+### Objective
+
+What an app needs arrives **finished**: a port with its adapter and its example, so that an app
+deletes code when the chassis moves instead of writing it again (decision 0009). No new capability
+enters before these close.
+
+### Specs, in order
+
+| Spec                    | Delivers                                                                                                                                                                                                           | Proof                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `086-order` (done)      | This roadmap brought up to date, decision 0009 and its two rules in the constitution, a generated app's test named after the app (`kete-core#84`)                                                                  | A generated app keeps no trace of the template's name                  |
+| `087-chat-channels`     | `@kete/notify`: the WhatsApp and Telegram adapters, inbound messages (authenticated webhooks, the provider's business-scoped ids), then the outbox to people (consent, templates, a sender per organization, cost) | Firmo and Nettio delete their copies; their tests pass unchanged       |
+| `088-agent-runtime`     | A one-day trial of Mastra under Nettio's assistant, then a decision record: the runtime on Mastra with a thin Kete layer (capabilities by right, drafts, journal, page context) — or not, with the reason          | Nettio's assistant tests unchanged; RLS proven on the runtime's tables |
+| `089-log-and-analytics` | `@kete/log`: structured logs, traces and errors behind a port. `@kete/analytics`: usage events per organization, in Postgres, read by Kete Cockpit                                                                 | Kete Cockpit shows who uses what, per organization                     |
+| `090-template-complete` | The template born with what Nettio had to write (`kete-core#86`): the assistant, messaging, the missing form fields, business roles, a gesture that returns a rule's code, the browser test session                | A generated app has them and passes CI on its first commit             |
+
+### Needs from other lanes (decision 0009)
+
+| Issue          | From   | Answer                                                                               |
+| -------------- | ------ | ------------------------------------------------------------------------------------ |
+| `kete-core#84` | Nettio | Taken in `086-order`                                                                 |
+| `kete-core#86` | Nettio | Taken: channels in `087`, the in-app « ask » in `088`, the six other pieces in `090` |
+
+### Waiting for its trigger
+
+| Capability                                          | Reopened when                                                                   |
+| --------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `@kete/sequences` and a port for certified invoices | The orders applying Togo's 2026 finance law (certified e-invoice) are published |
+| A mobile-money adapter in `@kete/payments`          | A pilot wants to be paid through it                                             |
+| `@kete/offline` (local command queue)               | A pilot's counter or field team needs it                                        |
+| Enterprise directories (SAML, SCIM)                 | A client requires it                                                            |
+| `050-interactive-views`, `051-references`           | Two apps need the same thing                                                    |
+| Memory with its governance, evaluations of models   | Decided with `088-agent-runtime`                                                |
+
+### Human proofs still open
+
+Recorded above as pending, and not obtained since: a timed adoption of the SDK (phase 1), a timed
+sign-up and the author's validation of the screens (phase 2), a real payment on staging (phase 3),
+the Cockpit's staging and the author's own sign-in.
+
+### Proof
+
+- `[agent]` Firmo and Nettio run on the chassis' chat adapters; neither keeps its own.
+- `[agent]` An app created from the template has an assistant and messaging on its first commit.
+- `[blocking]` One organization uses one Kete product for real, and Kete Cockpit shows it.
+
+---
+
 ## Later, when a real need appears
 
-`@kete/offline` (local command queue) · `@kete/sequences` (legal numbering) ·
-`@kete/ai` (model routing and budgets) · phone sign-in by one-time code · additional payment adapters (Moneroo,
+`@kete/ai` (model routing) · phone sign-in by one-time code · additional payment adapters (Moneroo,
 Stripe) · a Python SDK if a Python app needs it.

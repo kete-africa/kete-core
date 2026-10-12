@@ -109,7 +109,9 @@ export function createApp(options: CreateAppOptions): void {
   for (const doc of ['README.md', 'CLAUDE.md']) {
     edit(join(target, doc), (text) => text.replaceAll('App template', name));
   }
+  // Every mention: the product is named in the manifest the test expects and in the addresses it
+  // asks the center (kete-core#84).
   edit(join(target, 'tests', 'app.test.ts'), (text) =>
-    text.replace("product: 'prd_app_template'", `product: '${product}'`),
+    text.replaceAll('prd_app_template', product).replaceAll("'app-template'", `'${name}'`),
   );
 }

@@ -1,5 +1,12 @@
 # @kete-africa/create-app
 
+## 0.2.5
+
+### Patch Changes
+
+- A generated app's test is named after the app everywhere: the address it asks the center no longer
+  keeps the template's product (`kete-core#84`), so the first run passes its 14 tests.
+
 ## 0.2.4
 
 ### Patch Changes
