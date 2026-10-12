@@ -1,6 +1,6 @@
-import { existsSync, mkdtempSync, readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { createApp, packageVersions, templateFolder } from '../src/index.js';
 
@@ -46,6 +46,20 @@ describe('a new Kete App', () => {
       expect(JSON.parse(read(join(target, 'messages', `${locale}.json`))).app_name).toBe('nettio');
     }
     expect(read(join(target, 'tests', 'app.test.ts'))).toContain("product: 'prd_nettio'");
+  });
+
+  it('keeps no trace of the template’s own name, so its first tests are its own', () => {
+    const named: string[] = [];
+    const walk = (folder: string) => {
+      for (const entry of readdirSync(folder, { withFileTypes: true })) {
+        const path = join(folder, entry.name);
+        if (entry.isDirectory()) walk(path);
+        else if (/app[-_ ]template/i.test(read(path))) named.push(relative(target, path));
+      }
+    };
+    walk(target);
+    expect(named).toEqual([]);
+    expect(read(join(target, 'tests', 'app.test.ts'))).toContain('/v1/apps/prd_nettio/grants');
   });
 
   it('carries what makes it complete, and nothing a machine produced', () => {

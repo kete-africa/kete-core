@@ -69,6 +69,9 @@ testimonial, in code, docs or product copy.
 - **No secret in the repository**, a message or a log. `.env.example` documents every variable.
 - **Documentation with diagrams, in the same pull request** (doctrine D-017): Mermaid in Markdown;
   a package or feature without a `README.md` fails CI; generated docs are checked against the code.
+- **A port never ships alone** (decision 0009): a port enters a package with at least one adapter
+  and one working example — in the template, or in a test on the provider's recorded payloads. An
+  interface whose first adapter lives in an app is not delivered.
 
 ## Development Workflow
 
@@ -81,6 +84,9 @@ testimonial, in code, docs or product copy.
   the person waiting be helped today.
 - **Three-hour rule**: a task running beyond three hours without a visible deliverable is flagged
   as probable over-engineering.
+- **A need from another lane is answered** (doctrine D-034, decision 0009): an issue raised by an
+  app or by Kete Enterprise gets its answer in the workshop's next cycle — taken (with its spec
+  number), refused (with the reason), or parked (with the event that reopens it).
 
 ## Governance
 
@@ -88,4 +94,4 @@ This constitution overrides any other practice in this repository. Complexity mu
 a real user, never by elegance. Amendments are dated and recorded in `docs/decisions/`, and must
 not contradict the Kete doctrine; a conflict is resolved in the `kete` repository first.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-28 | **Last Amended**: 2026-09-28
+**Version**: 1.1.0 | **Ratified**: 2026-09-28 | **Last Amended**: 2026-10-12 (decision 0009)
