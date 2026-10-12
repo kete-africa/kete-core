@@ -3,7 +3,7 @@
 ## Metadata
 
 - **Status**: `candidate`
-- **Last updated**: `2026-10-12`
+- **Last updated**: `2026-10-13`
 - **Product boundary**: the shared foundation of every Kete app — contracts, shared packages, the
   Compte Kete service with Mon espace Kete, and the app template.
 - **Planning axis**: `DEPENDENCIES_AND_EVIDENCE_NOT_TIME`
@@ -393,30 +393,54 @@ first commit:
 
 ---
 
-## Phase 7 — Finished capabilities (decided 2026-10-12)
+## Phase 7 — Finished capabilities and the layer of trust (decided 2026-10-12 and 2026-10-13)
 
 ### Objective
 
 What an app needs arrives **finished**: a port with its adapter and its example, so that an app
-deletes code when the chassis moves instead of writing it again (decision 0009). No new capability
-enters before these close.
+deletes code when the chassis moves instead of writing it again (decision 0009). And what makes Kete
+different lives here, once, for every product: an agent acts under a person's mandate, within the
+organization's rules, and everything it did can be read afterwards (doctrine D-042 to D-046).
+
+This repository carries steps **A1** and **B1 to B7** of the plan decided on 2026-10-13; Kete
+Enterprise carries the center (its roadmap, steps C1 to C11), Kete Cockpit the fleet (D1).
 
 ### Specs, in order
 
-| Spec                    | Delivers                                                                                                                                                                                                           | Proof                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| `086-order` (done)      | This roadmap brought up to date, decision 0009 and its two rules in the constitution, a generated app's test named after the app (`kete-core#84`)                                                                  | A generated app keeps no trace of the template's name                  |
-| `087-chat-channels`     | `@kete/notify`: the WhatsApp and Telegram adapters, inbound messages (authenticated webhooks, the provider's business-scoped ids), then the outbox to people (consent, templates, a sender per organization, cost) | Firmo and Nettio delete their copies; their tests pass unchanged       |
-| `088-agent-runtime`     | A one-day trial of Mastra under Nettio's assistant, then a decision record: the runtime on Mastra with a thin Kete layer (capabilities by right, drafts, journal, page context) — or not, with the reason          | Nettio's assistant tests unchanged; RLS proven on the runtime's tables |
-| `089-log-and-analytics` | `@kete/log`: structured logs, traces and errors behind a port. `@kete/analytics`: usage events per organization, in Postgres, read by Kete Cockpit                                                                 | Kete Cockpit shows who uses what, per organization                     |
-| `090-template-complete` | The template born with what Nettio had to write (`kete-core#86`): the assistant, messaging, the missing form fields, business roles, a gesture that returns a rule's code, the browser test session                | A generated app has them and passes CI on its first commit             |
+| Step | Spec                    | Delivers                                                                                                                                                                                                    | Proof                                                                   |
+| ---- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| A1   | `086-order` (done)      | This roadmap, decision 0009 and its two rules in the constitution, a generated app's test named after the app (`kete-core#84`), the test runner moved to Vitest 4 (two critical advisories)                 | A generated app keeps no trace of the template's name; the audit passes |
+| B1   | `087-chat-channels`     | `@kete/notify`: the WhatsApp and Telegram adapters, inbound messages (authenticated webhooks, the provider's business-scoped ids)                                                                           | Nettio deletes its copy; its tests pass unchanged                       |
+| B2   | `088-chat-outbox`       | `@kete/notify`: the outbox to people — consent, templates per organization, a sender per organization, the cost of each message                                                                             | A refused message says why; two organizations never share a sender      |
+| B3   | `089-agent-runtime`     | A one-day trial of Mastra under Nettio's assistant, then a decision record. If it holds: the runtime on Mastra and a thin Kete layer — capabilities by right, drafts, mandate, journal, what the page shows | Nettio's assistant tests unchanged; RLS proven on the runtime's tables  |
+| B4   | `090-memory-and-evals`  | Memory with its governance (consent, retention, erasure, journal), evaluations of models and agents, the rule that a turn which read outside content triggers no action without a person, a dictation port  | A memory erased never comes back; an evaluation fails a worse prompt    |
+| B5   | `091-log-and-analytics` | `@kete/log`: structured logs, traces and errors behind a port. `@kete/analytics`: usage events per organization, in Postgres, read by Kete Cockpit                                                          | Kete Cockpit shows who uses what, per organization                      |
+| B6   | `092-plans-and-limits`  | Offers with limits in the Compte Kete (people, AI budget, storage, connected apps, agents), read by every app; a trial that ends                                                                            | An app refuses a costly gesture beyond the limit and stays readable     |
+| B7   | `093-template-complete` | The template born with what Nettio had to write (`kete-core#86`): the assistant, messaging, the missing form fields, business roles, a gesture that returns a rule's code, the browser test session         | A generated app has them and passes CI on its first commit              |
+
+### Built on (open source)
+
+| Library                                             | Where                                     | Status                            |
+| --------------------------------------------------- | ----------------------------------------- | --------------------------------- |
+| AI SDK, assistant-ui, the official MCP SDK, mcp-ui  | `@kete/ai`, the chat, capabilities, views | In use                            |
+| Better Auth, Postgres, pgvector, Drizzle, pg-boss   | Identity, every database, knowledge, jobs | In use                            |
+| OpenTelemetry, Langfuse                             | Traces and costs of model calls           | In use                            |
+| docxtemplater, officeparser, unpdf, sharp           | `@kete/files`                             | In use                            |
+| Mastra (Apache 2.0; its `ee/` folders are not used) | B3: the agents' runtime                   | Tried for a day, then decided     |
+| pino                                                | B5: structured logs                       | Decided                           |
+| Voxtral (open weights)                              | B4: dictation, behind the port            | Evaluated against what runs today |
+
+Not taken: CopilotKit and AG-UI (a second interface stack beside assistant-ui), Novu (MongoDB and
+Redis), PostHog (ClickHouse, Kafka, Redis), Mem0, Zep and Letta (the governance of memory would stay
+ours to write anyway). WhatsApp and Telegram are called directly, without a library; usage
+analytics are Postgres tables. A library's licence is checked before it is adopted.
 
 ### Needs from other lanes (decision 0009)
 
-| Issue          | From   | Answer                                                                               |
-| -------------- | ------ | ------------------------------------------------------------------------------------ |
-| `kete-core#84` | Nettio | Taken in `086-order`                                                                 |
-| `kete-core#86` | Nettio | Taken: channels in `087`, the in-app « ask » in `088`, the six other pieces in `090` |
+| Issue          | From   | Answer                                                                         |
+| -------------- | ------ | ------------------------------------------------------------------------------ |
+| `kete-core#84` | Nettio | Taken in `086-order`                                                           |
+| `kete-core#86` | Nettio | Taken: channels in B1 and B2, the in-app « ask » in B3, the other pieces in B7 |
 
 ### Waiting for its trigger
 
@@ -427,7 +451,11 @@ enters before these close.
 | `@kete/offline` (local command queue)               | A pilot's counter or field team needs it                                        |
 | Enterprise directories (SAML, SCIM)                 | A client requires it                                                            |
 | `050-interactive-views`, `051-references`           | Two apps need the same thing                                                    |
-| Memory with its governance, evaluations of models   | Decided with `088-agent-runtime`                                                |
+
+### Not done
+
+Selling the layer of trust to other software vendors; a second interface stack; a new business tool
+inside the center (doctrine D-042).
 
 ### Human proofs still open
 
@@ -438,6 +466,7 @@ the Cockpit's staging and the author's own sign-in.
 ### Proof
 
 - `[agent]` Firmo and Nettio run on the chassis' chat adapters; neither keeps its own.
+- `[agent]` An agent's gesture refused by a rule is journaled with the rule that refused it.
 - `[agent]` An app created from the template has an assistant and messaging on its first commit.
 - `[blocking]` One organization uses one Kete product for real, and Kete Cockpit shows it.
 

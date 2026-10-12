@@ -6,6 +6,8 @@ export default defineProject({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   test: {
+    // Compiled copies of the tests are not tests (Vitest 4 no longer skips dist by default).
+    exclude: ['**/node_modules/**', '**/dist/**'],
     name: 'app-template',
     environment: 'node',
     include: ['tests/**/*.test.ts'],
