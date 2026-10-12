@@ -1,6 +1,36 @@
 // The public entry point of @kete/notify. Anything not exported here is internal.
 
-export type { ChatAction, ChatChannel, ChatChannelName } from './chat.js';
+export {
+  ChatChannelError,
+  memoryChatChannel,
+  type ChatAction,
+  type ChatChannel,
+  type ChatChannelName,
+  type ChatChannels,
+  type ChatHeard,
+  type ChatInbound,
+  type ChatMedia,
+  type ChatSender,
+  type ChatSent,
+  type ChatTemplate,
+} from './chat.js';
+export {
+  parseTelegramUpdate,
+  receiveTelegram,
+  telegramChannel,
+  telegramSecretIsValid,
+  type TelegramOptions,
+  type TelegramWebhookOptions,
+} from './telegram.js';
+export {
+  parseWhatsAppNotification,
+  receiveWhatsApp,
+  verifyWhatsAppSubscription,
+  whatsAppChannel,
+  whatsAppSignatureIsValid,
+  type WhatsAppOptions,
+  type WhatsAppWebhookOptions,
+} from './whatsapp.js';
 export {
   checkEmail,
   EmailError,

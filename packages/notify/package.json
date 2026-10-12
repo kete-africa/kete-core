@@ -1,8 +1,8 @@
 {
   "name": "@kete-africa/notify",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
-  "description": "Kete messages: e-mails rendered with React Email and sent through a port, in-app notifications and Web Push, verified provider webhooks, and the port of chat channels.",
+  "description": "Kete messages: e-mails rendered with React Email and sent through a port, in-app notifications and Web Push, verified provider webhooks, and the chat channels (WhatsApp, Telegram) with their adapters and inbound messages.",
   "repository": {
     "type": "git",
     "url": "https://github.com/kete-africa/kete-core.git",

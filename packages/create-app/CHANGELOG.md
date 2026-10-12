@@ -1,5 +1,12 @@
 # @kete-africa/create-app
 
+## 0.2.6
+
+### Patch Changes
+
+- 990b4fb: The template tests with Vitest 4 (two critical advisories on the worker pool of Vitest 3), and
+  leaves compiled copies of the tests out of a run.
+
 ## 0.2.5
 
 ### Patch Changes
