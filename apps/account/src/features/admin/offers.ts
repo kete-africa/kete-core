@@ -14,7 +14,7 @@ import { prefixedId } from '@/platform/ids';
 import { isOperator, operatorsOrganizationId } from '@/platform/operators';
 import { getPaymentProvider } from '@/platform/payments';
 import { offers } from '@/platform/schema';
-import { disableOfferInput, offerInput } from './inputs';
+import { disableOfferInput, offerInput, offerTermsInput, trialInput } from './inputs';
 
 export { AdminError, type OperatorGesture } from '@kete/admin';
 
@@ -55,6 +55,9 @@ export async function readCatalog() {
       graceDays: row.graceDays,
       productId: row.providerProductId,
       price: { value: row.priceValue, currency: row.priceCurrency },
+      limits: row.limits,
+      readDays: row.readDays,
+      trial: row.trial,
       active: row.active,
     })),
   };
@@ -107,6 +110,45 @@ const disableOfferCommand = defineCommand({
   summarize: ({ productId }, output) => `Offer ${productId} disabled (${output.disabled})`,
 });
 
+/** The terms of an offer (spec 092): its limits and how long it stays readable after its end. */
+const setOfferTermsCommand = defineCommand({
+  name: 'set-offer-terms',
+  input: offerTermsInput,
+  reversibility: { reversible: true, inverse: 'set-offer-terms' },
+  async handler(value, { db: tx }) {
+    const provider = getPaymentProvider();
+    const { rows } = await tx.query<{ changed: number }>(
+      `select admin_set_offer_terms($1, $2, $3, $4) as changed`,
+      [provider.name, value.productId, JSON.stringify(value.limits), value.readDays],
+    );
+    return { changed: Number(rows[0]?.changed ?? 0) };
+  },
+  summarize: (value) =>
+    `Offer ${value.productId}: limits ${JSON.stringify(value.limits)}, readable ${value.readDays} days`,
+});
+
+/** An app's free trial (spec 092): free, once per organization, ends by itself. */
+const setTrialCommand = defineCommand({
+  name: 'set-trial',
+  input: trialInput,
+  reversibility: { reversible: true, inverse: 'disable-offer' },
+  async handler(value, { db: tx }) {
+    const { rows } = await tx.query<{ id: string }>(
+      `select admin_set_trial($1, $2, $3, $4, $5, $6) as id`,
+      [
+        prefixedId('offer'),
+        value.app,
+        value.name,
+        value.days,
+        JSON.stringify(value.limits),
+        value.readDays,
+      ],
+    );
+    return { id: rows[0]?.id ?? null };
+  },
+  summarize: (value) => `Trial of ${value.app}, ${value.days} days`,
+});
+
 /** An operator gesture on the catalog: a journaled command, in Kete's own organization. */
 async function runAsOperator<Input extends z.ZodType, Output>(
   command: CommandDefinition<Input, Output>,
@@ -124,4 +166,12 @@ export function setOffer(input: z.input<typeof offerInput>, gesture: OperatorGes
 
 export function disableOffer(productId: string, gesture: OperatorGesture) {
   return runAsOperator(disableOfferCommand, gesture, { productId });
+}
+
+export function setOfferTerms(input: z.input<typeof offerTermsInput>, gesture: OperatorGesture) {
+  return runAsOperator(setOfferTermsCommand, gesture, input);
+}
+
+export function setTrial(input: z.input<typeof trialInput>, gesture: OperatorGesture) {
+  return runAsOperator(setTrialCommand, gesture, input);
 }

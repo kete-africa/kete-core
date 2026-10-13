@@ -6,6 +6,7 @@ import {
   type KeteRole,
   type TokenVerifier,
 } from './verify.js';
+import { plansClaim, planToClaim } from './plans.js';
 
 export interface SignInOptions {
   /** The Compte Kete's public origin, e.g. https://compte.kete.africa */
@@ -216,6 +217,13 @@ export function createKeteSignIn(options: SignInOptions): KeteSignIn {
         apps: Object.fromEntries(
           Object.entries(identity.apps).map(([app, until]) => [app, until.toISOString()]),
         ),
+        ...(identity.plans
+          ? {
+              plans: Object.fromEntries(
+                Object.entries(identity.plans).map(([app, plan]) => [app, planToClaim(plan)]),
+              ),
+            }
+          : {}),
         two_factor: identity.twoFactor,
         ...(options.keepAccessToken ? { at: accessToken } : {}),
       })
@@ -245,6 +253,9 @@ export function createKeteSignIn(options: SignInOptions): KeteSignIn {
           apps: Object.fromEntries(
             Object.entries(apps).map(([app, until]) => [app, new Date(until)]),
           ),
+          ...(payload.plans !== undefined
+            ? { plans: plansClaim(payload.plans, () => new Error('invalid session')) }
+            : {}),
           twoFactor: payload.two_factor === true,
           expiresAt: new Date(Number(payload.exp) * 1000),
         };

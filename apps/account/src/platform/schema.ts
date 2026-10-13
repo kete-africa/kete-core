@@ -13,6 +13,7 @@ import {
   unique,
   timestamp,
 } from 'drizzle-orm/pg-core';
+import type { LimitName } from '@kete/auth';
 import { organizationIsolation } from '@kete/tenancy/drizzle';
 import { organization, user } from '@kete/identity/schema';
 
@@ -141,6 +142,12 @@ export const offers = pgTable(
     priceValue: numeric('price_value', { precision: 14, scale: 2, mode: 'number' }).notNull(),
     priceCurrency: text('price_currency').notNull(),
     active: boolean('active').notNull().default(true),
+    /** What the offer allows (spec 092): people, AI tokens a month, storage, apps, agents. */
+    limits: jsonb('limits').$type<Partial<Record<LimitName, number>>>().notNull().default({}),
+    /** Days during which what was done stays readable once the use has ended. */
+    readDays: integer('read_days').notNull().default(90),
+    /** A trial: free, once per organization and app, never sold. */
+    trial: boolean('trial').notNull().default(false),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -196,6 +203,7 @@ export const subscriptions = pgTable(
       .references(() => offers.id),
     paidUntil: timestamp('paid_until', { withTimezone: true }).notNull(),
     graceUntil: timestamp('grace_until', { withTimezone: true }).notNull(),
+    trial: boolean('trial').notNull().default(false),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [

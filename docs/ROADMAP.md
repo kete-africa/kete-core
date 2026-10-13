@@ -415,7 +415,7 @@ Enterprise carries the center (its roadmap, steps C1 to C11), Kete Cockpit the f
 | B3   | `089-agent-runtime` (done)     | A one-day trial of Mastra under Nettio's assistant, then a decision record. If it holds: the runtime on Mastra and a thin Kete layer — capabilities by right, drafts, mandate, journal, what the page shows | Nettio's assistant tests unchanged; RLS proven on the runtime's tables  |
 | B4   | `090-memory-and-evals` (done)  | Memory with its governance (consent, retention, erasure, journal), evaluations of models and agents, the rule that a turn which read outside content triggers no action without a person, a dictation port  | A memory erased never comes back; an evaluation fails a worse prompt    |
 | B5   | `091-log-and-analytics` (done) | `@kete/log`: structured logs, traces and errors behind a port. `@kete/analytics`: usage events per organization, in Postgres, read by Kete Cockpit                                                          | Kete Cockpit shows who uses what, per organization                      |
-| B6   | `092-plans-and-limits`         | Offers with limits in the Compte Kete (people, AI budget, storage, connected apps, agents), read by every app; a trial that ends                                                                            | An app refuses a costly gesture beyond the limit and stays readable     |
+| B6   | `092-plans-and-limits` (done)  | Offers with limits in the Compte Kete (people, AI budget, storage, connected apps, agents), read by every app; a trial that ends                                                                            | An app refuses a costly gesture beyond the limit and stays readable     |
 | B7   | `093-template-complete`        | The template born with what Nettio had to write (`kete-core#86`): the assistant, messaging, the missing form fields, business roles, a gesture that returns a rule's code, the browser test session         | A generated app has them and passes CI on its first commit              |
 
 B1 is proven: Nettio deleted its two adapters and runs on the chassis' own (`kete-africa/nettio#34`,
@@ -441,6 +441,10 @@ person; an evaluation fails a worse prompt. Dictation has its port, with Voxtral
 B5 is built (spec 091): logs redacted and traced behind a port; usage per organization, with daily
 counts in the outbox to Kete Cockpit and no person in them. Cockpit's screen of who uses what is
 asked of its lane.
+
+B6 is proven on the Compte Kete's test database (spec 092): offers carry their limits and a trial
+starts once per organization and app; the token tells every app what the offer allows; a gesture
+beyond a limit is refused, and after the end the organization's data stays readable for its days.
 
 ### Built on (open source)
 

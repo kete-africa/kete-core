@@ -71,6 +71,13 @@
       "when": 1790740000000,
       "tag": "0009_command_delegation",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790750000000,
+      "tag": "0010_plans_and_limits",
+      "breakpoints": true
     }
   ]
 }

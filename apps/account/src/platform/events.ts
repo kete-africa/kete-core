@@ -14,7 +14,11 @@ import { getPool } from './db';
 export const PRODUCT = 'prd_kete_account';
 
 /** The events the Compte Kete announces (its manifest declares exactly these). */
-export const DECLARED_EVENTS = ['account.created', 'payment.succeeded'] as const;
+export const DECLARED_EVENTS = [
+  'account.created',
+  'account.activated',
+  'payment.succeeded',
+] as const;
 type Declared = (typeof DECLARED_EVENTS)[number];
 
 export function accountEvent<T extends Declared>(

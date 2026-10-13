@@ -60,7 +60,11 @@ afterAll(async () => {
 
 describe('the Compte Kete announces', () => {
   it('declares its events in its manifest', () => {
-    expect(manifest().events).toEqual(['account.created', 'payment.succeeded']);
+    expect(manifest().events).toEqual([
+      'account.created',
+      'account.activated',
+      'payment.succeeded',
+    ]);
   });
 
   it('and its identity card: every Kete app signs in through it (D-040)', () => {

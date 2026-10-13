@@ -9,6 +9,18 @@ export {
   type TokenVerifier,
   type TokenVerifierOptions,
 } from './verify.js';
+export {
+  limitNames,
+  limitOf,
+  mayRead,
+  planOf,
+  PlanRefusedError,
+  refusalOf,
+  requireWithinPlan,
+  type KetePlan,
+  type LimitName,
+  type Refusal,
+} from './plans.js';
 export { createKeteSignIn, SignInError, type KeteSignIn, type SignInOptions } from './signin.js';
 export {
   createAppToken,

@@ -75,6 +75,41 @@ spec 038): `createTokenVerifier({ issuer, audience: ['urn:kete:apps', 'https://n
 Tokens come from the sign-in above, or from the Compte Kete itself (`GET /api/auth/token`, with the
 person's session); they live 15 minutes and are meant for the audience `urn:kete:apps`.
 
+## What the offer allows (spec 092)
+
+The token carries the organization's offer in each app (`plans`): its limits, whether it is a
+trial, until when it acts (`until`, grace included) and until when what was done stays readable
+(`readableUntil`). An app refuses a costly gesture beyond a limit or after the end, and stays
+readable.
+
+```mermaid
+flowchart LR
+  O[Kete Cockpit · an operator] -->|terms · trial| C[(offers · limits · read_days · trial)]
+  A[her organization's owner] -->|startTrial, once| S[(subscriptions · trial)]
+  P[a paid sale] --> S
+  S & C -->|plansOf| T[the token: apps + plans]
+  T --> X[every app]
+  X -->|refusalOf: ended · limit| R[a costly gesture refused, said why]
+  X -->|mayRead| V[what was done stays readable]
+```
+
+```ts
+const used = await countPeople(db);
+const refusal = refusalOf(identity, 'nettio', { limit: 'people', used });
+if (refusal) return refuse(refusal); // { reason: 'limit', limit: 'people', allowed: 3, used: 3 }
+
+if (!mayRead(identity, 'nettio')) return notAllowed(); // after the reading ends
+```
+
+| Export                           | What it does                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------- |
+| `planOf`, `limitOf`              | The offer of an app, a limit of it (`null`: no limit)                            |
+| `refusalOf`, `requireWithinPlan` | `no_plan`, `ended` or `limit` — or nothing; the second throws `PlanRefusedError` |
+| `mayRead`                        | Whether what was done may still be read                                          |
+
+Limits: `people`, `ai_tokens_month`, `storage_mb`, `connected_apps`, `agents`. A token from a
+Compte Kete that does not give `plans` is read as before: the `apps` claim decides.
+
 ## What is refused
 
 Every token that is not exactly a Compte Kete token (spec 003, SC-003): altered, expired, signed by

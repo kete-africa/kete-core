@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { disableOfferInput, offerInput } from '../features/admin/inputs';
+import {
+  disableOfferInput,
+  offerInput,
+  offerTermsInput,
+  trialInput,
+} from '../features/admin/inputs';
 import { personInput, signInLinkInput } from '../features/apps/inputs';
 
 // The Compte Kete's own API, beside the identity's (spec 026): what Kete apps and Kete Cockpit
@@ -229,7 +234,7 @@ export const accountPaths: Record<string, Schema> = {
     },
     post: {
       tags: ['Kete Cockpit'],
-      summary: 'Set or disable an offer',
+      summary: "Set or disable an offer, its terms, or an app's trial",
       description:
         'A journaled command (@kete/commands). The same `Idempotency-Key` makes a retry harmless; the price is read from the provider, never from the caller.',
       security: operatorToken,
@@ -257,6 +262,26 @@ export const accountPaths: Record<string, Schema> = {
                   {
                     type: 'object',
                     properties: { action: { const: 'disable' } },
+                    required: ['action'],
+                  },
+                ],
+              },
+              {
+                allOf: [
+                  input(offerTermsInput),
+                  {
+                    type: 'object',
+                    properties: { action: { const: 'terms' } },
+                    required: ['action'],
+                  },
+                ],
+              },
+              {
+                allOf: [
+                  input(trialInput),
+                  {
+                    type: 'object',
+                    properties: { action: { const: 'trial' } },
                     required: ['action'],
                   },
                 ],

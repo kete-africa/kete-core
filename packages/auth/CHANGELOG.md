@@ -1,5 +1,14 @@
 # @kete-africa/auth
 
+## 0.4.0
+
+### Minor Changes
+
+- Offers with limits (spec 092): the token carries `plans` — per app, the offer, whether it is a
+  trial, the end of use, the end of reading and its limits. `@kete/auth` reads it (`planOf`,
+  `limitOf`, `refusalOf`, `requireWithinPlan`, `mayRead`); `@kete/identity` fills it from
+  `plansOf`. A token without it is read as before.
+
 ## 0.3.0
 
 ### Minor Changes
