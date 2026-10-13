@@ -41,6 +41,12 @@
       "path": "packages/agents"
     },
     {
+      "path": "packages/log"
+    },
+    {
+      "path": "packages/analytics"
+    },
+    {
       "path": "packages/notify"
     },
     {
