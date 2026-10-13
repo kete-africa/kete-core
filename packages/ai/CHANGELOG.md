@@ -1,5 +1,16 @@
 # @kete-africa/ai
 
+## 0.3.0
+
+### Minor Changes
+
+- Memory with its governance (spec 090): consent, retention, forgetting and erasure, a journal of
+  gestures without words (`agentMemoryMigrationSql`, `remember`, `memoriesFor`, `eraseMemories`,
+  `rememberTool`), all conversations erased at once (`eraseAll`); the rule that a turn which read
+  outside content runs nothing that acts at once (`outside`); evaluations checked by code
+  (`evaluateAgent`); and in `@kete/ai` the dictation port (`dictation`), with Mistral's Voxtral as a
+  transcription model.
+
 ## 0.2.0
 
 ### Minor Changes

@@ -91,9 +91,12 @@ export function embeddingModel(config: ModelConfig): EmbeddingModel {
   }
 }
 
-/** The transcription model a configuration names (voice notes). */
+/** The transcription model a configuration names (voice notes, dictation): OpenAI or Mistral. */
 export function transcriptionModel(config: ModelConfig): TranscriptionModel {
   checkConfig(config);
+  // Mistral's Voxtral has open weights: the same words, hosted by Mistral or by the deployment.
+  if (config.provider === 'mistral')
+    return createMistral(settings(config)).transcription(config.model);
   if (config.provider !== 'openai') {
     throw new ModelConfigError(`${config.provider} offers no transcription model here.`);
   }

@@ -87,6 +87,21 @@ const thisMonth = await store.report(organizationId);
   each call, so a later price change does not rewrite history. A model without a price costs `null`.
 - No service of ours: Langfuse Cloud, one's own Langfuse, or any OpenTelemetry processor.
 
+## Dictation (spec 090)
+
+What a person said, written down, through one port: any transcription model of the AI SDK —
+OpenAI's, or Mistral's **Voxtral**, whose weights are open and which a deployment may host itself.
+The budget is checked before the call; the call is counted after it, heard or not; a silent
+recording is heard as nothing, not as a failure.
+
+```ts
+const port = dictation(transcriptionModel({ provider: 'mistral', model: 'voxtral-mini-latest' }), {
+  store: budgets,
+  context: { organizationId, actor, purpose: 'dictation', model: '' },
+});
+const { text } = await port.dictate(audio);
+```
+
 ## Choosing the provider (doctrine D-029)
 
 The provider is chosen by the **sensitivity of the data**, per product or per task. DeepSeek's own

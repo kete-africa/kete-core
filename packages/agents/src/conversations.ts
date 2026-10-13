@@ -150,6 +150,8 @@ export interface AgentConversations {
   read(threadId: string, personId: string, options?: { limit?: number }): Promise<AgentSaid[]>;
   /** Erases one of her conversations for good. Returns whether it was hers. */
   erase(threadId: string, personId: string): Promise<boolean>;
+  /** Erases all her conversations for good, when she asks to be forgotten. Returns how many. */
+  eraseAll(personId: string): Promise<number>;
 }
 
 /**
@@ -217,6 +219,14 @@ export function agentConversations(options: {
       if (!(await mine(threadId, personId))) return false;
       await memory.deleteThread(threadId);
       return true;
+    },
+    async eraseAll(personId) {
+      const { threads } = await memory.listThreads({
+        filter: { resourceId: resourceOf(personId) },
+        perPage: false,
+      });
+      for (const thread of threads) await memory.deleteThread(thread.id);
+      return threads.length;
     },
   };
 }
