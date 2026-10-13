@@ -412,7 +412,7 @@ Enterprise carries the center (its roadmap, steps C1 to C11), Kete Cockpit the f
 | A1   | `086-order` (done)         | This roadmap, decision 0009 and its two rules in the constitution, a generated app's test named after the app (`kete-core#84`), the test runner moved to Vitest 4 (two critical advisories)                 | A generated app keeps no trace of the template's name; the audit passes |
 | B1   | `087-chat-channels` (done) | `@kete/notify`: the WhatsApp and Telegram adapters, inbound messages (authenticated webhooks, the provider's business-scoped ids)                                                                           | Nettio deletes its copy; its tests pass unchanged                       |
 | B2   | `088-chat-outbox` (done)   | `@kete/notify`: the outbox to people — consent, templates per organization, a sender per organization, the cost of each message                                                                             | A refused message says why; two organizations never share a sender      |
-| B3   | `089-agent-runtime`        | A one-day trial of Mastra under Nettio's assistant, then a decision record. If it holds: the runtime on Mastra and a thin Kete layer — capabilities by right, drafts, mandate, journal, what the page shows | Nettio's assistant tests unchanged; RLS proven on the runtime's tables  |
+| B3   | `089-agent-runtime` (done) | A one-day trial of Mastra under Nettio's assistant, then a decision record. If it holds: the runtime on Mastra and a thin Kete layer — capabilities by right, drafts, mandate, journal, what the page shows | Nettio's assistant tests unchanged; RLS proven on the runtime's tables  |
 | B4   | `090-memory-and-evals`     | Memory with its governance (consent, retention, erasure, journal), evaluations of models and agents, the rule that a turn which read outside content triggers no action without a person, a dictation port  | A memory erased never comes back; an evaluation fails a worse prompt    |
 | B5   | `091-log-and-analytics`    | `@kete/log`: structured logs, traces and errors behind a port. `@kete/analytics`: usage events per organization, in Postgres, read by Kete Cockpit                                                          | Kete Cockpit shows who uses what, per organization                      |
 | B6   | `092-plans-and-limits`     | Offers with limits in the Compte Kete (people, AI budget, storage, connected apps, agents), read by every app; a trial that ends                                                                            | An app refuses a costly gesture beyond the limit and stays readable     |
@@ -428,6 +428,12 @@ does not leave; two organizations never share a sender, and a notification signe
 never heard in the other; no token is readable in the database. Not done: Nettio still runs its
 own outbox with one sender for the deployment — moving it is a step of its own lane.
 
+B3 was tried, then decided ([decision 0010](decisions/0010-agents-run-on-mastra-behind-a-thin-layer.md)):
+Nettio's 27 assistant tests pass unchanged on Mastra, and its conversation tables hold under
+row-level security as the application role. `@kete/agents` is the only package that imports the
+runtime. To obtain: Nettio's assistant on the published package. Not proven: a real model on a
+real conversation.
+
 ### Built on (open source)
 
 | Library                                             | Where                                     | Status                            |
@@ -436,7 +442,7 @@ own outbox with one sender for the deployment — moving it is a step of its own
 | Better Auth, Postgres, pgvector, Drizzle, pg-boss   | Identity, every database, knowledge, jobs | In use                            |
 | OpenTelemetry, Langfuse                             | Traces and costs of model calls           | In use                            |
 | docxtemplater, officeparser, unpdf, sharp           | `@kete/files`                             | In use                            |
-| Mastra (Apache 2.0; its `ee/` folders are not used) | B3: the agents' runtime                   | Tried for a day, then decided     |
+| Mastra (Apache 2.0; its `ee/` folders are not used) | `@kete/agents`: the agents' runtime       | In use (decision 0010)            |
 | pino                                                | B5: structured logs                       | Decided                           |
 | Voxtral (open weights)                              | B4: dictation, behind the port            | Evaluated against what runs today |
 

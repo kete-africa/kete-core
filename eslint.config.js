@@ -32,10 +32,32 @@ export default tseslint.config(
               message: 'Import a package through its public entry point.',
             },
             { group: ['**/examples/**'], message: 'Packages never depend on examples.' },
+            {
+              group: ['@mastra/*'],
+              message: 'The agents’ runtime is used through @kete/agents only (decision 0010).',
+            },
           ],
         },
       ],
       '@typescript-eslint/consistent-type-imports': 'error',
+    },
+  },
+  {
+    // The one package that holds the agents' runtime (decision 0010).
+    files: ['packages/agents/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@kete/*/src/*', '@kete/*/src'],
+              message: 'Import a package through its public entry point.',
+            },
+            { group: ['**/examples/**'], message: 'Packages never depend on examples.' },
+          ],
+        },
+      ],
     },
   },
 );
