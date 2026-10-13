@@ -72,12 +72,38 @@ export interface ChatTemplate {
   parameters: string[];
 }
 
+/** What a channel knows of a message that left: its own identifier, which a status names later. */
+export interface ChatReceipt {
+  providerMessageId: string;
+}
+
+/** A receipt, or nothing: an adapter that answers nothing still satisfies the port. */
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type -- an adapter may answer nothing
+export type ChatSendResult = ChatReceipt | void;
+
+/** What a provider says later of a message that left: where it is, and whether it was billed. */
+export interface ChatStatus {
+  providerMessageId: string;
+  status: 'sent' | 'delivered' | 'read' | 'failed';
+  /** Why it failed, in the words of `ChatChannelError`. */
+  reason: ChatChannelError['reason'] | null;
+  /** Whether the provider bills it, when it says so. */
+  billable: boolean | null;
+  /** The provider’s category of cost (« utility », « marketing », « service »…), when it says so. */
+  category: string | null;
+}
+
 export interface ChatChannel {
   readonly channel: ChatChannelName;
-  sendText(to: string, text: string, actions?: ChatAction[]): Promise<void>;
-  sendDocument(to: string, content: Uint8Array, filename: string, caption: string): Promise<void>;
+  sendText(to: string, text: string, actions?: ChatAction[]): Promise<ChatSendResult>;
+  sendDocument(
+    to: string,
+    content: Uint8Array,
+    filename: string,
+    caption: string,
+  ): Promise<ChatSendResult>;
   /** Some channels only let a business write first with an approved template. */
-  sendTemplate?(to: string, template: ChatTemplate): Promise<void>;
+  sendTemplate?(to: string, template: ChatTemplate): Promise<ChatSendResult>;
   /** A list to choose from; a chosen row comes back as an action with its id. */
   sendList?(
     to: string,
@@ -115,20 +141,22 @@ export type ChatSent =
 /** Keeps what would have left: for tests, never a live channel. */
 export function memoryChatChannel(channel: ChatChannelName): ChatChannel & { sent: ChatSent[] } {
   const sent: ChatSent[] = [];
+  // Each message gets an identifier, as a provider would give one.
+  const receipt = () => Promise.resolve({ providerMessageId: `mem_${channel}_${sent.length}` });
   return {
     channel,
     sent,
     sendText(to, text, actions) {
       sent.push({ kind: 'text', to, text, actions: actions ?? [] });
-      return Promise.resolve();
+      return receipt();
     },
     sendDocument(to, content, filename, caption) {
       sent.push({ kind: 'document', to, filename, caption, bytes: content.byteLength });
-      return Promise.resolve();
+      return receipt();
     },
     sendTemplate(to, template) {
       sent.push({ kind: 'template', to, template });
-      return Promise.resolve();
+      return receipt();
     },
   };
 }

@@ -142,4 +142,126 @@ product then asks her number in words.
 - A business writes first on WhatsApp only with an approved template (`sendTemplate`); outside the
   24-hour window a free text is refused with `outside_window`.
 - A refusal never carries a credential: the error names the provider's code, not the request.
+- `sendText`, `sendTemplate` and `sendDocument` may answer with a `ChatReceipt`: the
+  provider's identifier of the message, which a status names later. An adapter that answers
+  nothing still satisfies the port.
 - Without credentials a channel is `null` in `ChatChannels` — not connected, never simulated.
+
+## The outbox to people (spec 088)
+
+What sits between « something happened » and « a message left »: whether she agreed, in which
+words, through which channel, **from whose number**, and what happened to it. The app decides
+**when** a message is due and with **which values**; the outbox decides whether it may leave, sends
+it through the organization’s own sender, and keeps the trace.
+
+```mermaid
+flowchart LR
+  A[the app: « her deposit is ready »] -->|queueChatMessage| R{may it leave?}
+  R -->|kind turned off · nobody known| N[nothing kept]
+  R -->|no consent · no address · no sender| S[(skipped, with its reason)]
+  R -->|yes| Q[(queued)]
+  Q --> D[deliverChat · the worker]
+  D -->|the organization’s own sender, opened| C[ChatChannel]
+  C -->|network| Q
+  C -->|refused| F[(failed, with the reason)]
+  C -->|accepted| M[(sent · delivered · read · its cost category)]
+  W[the provider’s webhook] --> RC[receiveChat]
+  RC -->|whose account?| O[kete_chat_organization_of_account<br/>an identifier, nothing else]
+  O -->|checked with that organization’s secret| H[heard once, in that organization]
+  RC -->|statuses| M
+  H -->|queueChatReply| Q
+```
+
+```ts
+// The migration: four tables, each with its row-level security, and two identifier-only lookups.
+await owner.query(chatOutboxMigrationSql({ schema, appRole }));
+
+// An organization connects its own number: sealed under KETE_SECRETS_KEY before it is stored.
+await connectChatSender(db, organizationId, {
+  channel: 'whatsapp',
+  phoneNumberId,
+  accessToken,
+  appSecret,
+});
+
+// Who can be written to, her consent by a named gesture, the organization’s words.
+await saveChatContact(db, organizationId, { reference: customerId, phone: '+228 90 11 22 33' });
+await setChatConsent(db, customerId, true);
+await saveChatTemplate(
+  db,
+  organizationId,
+  {
+    kind: 'deposit.ready',
+    enabled: true,
+    body: 'Bonjour {client}, votre dépôt {numero} est prêt.',
+  },
+  ['client', 'numero'],
+);
+
+// Something happened: the app says what, the outbox says whether it leaves.
+const { status, reason } = await queueChatMessage(db, organizationId, {
+  reference: customerId,
+  kind: 'deposit.ready',
+  values: { client: 'Ama', numero: 'A-0412' },
+  subject: orderId,
+});
+await deliverChat(db); // in the organization’s transaction; a worker visits chatOrganizationsWaiting()
+
+// The webhook of the whole deployment, one address per channel.
+const { response, heard } = await receiveChat(request, {
+  channel: 'whatsapp',
+  lookup: pool,
+  inOrganization: (organizationId, work) => inOrganization(pool, organizationId, work),
+  verifyToken,
+});
+for (const one of heard) await answer(one); // queueChatReply(db, one.organizationId, { to: one.messageId, text })
+return response;
+```
+
+| Export                                                                   | What it does                                                                                              |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `chatOutboxMigrationSql`                                                 | `kete_chat_senders`, `kete_chat_contacts`, `kete_chat_templates`, `kete_chat_messages` and their policies |
+| `connectChatSender`, `listChatSenders`, `disconnectChatSender`           | The organization’s own number or bot; listed without any credential, « to reconnect » under another key   |
+| `chatChannelOf`                                                          | The organization’s channel, opened: to download what she sent, to show that an answer comes               |
+| `saveChatContact`, `chatContactOf`, `setChatConsent`, `chatLinkTokenOf`  | Who can be written to, by the app’s own reference of her; her consent; the link she opens                 |
+| `saveChatTemplate`, `listChatTemplates`, `unknownChatPlaceholders`       | The organization’s words per kind; an unknown placeholder is refused when saved                           |
+| `queueChatMessage`, `queueChatText`, `queueChatReply`                    | A kind in the organization’s words; plain words; the answer to a message that was heard                   |
+| `deliverChat`, `requeueChatMessage`, `chatOrganizationsWaiting`          | Sends what waits; puts a failed message back; which organizations a worker visits                         |
+| `receiveChat`, `hearChat`, `noteChatStatus`, `organizationOfChatAccount` | The webhook of a deployment with many senders, and its parts for an app that reads the request itself     |
+| `listChatMessages`, `chatUsage`                                          | Every message with what happened to it; what left in a month, by channel and cost category                |
+
+### Why a message did not leave
+
+| `status`  | `reason`                                                                            | What it means                                                                   |
+| --------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| —         | `template_off`, `unknown_contact`                                                   | Nothing is kept: the organization did not turn this kind on, or nobody is known |
+| `skipped` | `no_consent`                                                                        | She did not agree, or withdrew (« stop »)                                       |
+| `skipped` | `no_channel`, `no_address`                                                          | She chose no channel; no number, or a bot she has not opened yet                |
+| `skipped` | `not_connected`                                                                     | The organization has no sender on that channel — never another’s                |
+| `queued`  | `network`                                                                           | Tried, will be tried again: after 1 min, 5 min, 30 min, 2 h, then it fails      |
+| `failed`  | `outside_window`, `recipient_unreachable`, `needs_phone_number`, `provider_refused` | The provider’s refusal, in `ChatChannelError`’s words; not retried by itself    |
+| `failed`  | `not_connected`                                                                     | The sender was removed, or can no longer be opened with this deployment’s key   |
+
+### Rules
+
+- **Consent first.** It is given by a named gesture — `setChatConsent`, or her own link opened —
+  never inferred from a message she sent. « stop », « arrêter », « désabonner » or « unsubscribe »
+  withdraws it at once; the app is told (`intent: 'stop'`) and chooses its words.
+- **A sender per organization.** An account belongs to one organization (a unique index says so).
+  Its credentials are sealed with AES-256-GCM under `KETE_SECRETS_KEY` (32 random bytes in base64,
+  held by the deployment, never in the database); they are opened only to send or to check a
+  webhook, and appear in no answer, error nor log.
+- **Two questions cross the organizations’ boundary**, answered by `security definer` functions
+  with an organization’s identifier only: whose account a notification names, and which
+  organizations have something waiting. Everything else is read inside one organization, under
+  its row-level security.
+- **A notification is checked with its organization’s own secret.** One signed for another account
+  is refused (401); one for an account nobody holds here is heard nowhere.
+- **The template or her words.** Where a channel only lets a business write first with an approved
+  template, the template leaves unless she wrote in the last 24 hours — then the organization’s
+  own words leave, with their buttons. Words the provider refuses afterwards (`outside_window`)
+  leave again as the template, once.
+- **A count, never an amount.** The provider’s status says whether a message was billed and in
+  which category; no price is invented.
+- A channel that does not name its account in a notification carries it in its address: the app
+  reads it from its route and gives it as `account`.
