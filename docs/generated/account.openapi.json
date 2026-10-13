@@ -17035,7 +17035,7 @@
         "tags": [
           "Kete Cockpit"
         ],
-        "summary": "Set or disable an offer",
+        "summary": "Set or disable an offer, its terms, or an app's trial",
         "description": "A journaled command (@kete/commands). The same `Idempotency-Key` makes a retry harmless; the price is read from the provider, never from the caller.",
         "security": [
           {
@@ -17136,6 +17136,156 @@
                         "properties": {
                           "action": {
                             "const": "disable"
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "object",
+                        "properties": {
+                          "productId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "limits": {
+                            "default": {},
+                            "type": "object",
+                            "properties": {
+                              "people": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 1000000
+                              },
+                              "ai_tokens_month": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 1000000000000
+                              },
+                              "storage_mb": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100000000
+                              },
+                              "connected_apps": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 10000
+                              },
+                              "agents": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100000
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "readDays": {
+                            "default": 90,
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 3650
+                          }
+                        },
+                        "required": [
+                          "productId"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "const": "terms"
+                          }
+                        },
+                        "required": [
+                          "action"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "$schema": "https://json-schema.org/draft/2020-12/schema",
+                        "type": "object",
+                        "properties": {
+                          "app": {
+                            "type": "string",
+                            "enum": [
+                              "firmo",
+                              "nettio",
+                              "nyatefe",
+                              "cockpit"
+                            ]
+                          },
+                          "days": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 90
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          },
+                          "limits": {
+                            "default": {},
+                            "type": "object",
+                            "properties": {
+                              "people": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 1000000
+                              },
+                              "ai_tokens_month": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 1000000000000
+                              },
+                              "storage_mb": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100000000
+                              },
+                              "connected_apps": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 10000
+                              },
+                              "agents": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 100000
+                              }
+                            },
+                            "additionalProperties": false
+                          },
+                          "readDays": {
+                            "default": 90,
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 3650
+                          }
+                        },
+                        "required": [
+                          "app",
+                          "days",
+                          "name"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action": {
+                            "const": "trial"
                           }
                         },
                         "required": [

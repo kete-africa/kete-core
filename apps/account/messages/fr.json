@@ -200,5 +200,15 @@
   "security_new_password_again": "Le même, une seconde fois",
   "security_password_mismatch": "Les deux mots de passe diffèrent.",
   "security_password_added": "Mot de passe ajouté. Pense à activer la double authentification.",
-  "security_password_invalid": "Ce mot de passe ne convient pas : 10 caractères au moins."
+  "security_password_invalid": "Ce mot de passe ne convient pas : 10 caractères au moins.",
+  "billing_trial_title": "Essai gratuit de {days} jours",
+  "billing_trial_start": "Commencer l’essai",
+  "billing_trial_failed": "L’essai n’a pas pu commencer : cet outil a déjà été essayé ou souscrit.",
+  "billing_trial_tag": "Essai",
+  "billing_readable_until": "Vos données restent consultables jusqu’au {date}.",
+  "billing_limit_people": "jusqu’à {count} personnes",
+  "billing_limit_agents": "{count} agents",
+  "billing_limit_apps": "{count} applications connectées",
+  "billing_limit_storage": "{count} Go de fichiers",
+  "billing_limit_ai": "{count} jetons d’IA par mois"
 }

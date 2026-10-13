@@ -16,7 +16,7 @@ Every address is declared once in `src/routes.ts`: the files of `src/routes` are
 | `/reset-password`               | Choose the new password from the e-mailed link; every other session is closed                    |
 | `/espace`                       | My tools: the Kete apps of the active organization                                               |
 | `/espace/nouvelle-organisation` | Create an organization (the creator becomes its owner)                                           |
-| `/espace/abonnements`           | Subscriptions: offers, paying, access per tool                                                   |
+| `/espace/abonnements`           | Subscriptions: offers and their limits, a free trial once per tool, paying, access per tool      |
 | `/espace/organisation`          | Members, roles, invitations                                                                      |
 | `/espace/parametres`            | Logo, and generic settings: identity, legal identifiers, language, time zone, currency, channels |
 | `/espace/securite`              | Two-factor authentication, passkeys, dropping or adding back the password (spec 016)             |

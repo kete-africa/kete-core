@@ -9,7 +9,7 @@ import { isOperator } from './operators';
 import { deliverSignInLink, SIGN_IN_LINK_SECONDS } from './sign-in-links';
 import { inOrganization } from './tenancy';
 import * as schema from './schema';
-import { accessUntil } from '../features/payments/access';
+import { accessUntil, plansOf } from '../features/payments/access';
 import {
   invitationEmail,
   passwordResetEmail,
@@ -54,6 +54,7 @@ export const accountIdentityOptions = (): IdentityOptions => ({
     invitation: ({ to, ...values }) => sendEmail(invitationEmail, { to, values }).then(),
   },
   appsOf: accessUntil,
+  plansOf,
   isOperator,
   // Announced to Kete Cockpit through the outbox.
   onOrganizationCreated: (organizationId) =>

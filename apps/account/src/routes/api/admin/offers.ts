@@ -2,12 +2,15 @@ import { randomUUID } from 'node:crypto';
 import { createFileRoute } from '@tanstack/react-router';
 import { CommandError } from '@kete/commands';
 import { z } from 'zod';
+import { offerTermsInput, trialInput } from '@/features/admin/inputs';
 import {
   AdminError,
   disableOffer,
   readCatalog,
   requireOperator,
   setOffer,
+  setOfferTerms,
+  setTrial,
   type OperatorGesture,
 } from '@/features/admin/offers';
 
@@ -22,6 +25,8 @@ const action = z.discriminatedUnion('action', [
     name: z.string().optional(),
   }),
   z.object({ action: z.literal('disable'), productId: z.string().min(1).max(128) }),
+  offerTermsInput.extend({ action: z.literal('terms') }),
+  trialInput.extend({ action: z.literal('trial') }),
 ]);
 
 /** The caller's `Idempotency-Key` makes a retried request harmless; without one, each call is new. */
@@ -59,6 +64,13 @@ export const Route = createFileRoute('/api/admin/offers')({
         guarded(request, async (gesture) => {
           const body = action.parse(await request.json());
           if (body.action === 'disable') return disableOffer(body.productId, gesture);
+          if (body.action === 'terms') {
+            // The action is not part of the command's input: the schema leaves it out.
+            return setOfferTerms(offerTermsInput.parse(body), gesture);
+          }
+          if (body.action === 'trial') {
+            return setTrial(trialInput.parse(body), gesture);
+          }
           return setOffer(
             {
               app: body.app as 'nettio',

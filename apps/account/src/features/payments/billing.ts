@@ -1,4 +1,5 @@
 import { isPaid, PaymentProviderError, sameMoney, type Sale } from '@kete/payments';
+import type { LimitName } from '@kete/auth';
 import { and, asc, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { PHONE_COUNTRIES } from './countries';
@@ -52,7 +53,9 @@ export class BillingError extends Error {
       | 'checkout_not_found'
       | 'provider_unavailable'
       | 'provider_refused'
-      | 'email_required',
+      | 'email_required'
+      /** The organization already had this app, as a trial or paid: a trial is once. */
+      | 'trial_used',
   ) {
     super(code);
     this.name = 'BillingError';
@@ -65,6 +68,8 @@ export interface OfferView {
   name: string;
   periodDays: number;
   price: { value: number; currency: string };
+  /** What it allows; a limit not set is no limit (spec 092). */
+  limits: Partial<Record<LimitName, number>>;
 }
 
 export interface SubscriptionView {
@@ -72,10 +77,15 @@ export interface SubscriptionView {
   state: 'active' | 'grace' | 'expired';
   paidUntil: string;
   graceUntil: string;
+  trial: boolean;
+  /** What was done stays readable until then, once the use has ended. */
+  readableUntil: string;
 }
 
 export interface BillingView {
   offers: OfferView[];
+  /** The trials the organization may still start: one per app it never had. */
+  trials: OfferView[];
   subscriptions: SubscriptionView[];
   canPay: boolean;
   /** No e-mail on the account (provisioned by phone): the receipt's address is asked. */
@@ -103,19 +113,29 @@ export async function readBilling(actor: Actor | null): Promise<BillingView> {
     .where(eq(offers.active, true))
     .orderBy(asc(offers.app), asc(offers.periodDays));
   const rows = await inOrganization(me.organizationId, (tx) => tx.select().from(subscriptions));
+  const view = (offer: (typeof catalog)[number]): OfferView => ({
+    id: offer.id,
+    app: offer.app,
+    name: offer.name,
+    periodDays: offer.periodDays,
+    price: { value: offer.priceValue, currency: offer.priceCurrency },
+    limits: offer.limits,
+  });
+  const readDays = new Map(catalog.map((offer) => [offer.id, offer.readDays]));
   return {
-    offers: catalog.map((offer) => ({
-      id: offer.id,
-      app: offer.app,
-      name: offer.name,
-      periodDays: offer.periodDays,
-      price: { value: offer.priceValue, currency: offer.priceCurrency },
-    })),
+    offers: catalog.filter((offer) => !offer.trial).map(view),
+    trials: catalog
+      .filter((offer) => offer.trial && !rows.some((row) => row.app === offer.app))
+      .map(view),
     subscriptions: rows.map((row) => ({
       app: row.app,
       state: stateOf(row.paidUntil, row.graceUntil),
       paidUntil: row.paidUntil.toISOString(),
       graceUntil: row.graceUntil.toISOString(),
+      trial: row.trial,
+      readableUntil: new Date(
+        row.graceUntil.getTime() + (readDays.get(row.offerId) ?? 90) * DAY_MS,
+      ).toISOString(),
     })),
     canPay: canAdminister(me.role),
     needsEmail: (await realEmail(me.userId)) === null,
@@ -278,7 +298,7 @@ async function reconcile(organizationId: string, sale: Sale): Promise<ReconcileO
       })
       .onConflictDoUpdate({
         target: [subscriptions.organizationId, subscriptions.app],
-        set: { offerId: offer.id, paidUntil, graceUntil, updatedAt: now },
+        set: { offerId: offer.id, paidUntil, graceUntil, trial: false, updatedAt: now },
       });
     await tx
       .update(checkouts)
@@ -358,4 +378,47 @@ export async function receiveNotification(
     })
     .onConflictDoNothing();
   return result;
+}
+
+/**
+ * Starts the free trial of an app (spec 092): once per organization and app, by its owner or an
+ * administrator; never for an app the organization already had, as a trial or paid. It ends by
+ * itself; what was done stays readable for the days the offer says.
+ */
+export async function startTrial(
+  actor: Actor | null,
+  offerId: string,
+): Promise<{ app: KeteApp; until: string }> {
+  const me = requireMember(actor);
+  if (!canAdminister(me.role)) throw new ForbiddenError('forbidden');
+  const [offer] = await db
+    .select()
+    .from(offers)
+    .where(and(eq(offers.id, offerId), eq(offers.active, true), eq(offers.trial, true)));
+  if (!offer) throw new BillingError('offer_unavailable');
+  return inOrganization(me.organizationId, async (tx) => {
+    const [had] = await tx
+      .select({ id: subscriptions.id })
+      .from(subscriptions)
+      .where(eq(subscriptions.app, offer.app))
+      .for('update');
+    if (had) throw new BillingError('trial_used');
+    const now = new Date();
+    const paidUntil = new Date(now.getTime() + offer.periodDays * DAY_MS);
+    await tx.insert(subscriptions).values({
+      id: prefixedId('subscription'),
+      organizationId: me.organizationId,
+      app: offer.app,
+      offerId: offer.id,
+      paidUntil,
+      graceUntil: paidUntil,
+      trial: true,
+    });
+    // Announced to Kete Cockpit with the trial, in the same transaction.
+    await record(
+      tx,
+      accountEvent('account.activated', me.organizationId, { activation: `trial:${offer.app}` }),
+    );
+    return { app: offer.app, until: paidUntil.toISOString() };
+  });
 }

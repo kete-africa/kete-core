@@ -7,7 +7,7 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { APIError, createAuthMiddleware, getSessionFromCtx } from 'better-auth/api';
 import { jwt, magicLink, organization, twoFactor } from 'better-auth/plugins';
 import { and, asc, eq } from 'drizzle-orm';
-import { KETE_APPS_AUDIENCE, type KeteClaims } from './claims.js';
+import { KETE_APPS_AUDIENCE, type KeteClaims, type PlanClaim } from './claims.js';
 import type { IdentityDatabase } from './database.js';
 import { signInMethodsOf } from './methods.js';
 import { member } from './schema.js';
@@ -52,6 +52,8 @@ export interface IdentityOptions {
   };
   /** The apps an organization may use, each with the end of its access (the `apps` claim). */
   appsOf(organizationId: string): Promise<Record<string, string>>;
+  /** The organization's offer in each app (the `plans` claim, spec 092). */
+  plansOf?(organizationId: string): Promise<Record<string, PlanClaim>>;
   /** Who may register, change or remove an app: the instance's operators. */
   isOperator(userId: string): Promise<boolean>;
   /** Called once an organization exists, in its own transaction: announce it. */
@@ -113,6 +115,7 @@ export function createIdentity(options: IdentityOptions) {
       org,
       role,
       apps: org ? await options.appsOf(org) : {},
+      ...(org && options.plansOf ? { plans: await options.plansOf(org) } : {}),
       // A second factor, or a passkey-only account (spec 016).
       two_factor: person.twoFactorEnabled === true || (await methods.signsInStrongly(person.id)),
     };

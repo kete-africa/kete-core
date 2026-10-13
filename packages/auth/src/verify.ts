@@ -6,6 +6,7 @@ import {
   type JSONWebKeySet,
   createLocalJWKSet,
 } from 'jose';
+import { plansClaim, type KetePlan } from './plans.js';
 
 export type KeteRole = 'owner' | 'admin' | 'member';
 
@@ -19,6 +20,11 @@ export interface KeteIdentity {
   role: KeteRole | null;
   /** Apps the organization may use, each with the end of its access (grace period included). */
   apps: Record<string, Date>;
+  /**
+   * The organization's offer in each app: its limits, whether it is a trial, until when it acts
+   * and until when it still reads (spec 092). Absent from a Compte Kete older than its claim.
+   */
+  plans?: Record<string, KetePlan>;
   /** Whether the person signs in with a second factor (required for Kete operators). */
   twoFactor: boolean;
   expiresAt: Date;
@@ -145,6 +151,9 @@ export function createTokenVerifier(options: TokenVerifierOptions): TokenVerifie
       role: role as KeteRole | null,
       // No organization, no app.
       apps: org === null ? {} : appsClaim(payload.apps),
+      ...(org !== null && payload.plans !== undefined
+        ? { plans: plansClaim(payload.plans, () => new InvalidTokenError('invalid')) }
+        : {}),
       twoFactor: payload.two_factor === true,
       expiresAt: new Date((payload.exp as number) * 1000),
       ...(actingAgent ? { actingAgent } : {}),

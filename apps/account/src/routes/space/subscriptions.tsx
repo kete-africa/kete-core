@@ -3,7 +3,12 @@ import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { Button, Panel, Tag, TextField } from '@kete/design';
 import type { BillingView, OfferView, ReconcileOutcome } from '@/features/payments/billing';
 import { PHONE_COUNTRIES } from '@/features/payments/countries';
-import { beginCheckout, fetchBilling, verifyCheckout } from '@/features/payments/functions';
+import {
+  beginCheckout,
+  beginTrial,
+  fetchBilling,
+  verifyCheckout,
+} from '@/features/payments/functions';
 import { toolCatalog } from '@/features/tools/catalog';
 import { Notice, SelectField, useHydrated } from '@/lib/ui';
 import * as m from '@/paraglide/messages.js';
@@ -32,7 +37,11 @@ function Billing() {
   const billing = Route.useLoaderData();
   const { paiement } = Route.useSearch();
   const apps = [
-    ...new Set([...billing.offers.map((o) => o.app), ...billing.subscriptions.map((s) => s.app)]),
+    ...new Set([
+      ...billing.offers.map((o) => o.app),
+      ...billing.trials.map((o) => o.app),
+      ...billing.subscriptions.map((s) => s.app),
+    ]),
   ];
 
   return (
@@ -73,7 +82,18 @@ function AppBilling({ app, billing }: { app: OfferView['app']; billing: BillingV
             {m.billing_state_expired({ date: formatDate(subscription.graceUntil) })}
           </Tag>
         )}
+        {subscription?.trial && <Tag tone="info">{m.billing_trial_tag()}</Tag>}
+        {subscription?.state === 'expired' && new Date(subscription.readableUntil) > new Date() && (
+          <p className="mt-2 text-body-sm text-bark">
+            {m.billing_readable_until({ date: formatDate(subscription.readableUntil) })}
+          </p>
+        )}
       </div>
+      {billing.trials
+        .filter((trial) => trial.app === app)
+        .map((trial) => (
+          <TrialOffer key={trial.id} offer={trial} canStart={billing.canPay} />
+        ))}
       <ul className="divide-y divide-rule">
         {offers.map((offer) => (
           <li key={offer.id} className="flex flex-col gap-3 py-3">
@@ -83,6 +103,7 @@ function AppBilling({ app, billing }: { app: OfferView['app']; billing: BillingV
                 <p className="text-body-sm text-bark">
                   {m.billing_period({ days: String(offer.periodDays) })}
                 </p>
+                <Limits limits={offer.limits} />
               </div>
               <p className="font-number text-body-lg">{formatPrice(offer.price)}</p>
               {billing.canPay && open !== offer.id && (
@@ -100,6 +121,60 @@ function AppBilling({ app, billing }: { app: OfferView['app']; billing: BillingV
         ))}
       </ul>
     </Panel>
+  );
+}
+
+/** What an offer allows, in words; nothing when it sets no limit. */
+function Limits({ limits }: { limits: OfferView['limits'] }) {
+  const said: string[] = [];
+  if (limits.people !== undefined)
+    said.push(m.billing_limit_people({ count: String(limits.people) }));
+  if (limits.agents !== undefined)
+    said.push(m.billing_limit_agents({ count: String(limits.agents) }));
+  if (limits.connected_apps !== undefined) {
+    said.push(m.billing_limit_apps({ count: String(limits.connected_apps) }));
+  }
+  if (limits.storage_mb !== undefined) {
+    said.push(m.billing_limit_storage({ count: String(Math.round(limits.storage_mb / 1024)) }));
+  }
+  if (limits.ai_tokens_month !== undefined) {
+    const count = new Intl.NumberFormat(getLocale(), { notation: 'compact' }).format(
+      limits.ai_tokens_month,
+    );
+    said.push(m.billing_limit_ai({ count }));
+  }
+  return said.length > 0 ? <p className="text-body-sm text-bark">{said.join(' · ')}</p> : null;
+}
+
+/** A free trial the organization may start, once. */
+function TrialOffer({ offer, canStart }: { offer: OfferView; canStart: boolean }) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [failed, setFailed] = useState(false);
+  async function start() {
+    setPending(true);
+    setFailed(false);
+    const result = await beginTrial({ data: { offerId: offer.id } });
+    setPending(false);
+    if (!result.ok) {
+      setFailed(true);
+      return;
+    }
+    await router.invalidate();
+  }
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-3 rounded-box border border-rule p-3">
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold">{m.billing_trial_title({ days: String(offer.periodDays) })}</p>
+        <Limits limits={offer.limits} />
+        {failed && <p className="text-body-sm text-bark">{m.billing_trial_failed()}</p>}
+      </div>
+      {canStart && (
+        <Button onClick={() => void start()} disabled={pending}>
+          {m.billing_trial_start()}
+        </Button>
+      )}
+    </div>
   );
 }
 

@@ -200,5 +200,15 @@
   "security_new_password_again": "The same, once more",
   "security_password_mismatch": "The two passwords differ.",
   "security_password_added": "Password added. Remember to turn on two-factor authentication.",
-  "security_password_invalid": "This password does not fit: 10 characters at least."
+  "security_password_invalid": "This password does not fit: 10 characters at least.",
+  "billing_trial_title": "Free trial of {days} days",
+  "billing_trial_start": "Start the trial",
+  "billing_trial_failed": "The trial could not start: this tool was already tried or subscribed.",
+  "billing_trial_tag": "Trial",
+  "billing_readable_until": "Your data stays readable until {date}.",
+  "billing_limit_people": "up to {count} people",
+  "billing_limit_agents": "{count} agents",
+  "billing_limit_apps": "{count} connected apps",
+  "billing_limit_storage": "{count} GB of files",
+  "billing_limit_ai": "{count} AI tokens a month"
 }
