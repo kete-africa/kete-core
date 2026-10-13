@@ -50,6 +50,8 @@ flowchart LR
 | `packages/agents/`       | `@kete/agents` — see its [README](../packages/agents/README.md)                               |
 | `packages/log/`          | `@kete/log` — see its [README](../packages/log/README.md)                                     |
 | `packages/analytics/`    | `@kete/analytics` — see its [README](../packages/analytics/README.md)                         |
+| `packages/money/`        | `@kete/money` — see its [README](../packages/money/README.md)                                 |
+| `packages/sequences/`    | `@kete/sequences` — see its [README](../packages/sequences/README.md)                         |
 | `packages/notify/`       | `@kete/notify` — see its [README](../packages/notify/README.md)                               |
 | `packages/identity/`     | `@kete/identity` — see its [README](../packages/identity/README.md)                           |
 | `packages/views/`        | `@kete/views` — see its [README](../packages/views/README.md)                                 |

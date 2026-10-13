@@ -479,7 +479,7 @@ analytics are Postgres tables. A library's licence is checked before it is adopt
 
 | Capability                                          | Reopened when                                                                   |
 | --------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `@kete/sequences` and a port for certified invoices | The orders applying Togo's 2026 finance law (certified e-invoice) are published |
+| A port for certified invoices, on `@kete/sequences` | The orders applying Togo's 2026 finance law (certified e-invoice) are published |
 | A mobile-money adapter in `@kete/payments`          | A pilot wants to be paid through it                                             |
 | `@kete/offline` (local command queue)               | A pilot's counter or field team needs it                                        |
 | Enterprise directories (SAML, SCIM)                 | A client requires it                                                            |
@@ -502,6 +502,51 @@ the Cockpit's staging and the author's own sign-in.
 - `[agent]` An agent's gesture refused by a rule is journaled with the rule that refused it.
 - `[agent]` An app created from the template has an assistant and messaging on its first commit.
 - `[blocking]` One organization uses one Kete product for real, and Kete Cockpit shows it.
+
+---
+
+## Phase 8 — What the generic apps share (decided 2026-10-13)
+
+### Objective
+
+Four apps for every company stand behind the center — Gestion, Équipe, Engagements, Support — and
+the center holds the references they all cite: people, third parties, projects (doctrine D-047 to
+D-049). What two of them need is written here once: amounts of money, the numbers of documents,
+the contract by which a fact of money reaches the center with its project, and the path by which a
+message, a photo or a document becomes a draft a person checks.
+
+This repository carries steps **E1 to E4**; Kete Enterprise carries the references and the center's
+side (its roadmap, steps F1 to F5); each app has its own repository (steps G, H, I, J there).
+
+### Specs, in order
+
+| Step | Spec                             | Delivers                                                                                                                                                                                                     | Proof                                                               |
+| ---- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| E1   | `094-money` (done)               | `@kete/money`: an amount is an integer of its currency's smallest unit — read exactly, added, taxed with one rounding, split without losing a unit, shown in a person's language                             | A split's parts add up to the whole; two currencies never add up    |
+| E2   | `095-sequences` (done)           | `@kete/sequences`: a document's number taken in the transaction that writes it, per organization, per series and period                                                                                      | No gap after a failed write; no duplicate under concurrent writers  |
+| E3   | `096-references-and-money-facts` | Contracts: a fact of money (expected, received, committed, paid) with its amount, its third party, its project and budget line; `@kete/center` reads third parties and projects, asks a circuit, sends facts | A fact sent by an app is read by the center with its project        |
+| E4   | `097-intake`                     | The template: a message, a photo or a document becomes a draft whose every field says where it comes from; the person corrects, the correction is kept                                                       | A receipt's photo becomes a draft with the provenance of each field |
+
+E1 is proven (`packages/money/tests/money.test.ts`, 7): amounts are read digit by digit and never
+rounded on the way in; ten cents and twenty are thirty; 2 480 000 F split 40/30/30 gives 992 000,
+744 000 and 744 000; 100 F in three gives 34, 33 and 33; « 2 480 000 F CFA » in French.
+
+E2 is proven on the test database (`packages/sequences/tests/sequences.test.ts`, 8): numbers follow
+each other from 1 per organization, per series and per period; a number taken in a transaction
+that fails goes back, and the next document takes it; twelve writers at once get twelve different
+numbers; the application role cannot delete a series; `F-{YYYY}-{N:4}` gives `F-2026-0412`.
+
+### Not done
+
+Exchange rates, a country's taxes, general accounting, payroll, stock: an organization's accountant
+keeps her tool, and receives exports. A port for certified invoices waits for its trigger below.
+
+### Proof
+
+- `[agent]` Two apps created from the template number their documents and count their money with
+  the same packages; neither writes its own.
+- `[agent]` A fact of money sent by an app shows in the center under its project.
+- `[blocking]` A real receipt, photographed, becomes a correct draft with a real model.
 
 ---
 
