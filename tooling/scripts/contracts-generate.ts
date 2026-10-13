@@ -30,8 +30,10 @@ for (const file of files) {
       bannerComment: '',
       cwd: contractsDir,
       unreachableDefinitions: true,
-      // Referenced contracts are declared once, in their own file; event-data only has $defs.
-      declareExternallyReferenced: file.startsWith('event-data'),
+      // Referenced contracts are declared once, in their own file; event-data and
+      // intelligence-event declare their own $defs.
+      declareExternallyReferenced:
+        file.startsWith('event-data') || file.startsWith('intelligence-event'),
       style: { singleQuote: true, printWidth: 100, trailingComma: 'all' },
     }));
 }

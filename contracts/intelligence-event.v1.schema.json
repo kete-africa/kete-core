@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/intelligence-event.v1.schema.json",
+  "title": "IntelligenceEvent",
+  "description": "One event of a Kete Intelligence turn, streamed from the agents' runtime to the screen: what it is doing now, its plan and each step, each tool it calls with its level, a draft for the person, a source, the answer's text as it is written, a wait for the person, the end or the failure. The same stream is shown in the center and in every app.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/status"
+    },
+    {
+      "$ref": "#/$defs/plan"
+    },
+    {
+      "$ref": "#/$defs/step"
+    },
+    {
+      "$ref": "#/$defs/tool"
+    },
+    {
+      "$ref": "#/$defs/draft"
+    },
+    {
+      "$ref": "#/$defs/source"
+    },
+    {
+      "$ref": "#/$defs/text"
+    },
+    {
+      "$ref": "#/$defs/waiting"
+    },
+    {
+      "$ref": "#/$defs/done"
+    },
+    {
+      "$ref": "#/$defs/failed"
+    }
+  ],
+  "$defs": {
+    "status": {
+      "title": "IntelligenceStatus",
+      "description": "What it is doing at this instant, in a sentence.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "text"],
+      "properties": {
+        "type": {
+          "const": "status"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        }
+      }
+    },
+    "plan": {
+      "title": "IntelligencePlan",
+      "description": "The steps it intends to take, shown before it acts.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "steps"],
+      "properties": {
+        "type": {
+          "const": "plan"
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        }
+      }
+    },
+    "step": {
+      "title": "IntelligenceStep",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "index", "state"],
+      "properties": {
+        "type": {
+          "const": "step"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "state": {
+          "enum": ["running", "done", "skipped"]
+        }
+      }
+    },
+    "tool": {
+      "title": "IntelligenceTool",
+      "description": "A capability it calls, with its autonomy level and what it gave back, in short.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id", "name", "level", "state"],
+      "properties": {
+        "type": {
+          "const": "tool"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "state": {
+          "enum": ["running", "done", "failed"]
+        },
+        "input": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 300
+        }
+      }
+    },
+    "draft": {
+      "title": "IntelligenceDraft",
+      "description": "A draft prepared for the person, decided in place.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "draft_id", "title"],
+      "properties": {
+        "type": {
+          "const": "draft"
+        },
+        "draft_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "href": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 600
+        }
+      }
+    },
+    "source": {
+      "title": "IntelligenceSource",
+      "description": "What the answer rests on, opened by a click.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "label"],
+      "properties": {
+        "type": {
+          "const": "source"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "href": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 600
+        }
+      }
+    },
+    "text": {
+      "title": "IntelligenceText",
+      "description": "A piece of the answer as it is written.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "delta"],
+      "properties": {
+        "type": {
+          "const": "text"
+        },
+        "delta": {
+          "type": "string",
+          "maxLength": 20000
+        }
+      }
+    },
+    "waiting": {
+      "title": "IntelligenceWaiting",
+      "description": "It stops until the person answers or decides.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "reason"],
+      "properties": {
+        "type": {
+          "const": "waiting"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        }
+      }
+    },
+    "done": {
+      "title": "IntelligenceDone",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "const": "done"
+        },
+        "steps": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tools": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ms": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "failed": {
+      "title": "IntelligenceFailed",
+      "description": "It stopped; what was read is kept, nothing was changed by the failure.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "reason"],
+      "properties": {
+        "type": {
+          "const": "failed"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        }
+      }
+    }
+  }
+}

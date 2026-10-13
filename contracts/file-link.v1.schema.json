@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/file-link.v1.schema.json",
+  "title": "FileLink",
+  "description": "A file an app keeps, said to the center with what it proves: the object it is linked to, its role there, its nature and where it came from. The file stays in the app; the center keeps the link, so that search and the assistant find it across Kete, read under the rights of the linked object. Sent again under the same key, it replaces what was said.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["key", "name", "object", "role"],
+  "properties": {
+    "key": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "name": {
+      "description": "The file's name, as shown.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "object": {
+      "description": "What it is linked to: a record of the app, or a reference of the center.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "id": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "role": {
+      "description": "What it proves there, as a person reads it: « bon de commande signé », « justificatif ».",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "nature": {
+      "enum": [
+        "receipt",
+        "supplier_invoice",
+        "invoice",
+        "purchase_order",
+        "contract",
+        "statement",
+        "identity",
+        "photo",
+        "other"
+      ]
+    },
+    "origin": { "enum": ["whatsapp", "telegram", "email", "upload", "generated"] },
+    "project_id": { "type": "string", "pattern": "^prj_[0-9a-f-]{8,64}$" },
+    "party_id": { "type": "string", "pattern": "^pty_[0-9a-f-]{8,64}$" },
+    "keep_until": {
+      "description": "Until when it must be kept (a book-keeping piece: ten years).",
+      "type": "string",
+      "format": "date"
+    },
+    "href": { "type": "string", "format": "uri", "maxLength": 600 }
+  }
+}

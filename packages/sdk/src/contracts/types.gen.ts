@@ -71,6 +71,66 @@ export interface Dataset {
 }
 
 /**
+ * Something an app says will happen at a time — a meeting, a deadline, an absence, a task, a milestone, an agent's run — so that the center's Planifier shows the time of the whole organization (doctrine D-050). Sent again under the same key, it replaces what was said; sent with `cancelled`, it is taken back. Exactly one of `day` (a whole day) or `starts_at` (a moment) is given.
+ */
+export type DatedFact = {
+  /**
+   * The app's own key for this fact: one fact per app and key.
+   */
+  key: string;
+  /**
+   * meeting: people meet. deadline: something is due (an invoice, a report, a contract's term). absence: a person is away. task: a piece of work with its duration. milestone: a step of a project. agent_run: an agent or a routine will run.
+   */
+  kind: 'meeting' | 'deadline' | 'absence' | 'task' | 'milestone' | 'agent_run';
+  /**
+   * What it is, as a person reads it: « Échéance F-2026-0003 », « Réception du matériel ».
+   */
+  label: string;
+  /**
+   * A whole day. With `until`, the last day of a span (a leave from the 2nd to the 6th).
+   */
+  day?: string;
+  /**
+   * The last day of a span that started on `day`.
+   */
+  until?: string;
+  starts_at?: string;
+  /**
+   * When a fact with a moment ends; none for an instant.
+   */
+  ends_at?: string;
+  /**
+   * The people of the center it concerns: who meets, who is away, who must do it.
+   *
+   * @maxItems 50
+   */
+  person_ids?: string[];
+  project_id?: string;
+  party_id?: string;
+  /**
+   * shared (the default): its label is read by whoever may read its project or its people. busy: others see only that the person is taken. private: only the people it concerns see it. An absence is always read without its reason.
+   */
+  visibility?: 'shared' | 'busy' | 'private';
+  /**
+   * Where it is read, in the app.
+   */
+  href?: string;
+  /**
+   * True takes the fact back.
+   */
+  cancelled?: boolean;
+} & (
+  | {
+      day: unknown;
+      [k: string]: unknown;
+    }
+  | {
+      starts_at: unknown;
+      [k: string]: unknown;
+    }
+);
+
+/**
  * A signed batch of events sent to a receiver.
  */
 export interface DeliveryRequest {
@@ -178,6 +238,46 @@ export interface KeteEvent {
 }
 
 /**
+ * A file an app keeps, said to the center with what it proves: the object it is linked to, its role there, its nature and where it came from. The file stays in the app; the center keeps the link, so that search and the assistant find it across Kete, read under the rights of the linked object. Sent again under the same key, it replaces what was said.
+ */
+export interface FileLink {
+  key: string;
+  /**
+   * The file's name, as shown.
+   */
+  name: string;
+  /**
+   * What it is linked to: a record of the app, or a reference of the center.
+   */
+  object: {
+    kind: string;
+    id: string;
+  };
+  /**
+   * What it proves there, as a person reads it: « bon de commande signé », « justificatif ».
+   */
+  role: string;
+  nature?:
+    | 'receipt'
+    | 'supplier_invoice'
+    | 'invoice'
+    | 'purchase_order'
+    | 'contract'
+    | 'statement'
+    | 'identity'
+    | 'photo'
+    | 'other';
+  origin?: 'whatsapp' | 'telegram' | 'email' | 'upload' | 'generated';
+  project_id?: string;
+  party_id?: string;
+  /**
+   * Until when it must be kept (a book-keeping piece: ten years).
+   */
+  keep_until?: string;
+  href?: string;
+}
+
+/**
  * A Kete app's health, served at GET /health. Never exposes secrets or connection strings.
  */
 export interface HealthReport {
@@ -193,6 +293,306 @@ export interface HealthReport {
     pending: number;
     oldest_pending_age_seconds?: number;
   };
+}
+
+/**
+ * One event of a Kete Intelligence turn, streamed from the agents' runtime to the screen: what it is doing now, its plan and each step, each tool it calls with its level, a draft for the person, a source, the answer's text as it is written, a wait for the person, the end or the failure. The same stream is shown in the center and in every app.
+ */
+export type IntelligenceEvent =
+  | IntelligenceStatus
+  | IntelligencePlan
+  | IntelligenceStep
+  | IntelligenceTool
+  | IntelligenceDraft
+  | IntelligenceSource
+  | IntelligenceText
+  | IntelligenceWaiting
+  | IntelligenceDone
+  | IntelligenceFailed;
+
+/**
+ * What it is doing at this instant, in a sentence.
+ */
+export interface IntelligenceStatus {
+  type: 'status';
+  text: string;
+}
+/**
+ * The steps it intends to take, shown before it acts.
+ */
+export interface IntelligencePlan {
+  type: 'plan';
+  /**
+   * @minItems 1
+   * @maxItems 20
+   */
+  steps:
+    | [string]
+    | [string, string]
+    | [string, string, string]
+    | [string, string, string, string]
+    | [string, string, string, string, string]
+    | [string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ];
+}
+export interface IntelligenceStep {
+  type: 'step';
+  index: number;
+  state: 'running' | 'done' | 'skipped';
+}
+/**
+ * A capability it calls, with its autonomy level and what it gave back, in short.
+ */
+export interface IntelligenceTool {
+  type: 'tool';
+  id: string;
+  name: string;
+  level: number;
+  state: 'running' | 'done' | 'failed';
+  input?: string;
+  summary?: string;
+}
+/**
+ * A draft prepared for the person, decided in place.
+ */
+export interface IntelligenceDraft {
+  type: 'draft';
+  draft_id: string;
+  title: string;
+  href?: string;
+}
+/**
+ * What the answer rests on, opened by a click.
+ */
+export interface IntelligenceSource {
+  type: 'source';
+  label: string;
+  href?: string;
+}
+/**
+ * A piece of the answer as it is written.
+ */
+export interface IntelligenceText {
+  type: 'text';
+  delta: string;
+}
+/**
+ * It stops until the person answers or decides.
+ */
+export interface IntelligenceWaiting {
+  type: 'waiting';
+  reason: string;
+}
+export interface IntelligenceDone {
+  type: 'done';
+  steps?: number;
+  tools?: number;
+  ms?: number;
+}
+/**
+ * It stopped; what was read is kept, nothing was changed by the failure.
+ */
+export interface IntelligenceFailed {
+  type: 'failed';
+  reason: string;
+}
+
+/**
+ * What the use of a resource taught: a correction, a note, a gap an agent saw. Gathered with consent, it is data, never an instruction; its owner keeps it — it becomes a test case — or drops it (doctrine D-053).
+ */
+export interface Lesson {
+  id: string;
+  resource: {
+    kind: 'skill' | 'agent' | 'app';
+    id: string;
+  };
+  /**
+   * correction: a person corrected a draft. note: a person noted it. agent: an agent saw a gap.
+   */
+  source: 'correction' | 'note' | 'agent';
+  /**
+   * What was seen, as said.
+   */
+  observed: string;
+  /**
+   * What could change in the resource.
+   */
+  proposal?: string;
+  /**
+   * The situation it came from, which becomes a test case if kept.
+   */
+  case?: string;
+  /**
+   * The person agreed to share it; nothing confidential travels unless generalized.
+   */
+  consent: true;
+  state: 'waiting' | 'kept' | 'dropped';
 }
 
 /**
@@ -325,6 +725,78 @@ export interface Manifest {
      */
     criticality: 'low' | 'medium' | 'high' | 'critical';
   };
+  /**
+   * The question the app answers on its home (optional, added in v1: additive; doctrine D-048): « Combien ai-je vraiment, projet par projet ? ».
+   */
+  question?: {
+    fr: string;
+    en: string;
+  };
+  /**
+   * The places of the app, in the order of its sidebar (optional, added in v1: additive; spec 099). A center or the shell builds the menu and Ctrl K from them; each is opened at the app's address followed by its path.
+   *
+   * @maxItems 40
+   */
+  places?: {
+    id: string;
+    label: {
+      fr: string;
+      en: string;
+    };
+    path: string;
+    /**
+     * The heading the place sits under.
+     */
+    section?: {
+      fr: string;
+      en: string;
+    };
+    /**
+     * A name of the design's icon set.
+     */
+    icon?: string;
+    /**
+     * Shown only to who holds it.
+     */
+    permission?: string;
+  }[];
+  /**
+   * The figures the app declares (optional, added in v1: additive; spec 099), read at its API under the reader's rights.
+   */
+  metrics?: Metric[];
+}
+
+/**
+ * A figure an app declares in its manifest, computed by the app's code and read under the reader's rights (doctrine D-052). Boards, the apps' homes and summaries compose metrics; no one writes a query. Its axes are the center's references, so that a filter « project = X » applies to every app's figures at once.
+ */
+export interface Metric {
+  /**
+   * The app's area, then the figure: « finance.available », « team.absences ».
+   */
+  name: string;
+  label: {
+    fr: string;
+    en: string;
+  };
+  /**
+   * How it is computed, in a sentence a person reads beside « Pourquoi ? ».
+   */
+  description?: {
+    fr: string;
+    en: string;
+  };
+  /**
+   * money: in the currency's smallest unit, with its currency. count, days, hours, percent: plain numbers.
+   */
+  unit: 'money' | 'count' | 'days' | 'hours' | 'percent';
+  /**
+   * Whether a rise is good news (up), bad news (down), or neither (none).
+   */
+  better: 'up' | 'down' | 'none';
+  /**
+   * What it can be split or filtered by.
+   */
+  axes?: ('project' | 'party' | 'person' | 'period')[];
 }
 
 /**
@@ -371,4 +843,117 @@ export interface MoneyFact {
    * Where the piece that proves it is read, in the app.
    */
   href?: string;
+}
+
+/**
+ * Several things an agent proposes at once — the evening's tidying, a week's plan, what a document said — each ticked or not by the person, applied together by one gesture, and undone together (doctrine D-051). Nothing in it is true until applied: each item names the gesture that will make it true, with its level.
+ */
+export interface ProposalSet {
+  id: string;
+  /**
+   * closure: the evening's note. plan: a plan of the day or the week. intake: what was received. agent: an agent's run.
+   */
+  origin: 'closure' | 'plan' | 'intake' | 'agent';
+  /**
+   * The person who decides.
+   */
+  for: string;
+  /**
+   * @minItems 1
+   * @maxItems 30
+   */
+  items: [
+    {
+      key: string;
+      /**
+       * postpone, close, block (a time), assign (to a colleague, who may refuse), correct (a record), remind, lesson (proposed to a skill's owner), create.
+       */
+      gesture:
+        'postpone' | 'close' | 'block' | 'assign' | 'correct' | 'remind' | 'lesson' | 'create';
+      /**
+       * What will happen, as the person reads it.
+       */
+      label: string;
+      /**
+       * Why it is proposed, in a sentence.
+       */
+      reason?: string;
+      /**
+       * The autonomy level of the gesture that applies it (1 to 4).
+       */
+      level: number;
+      /**
+       * The capability that applies it, when an app does.
+       */
+      capability?: string;
+      /**
+       * Whether it is ticked when shown; the person changes it.
+       */
+      ticked?: boolean;
+    },
+    ...{
+      key: string;
+      /**
+       * postpone, close, block (a time), assign (to a colleague, who may refuse), correct (a record), remind, lesson (proposed to a skill's owner), create.
+       */
+      gesture:
+        'postpone' | 'close' | 'block' | 'assign' | 'correct' | 'remind' | 'lesson' | 'create';
+      /**
+       * What will happen, as the person reads it.
+       */
+      label: string;
+      /**
+       * Why it is proposed, in a sentence.
+       */
+      reason?: string;
+      /**
+       * The autonomy level of the gesture that applies it (1 to 4).
+       */
+      level: number;
+      /**
+       * The capability that applies it, when an app does.
+       */
+      capability?: string;
+      /**
+       * Whether it is ticked when shown; the person changes it.
+       */
+      ticked?: boolean;
+    }[],
+  ];
+}
+
+/**
+ * A skill, an agent or an app in its lifecycle: created, used, learning, evaluated, promoted one tier at a time with a review by its risk (doctrine D-053).
+ */
+export interface Resource {
+  kind: 'skill' | 'agent' | 'app';
+  id: string;
+  name: string;
+  /**
+   * The person who owns it and keeps or drops its lessons.
+   */
+  owner: string;
+  version: string;
+  /**
+   * Who may use it: me, my team, my unit, the whole organization.
+   */
+  tier: 'me' | 'team' | 'unit' | 'organization';
+  /**
+   * The review asked to reach the next tier.
+   */
+  review?: {
+    state: 'asked' | 'approved' | 'refused';
+    risk: 'low' | 'medium' | 'high';
+    /**
+     * The role that reviews.
+     */
+    by?: string;
+  };
+  /**
+   * Its test cases, and how many the current version passes.
+   */
+  cases?: {
+    total: number;
+    passed: number;
+  };
 }

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/dated-fact.v1.schema.json",
+  "title": "DatedFact",
+  "description": "Something an app says will happen at a time — a meeting, a deadline, an absence, a task, a milestone, an agent's run — so that the center's Planifier shows the time of the whole organization (doctrine D-050). Sent again under the same key, it replaces what was said; sent with `cancelled`, it is taken back. Exactly one of `day` (a whole day) or `starts_at` (a moment) is given.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["key", "kind", "label"],
+  "oneOf": [
+    {
+      "required": ["day"],
+      "properties": {
+        "day": true
+      }
+    },
+    {
+      "required": ["starts_at"],
+      "properties": {
+        "starts_at": true
+      }
+    }
+  ],
+  "properties": {
+    "key": {
+      "description": "The app's own key for this fact: one fact per app and key.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "kind": {
+      "description": "meeting: people meet. deadline: something is due (an invoice, a report, a contract's term). absence: a person is away. task: a piece of work with its duration. milestone: a step of a project. agent_run: an agent or a routine will run.",
+      "enum": ["meeting", "deadline", "absence", "task", "milestone", "agent_run"]
+    },
+    "label": {
+      "description": "What it is, as a person reads it: « Échéance F-2026-0003 », « Réception du matériel ».",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "day": {
+      "description": "A whole day. With `until`, the last day of a span (a leave from the 2nd to the 6th).",
+      "type": "string",
+      "format": "date"
+    },
+    "until": {
+      "description": "The last day of a span that started on `day`.",
+      "type": "string",
+      "format": "date"
+    },
+    "starts_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ends_at": {
+      "description": "When a fact with a moment ends; none for an instant.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "person_ids": {
+      "description": "The people of the center it concerns: who meets, who is away, who must do it.",
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 50,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      }
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^prj_[0-9a-f-]{8,64}$"
+    },
+    "party_id": {
+      "type": "string",
+      "pattern": "^pty_[0-9a-f-]{8,64}$"
+    },
+    "visibility": {
+      "description": "shared (the default): its label is read by whoever may read its project or its people. busy: others see only that the person is taken. private: only the people it concerns see it. An absence is always read without its reason.",
+      "enum": ["shared", "busy", "private"]
+    },
+    "href": {
+      "description": "Where it is read, in the app.",
+      "type": "string",
+      "format": "uri",
+      "maxLength": 600
+    },
+    "cancelled": {
+      "description": "True takes the fact back.",
+      "type": "boolean"
+    }
+  }
+}

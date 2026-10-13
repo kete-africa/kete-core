@@ -561,6 +561,57 @@ keeps her tool, and receives exports. A port for certified invoices waits for it
 
 ---
 
+## Phase 9 — The canvas in modules (decided 2026-10-13)
+
+### Objective
+
+The canvas of every Kete product, validated by the author (version 3.1; doctrine D-050 to D-055),
+built once as reusable modules that the center and every app consume — never a screen written
+twice. Kete Enterprise then rebuilds its places on them (its roadmap, « The method, time and
+memory »), and the four apps behind the center adopt them.
+
+Each module has three layers: a **contract** in `contracts/`; **logic** in plain TypeScript, with
+vendors behind ports (a port ships with an adapter, decision 0009); **components** in `@kete/design`
+or `@kete/shell`. A module enters the core only when two consumers need it.
+
+```mermaid
+flowchart TB
+  L1[L1 · contracts] --> L2[L2 · @kete/shell + design wave 1]
+  L1 --> L3[L3 · @kete/intelligence]
+  L2 --> L3
+  L1 --> L4[L4 · @kete/time]
+  L1 --> L5[L5 · @kete/metrics + @kete/boards]
+  L1 --> L6[L6 · proposal sets, notes, voice]
+  L1 --> L7[L7 · lifecycle of resources, agents' cards]
+  L2 --> L8[L8 · the phone's screens]
+  L3 & L4 & L5 & L6 & L7 & L8 --> E[Kete Enterprise C1, C2, C6, C7, C12 to C14]
+  E --> A[Kete Finance G4 · Kete Team H2 · Kete Commitments I2 · Support J2]
+```
+
+### Specs, in order
+
+| Step | Spec                      | Delivers                                                                                                                                                                               |
+| ---- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| L1   | `099-canvas-contracts`    | The manifest's question, places and metrics; dated facts; metrics; proposal sets; resources and lessons; file links; the stream of a Kete Intelligence turn — validated by `@kete/sdk` |
+| L2   | `100-shell`               | `@kete/shell`: the frame — top bar, places from the manifest, Ctrl K, the drawer, « Noter », sync state, economy mode, the phone's tab bar — and the design's first wave of parts      |
+| L3   | `101-intelligence`        | `@kete/intelligence`: the drawer of Kete Intelligence, extracted from Kete Enterprise's chat; one stream from `@kete/agents`; the template's page `/demander` replaced by the drawer   |
+| L4   | `102-time`                | `@kete/time`: dated facts, conflicts and free slots computed by code, an external agenda's port with an ICS adapter                                                                    |
+| L5   | `103-metrics-and-boards`  | `@kete/metrics` and `@kete/boards`: figures read under the reader's rights; a board looked at, sent by a routine, frozen as a summary and indexed by choice                            |
+| L6   | `104-proposals-and-voice` | Proposal sets in `@kete/drafts`; a note or a transcript understood by `@kete/ai`; the voice through the dictation port, WhatsApp voice notes included                                  |
+| L7   | `105-lifecycle`           | Lessons from use, test cases, versions, tiers and their review; an agent's card, triggers, budget, six states and autonomy earned by proofs                                            |
+| L8   | `106-phone`               | The phone's own screens in the shell: the morning's pile, the evening's voice, « Terrain » and « Plein soleil »                                                                        |
+
+### Proof
+
+- `[agent]` A generated app is born with the shell, the drawer of Kete Intelligence and its
+  manifest's places; no page `/demander` is left in the template.
+- `[agent]` The center and an app show the same frame, the same drawer and the same cards, from the
+  same packages.
+- `[blocking]` A person at KYA uses the method for a week: the morning's pile, the evening's
+  closure, Planifier.
+
+---
+
 ## Later, when a real need appears
 
 `@kete/ai` (model routing) · phone sign-in by one-time code · additional payment adapters (Moneroo,

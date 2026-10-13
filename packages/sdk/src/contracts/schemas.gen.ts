@@ -132,6 +132,118 @@ export const schemas = {
       }
     }
   },
+  "dated-fact.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/dated-fact.v1.schema.json",
+    "title": "DatedFact",
+    "description": "Something an app says will happen at a time — a meeting, a deadline, an absence, a task, a milestone, an agent's run — so that the center's Planifier shows the time of the whole organization (doctrine D-050). Sent again under the same key, it replaces what was said; sent with `cancelled`, it is taken back. Exactly one of `day` (a whole day) or `starts_at` (a moment) is given.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "key",
+      "kind",
+      "label"
+    ],
+    "oneOf": [
+      {
+        "required": [
+          "day"
+        ],
+        "properties": {
+          "day": true
+        }
+      },
+      {
+        "required": [
+          "starts_at"
+        ],
+        "properties": {
+          "starts_at": true
+        }
+      }
+    ],
+    "properties": {
+      "key": {
+        "description": "The app's own key for this fact: one fact per app and key.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "kind": {
+        "description": "meeting: people meet. deadline: something is due (an invoice, a report, a contract's term). absence: a person is away. task: a piece of work with its duration. milestone: a step of a project. agent_run: an agent or a routine will run.",
+        "enum": [
+          "meeting",
+          "deadline",
+          "absence",
+          "task",
+          "milestone",
+          "agent_run"
+        ]
+      },
+      "label": {
+        "description": "What it is, as a person reads it: « Échéance F-2026-0003 », « Réception du matériel ».",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300
+      },
+      "day": {
+        "description": "A whole day. With `until`, the last day of a span (a leave from the 2nd to the 6th).",
+        "type": "string",
+        "format": "date"
+      },
+      "until": {
+        "description": "The last day of a span that started on `day`.",
+        "type": "string",
+        "format": "date"
+      },
+      "starts_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "ends_at": {
+        "description": "When a fact with a moment ends; none for an instant.",
+        "type": "string",
+        "format": "date-time"
+      },
+      "person_ids": {
+        "description": "The people of the center it concerns: who meets, who is away, who must do it.",
+        "type": "array",
+        "uniqueItems": true,
+        "maxItems": 50,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "project_id": {
+        "type": "string",
+        "pattern": "^prj_[0-9a-f-]{8,64}$"
+      },
+      "party_id": {
+        "type": "string",
+        "pattern": "^pty_[0-9a-f-]{8,64}$"
+      },
+      "visibility": {
+        "description": "shared (the default): its label is read by whoever may read its project or its people. busy: others see only that the person is taken. private: only the people it concerns see it. An absence is always read without its reason.",
+        "enum": [
+          "shared",
+          "busy",
+          "private"
+        ]
+      },
+      "href": {
+        "description": "Where it is read, in the app.",
+        "type": "string",
+        "format": "uri",
+        "maxLength": 600
+      },
+      "cancelled": {
+        "description": "True takes the fact back.",
+        "type": "boolean"
+      }
+    }
+  },
   "delivery-request.v1": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://kete.africa/contracts/delivery-request.v1.schema.json",
@@ -374,6 +486,100 @@ export const schemas = {
       }
     }
   },
+  "file-link.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/file-link.v1.schema.json",
+    "title": "FileLink",
+    "description": "A file an app keeps, said to the center with what it proves: the object it is linked to, its role there, its nature and where it came from. The file stays in the app; the center keeps the link, so that search and the assistant find it across Kete, read under the rights of the linked object. Sent again under the same key, it replaces what was said.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "key",
+      "name",
+      "object",
+      "role"
+    ],
+    "properties": {
+      "key": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "name": {
+        "description": "The file's name, as shown.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300
+      },
+      "object": {
+        "description": "What it is linked to: a record of the app, or a reference of the center.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "role": {
+        "description": "What it proves there, as a person reads it: « bon de commande signé », « justificatif ».",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      },
+      "nature": {
+        "enum": [
+          "receipt",
+          "supplier_invoice",
+          "invoice",
+          "purchase_order",
+          "contract",
+          "statement",
+          "identity",
+          "photo",
+          "other"
+        ]
+      },
+      "origin": {
+        "enum": [
+          "whatsapp",
+          "telegram",
+          "email",
+          "upload",
+          "generated"
+        ]
+      },
+      "project_id": {
+        "type": "string",
+        "pattern": "^prj_[0-9a-f-]{8,64}$"
+      },
+      "party_id": {
+        "type": "string",
+        "pattern": "^pty_[0-9a-f-]{8,64}$"
+      },
+      "keep_until": {
+        "description": "Until when it must be kept (a book-keeping piece: ten years).",
+        "type": "string",
+        "format": "date"
+      },
+      "href": {
+        "type": "string",
+        "format": "uri",
+        "maxLength": 600
+      }
+    }
+  },
   "health.v1": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://kete.africa/contracts/health.v1.schema.json",
@@ -446,6 +652,384 @@ export const schemas = {
             "minimum": 0
           }
         }
+      }
+    }
+  },
+  "intelligence-event.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/intelligence-event.v1.schema.json",
+    "title": "IntelligenceEvent",
+    "description": "One event of a Kete Intelligence turn, streamed from the agents' runtime to the screen: what it is doing now, its plan and each step, each tool it calls with its level, a draft for the person, a source, the answer's text as it is written, a wait for the person, the end or the failure. The same stream is shown in the center and in every app.",
+    "oneOf": [
+      {
+        "$ref": "#/$defs/status"
+      },
+      {
+        "$ref": "#/$defs/plan"
+      },
+      {
+        "$ref": "#/$defs/step"
+      },
+      {
+        "$ref": "#/$defs/tool"
+      },
+      {
+        "$ref": "#/$defs/draft"
+      },
+      {
+        "$ref": "#/$defs/source"
+      },
+      {
+        "$ref": "#/$defs/text"
+      },
+      {
+        "$ref": "#/$defs/waiting"
+      },
+      {
+        "$ref": "#/$defs/done"
+      },
+      {
+        "$ref": "#/$defs/failed"
+      }
+    ],
+    "$defs": {
+      "status": {
+        "title": "IntelligenceStatus",
+        "description": "What it is doing at this instant, in a sentence.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "text"
+        ],
+        "properties": {
+          "type": {
+            "const": "status"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        }
+      },
+      "plan": {
+        "title": "IntelligencePlan",
+        "description": "The steps it intends to take, shown before it acts.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "steps"
+        ],
+        "properties": {
+          "type": {
+            "const": "plan"
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        }
+      },
+      "step": {
+        "title": "IntelligenceStep",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "index",
+          "state"
+        ],
+        "properties": {
+          "type": {
+            "const": "step"
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "state": {
+            "enum": [
+              "running",
+              "done",
+              "skipped"
+            ]
+          }
+        }
+      },
+      "tool": {
+        "title": "IntelligenceTool",
+        "description": "A capability it calls, with its autonomy level and what it gave back, in short.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "id",
+          "name",
+          "level",
+          "state"
+        ],
+        "properties": {
+          "type": {
+            "const": "tool"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "level": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4
+          },
+          "state": {
+            "enum": [
+              "running",
+              "done",
+              "failed"
+            ]
+          },
+          "input": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 300
+          }
+        }
+      },
+      "draft": {
+        "title": "IntelligenceDraft",
+        "description": "A draft prepared for the person, decided in place.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "draft_id",
+          "title"
+        ],
+        "properties": {
+          "type": {
+            "const": "draft"
+          },
+          "draft_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "href": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 600
+          }
+        }
+      },
+      "source": {
+        "title": "IntelligenceSource",
+        "description": "What the answer rests on, opened by a click.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "label"
+        ],
+        "properties": {
+          "type": {
+            "const": "source"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "href": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 600
+          }
+        }
+      },
+      "text": {
+        "title": "IntelligenceText",
+        "description": "A piece of the answer as it is written.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "delta"
+        ],
+        "properties": {
+          "type": {
+            "const": "text"
+          },
+          "delta": {
+            "type": "string",
+            "maxLength": 20000
+          }
+        }
+      },
+      "waiting": {
+        "title": "IntelligenceWaiting",
+        "description": "It stops until the person answers or decides.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "reason"
+        ],
+        "properties": {
+          "type": {
+            "const": "waiting"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        }
+      },
+      "done": {
+        "title": "IntelligenceDone",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "const": "done"
+          },
+          "steps": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tools": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "ms": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "failed": {
+        "title": "IntelligenceFailed",
+        "description": "It stopped; what was read is kept, nothing was changed by the failure.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "reason"
+        ],
+        "properties": {
+          "type": {
+            "const": "failed"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        }
+      }
+    }
+  },
+  "lesson.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/lesson.v1.schema.json",
+    "title": "Lesson",
+    "description": "What the use of a resource taught: a correction, a note, a gap an agent saw. Gathered with consent, it is data, never an instruction; its owner keeps it — it becomes a test case — or drops it (doctrine D-053).",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "resource",
+      "source",
+      "observed",
+      "consent",
+      "state"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^lsn_[0-9A-Za-z_-]{8,64}$"
+      },
+      "resource": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "skill",
+              "agent",
+              "app"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "source": {
+        "description": "correction: a person corrected a draft. note: a person noted it. agent: an agent saw a gap.",
+        "enum": [
+          "correction",
+          "note",
+          "agent"
+        ]
+      },
+      "observed": {
+        "description": "What was seen, as said.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      },
+      "proposal": {
+        "description": "What could change in the resource.",
+        "type": "string",
+        "maxLength": 1000
+      },
+      "case": {
+        "description": "The situation it came from, which becomes a test case if kept.",
+        "type": "string",
+        "maxLength": 1000
+      },
+      "consent": {
+        "description": "The person agreed to share it; nothing confidential travels unless generalized.",
+        "const": true
+      },
+      "state": {
+        "enum": [
+          "waiting",
+          "kept",
+          "dropped"
+        ]
       }
     }
   },
@@ -792,6 +1376,204 @@ export const schemas = {
             ]
           }
         }
+      },
+      "question": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fr",
+          "en"
+        ],
+        "properties": {
+          "fr": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "description": "The question the app answers on its home (optional, added in v1: additive; doctrine D-048): « Combien ai-je vraiment, projet par projet ? »."
+      },
+      "places": {
+        "type": "array",
+        "description": "The places of the app, in the order of its sidebar (optional, added in v1: additive; spec 099). A center or the shell builds the menu and Ctrl K from them; each is opened at the app's address followed by its path.",
+        "maxItems": 40,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "label",
+            "path"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,40}$"
+            },
+            "label": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "fr",
+                "en"
+              ],
+              "properties": {
+                "fr": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "en": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              }
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^/[A-Za-z0-9/_-]*$",
+              "maxLength": 200
+            },
+            "section": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "fr",
+                "en"
+              ],
+              "properties": {
+                "fr": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "en": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "description": "The heading the place sits under."
+            },
+            "icon": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,30}$",
+              "description": "A name of the design's icon set."
+            },
+            "permission": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$",
+              "description": "Shown only to who holds it."
+            }
+          }
+        }
+      },
+      "metrics": {
+        "type": "array",
+        "description": "The figures the app declares (optional, added in v1: additive; spec 099), read at its API under the reader's rights.",
+        "items": {
+          "$ref": "metric.v1.schema.json"
+        }
+      }
+    }
+  },
+  "metric.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/metric.v1.schema.json",
+    "title": "Metric",
+    "description": "A figure an app declares in its manifest, computed by the app's code and read under the reader's rights (doctrine D-052). Boards, the apps' homes and summaries compose metrics; no one writes a query. Its axes are the center's references, so that a filter « project = X » applies to every app's figures at once.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "name",
+      "label",
+      "unit",
+      "better"
+    ],
+    "properties": {
+      "name": {
+        "description": "The app's area, then the figure: « finance.available », « team.absences ».",
+        "type": "string",
+        "maxLength": 100,
+        "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+      },
+      "label": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fr",
+          "en"
+        ],
+        "properties": {
+          "fr": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        }
+      },
+      "description": {
+        "description": "How it is computed, in a sentence a person reads beside « Pourquoi ? ».",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fr",
+          "en"
+        ],
+        "properties": {
+          "fr": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          },
+          "en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          }
+        }
+      },
+      "unit": {
+        "description": "money: in the currency's smallest unit, with its currency. count, days, hours, percent: plain numbers.",
+        "enum": [
+          "money",
+          "count",
+          "days",
+          "hours",
+          "percent"
+        ]
+      },
+      "better": {
+        "description": "Whether a rise is good news (up), bad news (down), or neither (none).",
+        "enum": [
+          "up",
+          "down",
+          "none"
+        ]
+      },
+      "axes": {
+        "description": "What it can be split or filtered by.",
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "enum": [
+            "project",
+            "party",
+            "person",
+            "period"
+          ]
+        }
       }
     }
   },
@@ -868,6 +1650,205 @@ export const schemas = {
         "type": "string",
         "format": "uri",
         "maxLength": 600
+      }
+    }
+  },
+  "proposal-set.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/proposal-set.v1.schema.json",
+    "title": "ProposalSet",
+    "description": "Several things an agent proposes at once — the evening's tidying, a week's plan, what a document said — each ticked or not by the person, applied together by one gesture, and undone together (doctrine D-051). Nothing in it is true until applied: each item names the gesture that will make it true, with its level.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "origin",
+      "for",
+      "items"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^pps_[0-9A-Za-z_-]{8,64}$"
+      },
+      "origin": {
+        "description": "closure: the evening's note. plan: a plan of the day or the week. intake: what was received. agent: an agent's run.",
+        "enum": [
+          "closure",
+          "plan",
+          "intake",
+          "agent"
+        ]
+      },
+      "for": {
+        "description": "The person who decides.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 30,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "key",
+            "gesture",
+            "label",
+            "level"
+          ],
+          "properties": {
+            "key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "gesture": {
+              "description": "postpone, close, block (a time), assign (to a colleague, who may refuse), correct (a record), remind, lesson (proposed to a skill's owner), create.",
+              "enum": [
+                "postpone",
+                "close",
+                "block",
+                "assign",
+                "correct",
+                "remind",
+                "lesson",
+                "create"
+              ]
+            },
+            "label": {
+              "description": "What will happen, as the person reads it.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "reason": {
+              "description": "Why it is proposed, in a sentence.",
+              "type": "string",
+              "maxLength": 300
+            },
+            "level": {
+              "description": "The autonomy level of the gesture that applies it (1 to 4).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4
+            },
+            "capability": {
+              "description": "The capability that applies it, when an app does.",
+              "type": "string",
+              "maxLength": 100
+            },
+            "ticked": {
+              "description": "Whether it is ticked when shown; the person changes it.",
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "resource.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/resource.v1.schema.json",
+    "title": "Resource",
+    "description": "A skill, an agent or an app in its lifecycle: created, used, learning, evaluated, promoted one tier at a time with a review by its risk (doctrine D-053).",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "kind",
+      "id",
+      "name",
+      "owner",
+      "version",
+      "tier"
+    ],
+    "properties": {
+      "kind": {
+        "enum": [
+          "skill",
+          "agent",
+          "app"
+        ]
+      },
+      "id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      },
+      "owner": {
+        "description": "The person who owns it and keeps or drops its lessons.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "version": {
+        "type": "string",
+        "pattern": "^\\d+\\.\\d+(\\.\\d+)?$"
+      },
+      "tier": {
+        "description": "Who may use it: me, my team, my unit, the whole organization.",
+        "enum": [
+          "me",
+          "team",
+          "unit",
+          "organization"
+        ]
+      },
+      "review": {
+        "description": "The review asked to reach the next tier.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "state",
+          "risk"
+        ],
+        "properties": {
+          "state": {
+            "enum": [
+              "asked",
+              "approved",
+              "refused"
+            ]
+          },
+          "risk": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "by": {
+            "description": "The role that reviews.",
+            "type": "string",
+            "maxLength": 100
+          }
+        }
+      },
+      "cases": {
+        "description": "Its test cases, and how many the current version passes.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "total",
+          "passed"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "passed": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
       }
     }
   }

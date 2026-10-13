@@ -285,6 +285,97 @@
           "enum": ["low", "medium", "high", "critical"]
         }
       }
+    },
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fr", "en"],
+      "properties": {
+        "fr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "description": "The question the app answers on its home (optional, added in v1: additive; doctrine D-048): « Combien ai-je vraiment, projet par projet ? »."
+    },
+    "places": {
+      "type": "array",
+      "description": "The places of the app, in the order of its sidebar (optional, added in v1: additive; spec 099). A center or the shell builds the menu and Ctrl K from them; each is opened at the app's address followed by its path.",
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "path"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,40}$"
+          },
+          "label": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fr", "en"],
+            "properties": {
+              "fr": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "en": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            }
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^/[A-Za-z0-9/_-]*$",
+            "maxLength": 200
+          },
+          "section": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fr", "en"],
+            "properties": {
+              "fr": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "en": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "description": "The heading the place sits under."
+          },
+          "icon": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,30}$",
+            "description": "A name of the design's icon set."
+          },
+          "permission": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$",
+            "description": "Shown only to who holds it."
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "description": "The figures the app declares (optional, added in v1: additive; spec 099), read at its API under the reader's rights.",
+      "items": {
+        "$ref": "metric.v1.schema.json"
+      }
     }
   }
 }
