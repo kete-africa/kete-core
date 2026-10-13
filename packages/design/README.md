@@ -99,24 +99,29 @@ The page chooses its design and mode on `<html>`:
 
 ## Components
 
-| Component                                           | For                                                                                     |
-| --------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `Button`, `IconButton`, `TextField`, `Tag`, `Panel` | Controls; a field filled by an agent and uncertain says where it comes from             |
-| `Dialog`                                            | A modal dialog with its named close button; Escape and a click outside close it         |
-| `VerificationCard`                                  | A draft prepared by the agent, each field with its provenance, and the decision's trace |
-| `AgentState`                                        | Prepared (empty square), corrected, verified, refused (filled: a person decided)        |
-| `ConfirmDialog`                                     | The confirmation of an irreversible gesture (autonomy level 4)                          |
-| `UndoNotice`                                        | What an agent did reversibly, with « Annuler » (level 2)                                |
-| `EmptyState`                                        | An empty page: what will be here, the gesture that fills it                             |
-| `Shell`, `NavSection`, `NavItem`, `Icon`            | The workspace frame: collapsible sidebar, toolbar, line icons                           |
-| `CountBadge`, `TabBar`, `TabBarItem`                | What waits, as a count; the phone's bar of tabs, its raised « ask » in the middle       |
-| `CommandTrigger`, `CommandPalette`                  | Ctrl K: one field to search, ask and act (cmdk), the answer under it with its sources   |
-| `PageTitle`, `PageSection`, `AppGrid`, `AppCard`    | The page: its title, sections, the company's apps (featured, row, list)                 |
-| `Chip`, `ChipGroup`, `Menu`, `SearchField`          | Filters by category, menus, the search field                                            |
-| `Swatches`                                          | The client's colors, at the bottom of the sidebar                                       |
-| `KeteMark`, `KeteBand`                              | The marks of the `kete` design, in Kete's own palette                                   |
+| Component                                           | For                                                                                                                             |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `Button`, `IconButton`, `TextField`, `Tag`, `Panel` | Controls; a field filled by an agent and uncertain says where it comes from                                                     |
+| `Dialog`                                            | A modal dialog with its named close button; Escape and a click outside close it                                                 |
+| `VerificationCard`                                  | A draft prepared by the agent, each field with its provenance, and the decision's trace                                         |
+| `AgentState`                                        | Prepared (empty square), corrected, verified, refused (filled: a person decided)                                                |
+| `ConfirmDialog`                                     | The confirmation of an irreversible gesture (autonomy level 4)                                                                  |
+| `UndoNotice`                                        | What an agent did reversibly, with « Annuler » (level 2)                                                                        |
+| `EmptyState`                                        | An empty page: what will be here, the gesture that fills it                                                                     |
+| `Shell`, `NavSection`, `NavItem`, `Icon`            | The workspace frame: collapsible sidebar, toolbar, line icons                                                                   |
+| `CountBadge`, `TabBar`, `TabBarItem`                | What waits, as a count; the phone's bar of tabs, its raised « ask » in the middle                                               |
+| `CommandTrigger`, `CommandPalette`                  | Ctrl K: one field to search, ask and act (cmdk), the answer under it with its sources                                           |
+| `PageTitle`, `PageSection`, `AppGrid`, `AppCard`    | The page: its title, sections, the company's apps (featured, row, list)                                                         |
+| `Chip`, `ChipGroup`, `Menu`, `SearchField`          | Filters by category, menus, the search field                                                                                    |
+| `Swatches`                                          | The client's colors, at the bottom of the sidebar                                                                               |
+| `KeteMark`, `KeteBand`                              | The marks of the `kete` design, in Kete's own palette                                                                           |
+| `DecisionCard`                                      | A decision waiting for a person: its amount, who asks, its evidence, what it changes, its gestures and « Comment ? » (spec 100) |
+| `Mention`                                           | An object named anywhere, with its card on hover and the color of its app (spec 100)                                            |
+| `AgentRunState`                                     | An agent's six states — asleep, working, waiting, blocked, paused, stopped — the same marks everywhere (D-045)                  |
+| `KpiTile` with `why`                                | A figure with « Pourquoi ? » under it (D-045, rule 4)                                                                           |
 
-Every visible string comes from the app's translation catalogs, through props.
+Every visible string comes from the app's translation catalogs, through props. The frame that
+assembles these parts from an app's manifest is `@kete/shell`.
 
 ### The shell of Kete 2026
 

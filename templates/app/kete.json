@@ -13,5 +13,29 @@
       "purpose": "Answers questions with the readings the person may open (« Demander »), when a model is configured."
     },
     "criticality": "low"
-  }
+  },
+  "question": {
+    "fr": "Que reste-t-il à faire ?",
+    "en": "What is left to do?"
+  },
+  "places": [
+    {
+      "id": "tasks",
+      "label": {
+        "fr": "Tâches",
+        "en": "Tasks"
+      },
+      "path": "/taches",
+      "icon": "check"
+    },
+    {
+      "id": "journal",
+      "label": {
+        "fr": "Journal",
+        "en": "Journal"
+      },
+      "path": "/journal",
+      "icon": "clock"
+    }
+  ]
 }

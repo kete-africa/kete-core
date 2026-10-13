@@ -57,9 +57,15 @@ const iconPaths = {
   external: 'M14 4h6v6M20 4l-9 9M18 14v6H4V6h6',
   menu: 'M4 6h16M4 12h16M4 18h16',
   clock: 'M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',
+  pen: 'M4 20h4L19 9l-4-4L4 16zM14 6l4 4',
 } as const;
 
 export type IconName = keyof typeof iconPaths;
+
+/** Whether a name read from data (an app's manifest) is one of the icons. */
+export function isIconName(name: string): name is IconName {
+  return Object.hasOwn(iconPaths, name);
+}
 
 /** The workspace's line icons: 1.4 px strokes, the color of the text. */
 export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
