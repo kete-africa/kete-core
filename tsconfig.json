@@ -87,6 +87,9 @@
     },
     {
       "path": "packages/shell"
+    },
+    {
+      "path": "packages/intelligence"
     }
   ]
 }

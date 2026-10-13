@@ -200,7 +200,7 @@ describe('a turn of an agent', () => {
 });
 
 describe('the same turn as it happens', () => {
-  it('gives the words as they come, each call with what became of it, then the usage', async () => {
+  it('gives the words as they come, each call as it starts and what became of it, then the usage', async () => {
     let step = 0;
     const model = new MockLanguageModelV4({
       doStream: () => {
@@ -244,6 +244,7 @@ describe('the same turn as it happens', () => {
       events.push(event);
     }
     expect(events).toEqual([
+      { type: 'calling', name: 'money_month' },
       {
         type: 'call',
         name: 'money_month',

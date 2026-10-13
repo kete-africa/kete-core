@@ -838,8 +838,9 @@ export const schemas = {
           },
           "href": {
             "type": "string",
-            "format": "uri",
-            "maxLength": 600
+            "format": "uri-reference",
+            "maxLength": 600,
+            "description": "Where it is opened: an address of the product, relative to its own screens, or absolute."
           }
         }
       },
@@ -863,8 +864,9 @@ export const schemas = {
           },
           "href": {
             "type": "string",
-            "format": "uri",
-            "maxLength": 600
+            "format": "uri-reference",
+            "maxLength": 600,
+            "description": "Where it is opened: an address of the product, relative to its own screens, or absolute."
           }
         }
       },

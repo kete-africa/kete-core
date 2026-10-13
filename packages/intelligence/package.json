@@ -1,0 +1,49 @@
+{
+  "name": "@kete-africa/intelligence",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete Intelligence (spec 101): a turn of the agents' runtime streamed as the contract intelligence-event.v1, and the drawer that shows it — its status, plan, each capability with its level, the words as they come, drafts, sources, « Arrêter » — the same in the center and in every app.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/intelligence"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      },
+      "./server": {
+        "types": "./dist/src/server.d.ts",
+        "default": "./dist/src/server.js"
+      }
+    }
+  },
+  "dependencies": {
+    "@kete/agents": "workspace:@kete-africa/agents@*",
+    "@kete/design": "workspace:@kete-africa/design@*",
+    "@kete/sdk": "workspace:@kete-africa/sdk@*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0"
+  }
+}
