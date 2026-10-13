@@ -1,5 +1,13 @@
 # @kete-africa/ai
 
+## 0.4.0
+
+### Minor Changes
+
+- `intake`: what was received — a message, a photo, a voice note, a document — is read into a
+  record's fields, each with its source, its certainty and the passage it was read in; what the
+  source does not say is left empty, and the required fields to type are said (spec 098).
+
 ## 0.3.0
 
 ### Minor Changes

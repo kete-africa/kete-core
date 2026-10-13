@@ -8,6 +8,7 @@ import { transaction } from '@/platform/db';
 import { registry } from '@/platform/registry';
 import { holds } from '@/platform/rights';
 import { personOf } from '@/platform/session';
+import { readIntoDraft } from '@/platform/intake';
 import { perform, ScreenError, signedIn } from '@/platform/screen';
 import { reopenTask } from './commands/complete-task';
 import { findTask, listTasks } from './infrastructure/task.table';
@@ -24,6 +25,8 @@ export interface ReviewScreen {
     title: string;
     value: string;
     source: string | null;
+    /** The passage it was read in, when it was read from what was received. */
+    quote: string | null;
     uncertain: boolean;
   }[];
 }
@@ -42,6 +45,7 @@ function toScreen(review: DraftReview): ReviewScreen {
         title: properties[key]?.title ?? key,
         value: value === null || value === undefined ? '' : String(value),
         source: provenance?.source ?? null,
+        quote: provenance?.quote ?? null,
         uncertain: provenance?.certainty === 'low',
       };
     }),
@@ -80,6 +84,45 @@ export const addTask = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const outcome = await perform('tasks_create', data);
     return outcome.ok ? { ok: true as const } : { ok: false as const, code: outcome.code };
+  });
+
+/**
+ * A task from what was received — a message pasted, a photo of a note (kete-core spec 098): read
+ * into a draft she verifies. What it does not give comes back for her to type.
+ */
+export const readTask = createServerFn({ method: 'POST' })
+  .validator((input: unknown) =>
+    z
+      .union([
+        z.object({ text: z.string().trim().min(1).max(4000) }),
+        z.object({
+          photo: z.object({
+            base64: z.string().min(1).max(8_000_000),
+            contentType: z.string().regex(/^image\/[a-z0-9.+-]+$/),
+          }),
+        }),
+      ])
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { identity, as } = await signedIn();
+    return as(async () => {
+      if (!holds('tasks:read')) throw new ScreenError('forbidden');
+      return readIntoDraft({
+        identity,
+        capability: 'tasks_create',
+        schema: taskInput,
+        source:
+          'text' in data
+            ? { kind: 'message', text: data.text }
+            : {
+                kind: 'photo',
+                data: Uint8Array.from(Buffer.from(data.photo.base64, 'base64')),
+                contentType: data.photo.contentType,
+              },
+        context: 'A task: what is to be done, and by when.',
+      });
+    });
   });
 
 export const setTaskDone = createServerFn({ method: 'POST' })

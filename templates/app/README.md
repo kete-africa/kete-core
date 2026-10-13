@@ -28,6 +28,7 @@ flowchart LR
 | The roles of its trade: a member holds what her business role holds, as the owner ticked it | `src/platform/rights.ts`, migration `0004`              | `@kete/capabilities`                                 |
 | A gesture whose broken rule comes back as its code, said in words                           | `src/platform/screen.ts`, `src/lib/errors.ts`           | `@kete/capabilities` (`performGesture`, `RuleError`) |
 | « Demander »: a question answered with the readings she may open, nothing changed           | `src/features/assistant`, `/demander`                   | `@kete/agents`                                       |
+| Intake: a message or a photo read into a draft, every field with where it comes from        | `src/platform/intake.ts`, `/taches`, `/verification`    | `@kete/ai` (`intake`), `@kete/drafts`                |
 | WhatsApp and Telegram: its own senders, consent, words, delivery, webhooks                  | `src/platform/chat.ts`, `/api/chat/*`, migration `0005` | `@kete/notify`                                       |
 | Usage per organization, daily counts to Kete Cockpit                                        | `src/platform/usage.ts`, migration `0007`               | `@kete/analytics`                                    |
 | Logs: JSON lines, redacted, traced                                                          | `src/platform/log.ts`                                   | `@kete/log`                                          |

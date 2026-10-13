@@ -24,7 +24,15 @@ const draft = await prepareDraft(tx, {
   recordType: 'quote',
   definition: quote, // @kete/records: values checked against the schema (a draft may be incomplete)
   values: { client: 'Ama', total: { amount: 50000, currency: 'XOF' } },
-  provenance: { client: { source: 'voice', by: agent, certainty: 'medium', evidence: fileId } },
+  provenance: {
+    client: {
+      source: 'voice',
+      by: agent,
+      certainty: 'medium',
+      evidence: fileId,
+      quote: 'pour Ama',
+    },
+  },
 });
 
 // The verification link opens the draft; the person corrects, then validates:
