@@ -73,6 +73,79 @@ export interface CenterDecision {
   reason: string | null;
 }
 
+/** A third party as the center holds it (Kete Enterprise spec 073): one record, cited by its id. */
+export interface CenterParty {
+  partyId: string;
+  kind: 'company' | 'person';
+  name: string;
+  roles: ('client' | 'supplier' | 'funder' | 'partner')[];
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  registration: string | null;
+  channel: 'whatsapp' | 'telegram' | 'email' | 'phone' | null;
+  /** The records merged into this one: an app that kept one of them moves to `partyId`. */
+  mergedFrom: string[];
+}
+
+/** What the app knows of a third party, shown on its record in the center. */
+export interface PartyFact {
+  /** The app's own key: said again, it is replaced. */
+  key: string;
+  label: string;
+  state?: string | null;
+  href?: string | null;
+}
+
+/** A project as the center holds it (Kete Enterprise spec 074). */
+export interface CenterProject {
+  projectId: string;
+  name: string;
+  party: { partyId: string; name: string } | null;
+  lead: { userId: string; name: string };
+  status: 'open' | 'delivered' | 'closed';
+  phase: string | null;
+  /** In the currency's smallest unit (`@kete/money`). */
+  sold: number | null;
+  currency: string;
+  team: { userId: string; name: string; lead: boolean }[];
+  posts: { postId: string; name: string; budget: number }[];
+  budget: number;
+}
+
+/** A project an app opens from its own document: asked twice, it is the same project. */
+export interface ProjectOpened {
+  name: string;
+  /** The app's document it is born from: a won quote's reference. */
+  reference: string;
+  partyId?: string;
+  lead?: { userId: string; name: string };
+  sold?: number;
+  currency?: string;
+  /** The document's lines, as the posts of its budget; two lines on one post add up. */
+  posts?: { name: string; budget: number }[];
+}
+
+/**
+ * A fact of money (contract `money-fact.v1`): said again under its key, it replaces what was
+ * said — an invoice's amount is what is still due, a commitment's what is still to pay.
+ */
+export interface MoneyFact {
+  key: string;
+  kind: 'invoiced' | 'received' | 'committed' | 'spent';
+  /** In the currency's smallest unit: an integer, never negative. */
+  amount: number;
+  currency: string;
+  /** The day it became true, `2026-10-13`. */
+  occurredOn: string;
+  label: string;
+  projectId?: string;
+  /** The post of the project's budget it counts against, by its name. */
+  post?: string;
+  partyId?: string;
+  href?: string;
+}
+
 export interface CenterOptions {
   /** The center's API, `https://api.enterprise.example`; empty when the app works alone. */
   url: string | null | undefined;
@@ -120,6 +193,37 @@ export interface Center {
     organizationId: string,
     requestId: string,
   ): Promise<CenterDecision | null>;
+  /** The third parties she may read, found by name or phone; none without a center. */
+  parties(token: string | null | undefined, query?: string): Promise<CenterParty[]>;
+  /**
+   * A third party by its identifier, with the record that stays when it was merged: compare
+   * `partyId` with what was asked. Null when she may not read it.
+   */
+  party(token: string | null | undefined, partyId: string): Promise<CenterParty | null>;
+  /** Says what this app knows of a third party; `null` takes it back. */
+  sayOfParty(
+    token: string | null | undefined,
+    partyId: string,
+    fact: PartyFact | { key: string; gone: true },
+  ): Promise<void>;
+  /** The projects she belongs to — or all of them, when she reads them all. */
+  projects(token: string | null | undefined): Promise<CenterProject[]>;
+  /** A project of hers; null when she is outside it. */
+  project(token: string | null | undefined, projectId: string): Promise<CenterProject | null>;
+  /** The identifiers of the projects she belongs to: what the app filters her view by. */
+  myProjectIds(token: string | null | undefined): Promise<string[]>;
+  /** Opens a project from the app's own document, once: asked again, the same project answers. */
+  openProject(
+    token: string | null | undefined,
+    project: ProjectOpened,
+  ): Promise<{ ok: true; project: CenterProject; created: boolean } | { ok: false; error: string }>;
+  /** Says a fact of money to the center, in the contract's shape; said again, it is replaced. */
+  sendMoneyFact(
+    token: string | null | undefined,
+    fact: MoneyFact,
+  ): Promise<{ ok: boolean; error: string | null }>;
+  /** Takes a fact of money back: it was not true. */
+  dropMoneyFact(token: string | null | undefined, key: string): Promise<void>;
   /** Sends an indicator's reading for her quarter's review. */
   sendReading(
     token: string | null | undefined,
@@ -219,6 +323,84 @@ export function createCenter(options: CenterOptions): Center {
       return value;
     },
 
+    async parties(token, query) {
+      const found = await read<{ parties: CenterParty[] }>(
+        token,
+        `/v1/parties${query ? `?q=${encodeURIComponent(query)}` : ''}`,
+      );
+      return found?.parties ?? [];
+    },
+
+    async party(token, partyId) {
+      const found = await read<{ party: CenterParty }>(
+        token,
+        `/v1/parties/${encodeURIComponent(partyId)}`,
+      );
+      return found?.party ?? null;
+    },
+
+    async sayOfParty(token, partyId, fact) {
+      if (!token) return;
+      const path = `/v1/parties/${encodeURIComponent(partyId)}/facts`;
+      if ('gone' in fact) {
+        await post(token, `${path}/drop`, { source: options.source, key: fact.key });
+      } else {
+        await post(token, path, { ...fact, source: options.source });
+      }
+    },
+
+    async projects(token) {
+      return (await read<{ projects: CenterProject[] }>(token, '/v1/projects'))?.projects ?? [];
+    },
+
+    async project(token, projectId) {
+      const found = await read<{ project: CenterProject }>(
+        token,
+        `/v1/projects/${encodeURIComponent(projectId)}`,
+      );
+      return found?.project ?? null;
+    },
+
+    async myProjectIds(token) {
+      return (await read<{ projectIds: string[] }>(token, '/v1/projects/mine'))?.projectIds ?? [];
+    },
+
+    async openProject(token, project) {
+      if (!base) return { ok: false, error: 'not_connected' };
+      if (!token) return { ok: false, error: 'signed_out' };
+      const { reference, ...rest } = project;
+      const response = await post(token, '/v1/projects', {
+        ...rest,
+        bornFrom: { source: options.source, ref: reference },
+      });
+      if (!response) return { ok: false, error: 'unreachable' };
+      const answer = (await response.json().catch(() => ({}))) as {
+        project?: CenterProject;
+        created?: boolean;
+        error?: string;
+      };
+      return response.ok && answer.project
+        ? { ok: true, project: answer.project, created: answer.created === true }
+        : { ok: false, error: answer.error ?? `http_${response.status}` };
+    },
+
+    async sendMoneyFact(token, fact) {
+      if (!base) return { ok: false, error: 'not_connected' };
+      if (!token) return { ok: false, error: 'signed_out' };
+      const response = await post(token, '/v1/money/facts', {
+        source: options.source,
+        fact: moneyFactBody(fact),
+      });
+      if (!response) return { ok: false, error: 'unreachable' };
+      if (response.ok) return { ok: true, error: null };
+      const answer = (await response.json().catch(() => ({}))) as { error?: string };
+      return { ok: false, error: answer.error ?? `http_${response.status}` };
+    },
+
+    async dropMoneyFact(token, key) {
+      if (token) await post(token, '/v1/money/facts/drop', { source: options.source, key });
+    },
+
     async sendTask(token, task) {
       if (token) await post(token, '/v1/workspace/tasks', { ...task, source: options.source });
     },
@@ -239,6 +421,22 @@ export function createCenter(options: CenterOptions): Center {
       const answer = (await response.json().catch(() => ({}))) as { error?: string };
       return { ok: false, error: answer.error ?? `http_${response.status}` };
     },
+  };
+}
+
+/** A fact of money in its contract's shape (`contracts/money-fact.v1.schema.json`). */
+export function moneyFactBody(fact: MoneyFact): Record<string, unknown> {
+  return {
+    key: fact.key,
+    kind: fact.kind,
+    amount: fact.amount,
+    currency: fact.currency,
+    occurred_on: fact.occurredOn,
+    label: fact.label,
+    ...(fact.projectId ? { project_id: fact.projectId } : {}),
+    ...(fact.post ? { post: fact.post } : {}),
+    ...(fact.partyId ? { party_id: fact.partyId } : {}),
+    ...(fact.href ? { href: fact.href } : {}),
   };
 }
 

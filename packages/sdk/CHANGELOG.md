@@ -1,5 +1,13 @@
 # @kete-africa/sdk
 
+## 0.7.0
+
+### Minor Changes
+
+- The center's references and the facts of money: `@kete/center` reads third parties and projects
+  with the person's token, opens a project from the app's own document, and says a fact of money in
+  the shape of the new contract `money-fact.v1`, which `@kete/sdk` validates (`validateMoneyFact`).
+
 ## 0.6.0
 
 ### Minor Changes

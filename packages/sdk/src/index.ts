@@ -23,6 +23,7 @@ export {
   validateDeliveryResult,
   validateEvent,
   validateHealthReport,
+  validateMoneyFact,
   validateManifest,
   type ValidationResult,
 } from './contracts/validate.js';

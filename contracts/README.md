@@ -14,6 +14,7 @@ if the generated code no longer matches (`pnpm contracts:check`).
 | `health.v1.schema.json`           | An app's health report (`GET /health`)                                                                                                                                                                                     |
 | `capability.v1.schema.json`       | What an app exposes to agents, with its autonomy level (1 to 4)                                                                                                                                                            |
 | `dataset.v1.schema.json`          | A set of rows an app exposes to dashboards, the assistant and other apps, under the reader's rights                                                                                                                        |
+| `money-fact.v1.schema.json`       | A fact of money an app says to its center — invoiced, received, committed, spent — with its amount in the smallest unit, its project, its budget post and its third party                                                  |
 
 Signature headers (outside the JSON body): `Kete-Product: <product id>` and
 `Kete-Signature: t=<unix seconds>,kid=<key id>,v1=<hex HMAC-SHA256 of "{t}.{raw body}">`.

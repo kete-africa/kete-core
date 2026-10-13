@@ -34,6 +34,8 @@ export const validateCapability = validator(`${base}capability.v1.schema.json`);
 export const validateDataset = validator(`${base}dataset.v1.schema.json`);
 export const validateManifest = validator(`${base}manifest.v1.schema.json`);
 export const validateHealthReport = validator(`${base}health.v1.schema.json`);
+/** A fact of money an app says to its center (doctrine D-049). */
+export const validateMoneyFact = validator(`${base}money-fact.v1.schema.json`);
 export const validateDeliveryRequest = validator(`${base}delivery-request.v1.schema.json`);
 export const validateDeliveryResult = validator(`${base}delivery-result.v1.schema.json`);
 

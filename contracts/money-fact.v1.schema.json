@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/money-fact.v1.schema.json",
+  "title": "MoneyFact",
+  "description": "A fact of money an app says to its center, with the token of the person who made it true. Sent again under the same key, it replaces what was said: an app keeps the amount of an invoice at what is still due, and of a commitment at what is still to pay. The center adds the facts up by project; it executes no payment and keeps no ledger.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["key", "kind", "amount", "currency", "occurred_on", "label"],
+  "properties": {
+    "key": {
+      "description": "The app's own key for this fact: one fact per app and key.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "kind": {
+      "description": "invoiced: asked of a third party and still due. received: money that came in. committed: promised to a third party and still to pay (an order placed, a pay due). spent: money that went out.",
+      "enum": ["invoiced", "received", "committed", "spent"]
+    },
+    "amount": {
+      "description": "In the currency's smallest unit (francs for XOF, cents for EUR): an integer, never negative.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "currency": {
+      "description": "ISO 4217.",
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "occurred_on": {
+      "description": "The day it became true.",
+      "type": "string",
+      "format": "date"
+    },
+    "label": {
+      "description": "What it is, as a person reads it: « Facture F-0412 », « Bon de commande BC-0031 ».",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "project_id": {
+      "description": "The project of the center it belongs to; none for the organization's own running.",
+      "type": "string",
+      "pattern": "^prj_[0-9a-f-]{8,64}$"
+    },
+    "post": {
+      "description": "The post of the project's budget it counts against, by its name.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "party_id": {
+      "description": "The third party of the center it concerns.",
+      "type": "string",
+      "pattern": "^pty_[0-9a-f-]{8,64}$"
+    },
+    "href": {
+      "description": "Where the piece that proves it is read, in the app.",
+      "type": "string",
+      "format": "uri",
+      "maxLength": 600
+    }
+  }
+}

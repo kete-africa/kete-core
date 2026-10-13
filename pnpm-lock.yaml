@@ -469,7 +469,11 @@ importers:
         specifier: 2.3.0
         version: 2.3.0
 
-  packages/center: {}
+  packages/center:
+    devDependencies:
+      '@kete/sdk':
+        specifier: workspace:@kete-africa/sdk@*
+        version: link:../sdk
 
   packages/commands:
     dependencies:

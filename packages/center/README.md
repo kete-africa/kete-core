@@ -48,3 +48,43 @@ organizationId, requestId)` (Kete Enterprise spec 023).
 - **Grants** feed `createRights` of `@kete/capabilities`: until the organization manages the app's
   rights at the center (`managed: false`), the app keeps its defaults.
 - **Never a secret in a cache key**: grants are kept per token's SHA-256, five minutes at most.
+
+## References and money (spec 096)
+
+The center holds the references every app cites — third parties and projects (doctrine D-047) —
+and adds up the facts of money the apps say (D-049).
+
+```ts
+// A third party: a merged identifier answers with the record that stays.
+const party = await center.party(token, invoice.partyId);
+if (party && party.partyId !== invoice.partyId) await repoint(invoice, party.partyId);
+await center.sayOfParty(token, party.partyId, {
+  key: 'F-0412',
+  label: 'Facture F-0412',
+  state: 'Due',
+});
+
+// A project, opened once from this app's own document.
+const opened = await center.openProject(token, {
+  name: 'Chantier Garage Bè',
+  reference: 'D-0081',
+  sold: 2_480_000,
+  posts: [{ name: 'Matériel', budget: 1_450_000 }],
+});
+
+// A fact of money, in the shape of contracts/money-fact.v1.schema.json.
+await center.sendMoneyFact(token, {
+  key: 'BC-0031',
+  kind: 'committed',
+  amount: 700_000, // the smallest unit, @kete/money
+  currency: 'XOF',
+  occurredOn: '2026-10-09',
+  label: 'Bon de commande BC-0031',
+  projectId: opened.ok ? opened.project.projectId : undefined,
+  post: 'Matériel',
+});
+```
+
+- A fact said again under its key **replaces** itself: keep an invoice at what is still due, a
+  commitment at what is still to pay; `dropMoneyFact` takes one back.
+- Without a center, reads answer nothing and gestures say `not_connected`: the app goes on.
