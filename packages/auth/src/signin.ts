@@ -6,7 +6,8 @@ import {
   type KeteRole,
   type TokenVerifier,
 } from './verify.js';
-import { plansClaim, planToClaim } from './plans.js';
+import { plansClaim } from './plans.js';
+import { signSession } from './session.js';
 
 export interface SignInOptions {
   /** The Compte Kete's public origin, e.g. https://compte.kete.africa */
@@ -209,29 +210,10 @@ export function createKeteSignIn(options: SignInOptions): KeteSignIn {
       const lifetime = options.keepAccessToken
         ? Math.max(0, Math.min(ttl, Math.floor((identity.expiresAt.getTime() - Date.now()) / 1000)))
         : ttl;
-      const session = await new SignJWT({
-        email: identity.email,
-        name: identity.name,
-        org: identity.organizationId,
-        role: identity.role,
-        apps: Object.fromEntries(
-          Object.entries(identity.apps).map(([app, until]) => [app, until.toISOString()]),
-        ),
-        ...(identity.plans
-          ? {
-              plans: Object.fromEntries(
-                Object.entries(identity.plans).map(([app, plan]) => [app, planToClaim(plan)]),
-              ),
-            }
-          : {}),
-        two_factor: identity.twoFactor,
-        ...(options.keepAccessToken ? { at: accessToken } : {}),
-      })
-        .setProtectedHeader({ alg: 'HS256' })
-        .setSubject(identity.userId)
-        .setIssuedAt()
-        .setExpirationTime(`${lifetime}s`)
-        .sign(key);
+      const session = await signSession(options.sessionSecret, identity, {
+        seconds: lifetime,
+        ...(options.keepAccessToken && accessToken ? { accessToken } : {}),
+      });
       return redirect(flow.returnTo, [
         cookie(cookieName, session, lifetime),
         cookie(flowCookie, '', 0),

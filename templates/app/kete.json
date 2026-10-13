@@ -2,14 +2,15 @@
   "product": "prd_app_template",
   "name": "App template",
   "version": "0.1.0",
-  "events": [],
+  "events": ["metrics.daily"],
   "governance": {
     "owner": {
       "name": "Kete"
     },
     "dataCategories": ["personal"],
     "ai": {
-      "used": false
+      "used": true,
+      "purpose": "Answers questions with the readings the person may open (« Demander »), when a model is configured."
     },
     "criticality": "low"
   }

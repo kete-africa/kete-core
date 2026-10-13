@@ -74,5 +74,22 @@
   "perm_tasks_create": "Ajouter des tâches",
   "perm_tasks_create_body": "Créer une tâche pour l’organisation.",
   "perm_journal_read": "Lire le journal",
-  "perm_journal_read_body": "Voir qui a fait quoi dans l’app, agents compris."
+  "perm_journal_read_body": "Voir qui a fait quoi dans l’app, agents compris.",
+  "nav_ask": "Demander",
+  "ask_title": "Demander",
+  "ask_intro": "Posez une question : l’assistant répond avec ce que vous pouvez consulter, et ne change rien.",
+  "ask_question": "Votre question",
+  "ask_send": "Demander",
+  "ask_pending": "Réponse en cours…",
+  "ask_you": "Vous",
+  "ask_assistant": "Assistant",
+  "ask_sources": "D’où cela vient : {sources}",
+  "ask_not_connected": "Aucun modèle n’est connecté : l’assistant ne peut pas répondre.",
+  "ask_budget_spent": "Le budget d’IA de ce mois est épuisé.",
+  "errors_not_allowed": "Vous n’avez pas le droit de faire cela. Demandez-le au propriétaire.",
+  "errors_invalid_input": "Ce qui a été saisi ne convient pas. Vérifiez les champs.",
+  "errors_not_found": "Cet élément n’existe plus.",
+  "errors_already_done": "C’est déjà fait.",
+  "errors_not_done": "Ce n’est pas encore fait.",
+  "errors_generic": "Ce geste n’a pas pu aboutir. Rien n’a été modifié."
 }

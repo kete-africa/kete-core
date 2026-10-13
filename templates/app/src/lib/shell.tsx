@@ -31,6 +31,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link to="/taches" className="text-body-sm font-semibold text-fg-muted hover:text-fg">
               {m.nav_tasks()}
             </Link>
+            <Link to="/demander" className="text-body-sm font-semibold text-fg-muted hover:text-fg">
+              {m.nav_ask()}
+            </Link>
             <Link to="/journal" className="text-body-sm font-semibold text-fg-muted hover:text-fg">
               {m.nav_journal()}
             </Link>
