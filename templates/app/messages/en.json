@@ -74,5 +74,22 @@
   "perm_tasks_create": "Add tasks",
   "perm_tasks_create_body": "Create a task for the organization.",
   "perm_journal_read": "Read the journal",
-  "perm_journal_read_body": "See who did what in the app, agents included."
+  "perm_journal_read_body": "See who did what in the app, agents included.",
+  "nav_ask": "Ask",
+  "ask_title": "Ask",
+  "ask_intro": "Ask a question: the assistant answers with what you may read, and changes nothing.",
+  "ask_question": "Your question",
+  "ask_send": "Ask",
+  "ask_pending": "Answering…",
+  "ask_you": "You",
+  "ask_assistant": "Assistant",
+  "ask_sources": "Where it comes from: {sources}",
+  "ask_not_connected": "No model is connected: the assistant cannot answer.",
+  "ask_budget_spent": "This month’s AI budget is spent.",
+  "errors_not_allowed": "You may not do this. Ask the owner.",
+  "errors_invalid_input": "What was entered does not fit. Check the fields.",
+  "errors_not_found": "This no longer exists.",
+  "errors_already_done": "It is already done.",
+  "errors_not_done": "It is not done yet.",
+  "errors_generic": "This could not be done. Nothing was changed."
 }

@@ -40,6 +40,17 @@ export {
   type DatasetRead,
   type DatasetRegistry,
 } from './datasets.js';
+export {
+  assignBusinessRole,
+  businessDefaults,
+  businessRoleDecisions,
+  businessRoleOf,
+  businessRolesMigrationSql,
+  decideBusinessPermission,
+  permissionsOfBusinessRole,
+  type BusinessRolesMigrationOptions,
+} from './business-roles.js';
+export { performGesture, RuleError, type Outcome } from './gesture.js';
 export { createHttpApi, type HttpApiOptions } from './http.js';
 export {
   createRights,

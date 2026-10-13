@@ -416,7 +416,7 @@ Enterprise carries the center (its roadmap, steps C1 to C11), Kete Cockpit the f
 | B4   | `090-memory-and-evals` (done)  | Memory with its governance (consent, retention, erasure, journal), evaluations of models and agents, the rule that a turn which read outside content triggers no action without a person, a dictation port  | A memory erased never comes back; an evaluation fails a worse prompt    |
 | B5   | `091-log-and-analytics` (done) | `@kete/log`: structured logs, traces and errors behind a port. `@kete/analytics`: usage events per organization, in Postgres, read by Kete Cockpit                                                          | Kete Cockpit shows who uses what, per organization                      |
 | B6   | `092-plans-and-limits` (done)  | Offers with limits in the Compte Kete (people, AI budget, storage, connected apps, agents), read by every app; a trial that ends                                                                            | An app refuses a costly gesture beyond the limit and stays readable     |
-| B7   | `093-template-complete`        | The template born with what Nettio had to write (`kete-core#86`): the assistant, messaging, the missing form fields, business roles, a gesture that returns a rule's code, the browser test session         | A generated app has them and passes CI on its first commit              |
+| B7   | `093-template-complete` (done) | The template born with what Nettio had to write (`kete-core#86`): the assistant, messaging, the missing form fields, business roles, a gesture that returns a rule's code, the browser test session         | A generated app has them and passes CI on its first commit              |
 
 B1 is proven: Nettio deleted its two adapters and runs on the chassis' own (`kete-africa/nettio#34`,
 its 66 messaging, manager, statement and assistant tests passing); Firmo has the issue
@@ -446,6 +446,11 @@ B6 is proven on the Compte Kete's test database (spec 092): offers carry their l
 starts once per organization and app; the token tells every app what the offer allows; a gesture
 beyond a limit is refused, and after the end the organization's data stays readable for its days.
 
+B7 is proven (spec 093): a new app is born with the roles of its trade, gestures whose broken rules
+are said in words, « Demander », WhatsApp and Telegram, usage, logs and a session a browser test
+writes; its tests and the generated app's pass. The flow diagram of `kete-core#86` and offline stay
+for their trigger.
+
 ### Built on (open source)
 
 | Library                                             | Where                                     | Status                                                           |
@@ -465,10 +470,10 @@ analytics are Postgres tables. A library's licence is checked before it is adopt
 
 ### Needs from other lanes (decision 0009)
 
-| Issue          | From   | Answer                                                                         |
-| -------------- | ------ | ------------------------------------------------------------------------------ |
-| `kete-core#84` | Nettio | Taken in `086-order`                                                           |
-| `kete-core#86` | Nettio | Taken: channels in B1 and B2, the in-app « ask » in B3, the other pieces in B7 |
+| Issue          | From   | Answer                                                                                                               |
+| -------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
+| `kete-core#84` | Nettio | Taken in `086-order`                                                                                                 |
+| `kete-core#86` | Nettio | Answered: channels in B1 and B2, « ask » in B3, the template's pieces in B7; the flow diagram waits for a second app |
 
 ### Waiting for its trigger
 

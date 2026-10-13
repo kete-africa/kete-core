@@ -37,7 +37,8 @@ describe('a new Kete App', () => {
       product: 'prd_nettio',
       name: 'nettio',
       // Its identity card names its owner from the first commit (doctrine D-040).
-      governance: { owner, dataCategories: ['personal'], ai: { used: false }, criticality: 'low' },
+      // « Demander » calls a model once one is configured: the card says so (kete-core spec 093).
+      governance: { owner, dataCategories: ['personal'], ai: { used: true }, criticality: 'low' },
     });
     expect(read(join(target, 'src', 'platform', 'app.ts'))).toContain(
       "export const DESIGN: string = 'workspace';",

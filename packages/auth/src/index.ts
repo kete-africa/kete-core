@@ -21,6 +21,7 @@ export {
   type LimitName,
   type Refusal,
 } from './plans.js';
+export { signSession, type SessionPerson } from './session.js';
 export { createKeteSignIn, SignInError, type KeteSignIn, type SignInOptions } from './signin.js';
 export {
   createAppToken,

@@ -1,3 +1,4 @@
+import { permissionsOfBusinessRole } from './business-roles.js';
 // Permissions (kete-core spec 049): what an app checks, declared once with its words for people and
 // the Compte Kete roles that hold it by default. The manifest describes them; a center (Kete
 // Enterprise) lets an administrator grant them to roles and positions, and the app reads the
@@ -19,6 +20,11 @@ export interface PermissionDefinition {
   description?: Words;
   /** The Compte Kete roles that hold it when no center manages the app's rights. */
   roles: Role[];
+  /**
+   * The roles of the app's own trade that hold it until the owner decides otherwise (spec 093):
+   * `cashier`, `washer`. Read only when the app gives `businessRoleOf` to `createRights`.
+   */
+  businessRoles?: readonly string[];
 }
 
 /** What a center answers about a person, for one app. */
@@ -69,6 +75,14 @@ export interface RightsOptions {
    * not answer, or refuses the token. Caching is the caller's (see `@kete/center`).
    */
   grants?: (token: string) => Promise<Grants | null>;
+  /**
+   * A member's business role and what the owner decided for each role (spec 093): when given, a
+   * member holds what her business role holds — nothing without one — instead of the defaults of
+   * the `member` role. Owners and admins keep their defaults; a managing center still wins.
+   */
+  businessRoleOf?: (
+    person: RightsPerson,
+  ) => Promise<{ role: string | null; decided: ReadonlyMap<string, ReadonlyMap<string, boolean>> }>;
   /** How long the last grants known for a person stand in when the center is silent (24 h). */
   lastKnownSeconds?: number;
   now?: () => number;
@@ -78,6 +92,8 @@ export interface RightsOptions {
 export interface RightsPerson {
   userId: string;
   role: Role | null;
+  /** Her organization: where her business role is read (`businessRoleOf`). */
+  organizationId?: string | null;
 }
 
 export interface Rights {
@@ -126,7 +142,12 @@ export function createRights(options: RightsOptions): Rights {
       }
       const known = lastKnown.get(person.userId);
       const grants = fresh ?? (known && now() - known.at < lastKnownFor ? known.grants : null);
-      return grants?.managed ? held(grants) : defaultsOf(person.role);
+      if (grants?.managed) return held(grants);
+      if (options.businessRoleOf && person.role === 'member') {
+        const { role, decided } = await options.businessRoleOf(person);
+        return permissionsOfBusinessRole(role, options.permissions, decided);
+      }
+      return defaultsOf(person.role);
     },
   };
 }

@@ -13,12 +13,14 @@ export const taskPermissions = definePermissions([
     label: words(m.perm_tasks_read),
     description: words(m.perm_tasks_read_body),
     roles: ['owner', 'admin', 'member'],
+    businessRoles: ['staff'],
   },
   {
     name: 'tasks:write',
     label: words(m.perm_tasks_write),
     description: words(m.perm_tasks_write_body),
     roles: ['owner', 'admin', 'member'],
+    businessRoles: ['staff'],
   },
   {
     name: 'tasks:create',

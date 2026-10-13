@@ -1,5 +1,15 @@
 # @kete-africa/design
 
+## 0.7.0
+
+### Minor Changes
+
+- The template, born complete (spec 093): business roles (`businessRoles`, `businessRoleOf`,
+  `businessRolesMigrationSql`) and `performGesture` with `RuleError` in `@kete/capabilities`; form
+  fields (`SelectField`, `CheckField`, `ChoiceField`, `TextAreaField`, `ErrorNote`, `InfoNote`) in
+  `@kete/design`; `signSession` in `@kete/auth`; and a new app born with « Demander », WhatsApp and
+  Telegram, usage, logs and the roles of its trade.
+
 ## 0.6.0
 
 ### Minor Changes

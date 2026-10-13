@@ -880,6 +880,15 @@ importers:
       '@kete/admin':
         specifier: workspace:@kete-africa/admin@*
         version: link:../../packages/admin
+      '@kete/agents':
+        specifier: workspace:@kete-africa/agents@*
+        version: link:../../packages/agents
+      '@kete/ai':
+        specifier: workspace:@kete-africa/ai@*
+        version: link:../../packages/ai
+      '@kete/analytics':
+        specifier: workspace:@kete-africa/analytics@*
+        version: link:../../packages/analytics
       '@kete/auth':
         specifier: workspace:@kete-africa/auth@*
         version: link:../../packages/auth
@@ -904,6 +913,9 @@ importers:
       '@kete/jobs':
         specifier: workspace:@kete-africa/jobs@*
         version: link:../../packages/jobs
+      '@kete/log':
+        specifier: workspace:@kete-africa/log@*
+        version: link:../../packages/log
       '@kete/notify':
         specifier: workspace:@kete-africa/notify@*
         version: link:../../packages/notify
@@ -974,6 +986,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^5.2.0
         version: 5.2.0(supports-color@10.2.2)(vite@7.3.6(@types/node@22.20.4)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))
+      ai:
+        specifier: ^7.0.122
+        version: 7.0.122(zod@4.6.5)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3

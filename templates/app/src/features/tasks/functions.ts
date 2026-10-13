@@ -6,8 +6,9 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { transaction } from '@/platform/db';
 import { registry } from '@/platform/registry';
-import { asPerson, holds } from '@/platform/rights';
-import { personOf, screenActor, tokenOf } from '@/platform/session';
+import { holds } from '@/platform/rights';
+import { personOf } from '@/platform/session';
+import { perform, ScreenError, signedIn } from '@/platform/screen';
 import { reopenTask } from './commands/complete-task';
 import { findTask, listTasks } from './infrastructure/task.table';
 import { taskInput } from './task.record';
@@ -47,28 +48,6 @@ function toScreen(review: DraftReview): ReviewScreen {
   };
 }
 
-export class ScreenError extends Error {
-  constructor(readonly code: 'signed_out' | 'no_organization' | 'forbidden' | 'not_found') {
-    super(code);
-    this.name = 'ScreenError';
-  }
-}
-
-/** The person on this screen, in her organization, with her rights for what follows. */
-async function signedIn() {
-  const request = getRequest();
-  const identity = await personOf(request);
-  if (!identity) throw new ScreenError('signed_out');
-  if (!identity.organizationId) throw new ScreenError('no_organization');
-  const token = await tokenOf(request);
-  return {
-    identity,
-    caller: { actor: screenActor(identity), organizationId: identity.organizationId },
-    /** Runs `work` with her rights: her grants at the center, or her role's defaults. */
-    as: <T>(work: () => T | Promise<T>) => asPerson(identity, work, token),
-  };
-}
-
 export const fetchPerson = createServerFn({ method: 'GET' }).handler(async () => {
   const identity = await personOf(getRequest());
   return identity ? { name: identity.name, organizationId: identity.organizationId } : null;
@@ -92,15 +71,15 @@ export const fetchTask = createServerFn({ method: 'GET' })
     });
   });
 
-/** A person adds a task: the same capability an agent would only prepare a draft of. */
+/**
+ * A person adds a task: the same capability an agent would only prepare a draft of. A refusal
+ * or a broken rule comes back as its code, for the screen to word.
+ */
 export const addTask = createServerFn({ method: 'POST' })
   .validator((input: unknown) => taskInput.parse(input))
   .handler(async ({ data }) => {
-    const { caller, as } = await signedIn();
-    const result = await as(() =>
-      registry.invoke({ ...caller, name: 'tasks_create', input: data }),
-    );
-    return { status: result.status };
+    const outcome = await perform('tasks_create', data);
+    return outcome.ok ? { ok: true as const } : { ok: false as const, code: outcome.code };
   });
 
 export const setTaskDone = createServerFn({ method: 'POST' })
@@ -111,12 +90,8 @@ export const setTaskDone = createServerFn({ method: 'POST' })
     const { caller, as } = await signedIn();
     return as(async () => {
       if (data.done) {
-        const result = await registry.invoke({
-          ...caller,
-          name: 'tasks_complete',
-          input: { taskId: data.taskId },
-        });
-        return { status: result.status };
+        const outcome = await perform('tasks_complete', { taskId: data.taskId });
+        return outcome.ok ? { status: 'done' } : { status: 'refused', code: outcome.code };
       }
       if (!holds('tasks:write')) throw new ScreenError('forbidden');
       await transaction(caller.organizationId, (db) =>

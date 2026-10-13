@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import type { KeteIdentity } from '@kete/auth';
-import { createMcpHandler, type Caller } from '@kete/capabilities';
+import { assignBusinessRole, createMcpHandler, type Caller } from '@kete/capabilities';
 import { readJournal } from '@kete/commands';
 import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '@kete/testing';
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
@@ -56,6 +56,10 @@ beforeAll(async () => {
     },
   });
   usePool(db.app);
+  // Kofi works the tasks: the business role `staff` (kete-core spec 093).
+  await transaction('org_acme', (client) =>
+    assignBusinessRole(client, 'org_acme', 'usr_kofi', 'staff'),
+  );
 });
 
 afterAll(async () => {
@@ -267,7 +271,7 @@ describe('the app contract (kete-core spec 049)', () => {
 
 describe('what the app says about itself', () => {
   it('serves a valid manifest, and the same words in every language', () => {
-    expect(manifest()).toMatchObject({ product: 'prd_app_template', events: [] });
+    expect(manifest()).toMatchObject({ product: 'prd_app_template', events: ['metrics.daily'] });
     const fr = JSON.parse(readFileSync(new URL('../messages/fr.json', import.meta.url), 'utf8'));
     const en = JSON.parse(readFileSync(new URL('../messages/en.json', import.meta.url), 'utf8'));
     expect(Object.keys(en).sort()).toEqual(Object.keys(fr).sort());

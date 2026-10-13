@@ -1,4 +1,13 @@
-import { createJobs, queuedSender, relayEventsJob, sendEmailJob, type Jobs } from '@kete/jobs';
+import {
+  createJobs,
+  defineJob,
+  queuedSender,
+  relayEventsJob,
+  sendEmailJob,
+  type Jobs,
+} from '@kete/jobs';
+import { deliverWaiting } from './chat';
+import { announceDailyUsage } from './usage';
 import { createMailer, emailSenderFromEnv, type Mailer } from '@kete/notify';
 import { env } from './env';
 import { flushCenterEvents, flushEvents } from './events';
@@ -17,6 +26,19 @@ export function getJobs(work = false): Jobs {
     jobs: [
       sendEmailJob(emailSenderFromEnv()),
       relayEventsJob(() => Promise.all([flushEvents(), flushCenterEvents()])),
+      // WhatsApp and Telegram messages waiting to leave, every minute.
+      defineJob<object>({
+        name: 'chat.deliver',
+        schedule: '* * * * *',
+        retryLimit: 0,
+        handle: () => deliverWaiting(),
+      }),
+      // Yesterday's usage counts, to Kete Cockpit, each morning.
+      defineJob<object>({
+        name: 'usage.daily',
+        schedule: '15 2 * * *',
+        handle: () => announceDailyUsage(),
+      }),
     ] as never,
     work,
   });

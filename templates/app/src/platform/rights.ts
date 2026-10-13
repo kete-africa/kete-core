@@ -1,9 +1,15 @@
 import type { KeteIdentity } from '@kete/auth';
-import { createRights, definePermissions } from '@kete/capabilities';
+import {
+  businessRoleDecisions,
+  businessRoleOf,
+  createRights,
+  definePermissions,
+} from '@kete/capabilities';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { taskPermissions } from '@/features/tasks';
 import * as m from '@/paraglide/messages.js';
 import { getCenter } from './center';
+import { transaction } from './db';
 import { words } from './words';
 
 /**
@@ -22,7 +28,24 @@ export const permissions = definePermissions([
   },
 ]);
 
-const rights = createRights({ permissions, grants: (token) => getCenter().grants(token) });
+/**
+ * The roles of the app's own trade (kete-core spec 093): a member holds what her business role
+ * holds, as the owner ticked it — nothing without one. Replace `staff` by the roles of the trade
+ * (a cashier, a washer) and name them in each permission's `businessRoles`.
+ */
+export const businessRoles = ['owner', 'staff'] as const;
+
+const rights = createRights({
+  permissions,
+  grants: (token) => getCenter().grants(token),
+  businessRoleOf: (person) =>
+    person.organizationId
+      ? transaction(person.organizationId, async (db) => ({
+          role: await businessRoleOf(db, person.userId),
+          decided: await businessRoleDecisions(db),
+        }))
+      : Promise.resolve({ role: null, decided: new Map() }),
+});
 
 const current = new AsyncLocalStorage<{
   identity: KeteIdentity | null;

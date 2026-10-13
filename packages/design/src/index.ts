@@ -13,6 +13,14 @@ export {
   TextField,
   type TagTone,
 } from './components.js';
+export {
+  CheckField,
+  ChoiceField,
+  ErrorNote,
+  InfoNote,
+  SelectField,
+  TextAreaField,
+} from './fields.js';
 export { checkContrasts, contrastRatio, type ContrastFailure } from './contrast.js';
 export { resolvedDesigns } from './designs.gen.js';
 export {

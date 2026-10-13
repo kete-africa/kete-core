@@ -1,8 +1,10 @@
-import { Panel } from '@kete/design';
+import { ErrorNote, Panel } from '@kete/design';
+import { useState } from 'react';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { addTask, fetchTasks } from '@/features/tasks/functions';
 import { TaskForm } from '@/features/tasks/ui/TaskForm';
 import { TaskList } from '@/features/tasks/ui/TaskList';
+import { sayError } from '@/lib/errors';
 import { AppShell } from '@/lib/shell';
 import { requirePerson } from '@/lib/signed-in';
 import * as m from '@/paraglide/messages.js';
@@ -16,6 +18,7 @@ export const Route = createFileRoute('/taches')({
 function TasksPage() {
   const tasks = Route.useLoaderData();
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
   return (
     <AppShell>
       <div className="flex flex-col gap-6">
@@ -23,10 +26,12 @@ function TasksPage() {
         <Panel>
           <TaskForm
             onAdd={async (task) => {
-              await addTask({ data: task });
+              const outcome = await addTask({ data: task });
+              setError(outcome.ok ? null : sayError(outcome.code));
               await router.invalidate();
             }}
           />
+          <ErrorNote>{error}</ErrorNote>
         </Panel>
         <TaskList tasks={tasks} />
       </div>
