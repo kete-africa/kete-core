@@ -1,0 +1,36 @@
+{
+  "name": "@kete-africa/sequences",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Kete document numbers: quotes, invoices and orders numbered per organization, without a gap nor a duplicate, in the transaction that writes the document.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/sequences"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}

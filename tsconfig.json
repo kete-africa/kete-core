@@ -78,6 +78,12 @@
     },
     {
       "path": "packages/skills"
+    },
+    {
+      "path": "packages/money"
+    },
+    {
+      "path": "packages/sequences"
     }
   ]
 }
