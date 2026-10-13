@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/resource.v1.schema.json",
+  "title": "Resource",
+  "description": "A skill, an agent or an app in its lifecycle: created, used, learning, evaluated, promoted one tier at a time with a review by its risk (doctrine D-053).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "id", "name", "owner", "version", "tier"],
+  "properties": {
+    "kind": { "enum": ["skill", "agent", "app"] },
+    "id": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "owner": {
+      "description": "The person who owns it and keeps or drops its lessons.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?$"
+    },
+    "tier": {
+      "description": "Who may use it: me, my team, my unit, the whole organization.",
+      "enum": ["me", "team", "unit", "organization"]
+    },
+    "review": {
+      "description": "The review asked to reach the next tier.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "risk"],
+      "properties": {
+        "state": { "enum": ["asked", "approved", "refused"] },
+        "risk": { "enum": ["low", "medium", "high"] },
+        "by": {
+          "description": "The role that reviews.",
+          "type": "string",
+          "maxLength": 100
+        }
+      }
+    },
+    "cases": {
+      "description": "Its test cases, and how many the current version passes.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "passed"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "passed": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

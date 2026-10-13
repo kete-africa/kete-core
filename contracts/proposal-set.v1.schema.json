@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/proposal-set.v1.schema.json",
+  "title": "ProposalSet",
+  "description": "Several things an agent proposes at once — the evening's tidying, a week's plan, what a document said — each ticked or not by the person, applied together by one gesture, and undone together (doctrine D-051). Nothing in it is true until applied: each item names the gesture that will make it true, with its level.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "origin", "for", "items"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^pps_[0-9A-Za-z_-]{8,64}$"
+    },
+    "origin": {
+      "description": "closure: the evening's note. plan: a plan of the day or the week. intake: what was received. agent: an agent's run.",
+      "enum": ["closure", "plan", "intake", "agent"]
+    },
+    "for": {
+      "description": "The person who decides.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "gesture", "label", "level"],
+        "properties": {
+          "key": { "type": "string", "minLength": 1, "maxLength": 100 },
+          "gesture": {
+            "description": "postpone, close, block (a time), assign (to a colleague, who may refuse), correct (a record), remind, lesson (proposed to a skill's owner), create.",
+            "enum": [
+              "postpone",
+              "close",
+              "block",
+              "assign",
+              "correct",
+              "remind",
+              "lesson",
+              "create"
+            ]
+          },
+          "label": {
+            "description": "What will happen, as the person reads it.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "reason": {
+            "description": "Why it is proposed, in a sentence.",
+            "type": "string",
+            "maxLength": 300
+          },
+          "level": {
+            "description": "The autonomy level of the gesture that applies it (1 to 4).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4
+          },
+          "capability": {
+            "description": "The capability that applies it, when an app does.",
+            "type": "string",
+            "maxLength": 100
+          },
+          "ticked": {
+            "description": "Whether it is ticked when shown; the person changes it.",
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

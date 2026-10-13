@@ -36,6 +36,20 @@ export const validateManifest = validator(`${base}manifest.v1.schema.json`);
 export const validateHealthReport = validator(`${base}health.v1.schema.json`);
 /** A fact of money an app says to its center (doctrine D-049). */
 export const validateMoneyFact = validator(`${base}money-fact.v1.schema.json`);
+/** Something that will happen at a time, said to the center's Planifier (doctrine D-050). */
+export const validateDatedFact = validator(`${base}dated-fact.v1.schema.json`);
+/** A figure an app declares, read under the reader's rights (doctrine D-052). */
+export const validateMetric = validator(`${base}metric.v1.schema.json`);
+/** Several proposals decided together by one gesture (doctrine D-051). */
+export const validateProposalSet = validator(`${base}proposal-set.v1.schema.json`);
+/** A skill, an agent or an app in its lifecycle (doctrine D-053). */
+export const validateResource = validator(`${base}resource.v1.schema.json`);
+/** What the use of a resource taught, gathered with consent (doctrine D-053). */
+export const validateLesson = validator(`${base}lesson.v1.schema.json`);
+/** A file an app keeps, with what it proves (spec 099). */
+export const validateFileLink = validator(`${base}file-link.v1.schema.json`);
+/** One event of a Kete Intelligence turn (spec 099). */
+export const validateIntelligenceEvent = validator(`${base}intelligence-event.v1.schema.json`);
 export const validateDeliveryRequest = validator(`${base}delivery-request.v1.schema.json`);
 export const validateDeliveryResult = validator(`${base}delivery-result.v1.schema.json`);
 

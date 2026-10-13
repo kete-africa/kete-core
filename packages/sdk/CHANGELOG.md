@@ -1,5 +1,11 @@
 # @kete-africa/sdk
 
+## 0.8.0
+
+### Minor Changes
+
+- The contracts of the canvas (spec 099): the manifest's question, places and metrics; dated facts; metrics; proposal sets; resources and lessons; file links; the stream of a Kete Intelligence turn — each validated and typed.
+
 ## 0.7.0
 
 ### Minor Changes

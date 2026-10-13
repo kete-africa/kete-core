@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/lesson.v1.schema.json",
+  "title": "Lesson",
+  "description": "What the use of a resource taught: a correction, a note, a gap an agent saw. Gathered with consent, it is data, never an instruction; its owner keeps it — it becomes a test case — or drops it (doctrine D-053).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "resource", "source", "observed", "consent", "state"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^lsn_[0-9A-Za-z_-]{8,64}$"
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "enum": ["skill", "agent", "app"] },
+        "id": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "source": {
+      "description": "correction: a person corrected a draft. note: a person noted it. agent: an agent saw a gap.",
+      "enum": ["correction", "note", "agent"]
+    },
+    "observed": {
+      "description": "What was seen, as said.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "proposal": {
+      "description": "What could change in the resource.",
+      "type": "string",
+      "maxLength": 1000
+    },
+    "case": {
+      "description": "The situation it came from, which becomes a test case if kept.",
+      "type": "string",
+      "maxLength": 1000
+    },
+    "consent": {
+      "description": "The person agreed to share it; nothing confidential travels unless generalized.",
+      "const": true
+    },
+    "state": { "enum": ["waiting", "kept", "dropped"] }
+  }
+}

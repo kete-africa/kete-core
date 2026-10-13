@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/metric.v1.schema.json",
+  "title": "Metric",
+  "description": "A figure an app declares in its manifest, computed by the app's code and read under the reader's rights (doctrine D-052). Boards, the apps' homes and summaries compose metrics; no one writes a query. Its axes are the center's references, so that a filter « project = X » applies to every app's figures at once.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "label", "unit", "better"],
+  "properties": {
+    "name": {
+      "description": "The app's area, then the figure: « finance.available », « team.absences ».",
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+    },
+    "label": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fr", "en"],
+      "properties": {
+        "fr": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "en": { "type": "string", "minLength": 1, "maxLength": 120 }
+      }
+    },
+    "description": {
+      "description": "How it is computed, in a sentence a person reads beside « Pourquoi ? ».",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fr", "en"],
+      "properties": {
+        "fr": { "type": "string", "minLength": 1, "maxLength": 400 },
+        "en": { "type": "string", "minLength": 1, "maxLength": 400 }
+      }
+    },
+    "unit": {
+      "description": "money: in the currency's smallest unit, with its currency. count, days, hours, percent: plain numbers.",
+      "enum": ["money", "count", "days", "hours", "percent"]
+    },
+    "better": {
+      "description": "Whether a rise is good news (up), bad news (down), or neither (none).",
+      "enum": ["up", "down", "none"]
+    },
+    "axes": {
+      "description": "What it can be split or filtered by.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["project", "party", "person", "period"] }
+    }
+  }
+}
