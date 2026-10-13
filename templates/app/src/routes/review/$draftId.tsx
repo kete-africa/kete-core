@@ -52,7 +52,10 @@ function ReviewPage() {
   const fields: VerificationField[] = review.fields.map((field) => ({
     label: field.title,
     value: field.value,
-    provenance: field.source ? (sources[field.source]?.() ?? '') : '',
+    // Where it comes from, and the passage it was read in (kete-core spec 098).
+    provenance: field.source
+      ? `${sources[field.source]?.() ?? ''}${field.quote ? ` — « ${field.quote} »` : ''}`
+      : '',
     uncertain: field.uncertain,
   }));
 

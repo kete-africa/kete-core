@@ -1,5 +1,12 @@
 # @kete-africa/create-app
 
+## 0.4.0
+
+### Minor Changes
+
+- A new app is born with intake: a message or a photo read into a draft whose every field says
+  where it comes from, shown on the verification card (spec 098).
+
 ## 0.3.1
 
 ### Patch Changes

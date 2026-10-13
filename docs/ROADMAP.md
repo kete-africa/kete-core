@@ -525,7 +525,7 @@ side (its roadmap, steps F1 to F5); each app has its own repository (steps G, H,
 | E1   | `094-money` (done)               | `@kete/money`: an amount is an integer of its currency's smallest unit — read exactly, added, taxed with one rounding, split without losing a unit, shown in a person's language                             | A split's parts add up to the whole; two currencies never add up    |
 | E2   | `095-sequences` (done)           | `@kete/sequences`: a document's number taken in the transaction that writes it, per organization, per series and period                                                                                      | No gap after a failed write; no duplicate under concurrent writers  |
 | E3   | `096-references-and-money-facts` | Contracts: a fact of money (expected, received, committed, paid) with its amount, its third party, its project and budget line; `@kete/center` reads third parties and projects, asks a circuit, sends facts | A fact sent by an app is read by the center with its project        |
-| E4   | `098-intake`                     | The template: a message, a photo or a document becomes a draft whose every field says where it comes from; the person corrects, the correction is kept                                                       | A receipt's photo becomes a draft with the provenance of each field |
+| E4   | `098-intake` (done)              | The template: a message, a photo or a document becomes a draft whose every field says where it comes from; the person corrects, the correction is kept                                                       | A receipt's photo becomes a draft with the provenance of each field |
 
 E1 is proven (`packages/money/tests/money.test.ts`, 7): amounts are read digit by digit and never
 rounded on the way in; ten cents and twenty are thirty; 2 480 000 F split 40/30/30 gives 992 000,
@@ -540,6 +540,12 @@ E3 is proven on its side (`packages/center/tests/references.test.ts`, 6): an app
 party and follows a merged record, opens a project from its own document, and says a fact of money
 that validates against `money-fact.v1`. To obtain: the same fact read by the center under its
 project (Kete Enterprise, step F4).
+
+E4 is proven with a played model (`packages/ai/tests/intake.test.ts`, 3; `templates/app/tests/intake.test.ts`, 3): a
+receipt's photo becomes values each with its source, certainty and passage; what the receipt does
+not say is neither guessed nor filled; on the template, a photo becomes a task draft, the person
+corrects a field and validates, and her correction is kept. To obtain: a real model on real
+receipts, and the apps adopting it on their own records.
 
 ### Not done
 

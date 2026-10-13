@@ -91,5 +91,11 @@
   "errors_not_found": "Cet élément n’existe plus.",
   "errors_already_done": "C’est déjà fait.",
   "errors_not_done": "Ce n’est pas encore fait.",
-  "errors_generic": "Ce geste n’a pas pu aboutir. Rien n’a été modifié."
+  "errors_generic": "Ce geste n’a pas pu aboutir. Rien n’a été modifié.",
+  "intake_title": "À partir d’un message ou d’une photo",
+  "intake_message": "Le message reçu",
+  "intake_message_hint": "Collez-le : chaque champ dira d’où il vient, et vous vérifiez avant que rien ne soit écrit.",
+  "intake_photo": "Ou une photo",
+  "intake_read": "Lire",
+  "intake_incomplete": "Ce qui a été reçu ne dit pas : {fields}. Saisissez la tâche ci-dessus."
 }

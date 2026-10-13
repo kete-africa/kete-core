@@ -91,5 +91,11 @@
   "errors_not_found": "This no longer exists.",
   "errors_already_done": "It is already done.",
   "errors_not_done": "It is not done yet.",
-  "errors_generic": "This could not be done. Nothing was changed."
+  "errors_generic": "This could not be done. Nothing was changed.",
+  "intake_title": "From a message or a photo",
+  "intake_message": "The message received",
+  "intake_message_hint": "Paste it: each field will say where it comes from, and you check before anything is written.",
+  "intake_photo": "Or a photo",
+  "intake_read": "Read",
+  "intake_incomplete": "What was received does not say: {fields}. Type the task above."
 }

@@ -23,6 +23,8 @@ export interface FieldProvenance {
   certainty?: 'high' | 'medium' | 'low';
   /** What the value was read from: a file, a message, a transcript (an identifier). */
   evidence?: string;
+  /** The passage it was read in, as written there: what the person checks it against. */
+  quote?: string;
 }
 
 export type DraftStatus = 'prepared' | 'validated' | 'refused';

@@ -1,5 +1,12 @@
 # @kete-africa/drafts
 
+## 0.2.0
+
+### Minor Changes
+
+- A field's provenance may carry its `quote`: the passage it was read in, which the person checks it
+  against (spec 098).
+
 ## 0.1.1
 
 ### Patch Changes

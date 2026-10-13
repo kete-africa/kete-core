@@ -47,15 +47,16 @@ return stream.toUIMessageStreamResponse();
 const { value } = await extract({ model, schema: quote.schema, prompt: message, metering });
 ```
 
-| Export                                                                | What it does                                                                       |
-| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `languageModel`, `embeddingModel`, `transcriptionModel`               | A model from a `ModelConfig` (`modelConfigFromEnv` reads it from the environment)  |
-| `ask`, `askStream`                                                    | A conversation turn with tools (at most `maxSteps` model steps), metered           |
-| `extract`                                                             | A structured value of a Zod schema, metered                                        |
-| `scanReader`                                                          | A scan (image, PDF without text) read page by page: `@kete/files`' transcriber     |
-| `toolsFrom`                                                           | Capabilities (`registry.tools(caller)`) as AI SDK tools                            |
-| `postgresBudgetStore`, `aiMigrationSql`                               | Usage (append-only) and monthly token budgets in the product's Postgres, under RLS |
-| `observeModels`, `aiCostMigrationSql`, `modelPricesFromEnv`, `costOf` | Traces (OpenTelemetry, Langfuse), each call's cost, `store.report`                 |
+| Export                                                                | What it does                                                                                                                                           |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `languageModel`, `embeddingModel`, `transcriptionModel`               | A model from a `ModelConfig` (`modelConfigFromEnv` reads it from the environment)                                                                      |
+| `ask`, `askStream`                                                    | A conversation turn with tools (at most `maxSteps` model steps), metered                                                                               |
+| `extract`                                                             | A structured value of a Zod schema, metered                                                                                                            |
+| `scanReader`                                                          | A scan (image, PDF without text) read page by page: `@kete/files`' transcriber                                                                         |
+| `intake`                                                              | What was received — a message, a photo, a voice note, a document — read into a record's fields, each with its source, certainty and passage (spec 098) |
+| `toolsFrom`                                                           | Capabilities (`registry.tools(caller)`) as AI SDK tools                                                                                                |
+| `postgresBudgetStore`, `aiMigrationSql`                               | Usage (append-only) and monthly token budgets in the product's Postgres, under RLS                                                                     |
+| `observeModels`, `aiCostMigrationSql`, `modelPricesFromEnv`, `costOf` | Traces (OpenTelemetry, Langfuse), each call's cost, `store.report`                                                                                     |
 
 ## Observing models: traces and costs (spec 058)
 
