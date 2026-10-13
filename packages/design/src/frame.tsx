@@ -461,17 +461,24 @@ export function KpiTile({
   value,
   hint,
   href,
+  why,
 }: {
   label: ReactNode;
   value: ReactNode;
   hint?: ReactNode;
   href?: string;
+  /**
+   * « Pourquoi ? » (doctrine D-045, rule 4): a control that explains how the figure is computed.
+   * Only on a tile without `href`: a control is never put inside a link.
+   */
+  why?: ReactNode;
 }) {
   const content = (
     <>
       <span className="text-body-sm text-fg-muted">{label}</span>
       <span className="font-number text-[26px] leading-tight font-semibold">{value}</span>
       {hint && <span className="text-body-sm text-fg-muted">{hint}</span>}
+      {!href && why && <span className="text-body-sm">{why}</span>}
     </>
   );
   const className =

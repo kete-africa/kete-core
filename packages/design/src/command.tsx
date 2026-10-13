@@ -132,9 +132,13 @@ export function CommandPalette({
         <div className="max-h-[45vh] overflow-y-auto border-b border-line p-4">{answer}</div>
       )}
       <Command.List className="max-h-[50vh] overflow-y-auto p-2">
-        <Command.Empty className="p-4 text-body-sm text-fg-muted">{emptyLabel}</Command.Empty>
+        {/* With a question to ask, something always matches: the question itself. */}
+        {!(ask && query.trim()) && (
+          <Command.Empty className="p-4 text-body-sm text-fg-muted">{emptyLabel}</Command.Empty>
+        )}
         {ask && query.trim() && (
           <Command.Group
+            forceMount
             heading={ask.heading}
             className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-label-caps [&_[cmdk-group-heading]]:text-fg-muted"
           >

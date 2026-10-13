@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@kete/design": "workspace:@kete-africa/design@*",
+    "@kete/shell": "workspace:@kete-africa/shell@*",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },

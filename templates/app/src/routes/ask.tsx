@@ -9,12 +9,16 @@ import * as m from '@/paraglide/messages.js';
 
 export const Route = createFileRoute('/demander')({
   beforeLoad: ({ location }) => requirePerson(location.href),
+  // A question asked from Ctrl K or the frame's « Demander » arrives here (kete-core spec 100).
+  validateSearch: (search: Record<string, unknown>): { q?: string } =>
+    typeof search['q'] === 'string' ? { q: search['q'].slice(0, 2000) } : {},
   component: AskPage,
 });
 
 /** « Demander »: a question, answered with the readings she may open — nothing is changed. */
 function AskPage() {
-  const [question, setQuestion] = useState('');
+  const { q } = Route.useSearch();
+  const [question, setQuestion] = useState(q ?? '');
   const [turns, setTurns] = useState<(Turn & { sources?: string[] })[]>([]);
   const [pending, setPending] = useState(false);
   const [unavailable, setUnavailable] = useState<

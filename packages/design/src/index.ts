@@ -41,6 +41,13 @@ export {
   Suggestions,
   ToolCard,
 } from './chat.js';
+export {
+  AgentRunState,
+  DecisionCard,
+  Mention,
+  type AgentRunStateName,
+  type Evidence,
+} from './canvas.js';
 export { KeteBand, KeteMark } from './marks.js';
 export {
   applyTheme,
@@ -90,6 +97,7 @@ export {
   Chip,
   ChipGroup,
   Icon,
+  isIconName,
   Menu,
   NavItem,
   CountBadge,
