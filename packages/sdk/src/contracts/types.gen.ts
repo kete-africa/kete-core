@@ -326,3 +326,49 @@ export interface Manifest {
     criticality: 'low' | 'medium' | 'high' | 'critical';
   };
 }
+
+/**
+ * A fact of money an app says to its center, with the token of the person who made it true. Sent again under the same key, it replaces what was said: an app keeps the amount of an invoice at what is still due, and of a commitment at what is still to pay. The center adds the facts up by project; it executes no payment and keeps no ledger.
+ */
+export interface MoneyFact {
+  /**
+   * The app's own key for this fact: one fact per app and key.
+   */
+  key: string;
+  /**
+   * invoiced: asked of a third party and still due. received: money that came in. committed: promised to a third party and still to pay (an order placed, a pay due). spent: money that went out.
+   */
+  kind: 'invoiced' | 'received' | 'committed' | 'spent';
+  /**
+   * In the currency's smallest unit (francs for XOF, cents for EUR): an integer, never negative.
+   */
+  amount: number;
+  /**
+   * ISO 4217.
+   */
+  currency: string;
+  /**
+   * The day it became true.
+   */
+  occurred_on: string;
+  /**
+   * What it is, as a person reads it: « Facture F-0412 », « Bon de commande BC-0031 ».
+   */
+  label: string;
+  /**
+   * The project of the center it belongs to; none for the organization's own running.
+   */
+  project_id?: string;
+  /**
+   * The post of the project's budget it counts against, by its name.
+   */
+  post?: string;
+  /**
+   * The third party of the center it concerns.
+   */
+  party_id?: string;
+  /**
+   * Where the piece that proves it is read, in the app.
+   */
+  href?: string;
+}

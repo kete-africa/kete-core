@@ -536,6 +536,11 @@ each other from 1 per organization, per series and per period; a number taken in
 that fails goes back, and the next document takes it; twelve writers at once get twelve different
 numbers; the application role cannot delete a series; `F-{YYYY}-{N:4}` gives `F-2026-0412`.
 
+E3 is proven on its side (`packages/center/tests/references.test.ts`, 6): an app reads a third
+party and follows a merged record, opens a project from its own document, and says a fact of money
+that validates against `money-fact.v1`. To obtain: the same fact read by the center under its
+project (Kete Enterprise, step F4).
+
 ### Not done
 
 Exchange rates, a country's taxes, general accounting, payroll, stock: an organization's accountant
