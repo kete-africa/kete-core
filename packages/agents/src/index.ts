@@ -10,8 +10,37 @@ export {
   type AgentThread,
 } from './conversations.js';
 export {
+  evaluateAgent,
+  judge,
+  type CaseResult,
+  type EvaluationCase,
+  type EvaluationReport,
+} from './evaluate.js';
+export {
+  agentMemoryMigrationSql,
+  eraseMemories,
+  expireMemories,
+  forget,
+  MAX_MEMORIES,
+  memoriesFor,
+  memoriesOf,
+  memoryConsentOf,
+  memoryInstructions,
+  memoryJournalOf,
+  remember,
+  rememberTool,
+  setMemoryConsent,
+  type AgentMemory,
+  type AgentMemoryMigrationOptions,
+  type MemoryActor,
+  type MemoryConsent,
+  type MemoryJournalEntry,
+  type Remembered,
+} from './memory.js';
+export {
   runAgent,
   streamAgent,
+  WAITS_FOR_A_PERSON,
   type AgentAnswer,
   type AgentCall,
   type AgentEvent,

@@ -118,7 +118,82 @@ outside one.
   deployment that wants it on sets `MASTRA_TELEMETRY_DISABLED=0` itself.
 - **Its versions are pinned exactly**, and raised on purpose, with these tests.
 
+## Memory with its governance (spec 090)
+
+What an agent remembers of a person, from one conversation to the next. Hers: nothing is kept
+before she agreed, she reads all of it, forgets one thing or erases everything, it expires when she
+said, and every gesture on it is written down — without the words remembered.
+
+```mermaid
+flowchart LR
+  C{her consent} -->|none, or withdrawn| N[nothing kept · nothing read]
+  C -->|given, with a retention| R[remember · rememberTool]
+  R --> M[(kete_agent_memories · RLS)]
+  M -->|memoriesFor: consent today, not expired| T[the turn · after its instructions]
+  M -->|forget · eraseMemories · expireMemories| X[deleted for good]
+  R & X --> J[(kete_agent_memory_journal · gestures, never words · no update, no delete)]
+```
+
+```ts
+await owner.query(agentMemoryMigrationSql({ schema, appRole }));
+
+await setMemoryConsent(db, organizationId, userId, { enabled: true, retentionDays: 365 }, her);
+const remembered = await memoriesFor(db, userId); // [] unless she agrees today
+await runAgent({
+  ...turn,
+  remembered,
+  tools: [...tools, rememberTool({ organizationId, personId: userId, agent, inOrganization })],
+});
+
+// « Forget me »: her memory and her conversations, for good.
+await eraseMemories(db, organizationId, userId, her);
+await agentConversations({ pool, organizationId }).eraseAll(userId);
+```
+
+- What is remembered is given to the model **after** its instructions, as context that never
+  outranks them.
+- A memory that expired is not read even before the worker deletes it (`expireMemories`).
+- 100 memories at most per person; beyond, she forgets something first.
+
+## Outside content (spec 090)
+
+Words nobody of the organization wrote — a message from a stranger, an e-mail, a web page, a
+document dropped in — may carry instructions. Once such words are in a turn, a capability that
+**acts at once** (level 2) is not run: it answers `confirmation_required`, and waits for a person.
+What only prepares (levels 3 and 4) is prepared as always, since a person decides it.
+
+```ts
+await runAgent({
+  ...turn,
+  // The turn starts with outside words, or a tool brings some in.
+  outside: { input: heardFromAStranger, tools: ['mail_read', 'web_read', 'documents_read'] },
+});
+```
+
+## Evaluations (spec 090)
+
+Cases played through the very turn of production, each with what must hold, checked by code: the
+capabilities called or never called, a gesture prepared rather than done, what the words must say
+or never say. A run fails under its threshold — every case by default — and says why.
+
+```ts
+const report = await evaluateAgent({
+  turn: { agent, model, instructions: SYSTEM, tools },
+  cases: [
+    {
+      name: 'the month, with no advice on price',
+      messages: [{ role: 'user', content: 'Combien ce mois-ci ?' }],
+      expect: { calls: ['money_month'], says: [/F CFA/], neverSays: [/conseill.*prix/i] },
+    },
+  ],
+});
+if (!report.passed) process.exitCode = 1; // in CI, on a real model, before a prompt ships
+```
+
+The runtime has its own evaluation runner; it targets its own agent and would bypass this layer
+(budgets, the outside-content rule), so the cases run through `runAgent` instead.
+
 ## Not here yet
 
-The governance of memory (consent, retention, erasure with its journal) and evaluations: step B4.
-Agents that run for long and wait for a person: Kete Enterprise, step C6.
+Agents that run for long and wait for a person: Kete Enterprise, step C6. Semantic recall over
+past conversations: when an app asks for it, with its own consent.

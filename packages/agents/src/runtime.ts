@@ -4,6 +4,7 @@ import type { CapabilityTool, InvocationResult } from '@kete/capabilities';
 import { Agent } from '@mastra/core/agent';
 import { tool, type LanguageModel, type ModelMessage } from 'ai';
 import type { AgentConversations } from './conversations.js';
+import { memoryInstructions, type AgentMemory } from './memory.js';
 
 // A turn of an agent (spec 089, decision 0010). The loop — model, tools, steps, stream — is the
 // runtime's; what makes it a Kete agent stays here and is small: its only tools are the
@@ -33,6 +34,19 @@ export interface AgentTurn {
   metering?: Metering;
   /** Where the conversation is kept, and whose it is. */
   conversation?: { store: AgentConversations; threadId: string; personId: string };
+  /**
+   * What she asked to be remembered (`memoriesFor`): given to the model after its instructions,
+   * as context that never outranks them.
+   */
+  remembered?: readonly Pick<AgentMemory, 'text'>[];
+  /**
+   * Outside content (spec 090): words nobody of the organization wrote — a message from someone
+   * outside it, a web page, an e-mail, a document dropped in. `input`: the turn starts with
+   * some. `tools`: the capabilities whose results bring some. Once outside content is in the
+   * turn, a capability that would act at once is not run: it waits for a person. Drafts are
+   * prepared as always, since a person decides them anyway.
+   */
+  outside?: { input?: boolean; tools?: readonly string[] };
   abortSignal?: AbortSignal;
 }
 
@@ -84,21 +98,36 @@ function modelId(model: LanguageModel): string {
   return typeof model === 'string' ? model : `${model.provider}:${model.modelId}`;
 }
 
+/** What a capability that acts at once answers once outside content is in the turn. */
+export const WAITS_FOR_A_PERSON =
+  'Not run: this turn read content from outside the organization, so this gesture waits for a person to do it or ask for it herself.';
+
 function agentOf(turn: AgentTurn): Agent {
+  // Whether outside content entered the turn: from the start, or from a tool that brought some.
+  let tainted = turn.outside?.input === true;
+  const bringsOutside = new Set(turn.outside?.tools ?? []);
   const tools = Object.fromEntries(
     (turn.tools ?? []).map((capability) => [
       capability.name,
       tool({
         description: capability.description,
         inputSchema: capability.input,
-        execute: (input: unknown) => capability.execute(input),
+        execute: async (input: unknown): Promise<InvocationResult> => {
+          // Levels 3 and 4 only prepare: a person decides them. Level 2 acts at once: not here.
+          if (tainted && capability.autonomy === 2) {
+            return { status: 'confirmation_required', message: WAITS_FOR_A_PERSON };
+          }
+          const result = await capability.execute(input);
+          if (bringsOutside.has(capability.name)) tainted = true;
+          return result;
+        },
       }),
     ]),
   );
   return new Agent({
     id: turn.agent,
     name: turn.name ?? turn.agent,
-    instructions: turn.instructions,
+    instructions: turn.instructions + memoryInstructions(turn.remembered ?? []),
     // The runtime accepts the models and the tools of the AI SDK as they are; its types do not
     // say so for every version (decision 0010). These two casts are the whole seam.
     model: turn.model as unknown as AgentConfig['model'],
