@@ -1,5 +1,12 @@
 # @kete-africa/create-app
 
+## 0.3.1
+
+### Patch Changes
+
+- A new app is born with `@kete/center` 0.5 (a decision with its project, and sent back), and the
+  README says how to get today's template on the day it changes.
+
 ## 0.3.0
 
 ### Minor Changes

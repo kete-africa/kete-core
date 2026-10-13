@@ -60,7 +60,12 @@ export interface DecisionAsked {
   /** The amount or level the circuit's thresholds read. */
   measure?: number;
   unitId?: string;
-  /** Where the app is told it was decided: only the request's id is sent. */
+  /** The project of the center it belongs to: a step of the circuit may be its lead's. */
+  projectId?: string;
+  /**
+   * Where the app is told it was decided or sent back: only the request's id is sent. Asked again
+   * with the same subject and reference after a return, it is the same request, corrected.
+   */
   callbackUrl?: string;
 }
 
@@ -68,8 +73,11 @@ export interface CenterDecision {
   requestId: string;
   subject: string;
   reference: string;
-  status: 'pending' | 'approved' | 'refused';
+  /** `returned`: sent back to who asked, to be corrected and asked again (Enterprise spec 075). */
+  status: 'pending' | 'approved' | 'refused' | 'returned';
+  /** Who gave the last word. */
   decidedBy: string | null;
+  /** Why, when refused or sent back. */
   reason: string | null;
 }
 
