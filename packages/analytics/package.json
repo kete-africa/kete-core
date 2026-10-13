@@ -1,0 +1,38 @@
+{
+  "name": "@kete-africa/analytics",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Kete usage: who uses what, per organization, in the app's own Postgres; read by the organization, and by Kete Cockpit as daily counts only.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/analytics"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kete/records": "workspace:@kete-africa/records@*",
+    "@kete/sdk": "workspace:@kete-africa/sdk@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}
