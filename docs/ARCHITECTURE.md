@@ -47,6 +47,7 @@ flowchart LR
 | `packages/drafts/`       | `@kete/drafts` — see its [README](../packages/drafts/README.md)                               |
 | `packages/capabilities/` | `@kete/capabilities` — see its [README](../packages/capabilities/README.md)                   |
 | `packages/ai/`           | `@kete/ai` — see its [README](../packages/ai/README.md)                                       |
+| `packages/agents/`       | `@kete/agents` — see its [README](../packages/agents/README.md)                               |
 | `packages/notify/`       | `@kete/notify` — see its [README](../packages/notify/README.md)                               |
 | `packages/identity/`     | `@kete/identity` — see its [README](../packages/identity/README.md)                           |
 | `packages/views/`        | `@kete/views` — see its [README](../packages/views/README.md)                                 |
