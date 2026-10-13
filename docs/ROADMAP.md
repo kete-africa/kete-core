@@ -411,7 +411,7 @@ Enterprise carries the center (its roadmap, steps C1 to C11), Kete Cockpit the f
 | ---- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | A1   | `086-order` (done)         | This roadmap, decision 0009 and its two rules in the constitution, a generated app's test named after the app (`kete-core#84`), the test runner moved to Vitest 4 (two critical advisories)                 | A generated app keeps no trace of the template's name; the audit passes |
 | B1   | `087-chat-channels` (done) | `@kete/notify`: the WhatsApp and Telegram adapters, inbound messages (authenticated webhooks, the provider's business-scoped ids)                                                                           | Nettio deletes its copy; its tests pass unchanged                       |
-| B2   | `088-chat-outbox`          | `@kete/notify`: the outbox to people — consent, templates per organization, a sender per organization, the cost of each message                                                                             | A refused message says why; two organizations never share a sender      |
+| B2   | `088-chat-outbox` (done)   | `@kete/notify`: the outbox to people — consent, templates per organization, a sender per organization, the cost of each message                                                                             | A refused message says why; two organizations never share a sender      |
 | B3   | `089-agent-runtime`        | A one-day trial of Mastra under Nettio's assistant, then a decision record. If it holds: the runtime on Mastra and a thin Kete layer — capabilities by right, drafts, mandate, journal, what the page shows | Nettio's assistant tests unchanged; RLS proven on the runtime's tables  |
 | B4   | `090-memory-and-evals`     | Memory with its governance (consent, retention, erasure, journal), evaluations of models and agents, the rule that a turn which read outside content triggers no action without a person, a dictation port  | A memory erased never comes back; an evaluation fails a worse prompt    |
 | B5   | `091-log-and-analytics`    | `@kete/log`: structured logs, traces and errors behind a port. `@kete/analytics`: usage events per organization, in Postgres, read by Kete Cockpit                                                          | Kete Cockpit shows who uses what, per organization                      |
@@ -421,6 +421,12 @@ Enterprise carries the center (its roadmap, steps C1 to C11), Kete Cockpit the f
 B1 is proven: Nettio deleted its two adapters and runs on the chassis' own (`kete-africa/nettio#34`,
 its 66 messaging, manager, statement and assistant tests passing); Firmo has the issue
 `kete-africa/firmo#18`. Not proven: a real message on a real number.
+
+B2 is proven on the test database (`packages/notify/tests/outbox.test.ts`): a message without
+consent, without an address or without the organization’s own sender is kept with its reason and
+does not leave; two organizations never share a sender, and a notification signed for one is
+never heard in the other; no token is readable in the database. Not done: Nettio still runs its
+own outbox with one sender for the deployment — moving it is a step of its own lane.
 
 ### Built on (open source)
 

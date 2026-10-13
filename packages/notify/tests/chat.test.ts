@@ -5,9 +5,11 @@ import {
   memoryChatChannel,
   parseTelegramUpdate,
   parseWhatsAppNotification,
+  parseWhatsAppStatuses,
   receiveTelegram,
   receiveWhatsApp,
   telegramChannel,
+  whatsAppAccountsOf,
   whatsAppChannel,
 } from '../src/index.js';
 
@@ -224,6 +226,62 @@ describe('hearing WhatsApp', () => {
   });
 });
 
+describe('what WhatsApp says of a message that left', () => {
+  const body = {
+    entry: [
+      {
+        changes: [
+          {
+            value: {
+              metadata: { phone_number_id: '1055' },
+              statuses: [
+                {
+                  id: 'wamid.1',
+                  status: 'delivered',
+                  pricing: { billable: true, pricing_model: 'PMP', category: 'utility' },
+                },
+                { id: 'wamid.2', status: 'failed', errors: [{ code: 131047 }] },
+                { id: 'wamid.3', status: 'deleted' },
+              ],
+            },
+          },
+          {
+            value: {
+              metadata: { phone_number_id: '2066' },
+              statuses: [{ id: 'wamid.9', status: 'read' }],
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  it('reads where it is, whether it was billed, and why it failed', () => {
+    expect(parseWhatsAppStatuses(body, '1055')).toEqual([
+      {
+        providerMessageId: 'wamid.1',
+        status: 'delivered',
+        reason: null,
+        billable: true,
+        category: 'utility',
+      },
+      {
+        providerMessageId: 'wamid.2',
+        status: 'failed',
+        reason: 'outside_window',
+        billable: null,
+        category: null,
+      },
+    ]);
+  });
+
+  it('tells the accounts a notification names, and keeps to one when asked', () => {
+    expect(whatsAppAccountsOf(body)).toEqual(['1055', '2066']);
+    expect(parseWhatsAppStatuses(body, '2066')).toMatchObject([{ providerMessageId: 'wamid.9' }]);
+    expect(parseWhatsAppStatuses(body)).toHaveLength(3);
+  });
+});
+
 describe('writing on WhatsApp', () => {
   const options = { accessToken: 'token-of-the-test', phoneNumberId: '1055' };
 
@@ -243,6 +301,16 @@ describe('writing on WhatsApp', () => {
     });
     expect(http.sent(1)).toMatchObject({ recipient: 'TG.13491208655302741918', type: 'text' });
     expect(http.sent(1)).not.toHaveProperty('to');
+  });
+
+  it('answers with the provider’s identifier of the message, which a status names later', async () => {
+    const http = recorded({ body: { messages: [{ id: 'wamid.1' }] } });
+    const channel = whatsAppChannel({ ...options, fetch: http.fn });
+    expect(await channel.sendText('22890123456', 'Votre dépôt est prêt.')).toEqual({
+      providerMessageId: 'wamid.1',
+    });
+    const silent = whatsAppChannel({ ...options, fetch: recorded({ body: {} }).fn });
+    expect(await silent.sendText('22890123456', 'Votre dépôt est prêt.')).toBeUndefined();
   });
 
   it('shows three buttons at most, twenty characters each, and sends a long text first', async () => {
@@ -475,6 +543,12 @@ describe('writing on Telegram', () => {
     expect(http.sent(2)).toMatchObject({
       reply_markup: { keyboard: [[{ text: 'Partager mon numéro', request_contact: true }]] },
     });
+  });
+
+  it('names a message that left by its chat and its number in that chat', async () => {
+    const http = recorded({ body: { ok: true, result: { message_id: 31 } } });
+    const channel = telegramChannel({ botToken: '42:bot-token-of-the-test', fetch: http.fn });
+    expect(await channel.sendText('777', 'Merci.')).toEqual({ providerMessageId: '777:31' });
   });
 
   it('says she is unreachable when she blocked the bot, and never shows the bot’s token', async () => {

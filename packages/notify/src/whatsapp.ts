@@ -8,7 +8,9 @@ import {
   type ChatChannel,
   type ChatHeard,
   type ChatInbound,
+  type ChatReceipt,
   type ChatSender,
+  type ChatStatus,
   type Json,
 } from './chat.js';
 
@@ -95,62 +97,122 @@ function senderOf(message: Json, contacts: Json[]): ChatSender | null {
   };
 }
 
-/** The messages of a verified notification; statuses and unknown events are ignored. */
-export function parseWhatsAppNotification(body: unknown): ChatInbound[] {
-  const messages: ChatInbound[] = [];
+/** What a notification is about, account by account: the number it was sent to names it. */
+function valuesOf(body: unknown, account?: string): Json[] {
+  const values: Json[] = [];
   for (const entry of list(record(body).entry)) {
     for (const change of list(entry.changes)) {
       const value = record(change.value);
-      const contacts = list(value.contacts);
-      for (const message of list(value.messages)) {
-        const sender = senderOf(message, contacts);
-        const id = text(message.id);
-        if (!sender || !id) continue;
-        const base = { channel: 'whatsapp' as const, providerMessageId: id, sender };
-        const type = text(message.type);
-        if (type === 'text') {
-          messages.push({ ...base, kind: 'text', text: text(record(message.text).body) ?? '' });
-        } else if (type === 'audio') {
-          const audio = record(message.audio);
-          messages.push({
-            ...base,
-            kind: 'voice',
-            media: { id: text(audio.id) ?? '', mediaType: text(audio.mime_type), filename: null },
-          });
-        } else if (type === 'image') {
-          const image = record(message.image);
-          messages.push({
-            ...base,
-            kind: 'photo',
-            text: text(image.caption),
-            media: { id: text(image.id) ?? '', mediaType: text(image.mime_type), filename: null },
-          });
-        } else if (type === 'document') {
-          const document = record(message.document);
-          messages.push({
-            ...base,
-            kind: 'document',
-            text: text(document.caption),
-            media: {
-              id: text(document.id) ?? '',
-              mediaType: text(document.mime_type),
-              filename: text(document.filename),
-            },
-          });
-        } else if (type === 'interactive') {
-          const interactive = record(message.interactive);
-          // A reply button, or a row chosen in a list.
-          const reply = record(interactive.button_reply ?? interactive.list_reply);
-          messages.push({ ...base, kind: 'action', action: text(reply.id) ?? '' });
-        } else if (type === 'button') {
-          messages.push({
-            ...base,
-            kind: 'action',
-            action: text(record(message.button).payload) ?? '',
-          });
-        } else {
-          messages.push({ ...base, kind: 'unsupported' });
-        }
+      if (account === undefined || text(record(value.metadata).phone_number_id) === account) {
+        values.push(value);
+      }
+    }
+  }
+  return values;
+}
+
+/**
+ * The accounts a notification names (the identifiers of the numbers it was sent to): what tells
+ * whose notification it is, before its signature is checked with that owner’s secret.
+ */
+export function whatsAppAccountsOf(body: unknown): string[] {
+  const accounts = valuesOf(body).map((value) => text(record(value.metadata).phone_number_id));
+  return [...new Set(accounts.filter((account): account is string => account !== null))];
+}
+
+/** Why the provider refused, from its error code. */
+function reasonOf(code: number): ChatChannelError['reason'] {
+  // 131047: a business writing first outside the 24-hour window.
+  if (code === 131047) return 'outside_window';
+  if (code === 131026 || code === 131030) return 'recipient_unreachable';
+  // 131062: this kind of message cannot go to a business-scoped id.
+  if (code === 131062) return 'needs_phone_number';
+  return 'provider_refused';
+}
+
+const statusNames = new Set(['sent', 'delivered', 'read', 'failed']);
+
+/**
+ * The statuses of a verified notification: where a message that left is, and whether it was billed.
+ * A message the provider accepted may still fail here — written outside the 24-hour window.
+ */
+export function parseWhatsAppStatuses(body: unknown, account?: string): ChatStatus[] {
+  const statuses: ChatStatus[] = [];
+  for (const value of valuesOf(body, account)) {
+    for (const entry of list(value.statuses)) {
+      const id = text(entry.id);
+      const status = text(entry.status);
+      if (!id || !status || !statusNames.has(status)) continue;
+      const pricing = record(entry.pricing);
+      const error = list(entry.errors)[0];
+      statuses.push({
+        providerMessageId: id,
+        status: status as ChatStatus['status'],
+        reason: status === 'failed' ? reasonOf(Number(error?.code ?? 0)) : null,
+        billable: typeof pricing.billable === 'boolean' ? pricing.billable : null,
+        category: text(pricing.category),
+      });
+    }
+  }
+  return statuses;
+}
+
+/**
+ * The messages of a verified notification — of one account when it is named; statuses and unknown
+ * events are ignored.
+ */
+export function parseWhatsAppNotification(body: unknown, account?: string): ChatInbound[] {
+  const messages: ChatInbound[] = [];
+  for (const value of valuesOf(body, account)) {
+    const contacts = list(value.contacts);
+    for (const message of list(value.messages)) {
+      const sender = senderOf(message, contacts);
+      const id = text(message.id);
+      if (!sender || !id) continue;
+      const base = { channel: 'whatsapp' as const, providerMessageId: id, sender };
+      const type = text(message.type);
+      if (type === 'text') {
+        messages.push({ ...base, kind: 'text', text: text(record(message.text).body) ?? '' });
+      } else if (type === 'audio') {
+        const audio = record(message.audio);
+        messages.push({
+          ...base,
+          kind: 'voice',
+          media: { id: text(audio.id) ?? '', mediaType: text(audio.mime_type), filename: null },
+        });
+      } else if (type === 'image') {
+        const image = record(message.image);
+        messages.push({
+          ...base,
+          kind: 'photo',
+          text: text(image.caption),
+          media: { id: text(image.id) ?? '', mediaType: text(image.mime_type), filename: null },
+        });
+      } else if (type === 'document') {
+        const document = record(message.document);
+        messages.push({
+          ...base,
+          kind: 'document',
+          text: text(document.caption),
+          media: {
+            id: text(document.id) ?? '',
+            mediaType: text(document.mime_type),
+            filename: text(document.filename),
+          },
+        });
+      } else if (type === 'interactive') {
+        const interactive = record(message.interactive);
+        // A reply button, or a row chosen in a list.
+        const reply = record(interactive.button_reply ?? interactive.list_reply);
+        messages.push({ ...base, kind: 'action', action: text(reply.id) ?? '' });
+      } else if (type === 'button') {
+        messages.push({
+          ...base,
+          kind: 'action',
+          action: text(record(message.button).payload) ?? '',
+        });
+      } else {
+        messages.push({ ...base, kind: 'unsupported' });
       }
     }
   }
@@ -187,17 +249,13 @@ export async function receiveWhatsApp(
   return { response: new Response('ok'), messages: parseWhatsAppNotification(body) };
 }
 
-/** Why the provider refused, from its error code. */
 function refusal(status: number, body: Json): ChatChannelError {
   const code = Number(record(body.error).code ?? 0);
-  // 131047: a business writing first outside the 24-hour window.
-  if (code === 131047) return new ChatChannelError('outside_window', `whatsapp ${code}`);
-  if (code === 131026 || code === 131030) {
-    return new ChatChannelError('recipient_unreachable', `whatsapp ${code}`);
-  }
-  // 131062: this kind of message cannot go to a business-scoped id.
-  if (code === 131062) return new ChatChannelError('needs_phone_number', `whatsapp ${code}`);
-  return new ChatChannelError('provider_refused', `whatsapp ${status} ${code}`);
+  const reason = reasonOf(code);
+  return new ChatChannelError(
+    reason,
+    reason === 'provider_refused' ? `whatsapp ${status} ${code}` : `whatsapp ${code}`,
+  );
 }
 
 export function whatsAppChannel(options: WhatsAppOptions): ChatChannel {
@@ -218,7 +276,14 @@ export function whatsAppChannel(options: WhatsAppOptions): ChatChannel {
     return response;
   }
 
-  const send = (to: string, payload: Json): Promise<Response> =>
+  const send = async (to: string, payload: Json): Promise<ChatReceipt | undefined> => {
+    const response = await post(to, payload);
+    // The provider names the message it accepted: a status finds it by this identifier.
+    const accepted = record(await response.json().catch(() => ({})));
+    const id = text(list(accepted.messages)[0]?.id);
+    return id ? { providerMessageId: id } : undefined;
+  };
+  const post = (to: string, payload: Json): Promise<Response> =>
     call(`${options.phoneNumberId}/messages`, {
       method: 'POST',
       headers: { ...auth, 'content-type': 'application/json' },
@@ -234,8 +299,7 @@ export function whatsAppChannel(options: WhatsAppOptions): ChatChannel {
     channel: 'whatsapp',
     async sendText(to, body, actions) {
       if (!actions?.length) {
-        await send(to, { type: 'text', text: { body, preview_url: true } });
-        return;
+        return send(to, { type: 'text', text: { body, preview_url: true } });
       }
       // An interactive message's text is 1 024 characters at most: a longer one goes first.
       let shown = body;
@@ -243,7 +307,7 @@ export function whatsAppChannel(options: WhatsAppOptions): ChatChannel {
         await send(to, { type: 'text', text: { body, preview_url: true } });
         shown = '…';
       }
-      await send(to, {
+      return send(to, {
         type: 'interactive',
         interactive: {
           type: 'button',
@@ -259,7 +323,7 @@ export function whatsAppChannel(options: WhatsAppOptions): ChatChannel {
       });
     },
     async sendTemplate(to, template) {
-      await send(to, {
+      return send(to, {
         type: 'template',
         template: {
           name: template.name,
@@ -285,7 +349,7 @@ export function whatsAppChannel(options: WhatsAppOptions): ChatChannel {
         body: form,
       });
       const { id } = (await uploaded.json()) as { id: string };
-      await send(to, { type: 'document', document: { id, filename, caption } });
+      return send(to, { type: 'document', document: { id, filename, caption } });
     },
     async sendList(to, body, buttonLabel, rows) {
       // Ten rows at most; a title of 24 characters, a description of 72.

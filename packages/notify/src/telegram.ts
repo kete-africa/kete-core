@@ -7,6 +7,7 @@ import {
   type ChatChannel,
   type ChatHeard,
   type ChatInbound,
+  type ChatReceipt,
   type ChatSender,
   type Json,
 } from './chat.js';
@@ -181,10 +182,16 @@ export function telegramChannel(options: TelegramOptions): ChatChannel {
     );
   }
 
+  // A message is numbered within its chat: the two together name it.
+  const receipt = (to: string, result: Json): ChatReceipt | undefined => {
+    const id = text(result.message_id);
+    return id ? { providerMessageId: `${to}:${id}` } : undefined;
+  };
+
   return {
     channel: 'telegram',
     async sendText(to, body, actions) {
-      await call('sendMessage', {
+      const result = await call('sendMessage', {
         chat_id: to,
         text: body,
         // Any number-sharing keyboard goes away once the conversation has started.
@@ -196,6 +203,7 @@ export function telegramChannel(options: TelegramOptions): ChatChannel {
             }
           : { remove_keyboard: true },
       });
+      return receipt(to, result);
     },
     async sendDocument(to, content, filename, caption) {
       const form = new FormData();
@@ -206,7 +214,7 @@ export function telegramChannel(options: TelegramOptions): ChatChannel {
         new Blob([new Uint8Array(content)], { type: mediaTypeOf(filename) }),
         filename,
       );
-      await call('sendDocument', form);
+      return receipt(to, await call('sendDocument', form));
     },
     async sendList(to, body, _buttonLabel, rows) {
       // One button per row, under the message.
