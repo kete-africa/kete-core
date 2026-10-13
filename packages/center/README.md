@@ -40,6 +40,11 @@ circuits, for the person; once decided, the center posts the request's id to the
 `callbackUrl`, and the app reads the outcome with its own token: `center.decision(appToken,
 organizationId, requestId)` (Kete Enterprise spec 023).
 
+A request may carry its `projectId`: a step of the circuit is then decided by the project's lead.
+It may come back `returned` — sent back to who asked, `reason` saying what to correct; the app
+asks again with the same `subject` and `reference` once corrected, and it is the same request
+(Kete Enterprise spec 075).
+
 ## Business events
 
 `center.eventsUrl` is where the app delivers its business events, with its own token

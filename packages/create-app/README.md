@@ -6,6 +6,11 @@ Creates a Kete App from kete-core's template (`templates/app`, spec 029):
 pnpm create @kete-africa/app nettio --owner="Software team" --contact=software@example.com --design=workspace
 ```
 
+pnpm takes a version only once it is older than its minimum release age: on the day the template
+changes, `pnpm create` still gives the one before. To get today's, name it and lift the age for that
+call — `pnpm --config.minimumReleaseAge=0 create @kete-africa/app@<version> …` (seen on 2026-10-13,
+when Kete Gestion was born).
+
 The new app is named, wears its design (`kete` by default, `workspace` for an enterprise), and takes
 its `@kete/*` packages from GitHub Packages at their published versions — never a branch of
 kete-core (doctrine D-034). Its manifest carries its identity card from the first commit

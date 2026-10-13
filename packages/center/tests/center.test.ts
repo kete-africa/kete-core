@@ -130,4 +130,41 @@ describe('the center, as an app sees it', () => {
     expect(new Headers(calls[1]?.init?.headers).get('authorization')).toBe('Bearer app-token');
     expect(await center.decision(null, 'org_kya', 'drq_1')).toBeNull();
   });
+
+  it('asks with the request’s project, and reads a request sent back with its reason', async () => {
+    let asked = 0;
+    const { calls, fetcher } = fakeFetch(() =>
+      asked++ > 0
+        ? Response.json({
+            requestId: 'drq_2',
+            subject: 'prd_kete_gestion.purchase',
+            reference: 'pur_7',
+            status: 'returned',
+            decidedBy: 'usr_kossi',
+            reason: 'Le devis du fournisseur manque.',
+          })
+        : Response.json({ requestId: 'drq_2', status: 'pending' }, { status: 201 }),
+    );
+    const center = createCenter({
+      url: 'https://api.center.test',
+      product: 'prd_kete_gestion',
+      source: 'kete-gestion',
+      fetch: fetcher,
+    });
+    await center.requestDecision('person-token', {
+      subject: 'purchase',
+      reference: 'pur_7',
+      title: 'Câbles, 120 000 F CFA',
+      measure: 120_000,
+      projectId: 'prj_0123456789abcdef',
+    });
+    expect(JSON.parse(String(calls[0]?.init?.body))).toMatchObject({
+      projectId: 'prj_0123456789abcdef',
+    });
+    expect(await center.decision('app-token', 'org_kya', 'drq_2')).toMatchObject({
+      status: 'returned',
+      decidedBy: 'usr_kossi',
+      reason: 'Le devis du fournisseur manque.',
+    });
+  });
 });

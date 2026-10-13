@@ -1,5 +1,13 @@
 # @kete-africa/center
 
+## 0.5.0
+
+### Minor Changes
+
+- A decision an app asks carries its project (`projectId`: a step of the circuit may be its lead's)
+  and may come back `returned` — sent back to who asked, with the reason; asked again under the same
+  reference, it is the same request, corrected (Kete Enterprise spec 075).
+
 ## 0.4.0
 
 ### Minor Changes
