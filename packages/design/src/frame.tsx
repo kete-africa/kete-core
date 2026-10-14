@@ -462,11 +462,17 @@ export function KpiTile({
   hint,
   href,
   why,
+  trend,
 }: {
   label: ReactNode;
   value: ReactNode;
   hint?: ReactNode;
   href?: string;
+  /**
+   * Where it went since the period before, and whether that is good news — the figure's own
+   * `better` decides, never the arrow: a rise of absences is bad. `label`: « +12 % ».
+   */
+  trend?: { direction: 'up' | 'down' | 'flat'; tone: 'good' | 'bad' | 'neutral'; label: ReactNode };
   /**
    * « Pourquoi ? » (doctrine D-045, rule 4): a control that explains how the figure is computed.
    * Only on a tile without `href`: a control is never put inside a link.
@@ -477,6 +483,22 @@ export function KpiTile({
     <>
       <span className="text-body-sm text-fg-muted">{label}</span>
       <span className="font-number text-[26px] leading-tight font-semibold">{value}</span>
+      {trend && (
+        <span
+          data-tone={trend.tone}
+          className={cx(
+            'inline-flex items-center gap-1 font-number text-body-sm',
+            trend.tone === 'good' && 'text-state-success-fg',
+            trend.tone === 'bad' && 'text-state-error-fg',
+            trend.tone === 'neutral' && 'text-fg-muted',
+          )}
+        >
+          <span aria-hidden="true">
+            {trend.direction === 'up' ? '▲' : trend.direction === 'down' ? '▼' : '='}
+          </span>
+          {trend.label}
+        </span>
+      )}
       {hint && <span className="text-body-sm text-fg-muted">{hint}</span>}
       {!href && why && <span className="text-body-sm">{why}</span>}
     </>

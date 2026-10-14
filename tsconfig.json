@@ -93,6 +93,12 @@
     },
     {
       "path": "packages/time"
+    },
+    {
+      "path": "packages/metrics"
+    },
+    {
+      "path": "packages/boards"
     }
   ]
 }

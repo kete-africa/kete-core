@@ -40,6 +40,8 @@ export const validateMoneyFact = validator(`${base}money-fact.v1.schema.json`);
 export const validateDatedFact = validator(`${base}dated-fact.v1.schema.json`);
 /** A figure an app declares, read under the reader's rights (doctrine D-052). */
 export const validateMetric = validator(`${base}metric.v1.schema.json`);
+/** A figure read for a reader, under her rights (doctrine D-052). */
+export const validateMetricReading = validator(`${base}metric-reading.v1.schema.json`);
 /** Several proposals decided together by one gesture (doctrine D-051). */
 export const validateProposalSet = validator(`${base}proposal-set.v1.schema.json`);
 /** A skill, an agent or an app in its lifecycle (doctrine D-053). */

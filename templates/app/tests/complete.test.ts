@@ -18,6 +18,8 @@ import { askApp, askStream } from '../src/features/assistant';
 import { useModel } from '../src/platform/ai';
 import { deliverWaiting, receive, useChat } from '../src/platform/chat';
 import { transaction, usePool } from '../src/platform/db';
+import { manifest } from '../src/platform/events';
+import { metrics } from '../src/platform/metrics';
 import { registry } from '../src/platform/registry';
 import { asPerson } from '../src/platform/rights';
 import { personOf, screenActor } from '../src/platform/session';
@@ -290,6 +292,39 @@ describe('WhatsApp and Telegram', () => {
     expect(kept.map((message) => [message.direction, message.status])).toEqual([
       ['out', 'sent'],
       ['in', 'received'],
+    ]);
+  });
+});
+
+describe('its figures (kete-core spec 103)', () => {
+  it('reads them under the reader’s rights: counted for her, refused to whoever may not read tasks', async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const read = (who: KeteIdentity) => asPerson(who, () => metrics.read('all', { today }));
+    const value = (readings: { name: string; value: number | null }[], name: string) =>
+      readings.find((reading) => reading.name === name)?.value ?? null;
+    const before = await read(owner);
+    expect(before.map((reading) => reading.name)).toEqual(['tasks.open', 'tasks.overdue']);
+    await performGesture(
+      registry,
+      {
+        actor: screenActor(owner),
+        organizationId: ORG,
+        name: 'tasks_create',
+        input: { title: 'Déposer le rapport', dueOn: '2026-01-05' },
+      },
+      (work) => asPerson(owner, work),
+    );
+    const after = await read(owner);
+    expect(value(after, 'tasks.open')).toBe((value(before, 'tasks.open') ?? 0) + 1);
+    expect(value(after, 'tasks.overdue')).toBe((value(before, 'tasks.overdue') ?? 0) + 1);
+    // Without a business role, the newcomer reads no task: no figure of them either.
+    expect(await read(newcomer)).toEqual([
+      expect.objectContaining({ name: 'tasks.open', value: null, denied: true }),
+      expect.objectContaining({ name: 'tasks.overdue', value: null, denied: true }),
+    ]);
+    expect(manifest().metrics?.map((metric) => metric.name)).toEqual([
+      'tasks.open',
+      'tasks.overdue',
     ]);
   });
 });

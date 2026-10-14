@@ -15,6 +15,7 @@ export const routes = rootRoute('__root.tsx', [
   route('/api/v1/$', 'api/v1.ts'),
   route('/api/avis', 'api/feedback.ts'),
   route('/api/intelligence', 'api/intelligence.ts'),
+  route('/api/metrics', 'api/metrics.ts'),
   route('/api/chat/whatsapp', 'api/chat-whatsapp.ts'),
   route('/api/chat/telegram/$account', 'api/chat-telegram.ts'),
   route('/health', 'api/health.ts'),

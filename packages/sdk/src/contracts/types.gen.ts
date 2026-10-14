@@ -773,6 +773,51 @@ export interface Manifest {
 }
 
 /**
+ * A figure an app declared (metric.v1), read at a moment for a reader, under her rights (doctrine D-052): its value over a period, the value of the period before when she compares, and the filters it applied. A board, an app's home and a summary show readings; a summary keeps them frozen.
+ */
+export interface MetricReading {
+  /**
+   * The metric's name, as its app declares it: « finance.available ».
+   */
+  name: string;
+  /**
+   * In the metric's unit; money in the currency's smallest unit. Null: nothing to count, or the reader may not read it (`denied`).
+   */
+  value: number | null;
+  /**
+   * The value over the period just before, of the same length, when the reader compares.
+   */
+  previous?: number | null;
+  /**
+   * For a metric in money: ISO 4217.
+   */
+  currency?: string;
+  /**
+   * The days it covers, both included; none for « everything ».
+   */
+  period?: {
+    from: string;
+    to: string;
+  };
+  /**
+   * The filters it applied — only those on its axes; a filter asked on another axis is left out, and the reader is told the figure is not filtered.
+   */
+  filter?: {
+    project_id?: string;
+    party_id?: string;
+    person_id?: string;
+  };
+  /**
+   * When it was read.
+   */
+  at: string;
+  /**
+   * True: the reader may not read this figure; its value is null.
+   */
+  denied?: boolean;
+}
+
+/**
  * A figure an app declares in its manifest, computed by the app's code and read under the reader's rights (doctrine D-052). Boards, the apps' homes and summaries compose metrics; no one writes a query. Its axes are the center's references, so that a filter « project = X » applies to every app's figures at once.
  */
 export interface Metric {

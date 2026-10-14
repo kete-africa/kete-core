@@ -119,6 +119,9 @@ The page chooses its design and mode on `<html>`:
 | `Mention`                                           | An object named anywhere, with its card on hover and the color of its app (spec 100)                                            |
 | `AgentRunState`                                     | An agent's six states — asleep, working, waiting, blocked, paused, stopped — the same marks everywhere (D-045)                  |
 | `KpiTile` with `why`                                | A figure with « Pourquoi ? » under it (D-045, rule 4)                                                                           |
+| `KpiTile` with `trend`                              | Where a figure went since the period before, toned by whether that is good news (spec 103)                                      |
+| `BoardGrid`                                         | A board's cards on twelve columns, one under the other on a phone, a proposal dashed (spec 103)                                 |
+| `SummaryCard`                                       | A board frozen at a moment: what changed, each figure, her words, its gestures (spec 103)                                       |
 | `WeekCalendar`, `AgendaList`                        | A week hour by hour — whole days on top, a proposal dashed, a clash marked, now — read as a list on a phone (spec 102)          |
 | `TeamLanes`                                         | Who is there and who is away, day by day, by unit: an absence hatched, never its reason (spec 102)                              |
 
