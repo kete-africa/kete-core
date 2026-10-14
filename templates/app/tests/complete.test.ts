@@ -15,6 +15,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { migrations } from '../db/migrations';
 import type { IntelligenceEvent } from '@kete/sdk';
 import { askApp, askStream } from '../src/features/assistant';
+import { applyDay, undoDay, understandDay } from '../src/features/closure';
 import { useModel } from '../src/platform/ai';
 import { deliverWaiting, receive, useChat } from '../src/platform/chat';
 import { transaction, usePool } from '../src/platform/db';
@@ -293,6 +294,94 @@ describe('WhatsApp and Telegram', () => {
       ['out', 'sent'],
       ['in', 'received'],
     ]);
+  });
+});
+
+describe('the evening’s closure (kete-core spec 104)', () => {
+  it('proposes gestures on her tasks, applies what she ticked together, and undoes them together', async () => {
+    const as = <T>(work: () => T | Promise<T>) => asPerson(owner, work);
+    const created = await performGesture<{ taskId: string }>(
+      registry,
+      {
+        actor: screenActor(owner),
+        organizationId: ORG,
+        name: 'tasks_create',
+        input: { title: 'Devis Pharmacie du Port' },
+      },
+      as,
+    );
+    const taskId = created.ok ? created.output.taskId : '';
+    const statusOf = () =>
+      transaction(ORG, async (db) => {
+        const { rows } = await db.query<{ status: string }>(
+          'select status from tasks where task_id = $1',
+          [taskId],
+        );
+        return rows[0]?.status;
+      });
+    useModel(
+      new MockLanguageModelV4({
+        doGenerate: () =>
+          Promise.resolve({
+            content: [
+              {
+                type: 'text' as const,
+                text: JSON.stringify({
+                  items: [
+                    {
+                      gesture: 'close',
+                      object: taskId,
+                      day: null,
+                      label: 'Clore « Devis Pharmacie du Port »',
+                      reason: 'J’ai fini le devis.',
+                    },
+                    // A task she does not have: never proposed.
+                    {
+                      gesture: 'close',
+                      object: 'tsk_ghost',
+                      day: null,
+                      label: 'Clore',
+                      reason: null,
+                    },
+                  ],
+                  unclear: ['appeler le cousin de Kossi'],
+                }),
+              },
+            ],
+            finishReason: { unified: 'stop' as const, raw: 'stop' },
+            usage,
+            warnings: [],
+          }),
+      }),
+    );
+    try {
+      const understood = await understandDay(
+        owner,
+        'J’ai fini le devis. Et appeler le cousin de Kossi.',
+        as,
+      );
+      expect(understood.status).toBe('proposed');
+      if (understood.status !== 'proposed') return;
+      expect(understood.unclear).toEqual(['appeler le cousin de Kossi']);
+      expect(understood.set.set.items).toEqual([
+        expect.objectContaining({ capability: 'tasks_complete', input: { taskId }, level: 2 }),
+      ]);
+      const id = understood.set.set.id;
+      // Another person cannot decide her set.
+      expect(
+        await applyDay(essi, id, [`close-${taskId}`], (work) => asPerson(essi, work)),
+      ).toBeNull();
+      const applied = await applyDay(owner, id, [`close-${taskId}`], as);
+      expect(applied?.outcomes).toEqual([
+        expect.objectContaining({ key: `close-${taskId}`, state: 'applied' }),
+      ]);
+      expect(await statusOf()).toBe('done');
+      const undone = await undoDay(owner, id, as);
+      expect(undone?.status).toBe('undone');
+      expect(await statusOf()).toBe('open');
+    } finally {
+      useModel(undefined);
+    }
   });
 });
 

@@ -1,5 +1,18 @@
 # @kete-africa/notify
 
+## 0.5.0
+
+### Minor Changes
+
+- Proposals and voice (spec 104, step L6). `@kete-africa/drafts` keeps proposal sets — applied
+  together by one gesture, a level 4 item waiting for its own confirmation, undone together
+  (`proposeSet`, `applySet`, `dismissSet`, `undoSet`, `proposalSetsMigrationSql`). `@kete-africa/ai`
+  understands a note as gestures on the objects the app knows (`understand`), never guessed.
+  `@kete-africa/notify` gives a message's words, a voice note written by the dictation port
+  (`wordsOf`). `@kete-africa/sdk`: a proposal's item carries its capability's `input` (additive).
+  `@kete-africa/design` adds `ProposalList` and `VoiceCapture`. A generated app closes its day at
+  `/soir`.
+
 ## 0.4.0
 
 ### Minor Changes

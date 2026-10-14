@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/drafts",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "Kete drafts: what an agent prepares and a person validates — record drafts and change proposals, with each field's provenance.",
   "repository": {
@@ -17,6 +17,7 @@
   "dependencies": {
     "@kete/commands": "workspace:@kete-africa/commands@*",
     "@kete/records": "workspace:@kete-africa/records@*",
+    "@kete/sdk": "workspace:@kete-africa/sdk@*",
     "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
     "zod": "^4.6.5"
   },

@@ -56,3 +56,32 @@ await validateDraft(tx, {
   `import`, with who, how sure, and the evidence.
 - **Corrections kept**: field by field, what was prepared and what was validated.
 - `draftsMigrationSql` creates the table with its policies (constitution V).
+
+## Proposal sets (spec 104)
+
+Several things an agent proposes at once — the evening's tidying, a week's plan, what a document
+said — each ticked or not by the person, **applied together by one gesture and undone together**
+(contract `proposal-set.v1`; doctrine D-051).
+
+```mermaid
+stateDiagram-v2
+  [*] --> proposed: proposeSet
+  proposed --> applied: applySet · the ticked items, each through its capability
+  proposed --> dismissed: dismissSet
+  applied --> undone: undoSet · the last first
+```
+
+```ts
+const { set } = await proposeSet(tx, organizationId, { origin: 'closure', for: 'usr_afi', items });
+await applySet(tx, set.id, {
+  by: afi, // a person, or human_required
+  ticked: ['close-tsk_1', 'postpone-tsk_2'],
+  apply: (item) => perform(item.capability, item.input), // { ok, result } or { ok: false, reason }
+});
+await undoSet(tx, set.id, { by: afi, undo: (item, result) => reverse(item, result) });
+```
+
+- **A level 4 item is never applied in a batch**: it says `needs_confirmation` and asks its own.
+- A failure does not stop the others; each item says what became of it.
+- Frozen once dismissed or undone, by the database; `proposalSetsMigrationSql` creates the table
+  with its policies (constitution V).

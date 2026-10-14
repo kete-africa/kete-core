@@ -39,3 +39,10 @@ export {
 export { dictation, type Dictated, type DictationPort } from './dictate.js';
 export { scanReader } from './scans.js';
 export { intake, type Intake, type IntakeProvenance, type IntakeSource } from './intake.js';
+export {
+  understand,
+  type GestureOffer,
+  type KnownObject,
+  type ProposalGesture,
+  type ProposedItem,
+} from './understand.js';

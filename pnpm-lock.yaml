@@ -430,6 +430,9 @@ importers:
         specifier: ^4.6.5
         version: 4.6.5
     devDependencies:
+      '@kete/sdk':
+        specifier: workspace:@kete-africa/sdk@*
+        version: link:../sdk
       '@kete/testing':
         specifier: workspace:@kete-africa/testing@*
         version: link:../testing
@@ -562,6 +565,9 @@ importers:
       '@kete/records':
         specifier: workspace:@kete-africa/records@*
         version: link:../records
+      '@kete/sdk':
+        specifier: workspace:@kete-africa/sdk@*
+        version: link:../sdk
       '@kete/tenancy':
         specifier: workspace:@kete-africa/tenancy@*
         version: link:../tenancy

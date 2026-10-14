@@ -103,6 +103,32 @@ const port = dictation(transcriptionModel({ provider: 'mistral', model: 'voxtral
 const { text } = await port.dictate(audio);
 ```
 
+## Understanding a note (spec 104)
+
+What a person wrote or said at the end of her day becomes gestures proposed to her — **on the
+objects the app knows and with the gestures it offers**, never guessed. Their level and capability
+come from the app's offer, not from the model; up to level 2 an item comes ticked. What the model
+could not place is said back to her (`unclear`).
+
+```ts
+const { items, unclear } = await understand({
+  model,
+  text: transcript,
+  today: '2026-10-14',
+  known: openTasks.map((t) => ({ key: t.taskId, kind: 'task', label: t.title })),
+  offers: [
+    {
+      gesture: 'close',
+      describe: 'close a task she says is done',
+      level: 2,
+      capability: 'tasks_complete',
+      inputOf: ({ object }) => ({ taskId: object?.key }),
+    },
+  ],
+});
+// items → proposeSet of @kete/drafts
+```
+
 ## Choosing the provider (doctrine D-029)
 
 The provider is chosen by the **sensitivity of the data**, per product or per task. DeepSeek's own

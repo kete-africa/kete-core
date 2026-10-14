@@ -1833,6 +1833,10 @@ export const schemas = {
             "ticked": {
               "description": "Whether it is ticked when shown; the person changes it.",
               "type": "boolean"
+            },
+            "input": {
+              "description": "What the capability is called with, once applied (optional, added in v1: additive; spec 104).",
+              "type": "object"
             }
           }
         }

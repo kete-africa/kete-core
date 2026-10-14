@@ -69,3 +69,43 @@ revoke all on ${t} from ${app};
 grant select, insert, update on ${t} to ${app};
 `;
 }
+
+/**
+ * The SQL creating the proposal sets table (spec 104), with its RLS policies in the same migration
+ * (constitution V): a set is read and written in its organization only; once dismissed or undone, it
+ * is frozen. Nothing is ever deleted.
+ */
+export function proposalSetsMigrationSql(options: DraftsMigrationOptions): string {
+  const schema = checkIdentifier(options.schema ?? 'public');
+  const app = checkIdentifier(options.appRole);
+  const t = `${schema}.kete_proposal_sets`;
+  const organization = `organization_id = ${ACTIVE_ORGANIZATION_SQL}`;
+  return `
+create table ${t} (
+  proposal_set_id text primary key,
+  organization_id text not null,
+  origin text not null check (origin in ('closure', 'plan', 'intake', 'agent')),
+  for_person text not null,
+  items jsonb not null,
+  status text not null default 'proposed'
+    check (status in ('proposed', 'applied', 'dismissed', 'undone')),
+  outcomes jsonb not null default '[]',
+  decided_by text,
+  decided_at timestamptz,
+  created_at timestamptz not null default now(),
+  check ((status = 'proposed') = (decided_at is null))
+);
+create index kete_proposal_sets_waiting on ${t} (organization_id, for_person, status, created_at desc);
+
+alter table ${t} enable row level security;
+create policy kete_proposal_sets_isolation on ${t} as permissive for all to ${app}
+  using (${organization})
+  with check (${organization});
+create policy kete_proposal_sets_frozen on ${t} as restrictive for update to ${app}
+  using (status in ('proposed', 'applied'))
+  with check (true);
+grant usage on schema ${schema} to ${app};
+revoke all on ${t} from ${app};
+grant select, insert, update on ${t} to ${app};
+`;
+}

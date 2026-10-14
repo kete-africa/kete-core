@@ -191,3 +191,31 @@ export function mediaTypeOf(filename: string): string {
   const extension = filename.slice(filename.lastIndexOf('.') + 1).toLowerCase();
   return mediaTypes[extension] ?? 'application/octet-stream';
 }
+
+/** What a person said in a message: her words, or what she said in a voice note, written down. */
+export interface ChatWords {
+  text: string;
+  from: 'text' | 'voice';
+}
+
+/**
+ * The words of a message (kete-core spec 104): a text as it is, a voice note fetched from its
+ * channel and written down by the dictation port (`dictation` of `@kete/ai`); anything else, or a
+ * voice note nothing could hear, has none. Each channel's media, the same way.
+ */
+export async function wordsOf(
+  message: ChatInbound,
+  options: {
+    channel: Pick<ChatChannel, 'download'>;
+    dictate: (audio: Uint8Array) => Promise<{ text: string }>;
+  },
+): Promise<ChatWords | null> {
+  if (message.kind === 'text') {
+    const text = message.text?.trim();
+    return text ? { text, from: 'text' } : null;
+  }
+  if (message.kind !== 'voice' || !message.media || !options.channel.download) return null;
+  const { bytes } = await options.channel.download(message.media);
+  const heard = (await options.dictate(bytes)).text.trim();
+  return heard ? { text: heard, from: 'voice' } : null;
+}
