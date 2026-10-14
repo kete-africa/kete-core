@@ -102,6 +102,13 @@ jobs:
           ACCOUNT_TEST_STORAGE_BUCKET: ${{ secrets.ACCOUNT_TEST_STORAGE_BUCKET }}
           ACCOUNT_TEST_STORAGE_ACCESS_KEY_ID: ${{ secrets.ACCOUNT_TEST_STORAGE_ACCESS_KEY_ID }}
           ACCOUNT_TEST_STORAGE_SECRET_ACCESS_KEY: ${{ secrets.ACCOUNT_TEST_STORAGE_SECRET_ACCESS_KEY }}
+      # What the page showed when a browser test failed: its snapshot, screenshot and trace.
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: account-e2e-report
+          path: apps/account/test-results
+          retention-days: 7
 
   image:
     runs-on: ubuntu-latest
