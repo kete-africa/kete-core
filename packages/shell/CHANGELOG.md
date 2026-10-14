@@ -7,6 +7,8 @@
 - The phone (spec 106, step L8). `@kete-africa/shell` adds the morning's pile (`MorningPile`), the
   field mode « Terrain » (`FieldFrame`) and `useSunlight`. `@kete-africa/design` generates « Plein
   soleil » for every design — `data-sun="on"`, the light mode at its strongest, its contrasts checked.
+- `onNote` may return what to show under the note's field — « Gardée ; rappel jeudi 9 h », with its
+  undo — and the dialog stays open; nothing returned closes it, as before.
 
 ## 0.1.0
 

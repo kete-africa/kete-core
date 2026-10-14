@@ -44,6 +44,8 @@ const sections = placesFor(app.places, { lang: 'fr', can: (p) => grants.includes
 - **Places**: `placesFor` keeps the manifest's order and headings; a place with a permission shows
   only when `can` says she holds it.
 - **Keys**: Ctrl K opens the palette, Ctrl J asks, N notes (when she is not typing).
+- **A note's answer**: `onNote` may return what to show under the field — the reminder it filed,
+  with its undo — and the dialog stays open; nothing returned closes it.
 - **Words**: no word is written in the package; `ShellWords` lists them all.
 - The parts it composes are `@kete/design`'s: `Shell`, `NavItem`, `CommandPalette`, `TabBar`.
 
