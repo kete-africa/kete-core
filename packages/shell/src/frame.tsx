@@ -120,7 +120,7 @@ export function NoteDialog({
    * Keeps the note. What it returns — « Gardée ; rappel jeudi 9 h », with its undo — is shown under
    * the field and the dialog stays open; nothing returned closes it.
    */
-  onSave: (text: string) => Promise<ReactNode | void>;
+  onSave: (text: string) => Promise<ReactNode>;
   words: Pick<ShellWords, 'noteTitle' | 'noteField' | 'noteHint' | 'noteSave' | 'close'>;
 }) {
   const [text, setText] = useState('');
@@ -236,7 +236,7 @@ export function AppFrame({
   beside?: { open: boolean; label: string; onClose: () => void; content: ReactNode };
   onFiles?: () => void;
   /** Keeps a note; what it returns is shown in the dialog (see `NoteDialog`). */
-  onNote?: (text: string) => Promise<ReactNode | void>;
+  onNote?: (text: string) => Promise<ReactNode>;
   sync?: SyncState;
   bell?: { href: string; count?: number };
   /** The ids of up to four places on the phone's tabs; « Demander » sits in the middle. */
