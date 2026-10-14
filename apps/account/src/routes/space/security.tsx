@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useEffect, useState } from 'react';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { Button, Panel, Tag, TextField } from '@kete/design';
 import QRCode from 'qrcode';
@@ -20,6 +20,9 @@ interface Enrollment {
 
 function Security() {
   const { twoFactorEnabled, password, passkeys } = Route.useLoaderData();
+  // Her password removed, the two-factor panel goes at once — not when the page is read again.
+  const [passwordGone, setPasswordGone] = useState(false);
+  useEffect(() => setPasswordGone(false), [password]);
   const router = useRouter();
   const hydrated = useHydrated();
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
@@ -81,8 +84,12 @@ function Security() {
         <h1 className="font-headline text-headline font-extrabold">{m.security_title()}</h1>
         <p className="text-body-lg text-bark">{m.security_intro()}</p>
       </div>
-      <Passkeys passkeys={passkeys} password={password} />
-      {password && (
+      <Passkeys
+        passkeys={passkeys}
+        password={password}
+        onPasswordRemoved={() => setPasswordGone(true)}
+      />
+      {password && !passwordGone && (
         <Panel title={m.security_two_factor()}>
           <div className="mb-4">
             <Tag tone={twoFactorEnabled ? 'validated' : 'neutral'}>
@@ -158,9 +165,11 @@ function Security() {
 function Passkeys({
   passkeys,
   password,
+  onPasswordRemoved,
 }: {
   passkeys: { id: string; name: string | null; createdAt: string | null }[];
   password: boolean;
+  onPasswordRemoved: () => void;
 }) {
   const router = useRouter();
   const hydrated = useHydrated();
@@ -215,6 +224,7 @@ function Passkeys({
       return;
     }
     setState('password_removed');
+    onPasswordRemoved();
     await router.invalidate();
   }
 
