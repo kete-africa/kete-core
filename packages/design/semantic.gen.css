@@ -142,6 +142,47 @@
     }
   }
 
+  [data-sun='on'] {
+    color-scheme: light;
+    --color-canvas: #fffdf9;
+    --color-surface: #fffdf9;
+    --color-surface-raised: #fffdf9;
+    --color-surface-hover: #f4e6da;
+    --color-surface-selected: #f4e6da;
+    --color-surface-control: #fffdf9;
+    --color-fg: #2a1610;
+    --color-fg-soft: #2a1610;
+    --color-fg-muted: #2a1610;
+    --color-line: #2a1610;
+    --color-line-strong: #2a1610;
+    --color-line-control: #2a1610;
+    --color-line-selected: #2a1610;
+    --color-line-overlay: #2a1610;
+    --color-accent: #b83a1b;
+    --color-action: #b83a1b;
+    --color-action-strong: #962e14;
+    --color-on-action: #fbf6f0;
+    --color-link: #b83a1b;
+    --color-focus: #b83a1b;
+    --color-agent: #2a1610;
+    --color-on-agent: #fbf6f0;
+    --color-notice: #2a1610;
+    --color-on-notice: #fbf6f0;
+    --color-notice-line: #2a1610;
+    --color-state-success: #2f7d4f;
+    --color-state-success-fg: #1f5c38;
+    --color-state-success-surface: #e3f1e8;
+    --color-state-verify: #c98a2b;
+    --color-state-verify-fg: #7a4a0b;
+    --color-state-verify-surface: #fbebd0;
+    --color-state-error: #9b1c3c;
+    --color-state-error-fg: #7d1330;
+    --color-state-error-surface: #f7e1e7;
+    --color-state-info: #2b5c8a;
+    --color-state-info-fg: #1e4466;
+    --color-state-info-surface: #e2ecf5;
+  }
+
   /* The workspace design: dark unless the page chooses light. */
   [data-design='workspace'] {
     --font-ui: 'Segoe UI', 'Inter Variable', 'Inter', system-ui, -apple-system, Arial, sans-serif;
@@ -293,5 +334,46 @@
       --color-state-info-fg: #1e4466;
       --color-state-info-surface: #e2ecf5;
     }
+  }
+
+  [data-design='workspace'][data-sun='on'] {
+    color-scheme: light;
+    --color-canvas: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-raised: #ffffff;
+    --color-surface-hover: #e2e2df;
+    --color-surface-selected: #e2e2df;
+    --color-surface-control: #ffffff;
+    --color-fg: #1f1f1f;
+    --color-fg-soft: #1f1f1f;
+    --color-fg-muted: #1f1f1f;
+    --color-line: #1f1f1f;
+    --color-line-strong: #1f1f1f;
+    --color-line-control: #1f1f1f;
+    --color-line-selected: #1f1f1f;
+    --color-line-overlay: #1f1f1f;
+    --color-accent: #15897a;
+    --color-action: #177969;
+    --color-action-strong: #125f52;
+    --color-on-action: #ffffff;
+    --color-link: #1f1f1f;
+    --color-focus: #b35f00;
+    --color-agent: #1f1f1f;
+    --color-on-agent: #ffffff;
+    --color-notice: #1f1f1f;
+    --color-on-notice: #f7f7f6;
+    --color-notice-line: #1f1f1f;
+    --color-state-success: #2f7d4f;
+    --color-state-success-fg: #1f5c38;
+    --color-state-success-surface: #e3f1e8;
+    --color-state-verify: #c98a2b;
+    --color-state-verify-fg: #7a4a0b;
+    --color-state-verify-surface: #fbebd0;
+    --color-state-error: #9b1c3c;
+    --color-state-error-fg: #7d1330;
+    --color-state-error-surface: #f7e1e7;
+    --color-state-info: #2b5c8a;
+    --color-state-info-fg: #1e4466;
+    --color-state-info-surface: #e2ecf5;
   }
 }
