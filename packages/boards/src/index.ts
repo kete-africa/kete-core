@@ -10,7 +10,7 @@ export {
   type NoteCard,
   type Place,
 } from './board.js';
-export { nextRun, type Routine } from './routine.js';
+export { nextRun, type Routine } from '@kete/time';
 export {
   freeze,
   summaryDocument,

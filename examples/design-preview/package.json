@@ -13,6 +13,7 @@
     "@kete/boards": "workspace:@kete-africa/boards@*",
     "@kete/design": "workspace:@kete-africa/design@*",
     "@kete/intelligence": "workspace:@kete-africa/intelligence@*",
+    "@kete/lifecycle": "workspace:@kete-africa/lifecycle@*",
     "@kete/metrics": "workspace:@kete-africa/metrics@*",
     "@kete/sdk": "workspace:@kete-africa/sdk@*",
     "@kete/shell": "workspace:@kete-africa/shell@*",

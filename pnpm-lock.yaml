@@ -267,6 +267,9 @@ importers:
       '@kete/intelligence':
         specifier: workspace:@kete-africa/intelligence@*
         version: link:../../packages/intelligence
+      '@kete/lifecycle':
+        specifier: workspace:@kete-africa/lifecycle@*
+        version: link:../../packages/lifecycle
       '@kete/metrics':
         specifier: workspace:@kete-africa/metrics@*
         version: link:../../packages/metrics
@@ -467,6 +470,9 @@ importers:
       '@kete/sdk':
         specifier: workspace:@kete-africa/sdk@*
         version: link:../sdk
+      '@kete/time':
+        specifier: workspace:@kete-africa/time@*
+        version: link:../time
 
   packages/capabilities:
     dependencies:
@@ -729,6 +735,28 @@ importers:
       zod:
         specifier: ^4.6.5
         version: 4.6.5
+    devDependencies:
+      '@kete/testing':
+        specifier: workspace:@kete-africa/testing@*
+        version: link:../testing
+
+  packages/lifecycle:
+    dependencies:
+      '@kete/commands':
+        specifier: workspace:@kete-africa/commands@*
+        version: link:../commands
+      '@kete/records':
+        specifier: workspace:@kete-africa/records@*
+        version: link:../records
+      '@kete/sdk':
+        specifier: workspace:@kete-africa/sdk@*
+        version: link:../sdk
+      '@kete/tenancy':
+        specifier: workspace:@kete-africa/tenancy@*
+        version: link:../tenancy
+      '@kete/time':
+        specifier: workspace:@kete-africa/time@*
+        version: link:../time
     devDependencies:
       '@kete/testing':
         specifier: workspace:@kete-africa/testing@*
