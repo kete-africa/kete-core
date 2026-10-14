@@ -119,6 +119,8 @@ The page chooses its design and mode on `<html>`:
 | `Mention`                                           | An object named anywhere, with its card on hover and the color of its app (spec 100)                                            |
 | `AgentRunState`                                     | An agent's six states — asleep, working, waiting, blocked, paused, stopped — the same marks everywhere (D-045)                  |
 | `KpiTile` with `why`                                | A figure with « Pourquoi ? » under it (D-045, rule 4)                                                                           |
+| `WeekCalendar`, `AgendaList`                        | A week hour by hour — whole days on top, a proposal dashed, a clash marked, now — read as a list on a phone (spec 102)          |
+| `TeamLanes`                                         | Who is there and who is away, day by day, by unit: an absence hatched, never its reason (spec 102)                              |
 
 Every visible string comes from the app's translation catalogs, through props. The frame that
 assembles these parts from an app's manifest is `@kete/shell`.

@@ -48,6 +48,20 @@ export {
   type AgentRunStateName,
   type Evidence,
 } from './canvas.js';
+export {
+  AgendaList,
+  TeamLanes,
+  WeekCalendar,
+  type CalendarDay,
+  type CalendarDayItem,
+  type CalendarDayTone,
+  type CalendarItem,
+  type CalendarTone,
+  type CalendarWords,
+  type LaneCell,
+  type LaneRow,
+  type LaneTone,
+} from './calendar.js';
 export { KeteBand, KeteMark } from './marks.js';
 export {
   applyTheme,

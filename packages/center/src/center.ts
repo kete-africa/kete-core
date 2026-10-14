@@ -154,6 +154,33 @@ export interface MoneyFact {
   href?: string;
 }
 
+/**
+ * A dated fact (contract `dated-fact.v1`; doctrine D-050): something the app says will happen at a
+ * time — a meeting, a deadline, an absence, a task, a milestone, an agent's run — for the center's
+ * Planifier. Said again under its key, it replaces what was said. Exactly one of `day` and
+ * `startsAt` is given.
+ */
+export interface DatedFact {
+  key: string;
+  kind: 'meeting' | 'deadline' | 'absence' | 'task' | 'milestone' | 'agent_run';
+  /** As a person reads it: « Échéance F-2026-0003 ». */
+  label: string;
+  /** A whole day, `2026-10-15`; with `until`, the first day of a span. */
+  day?: string;
+  /** The last day of a span that started on `day`. */
+  until?: string;
+  /** A moment, ISO 8601 with its offset. */
+  startsAt?: string;
+  endsAt?: string;
+  /** The people of the center it concerns: who meets, who is away, who must do it. */
+  personIds?: string[];
+  projectId?: string;
+  partyId?: string;
+  /** `shared` by default; `busy`: others see only that she is taken; `private`. */
+  visibility?: 'shared' | 'busy' | 'private';
+  href?: string;
+}
+
 export interface CenterOptions {
   /** The center's API, `https://api.enterprise.example`; empty when the app works alone. */
   url: string | null | undefined;
@@ -232,6 +259,13 @@ export interface Center {
   ): Promise<{ ok: boolean; error: string | null }>;
   /** Takes a fact of money back: it was not true. */
   dropMoneyFact(token: string | null | undefined, key: string): Promise<void>;
+  /** Says a dated fact to the center, in the contract's shape; said again, it is replaced. */
+  sendDatedFact(
+    token: string | null | undefined,
+    fact: DatedFact,
+  ): Promise<{ ok: boolean; error: string | null }>;
+  /** Takes a dated fact back: it will not happen. */
+  dropDatedFact(token: string | null | undefined, key: string): Promise<void>;
   /** Sends an indicator's reading for her quarter's review. */
   sendReading(
     token: string | null | undefined,
@@ -409,6 +443,23 @@ export function createCenter(options: CenterOptions): Center {
       if (token) await post(token, '/v1/money/facts/drop', { source: options.source, key });
     },
 
+    async sendDatedFact(token, fact) {
+      if (!base) return { ok: false, error: 'not_connected' };
+      if (!token) return { ok: false, error: 'signed_out' };
+      const response = await post(token, '/v1/time/facts', {
+        source: options.source,
+        fact: datedFactBody(fact),
+      });
+      if (!response) return { ok: false, error: 'unreachable' };
+      if (response.ok) return { ok: true, error: null };
+      const answer = (await response.json().catch(() => ({}))) as { error?: string };
+      return { ok: false, error: answer.error ?? `http_${response.status}` };
+    },
+
+    async dropDatedFact(token, key) {
+      if (token) await post(token, '/v1/time/facts/drop', { source: options.source, key });
+    },
+
     async sendTask(token, task) {
       if (token) await post(token, '/v1/workspace/tasks', { ...task, source: options.source });
     },
@@ -444,6 +495,24 @@ export function moneyFactBody(fact: MoneyFact): Record<string, unknown> {
     ...(fact.projectId ? { project_id: fact.projectId } : {}),
     ...(fact.post ? { post: fact.post } : {}),
     ...(fact.partyId ? { party_id: fact.partyId } : {}),
+    ...(fact.href ? { href: fact.href } : {}),
+  };
+}
+
+/** A dated fact in its contract's shape (`contracts/dated-fact.v1.schema.json`). */
+export function datedFactBody(fact: DatedFact): Record<string, unknown> {
+  return {
+    key: fact.key,
+    kind: fact.kind,
+    label: fact.label,
+    ...(fact.day ? { day: fact.day } : {}),
+    ...(fact.until ? { until: fact.until } : {}),
+    ...(fact.startsAt ? { starts_at: fact.startsAt } : {}),
+    ...(fact.endsAt ? { ends_at: fact.endsAt } : {}),
+    ...(fact.personIds?.length ? { person_ids: fact.personIds } : {}),
+    ...(fact.projectId ? { project_id: fact.projectId } : {}),
+    ...(fact.partyId ? { party_id: fact.partyId } : {}),
+    ...(fact.visibility ? { visibility: fact.visibility } : {}),
     ...(fact.href ? { href: fact.href } : {}),
   };
 }

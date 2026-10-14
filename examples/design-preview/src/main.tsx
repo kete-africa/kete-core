@@ -31,6 +31,7 @@ import { StrictMode, useEffect, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './app.css';
 import { CanvasPage } from './canvas';
+import { PlanPage } from './plan';
 import { ChatPage, SlotsPage } from './slots';
 
 // The workspace page of copilot-demo, rebuilt with @kete/design: same structure and behavior,
@@ -440,6 +441,16 @@ const frames: Record<
     label: 'cadre · clair',
     attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
     page: <CanvasPage />,
+  },
+  'plan-dark': {
+    label: 'planifier · sombre',
+    attributes: { 'data-design': 'workspace' },
+    page: <PlanPage />,
+  },
+  'plan-light': {
+    label: 'planifier · clair',
+    attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
+    page: <PlanPage />,
   },
   'kete-light': { label: 'kete · clair', attributes: {}, page: <KetePage /> },
   'kete-dark': {

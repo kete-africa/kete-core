@@ -90,6 +90,9 @@
     },
     {
       "path": "packages/intelligence"
+    },
+    {
+      "path": "packages/time"
     }
   ]
 }

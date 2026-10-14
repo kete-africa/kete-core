@@ -2,6 +2,7 @@
 
 export {
   createCenter,
+  datedFactBody,
   moneyFactBody,
   type Center,
   type CenterGrants,
@@ -11,6 +12,7 @@ export {
   type CenterReading,
   type CenterDecision,
   type CenterTask,
+  type DatedFact,
   type DecisionAsked,
   type DirectoryCard,
   type DirectoryPerson,
