@@ -8,6 +8,7 @@ export const routes = rootRoute('__root.tsx', [
   route('/taches/$taskId', 'tasks/$taskId.tsx'),
   route('/verification/$draftId', 'review/$draftId.tsx'),
   route('/journal', 'journal.tsx'),
+  route('/soir', 'closure.tsx'),
   route('/auth/connexion', 'auth/sign-in.ts'),
   route('/auth/callback', 'auth/callback.ts'),
   route('/auth/sortie', 'auth/sign-out.ts'),

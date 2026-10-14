@@ -36,6 +36,15 @@
       },
       "path": "/journal",
       "icon": "clock"
+    },
+    {
+      "id": "closure",
+      "label": {
+        "fr": "Ma journée",
+        "en": "My day"
+      },
+      "path": "/soir",
+      "icon": "pen"
     }
   ],
   "metrics": [

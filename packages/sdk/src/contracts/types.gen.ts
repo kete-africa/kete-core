@@ -941,6 +941,12 @@ export interface ProposalSet {
        * Whether it is ticked when shown; the person changes it.
        */
       ticked?: boolean;
+      /**
+       * What the capability is called with, once applied (optional, added in v1: additive; spec 104).
+       */
+      input?: {
+        [k: string]: unknown;
+      };
     },
     ...{
       key: string;
@@ -969,6 +975,12 @@ export interface ProposalSet {
        * Whether it is ticked when shown; the person changes it.
        */
       ticked?: boolean;
+      /**
+       * What the capability is called with, once applied (optional, added in v1: additive; spec 104).
+       */
+      input?: {
+        [k: string]: unknown;
+      };
     }[],
   ];
 }

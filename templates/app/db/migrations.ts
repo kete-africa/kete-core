@@ -3,7 +3,7 @@ import { usageMigrationSql } from '@kete/analytics';
 import { businessRolesMigrationSql } from '@kete/capabilities';
 import { commandsDelegationMigrationSql, commandsMigrationSql } from '@kete/commands';
 import { chatOutboxMigrationSql } from '@kete/notify';
-import { draftsMigrationSql } from '@kete/drafts';
+import { draftsMigrationSql, proposalSetsMigrationSql } from '@kete/drafts';
 import { feedbackMigrationSql } from '@kete/feedback';
 import { outboxMigrationSql } from '@kete/sdk';
 import { tasksMigrationSql } from '@/features/tasks';
@@ -55,4 +55,6 @@ export const migrations: Migration[] = [
   },
   // Who uses what, per organization (kete-core spec 091).
   { name: '0007_kete_usage', sql: (context) => usageMigrationSql(context) },
+  // What the assistant proposes at once, decided by one gesture (kete-core spec 104).
+  { name: '0008_kete_proposal_sets', sql: (context) => proposalSetsMigrationSql(context) },
 ];

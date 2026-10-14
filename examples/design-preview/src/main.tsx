@@ -32,6 +32,7 @@ import { createRoot } from 'react-dom/client';
 import './app.css';
 import { CanvasPage } from './canvas';
 import { BoardPage } from './board';
+import { ClosurePage } from './closure';
 import { PlanPage } from './plan';
 import { ChatPage, SlotsPage } from './slots';
 
@@ -462,6 +463,16 @@ const frames: Record<
     label: 'tableau · clair',
     attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
     page: <BoardPage />,
+  },
+  'closure-dark': {
+    label: 'soir · sombre',
+    attributes: { 'data-design': 'workspace' },
+    page: <ClosurePage />,
+  },
+  'closure-light': {
+    label: 'soir · clair',
+    attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
+    page: <ClosurePage />,
   },
   'kete-light': { label: 'kete · clair', attributes: {}, page: <KetePage /> },
   'kete-dark': {

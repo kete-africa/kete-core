@@ -11,6 +11,8 @@ import {
   telegramChannel,
   whatsAppAccountsOf,
   whatsAppChannel,
+  wordsOf,
+  type ChatInbound,
 } from '../src/index.js';
 
 // The payloads are the providers' documented shapes, with invented people. Nothing here reaches a
@@ -579,5 +581,60 @@ describe('a channel in memory, for an app’s own tests', () => {
     });
     expect(channel.sent.map((message) => message.kind)).toEqual(['text', 'document', 'template']);
     expect(channel.sent[1]).toMatchObject({ filename: 'devis.pdf', bytes: 3 });
+  });
+});
+
+describe('the words of a message (spec 104)', () => {
+  const sender = {
+    id: '22890123456',
+    phone: '22890123456',
+    address: '22890123456',
+    username: null,
+    displayName: 'Afi',
+  };
+  const base = { channel: 'whatsapp' as const, providerMessageId: 'wamid.1', sender };
+  const fetched: string[] = [];
+  const channel = {
+    download: async (media: { id: string }) => {
+      fetched.push(media.id);
+      return { bytes: new Uint8Array([1, 2, 3]), mediaType: 'audio/ogg' };
+    },
+  };
+  const dictate = async (audio: Uint8Array) => ({
+    text: audio.length ? '  Fini le devis de la Pharmacie.  ' : '',
+  });
+
+  it('reads a text as it is, and a voice note written down by the dictation port', async () => {
+    const text: ChatInbound = { ...base, kind: 'text', text: ' Relancer Ecobank jeudi ' };
+    expect(await wordsOf(text, { channel, dictate })).toEqual({
+      text: 'Relancer Ecobank jeudi',
+      from: 'text',
+    });
+    const voice: ChatInbound = {
+      ...base,
+      kind: 'voice',
+      media: { id: 'media-7', mediaType: 'audio/ogg', filename: null },
+    };
+    expect(await wordsOf(voice, { channel, dictate })).toEqual({
+      text: 'Fini le devis de la Pharmacie.',
+      from: 'voice',
+    });
+    expect(fetched).toEqual(['media-7']);
+  });
+
+  it('has no words for a photo, nor for a voice note nothing could hear', async () => {
+    const photo: ChatInbound = {
+      ...base,
+      kind: 'photo',
+      media: { id: 'm', mediaType: 'image/jpeg', filename: null },
+    };
+    expect(await wordsOf(photo, { channel, dictate })).toBeNull();
+    const silent: ChatInbound = {
+      ...base,
+      kind: 'voice',
+      media: { id: 'm2', mediaType: 'audio/ogg', filename: null },
+    };
+    expect(await wordsOf(silent, { channel, dictate: async () => ({ text: ' ' }) })).toBeNull();
+    expect(await wordsOf(silent, { channel: {}, dictate })).toBeNull();
   });
 });

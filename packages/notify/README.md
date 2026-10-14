@@ -147,6 +147,17 @@ product then asks her number in words.
   nothing still satisfies the port.
 - Without credentials a channel is `null` in `ChatChannels` — not connected, never simulated.
 
+### A voice note's words (spec 104)
+
+`wordsOf(message, { channel, dictate })`: a text as it is, a voice note fetched from its channel and
+written down by the dictation port of `@kete/ai`; anything else has no words. The same on
+WhatsApp and Telegram.
+
+```ts
+const words = await wordsOf(heard.message, { channel, dictate: (audio) => port.dictate(audio) });
+if (words) await understand({ model, text: words.text, ... });
+```
+
 ## The outbox to people (spec 088)
 
 What sits between « something happened » and « a message left »: whether she agreed, in which

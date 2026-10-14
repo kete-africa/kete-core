@@ -122,6 +122,8 @@ The page chooses its design and mode on `<html>`:
 | `KpiTile` with `trend`                              | Where a figure went since the period before, toned by whether that is good news (spec 103)                                      |
 | `BoardGrid`                                         | A board's cards on twelve columns, one under the other on a phone, a proposal dashed (spec 103)                                 |
 | `SummaryCard`                                       | A board frozen at a moment: what changed, each figure, her words, its gestures (spec 103)                                       |
+| `ProposalList`                                      | What an agent proposes: ticked or not, its level, applied together, undone together (spec 104)                                  |
+| `VoiceCapture`                                      | What she says, recorded in her browser for the app's dictation port; nothing before she presses (spec 104)                      |
 | `WeekCalendar`, `AgendaList`                        | A week hour by hour — whole days on top, a proposal dashed, a clash marked, now — read as a list on a phone (spec 102)          |
 | `TeamLanes`                                         | Who is there and who is away, day by day, by unit: an absence hatched, never its reason (spec 102)                              |
 

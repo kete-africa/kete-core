@@ -50,6 +50,14 @@ export {
 } from './canvas.js';
 export { BoardGrid, SummaryCard, type BoardCardSlot, type SummaryLine } from './board.js';
 export {
+  ProposalList,
+  VoiceCapture,
+  type ProposalOutcomeState,
+  type ProposalRow,
+  type ProposalWords,
+  type VoiceWords,
+} from './proposals.js';
+export {
   AgendaList,
   TeamLanes,
   WeekCalendar,

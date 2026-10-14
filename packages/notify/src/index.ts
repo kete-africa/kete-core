@@ -3,6 +3,7 @@
 export {
   ChatChannelError,
   memoryChatChannel,
+  wordsOf,
   type ChatAction,
   type ChatChannel,
   type ChatChannelName,
@@ -16,6 +17,7 @@ export {
   type ChatSent,
   type ChatStatus,
   type ChatTemplate,
+  type ChatWords,
 } from './chat.js';
 export {
   chatChannelOf,

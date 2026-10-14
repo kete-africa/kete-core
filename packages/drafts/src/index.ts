@@ -18,4 +18,22 @@ export {
   type ProvenanceSource,
   type ValidateInput,
 } from './drafts.js';
-export { draftsMigrationSql, type DraftsMigrationOptions } from './migration.js';
+export {
+  draftsMigrationSql,
+  proposalSetsMigrationSql,
+  type DraftsMigrationOptions,
+} from './migration.js';
+export {
+  applySet,
+  dismissSet,
+  getProposalSet,
+  newProposalSetId,
+  proposalSetsFor,
+  ProposalSetError,
+  proposeSet,
+  undoSet,
+  type ItemOutcome,
+  type ProposalItem,
+  type ProposalSetStatus,
+  type StoredProposalSet,
+} from './proposals.js';
