@@ -49,6 +49,7 @@ export {
   type Evidence,
 } from './canvas.js';
 export { BoardGrid, SummaryCard, type BoardCardSlot, type SummaryLine } from './board.js';
+export { AgentCard, LessonCard, TierLadder, type AgentGesture } from './lifecycle.js';
 export {
   ProposalList,
   VoiceCapture,

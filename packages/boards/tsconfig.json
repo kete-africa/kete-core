@@ -12,6 +12,9 @@
     },
     {
       "path": "../metrics"
+    },
+    {
+      "path": "../time"
     }
   ]
 }

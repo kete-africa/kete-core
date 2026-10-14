@@ -1,6 +1,6 @@
-// When a board's routine runs (spec 103; doctrine D-051, D-052): every day, every working day,
-// every week on a day, or every month on a date — at a time of the organization's day. The run
-// reads the board, freezes it as a summary and sends it to her channel.
+// When a routine runs (specs 103, 105; doctrine D-051, D-052) — a board's, an agent's: every day,
+// every working day, every week on a day, or every month on a date — at a time of the
+// organization's day. A board's run freezes it as a summary; an agent's wakes it.
 
 export interface Routine {
   every: 'day' | 'workday' | 'week' | 'month';

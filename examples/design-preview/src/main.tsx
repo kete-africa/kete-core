@@ -31,6 +31,7 @@ import { StrictMode, useEffect, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './app.css';
 import { CanvasPage } from './canvas';
+import { AgentPage } from './agent';
 import { BoardPage } from './board';
 import { ClosurePage } from './closure';
 import { PlanPage } from './plan';
@@ -473,6 +474,16 @@ const frames: Record<
     label: 'soir · clair',
     attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
     page: <ClosurePage />,
+  },
+  'agent-dark': {
+    label: 'déléguer · sombre',
+    attributes: { 'data-design': 'workspace' },
+    page: <AgentPage />,
+  },
+  'agent-light': {
+    label: 'déléguer · clair',
+    attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
+    page: <AgentPage />,
   },
   'kete-light': { label: 'kete · clair', attributes: {}, page: <KetePage /> },
   'kete-dark': {

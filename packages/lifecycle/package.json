@@ -1,0 +1,45 @@
+{
+  "name": "@kete-africa/lifecycle",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "One lifecycle for skills, agents and apps (spec 105; doctrine D-053): created, used, learning from lessons gathered with consent, evaluated by test cases, promoted one tier at a time with a review by its risk; an agent's six states, triggers, budget, and autonomy earned by proofs.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/lifecycle"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kete/commands": "workspace:@kete-africa/commands@*",
+    "@kete/records": "workspace:@kete-africa/records@*",
+    "@kete/sdk": "workspace:@kete-africa/sdk@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "@kete/time": "workspace:@kete-africa/time@*"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      },
+      "./server": {
+        "types": "./dist/src/server.d.ts",
+        "default": "./dist/src/server.js"
+      }
+    }
+  }
+}

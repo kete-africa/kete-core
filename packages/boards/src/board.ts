@@ -1,5 +1,5 @@
 import type { Period } from '@kete/metrics';
-import type { Routine } from './routine.js';
+import type { Routine } from '@kete/time';
 
 // A board (spec 103; doctrine D-052): one object, looked at live, sent by a routine, frozen as a
 // summary. Its cards name the apps' declared figures — never a query — or carry her own note; each

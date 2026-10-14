@@ -21,3 +21,4 @@ export {
   type TaskToPlace,
   type Workday,
 } from './plan.js';
+export { nextRun, type Routine } from './routine.js';

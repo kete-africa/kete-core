@@ -58,3 +58,9 @@ await agenda.read({ from: '2026-10-12', to: '2026-10-18' }); // « busy » facts
   out — the caller says so.
 - An absence never says why; an agenda read from outside is `busy` unless the person shares it.
 - `AgendaSource` is the port; `icsAgenda` its first adapter (every agenda exports ICS).
+
+## Routines (spec 105)
+
+`nextRun(routine, after, offsetMinutes)`: when a routine runs next — every day, working day, week on a
+day or month on a date, at a time of the organization's day. A board's routine (`@kete/boards`)
+and an agent's triggers (`@kete/lifecycle`) both use it.
