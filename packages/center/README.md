@@ -93,3 +93,23 @@ await center.sendMoneyFact(token, {
 - A fact said again under its key **replaces** itself: keep an invoice at what is still due, a
   commitment at what is still to pay; `dropMoneyFact` takes one back.
 - Without a center, reads answer nothing and gestures say `not_connected`: the app goes on.
+
+## Time (spec 102)
+
+What the app says will happen at a time — a leave, a deadline, a task — goes to the center's
+Planifier (doctrine D-050), in the shape of `contracts/dated-fact.v1.schema.json`.
+
+```ts
+await center.sendDatedFact(token, {
+  key: 'leave-kossi',
+  kind: 'absence', // never its reason
+  label: 'Congé',
+  day: '2026-10-15',
+  until: '2026-10-16',
+  personIds: ['usr_kossi'],
+});
+await center.dropDatedFact(token, 'leave-kossi'); // it will not happen
+```
+
+- Exactly one of `day` and `startsAt`; a fact said again under its key replaces itself.
+- What clashes and what is free is computed by `@kete/time`, never guessed.
