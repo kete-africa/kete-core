@@ -108,6 +108,16 @@ export async function listTasks(db: SqlExecutor, status?: TaskStatus): Promise<T
   return rows.map(toTask);
 }
 
+/** How many tasks are open — and past their due day, when `dueBefore` is given. */
+export async function countOpenTasks(db: SqlExecutor, dueBefore?: string): Promise<number> {
+  const { rows } = await db.query<{ count: string }>(
+    `select count(*) as count from tasks
+      where status = 'open' and ($1::date is null or due_on < $1::date)`,
+    [dueBefore ?? null],
+  );
+  return Number(rows[0]?.count ?? 0);
+}
+
 export async function setStatus(
   db: SqlExecutor,
   taskId: string,

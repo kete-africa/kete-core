@@ -31,6 +31,7 @@ import { StrictMode, useEffect, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './app.css';
 import { CanvasPage } from './canvas';
+import { BoardPage } from './board';
 import { PlanPage } from './plan';
 import { ChatPage, SlotsPage } from './slots';
 
@@ -451,6 +452,16 @@ const frames: Record<
     label: 'planifier · clair',
     attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
     page: <PlanPage />,
+  },
+  'board-dark': {
+    label: 'tableau · sombre',
+    attributes: { 'data-design': 'workspace' },
+    page: <BoardPage />,
+  },
+  'board-light': {
+    label: 'tableau · clair',
+    attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
+    page: <BoardPage />,
   },
   'kete-light': { label: 'kete · clair', attributes: {}, page: <KetePage /> },
   'kete-dark': {

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/metric-reading.v1.schema.json",
+  "title": "MetricReading",
+  "description": "A figure an app declared (metric.v1), read at a moment for a reader, under her rights (doctrine D-052): its value over a period, the value of the period before when she compares, and the filters it applied. A board, an app's home and a summary show readings; a summary keeps them frozen.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "value", "at"],
+  "properties": {
+    "name": {
+      "description": "The metric's name, as its app declares it: « finance.available ».",
+      "type": "string",
+      "maxLength": 100,
+      "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+    },
+    "value": {
+      "description": "In the metric's unit; money in the currency's smallest unit. Null: nothing to count, or the reader may not read it (`denied`).",
+      "type": ["number", "null"]
+    },
+    "previous": {
+      "description": "The value over the period just before, of the same length, when the reader compares.",
+      "type": ["number", "null"]
+    },
+    "currency": {
+      "description": "For a metric in money: ISO 4217.",
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "period": {
+      "description": "The days it covers, both included; none for « everything ».",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": { "type": "string", "format": "date" },
+        "to": { "type": "string", "format": "date" }
+      }
+    },
+    "filter": {
+      "description": "The filters it applied — only those on its axes; a filter asked on another axis is left out, and the reader is told the figure is not filtered.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": { "type": "string", "pattern": "^prj_[0-9a-f-]{8,64}$" },
+        "party_id": { "type": "string", "pattern": "^pty_[0-9a-f-]{8,64}$" },
+        "person_id": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "at": {
+      "description": "When it was read.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "denied": {
+      "description": "True: the reader may not read this figure; its value is null.",
+      "type": "boolean"
+    }
+  }
+}

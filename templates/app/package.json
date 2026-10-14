@@ -26,6 +26,7 @@
     "@kete/drafts": "workspace:@kete-africa/drafts@*",
     "@kete/feedback": "workspace:@kete-africa/feedback@*",
     "@kete/intelligence": "workspace:@kete-africa/intelligence@*",
+    "@kete/metrics": "workspace:@kete-africa/metrics@*",
     "@kete/jobs": "workspace:@kete-africa/jobs@*",
     "@kete/log": "workspace:@kete-africa/log@*",
     "@kete/notify": "workspace:@kete-africa/notify@*",

@@ -57,6 +57,11 @@ export function manifest(): Manifest {
     events: DECLARED_EVENTS,
     // Who answers for the app, its data, its use of AI, its criticality (doctrine D-040).
     governance: app.governance,
+    // Its question, its places and its figures (kete-core specs 099, 103): the frame, the center's
+    // menu and the boards read them.
+    question: app.question,
+    places: app.places,
+    metrics: app.metrics,
     // What it exposes, and where (kete-core spec 045): the registry of Kete Enterprise reads them.
     capabilities: registry.describeAll(),
     datasets: datasets.describeAll(),

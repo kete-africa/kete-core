@@ -37,5 +37,33 @@
       "path": "/journal",
       "icon": "clock"
     }
+  ],
+  "metrics": [
+    {
+      "name": "tasks.open",
+      "label": {
+        "fr": "Tâches ouvertes",
+        "en": "Open tasks"
+      },
+      "description": {
+        "fr": "Les tâches de l’organisation qui ne sont pas faites.",
+        "en": "The organization’s tasks not yet done."
+      },
+      "unit": "count",
+      "better": "down"
+    },
+    {
+      "name": "tasks.overdue",
+      "label": {
+        "fr": "Tâches en retard",
+        "en": "Overdue tasks"
+      },
+      "description": {
+        "fr": "Les tâches ouvertes dont l’échéance est passée.",
+        "en": "The open tasks past their due day."
+      },
+      "unit": "count",
+      "better": "down"
+    }
   ]
 }

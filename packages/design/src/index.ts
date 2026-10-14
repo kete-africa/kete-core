@@ -48,6 +48,7 @@ export {
   type AgentRunStateName,
   type Evidence,
 } from './canvas.js';
+export { BoardGrid, SummaryCard, type BoardCardSlot, type SummaryLine } from './board.js';
 export {
   AgendaList,
   TeamLanes,

@@ -258,12 +258,18 @@ importers:
 
   examples/design-preview:
     dependencies:
+      '@kete/boards':
+        specifier: workspace:@kete-africa/boards@*
+        version: link:../../packages/boards
       '@kete/design':
         specifier: workspace:@kete-africa/design@*
         version: link:../../packages/design
       '@kete/intelligence':
         specifier: workspace:@kete-africa/intelligence@*
         version: link:../../packages/intelligence
+      '@kete/metrics':
+        specifier: workspace:@kete-africa/metrics@*
+        version: link:../../packages/metrics
       '@kete/sdk':
         specifier: workspace:@kete-africa/sdk@*
         version: link:../../packages/sdk
@@ -449,6 +455,15 @@ importers:
       jose:
         specifier: ^6.2.12
         version: 6.2.12
+
+  packages/boards:
+    dependencies:
+      '@kete/metrics':
+        specifier: workspace:@kete-africa/metrics@*
+        version: link:../metrics
+      '@kete/sdk':
+        specifier: workspace:@kete-africa/sdk@*
+        version: link:../sdk
 
   packages/capabilities:
     dependencies:
@@ -732,6 +747,12 @@ importers:
         specifier: ^2.11.0
         version: 2.11.0(@opentelemetry/api@1.9.1)
 
+  packages/metrics:
+    dependencies:
+      '@kete/sdk':
+        specifier: workspace:@kete-africa/sdk@*
+        version: link:../sdk
+
   packages/money:
     dependencies:
       zod:
@@ -1004,6 +1025,9 @@ importers:
       '@kete/log':
         specifier: workspace:@kete-africa/log@*
         version: link:../../packages/log
+      '@kete/metrics':
+        specifier: workspace:@kete-africa/metrics@*
+        version: link:../../packages/metrics
       '@kete/notify':
         specifier: workspace:@kete-africa/notify@*
         version: link:../../packages/notify
