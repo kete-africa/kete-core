@@ -2,3 +2,4 @@
 @import '@kete/design/styles.css';
 @source '../node_modules/@kete/design/src';
 @source '../node_modules/@kete/shell/src';
+@source '../node_modules/@kete/intelligence/src';

@@ -1,7 +1,13 @@
 import { FeedbackButton } from '@kete/feedback/button';
+import {
+  IntelligencePanel,
+  postTo,
+  useIntelligence,
+  type IntelligenceWords,
+} from '@kete/intelligence';
 import { AppFrame, allPlaces, placesFor, type ShellWords } from '@kete/shell';
 import { useRouteContext, useRouterState } from '@tanstack/react-router';
-import type { ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import app from '../../kete.json' with { type: 'json' };
 import * as m from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
@@ -51,9 +57,47 @@ function shellWords(): ShellWords {
   };
 }
 
+/** Every word of Kete Intelligence's drawer, from this app's catalogs (kete-core spec 101). */
+function intelligenceWords(): IntelligenceWords {
+  const reasons: Record<string, () => string> = {
+    not_connected: m.intelligence_not_connected,
+    budget_spent: m.intelligence_budget_spent,
+    confirmation_required: m.intelligence_confirmation,
+  };
+  return {
+    thread: m.intelligence_thread(),
+    you: m.intelligence_you(),
+    assistant: m.intelligence_assistant(),
+    composer: m.intelligence_composer(),
+    placeholder: m.intelligence_placeholder(),
+    send: m.intelligence_send(),
+    stop: m.intelligence_stop(),
+    hint: m.intelligence_hint(),
+    context: m.intelligence_context(),
+    suggestions: m.intelligence_suggestions(),
+    thinking: m.intelligence_thinking(),
+    reading: (tool) => m.intelligence_reading({ tool }),
+    plan: m.intelligence_plan(),
+    level: (level) => m.intelligence_level({ level: String(level) }),
+    toolState: {
+      running: m.intelligence_running(),
+      done: m.intelligence_done_tool(),
+      failed: m.intelligence_failed_tool(),
+    },
+    sources: m.intelligence_sources(),
+    draft: m.intelligence_draft(),
+    verify: m.intelligence_verify(),
+    done: (tools, seconds) =>
+      m.intelligence_done({ tools: String(tools), seconds: String(seconds) }),
+    stopped: m.intelligence_stopped(),
+    reason: (code) => (reasons[code] ?? m.intelligence_failed)(),
+  };
+}
+
 /**
- * The frame of every signed-in screen (kete-core spec 100): the places of `kete.json`, Ctrl K,
- * « Demander », the phone's tabs — the same frame as the center and every Kete app.
+ * The frame of every signed-in screen (kete-core specs 100 and 101): the places of `kete.json`,
+ * Ctrl K, Kete Intelligence beside the page, the phone's tabs — the same frame as the center and
+ * every Kete app.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const context = useRouteContext({ strict: false }) as { person?: { name: string } };
@@ -62,6 +106,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const current = allPlaces(sections).find(
     (place) => place.href === path || (place.href !== '/' && path.startsWith(`${place.href}/`)),
   )?.id;
+  // Kete Intelligence beside the page (kete-core spec 101): the page she asks from goes with her
+  // question; the drawer keeps the page in view.
+  const page = current
+    ? allPlaces(sections).find((place) => place.id === current)?.label
+    : undefined;
+  const transport = useMemo(() => postTo('/api/intelligence', page ? { page } : {}), [page]);
+  const intelligence = useIntelligence(transport);
+  const [open, setOpen] = useState(false);
   return (
     <AppFrame
       brand={m.app_name()}
@@ -70,9 +122,25 @@ export function AppShell({ children }: { children: ReactNode }) {
       person={{ name: context.person?.name ?? '' }}
       words={shellWords()}
       onAsk={(question) => {
-        window.location.href = question
-          ? `/demander?q=${encodeURIComponent(question)}`
-          : '/demander';
+        setOpen(true);
+        if (question) void intelligence.send(question);
+      }}
+      beside={{
+        open,
+        label: m.intelligence_label(),
+        onClose: () => setOpen(false),
+        content: (
+          <IntelligencePanel
+            turns={intelligence.turns}
+            running={intelligence.running}
+            onSend={(question) => void intelligence.send(question)}
+            onStop={intelligence.stop}
+            words={intelligenceWords()}
+            {...(page ? { context: page } : {})}
+            intro={m.intelligence_intro()}
+            suggestions={[m.intelligence_suggest_open(), m.intelligence_suggest_late()]}
+          />
+        ),
       }}
       tabs={app.places.map((place) => place.id)}
       signOutHref="/auth/sortie"

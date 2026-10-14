@@ -7,6 +7,13 @@ import {
   Mention,
   PageHeader,
 } from '@kete/design';
+import {
+  IntelligencePanel,
+  useIntelligence,
+  type AskTransport,
+  type IntelligenceWords,
+} from '@kete/intelligence';
+import type { IntelligenceEvent } from '@kete/sdk';
 import { AppFrame, placesFor, type ManifestPlace, type ShellWords } from '@kete/shell';
 import { useState } from 'react';
 
@@ -67,9 +74,88 @@ const words: ShellWords = {
   sync: { ok: 'À jour', offline: (n) => `Hors ligne · ${n} en attente`, sending: 'Envoi…' },
 };
 
+const intelligenceWords: IntelligenceWords = {
+  thread: 'Conversation',
+  you: 'Vous',
+  assistant: 'Kete Intelligence',
+  composer: 'Votre demande',
+  placeholder: 'Demandez, ou confiez une tâche…',
+  send: 'Envoyer',
+  stop: 'Arrêter',
+  hint: 'Agit avec vos droits · prépare, vous décidez',
+  context: 'Contexte',
+  suggestions: 'Suggestions',
+  thinking: 'Je réfléchis…',
+  reading: (tool) => `Je consulte ${tool}…`,
+  plan: 'Plan',
+  level: (level) => `niveau ${level}`,
+  toolState: { running: 'en cours', done: 'fait', failed: 'échoué' },
+  sources: 'Sources',
+  draft: 'Brouillon',
+  verify: 'Vérifier',
+  done: (tools, seconds) => `${tools} gestes · ${seconds} s`,
+  stopped: 'Arrêté : ce qui a été lu est gardé, rien n’a été changé.',
+  reason: () => 'La réponse n’a pas pu aboutir.',
+};
+
+const toolWords: Record<string, string> = {
+  quote_get: 'le devis',
+  invoice_list: 'les factures',
+  invoices_from_quote: 'la facture d’acompte',
+};
+
+/** A turn played as the drawer's address would stream it: the real stream, a scripted model. */
+const scripted: AskTransport = (_question, _history, signal) => {
+  const turn: [number, IntelligenceEvent][] = [
+    [
+      300,
+      {
+        type: 'plan',
+        steps: ['Lire le devis', 'Vérifier ce qui est facturé', 'Préparer l’acompte'],
+      },
+    ],
+    [200, { type: 'step', index: 0, state: 'running' }],
+    [200, { type: 'tool', id: 't1', name: 'quote_get', level: 1, state: 'running' }],
+    [900, { type: 'tool', id: 't1', name: 'quote_get', level: 1, state: 'done' }],
+    [100, { type: 'step', index: 0, state: 'done' }],
+    [100, { type: 'step', index: 1, state: 'running' }],
+    [100, { type: 'tool', id: 't2', name: 'invoice_list', level: 1, state: 'running' }],
+    [800, { type: 'tool', id: 't2', name: 'invoice_list', level: 1, state: 'done' }],
+    [100, { type: 'step', index: 1, state: 'done' }],
+    [100, { type: 'step', index: 2, state: 'running' }],
+    [100, { type: 'tool', id: 't3', name: 'invoices_from_quote', level: 3, state: 'running' }],
+    [900, { type: 'tool', id: 't3', name: 'invoices_from_quote', level: 3, state: 'done' }],
+    [
+      100,
+      { type: 'draft', draft_id: 'drf_1', title: 'invoices_from_quote', href: '#verification' },
+    ],
+    [100, { type: 'step', index: 2, state: 'done' }],
+    [100, { type: 'source', label: 'Devis D-2026-0004', href: '#devis' }],
+    ...'J’ai préparé la **facture d’acompte de 198 000 F CFA** (30 % de 660 000 F). Elle n’est pas encore écrite : vérifiez-la. Il restera **462 000 F CFA** à facturer.'
+      .split(/(?<= )/)
+      .map((delta): [number, IntelligenceEvent] => [40, { type: 'text', delta }]),
+    [100, { type: 'done', tools: 3, ms: 5200 }],
+  ];
+  const encoder = new TextEncoder();
+  const body = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      for (const [wait, event] of turn) {
+        await new Promise((resolve) => setTimeout(resolve, wait));
+        if (signal.aborted) {
+          controller.error(new DOMException('stopped', 'AbortError'));
+          return;
+        }
+        controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+      }
+      controller.close();
+    },
+  });
+  return Promise.resolve(new Response(body));
+};
+
 export function CanvasPage() {
   const [beside, setBeside] = useState(false);
-  const [asked, setAsked] = useState<string | undefined>();
+  const intelligence = useIntelligence(scripted);
   return (
     <AppFrame
       brand="Kete Finance"
@@ -79,17 +165,25 @@ export function CanvasPage() {
       person={{ name: 'Afi Mensah', detail: 'Direction' }}
       words={words}
       onAsk={(question) => {
-        setAsked(question);
         setBeside(true);
+        if (question) void intelligence.send(question);
       }}
       beside={{
         open: beside,
         label: 'Kete Intelligence',
         onClose: () => setBeside(false),
         content: (
-          <div className="p-4 text-fg-soft">
-            {asked ? `« ${asked} »` : 'Le tiroir de Kete Intelligence s’ouvre ici (étape L3).'}
-          </div>
+          <IntelligencePanel
+            turns={intelligence.turns}
+            running={intelligence.running}
+            onSend={(question) => void intelligence.send(question)}
+            onStop={intelligence.stop}
+            words={intelligenceWords}
+            context="Accueil · Kete Finance"
+            intro="Bonjour Afi. Je vois la page ouverte ; je lis, je calcule et je prépare — vous décidez."
+            suggestions={['Prépare la facture d’acompte de 30 % du devis D-2026-0004.']}
+            toolLabel={(name) => toolWords[name] ?? name}
+          />
         ),
       }}
       onNote={async () => undefined}

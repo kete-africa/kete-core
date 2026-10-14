@@ -27,7 +27,7 @@ flowchart LR
 | ------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------- |
 | The roles of its trade: a member holds what her business role holds, as the owner ticked it | `src/platform/rights.ts`, migration `0004`              | `@kete/capabilities`                                 |
 | A gesture whose broken rule comes back as its code, said in words                           | `src/platform/screen.ts`, `src/lib/errors.ts`           | `@kete/capabilities` (`performGesture`, `RuleError`) |
-| « Demander »: a question answered with the readings she may open, nothing changed           | `src/features/assistant`, `/demander`                   | `@kete/agents`                                       |
+| Kete Intelligence beside every page: a question answered as it happens, readings only       | `src/features/assistant`, `/api/intelligence`           | `@kete/agents`, `@kete/intelligence`                 |
 | Intake: a message or a photo read into a draft, every field with where it comes from        | `src/platform/intake.ts`, `/taches`, `/verification`    | `@kete/ai` (`intake`), `@kete/drafts`                |
 | WhatsApp and Telegram: its own senders, consent, words, delivery, webhooks                  | `src/platform/chat.ts`, `/api/chat/*`, migration `0005` | `@kete/notify`                                       |
 | Usage per organization, daily counts to Kete Cockpit                                        | `src/platform/usage.ts`, migration `0007`               | `@kete/analytics`                                    |
@@ -70,5 +70,5 @@ start-up) and the worker (`pnpm worker`). An operator registers the app at the C
    `critical`). Kete's registry deduces from it the controls that apply.
 2. Replace `src/features/tasks` with the first real feature, keeping its layers. Name the roles of
    its trade in `src/platform/rights.ts` (`businessRoles`) and in each permission's
-   `businessRoles`; adapt « Demander »'s rules (`src/features/assistant/ask.ts`) to the trade.
+   `businessRoles`; adapt Kete Intelligence's rules (`src/features/assistant/ask.ts`) to the trade.
 3. Choose its design in `src/platform/app.ts` — `kete`, `workspace`, or its own (`design/`).

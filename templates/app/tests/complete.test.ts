@@ -10,10 +10,11 @@ import {
   setChatConsent,
 } from '@kete/notify';
 import { createTestSchema, type TestSchema } from '@kete/testing';
-import { MockLanguageModelV4 } from 'ai/test';
+import { MockLanguageModelV4, simulateReadableStream } from 'ai/test';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { migrations } from '../db/migrations';
-import { askApp } from '../src/features/assistant';
+import type { IntelligenceEvent } from '@kete/sdk';
+import { askApp, askStream } from '../src/features/assistant';
 import { useModel } from '../src/platform/ai';
 import { deliverWaiting, receive, useChat } from '../src/platform/chat';
 import { transaction, usePool } from '../src/platform/db';
@@ -158,6 +159,75 @@ describe('« Demander »', () => {
     });
     // Readings only: completing (acts at once) and creating (a draft) are never offered.
     expect(offered[0]).toEqual(['task_list', 'task_get']);
+  });
+});
+
+describe('Kete Intelligence’s drawer (kete-core spec 101)', () => {
+  type Streamed = Awaited<ReturnType<MockLanguageModelV4['doStream']>>['stream'];
+  type Part = Streamed extends ReadableStream<infer P> ? P : never;
+  const collect = async (events: AsyncIterable<IntelligenceEvent>) => {
+    const all: IntelligenceEvent[] = [];
+    for await (const event of events) all.push(event);
+    return all;
+  };
+
+  it('says it is not connected without a model', async () => {
+    useModel(null);
+    const events = await asPerson(owner, () =>
+      collect(askStream({ userId: owner.userId, organizationId: ORG }, 'Bonjour')),
+    );
+    expect(events).toEqual([{ type: 'failed', reason: 'not_connected' }]);
+  });
+
+  it('streams each reading as it starts and ends, with its level, the words, then the end', async () => {
+    let step = 0;
+    useModel(
+      new MockLanguageModelV4({
+        doStream: () => {
+          step += 1;
+          const chunks: Part[] =
+            step === 1
+              ? [
+                  { type: 'tool-call', toolCallId: 'c1', toolName: 'task_list', input: '{}' },
+                  {
+                    type: 'finish',
+                    finishReason: { unified: 'tool-calls', raw: 'tool_calls' },
+                    usage,
+                  },
+                ]
+              : [
+                  { type: 'text-start', id: 't' },
+                  { type: 'text-delta', id: 't', delta: 'Une tâche, ' },
+                  { type: 'text-delta', id: 't', delta: 'faite.' },
+                  { type: 'text-end', id: 't' },
+                  { type: 'finish', finishReason: { unified: 'stop', raw: 'stop' }, usage },
+                ];
+          return Promise.resolve({ stream: simulateReadableStream<Part>({ chunks }) });
+        },
+      }),
+    );
+    // The whole turn runs within her rights, as the drawer's address runs it.
+    const events = await asPerson(owner, () =>
+      collect(
+        askStream(
+          { userId: owner.userId, organizationId: ORG },
+          'Où en sont les tâches ?',
+          [],
+          'Tâches',
+        ),
+      ),
+    );
+    expect(events.slice(0, 2)).toEqual([
+      { type: 'tool', id: 't1', name: 'task_list', level: 1, state: 'running' },
+      { type: 'tool', id: 't1', name: 'task_list', level: 1, state: 'done', summary: 'done' },
+    ]);
+    expect(
+      events
+        .filter((event) => event.type === 'text')
+        .map((event) => event.delta)
+        .join(''),
+    ).toBe('Une tâche, faite.');
+    expect(events.at(-1)).toMatchObject({ type: 'done', tools: 1 });
   });
 });
 

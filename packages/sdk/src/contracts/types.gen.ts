@@ -525,6 +525,9 @@ export interface IntelligenceDraft {
   type: 'draft';
   draft_id: string;
   title: string;
+  /**
+   * Where it is opened: an address of the product, relative to its own screens, or absolute.
+   */
   href?: string;
 }
 /**
@@ -533,6 +536,9 @@ export interface IntelligenceDraft {
 export interface IntelligenceSource {
   type: 'source';
   label: string;
+  /**
+   * Where it is opened: an address of the product, relative to its own screens, or absolute.
+   */
   href?: string;
 }
 /**

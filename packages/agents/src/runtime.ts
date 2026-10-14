@@ -74,6 +74,8 @@ export interface AgentAnswer {
 /** What happens while an agent works, for a page that shows it as it comes. */
 export type AgentEvent =
   | { type: 'text'; delta: string }
+  /** A capability it starts to call: what a screen shows while it runs (spec 101). */
+  | { type: 'calling'; name: string }
   | ({ type: 'call' } & AgentCall)
   | { type: 'done'; usage: Usage }
   | { type: 'stopped'; reason: 'budget_spent' | 'failed' };
@@ -195,6 +197,8 @@ export async function* streamAgent(turn: AgentTurn): AsyncGenerator<AgentEvent> 
     for await (const part of stream.fullStream) {
       if (part.type === 'text-delta') {
         if (part.payload.text) yield { type: 'text', delta: part.payload.text };
+      } else if (part.type === 'tool-call') {
+        yield { type: 'calling', name: part.payload.toolName };
       } else if (part.type === 'tool-result') {
         yield {
           type: 'call',
