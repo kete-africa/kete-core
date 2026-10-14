@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@kete/design": "workspace:@kete-africa/design@*",
+    "@kete/intelligence": "workspace:@kete-africa/intelligence@*",
+    "@kete/sdk": "workspace:@kete-africa/sdk@*",
     "@kete/shell": "workspace:@kete-africa/shell@*",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"

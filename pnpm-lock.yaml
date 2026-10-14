@@ -261,6 +261,12 @@ importers:
       '@kete/design':
         specifier: workspace:@kete-africa/design@*
         version: link:../../packages/design
+      '@kete/intelligence':
+        specifier: workspace:@kete-africa/intelligence@*
+        version: link:../../packages/intelligence
+      '@kete/sdk':
+        specifier: workspace:@kete-africa/sdk@*
+        version: link:../../packages/sdk
       '@kete/shell':
         specifier: workspace:@kete-africa/shell@*
         version: link:../../packages/shell
@@ -980,6 +986,9 @@ importers:
       '@kete/feedback':
         specifier: workspace:@kete-africa/feedback@*
         version: link:../../packages/feedback
+      '@kete/intelligence':
+        specifier: workspace:@kete-africa/intelligence@*
+        version: link:../../packages/intelligence
       '@kete/jobs':
         specifier: workspace:@kete-africa/jobs@*
         version: link:../../packages/jobs
