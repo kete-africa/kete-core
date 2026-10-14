@@ -77,11 +77,43 @@ export function readDesign(name: string, designMd: string, mapping: SemanticMapp
       failures.push(`${name} ${mode}: ${f.fg} on ${f.bg} is ${f.ratio}:1, needs ${f.min}:1.`);
     }
   }
+  // « Plein soleil » is derived from the light mode: checked all the same.
+  if (Object.keys(resolved.light).length === semanticColors.length) {
+    for (const f of checkContrasts(sunColors(resolved.light), contrastPairs)) {
+      failures.push(`${name} sun: ${f.fg} on ${f.bg} is ${f.ratio}:1, needs ${f.min}:1.`);
+    }
+  }
   const typeScale = tailwind
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => /^--(text|font-weight|tracking)-/.test(line));
   return { tokens: tokens.trimEnd() + '\n', tailwind, typeScale, resolved, failures };
+}
+
+/**
+ * « Plein soleil » (kete-core spec 106; doctrine D-054): the light mode at its strongest, for a
+ * screen read outdoors — every surface the surface's color, every text and line the text's color;
+ * actions and states keep theirs. Derived from the light mode, so every design has it, and its
+ * contrasts are at least the light mode's.
+ */
+export function sunColors(light: Record<SemanticColor, string>): Record<SemanticColor, string> {
+  const surface = light.surface;
+  const text = light.fg;
+  return {
+    ...light,
+    canvas: surface,
+    'surface-raised': surface,
+    'surface-control': surface,
+    'surface-hover': light['surface-selected'],
+    fg: text,
+    'fg-soft': text,
+    'fg-muted': text,
+    line: text,
+    'line-strong': text,
+    'line-control': text,
+    'line-selected': text,
+    'line-overlay': text,
+  };
 }
 
 /** The semantic colors as CSS variables. */
@@ -127,6 +159,8 @@ export function designRules(
     ...(scope ? [block(scope, mapping.defaultMode, '  ', extra)] : []),
     block(`${scope}${chosen}`, other, '  '),
     `  @media (prefers-color-scheme: ${other}) {\n${block(`${scope}[data-theme='auto']`, other, '    ')}\n  }`,
+    // « Plein soleil », last: it wins over any mode while it is on.
+    `  ${scope}[data-sun='on'] {\n${cssLines(['color-scheme: light;'], '    ')}\n${colorVariables(sunColors(resolved.light), '    ')}\n  }`,
   ].join('\n\n');
 }
 

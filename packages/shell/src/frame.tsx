@@ -116,11 +116,16 @@ export function NoteDialog({
 }: {
   open: boolean;
   onClose: () => void;
-  onSave: (text: string) => Promise<void>;
+  /**
+   * Keeps the note. What it returns — « Gardée ; rappel jeudi 9 h », with its undo — is shown under
+   * the field and the dialog stays open; nothing returned closes it.
+   */
+  onSave: (text: string) => Promise<ReactNode>;
   words: Pick<ShellWords, 'noteTitle' | 'noteField' | 'noteHint' | 'noteSave' | 'close'>;
 }) {
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [said, setSaid] = useState<ReactNode>(null);
   return (
     <Dialog open={open} onClose={onClose} title={words.noteTitle} closeLabel={words.close}>
       <form
@@ -130,10 +135,12 @@ export function NoteDialog({
           const kept = text.trim();
           if (!kept) return;
           setSaving(true);
+          setSaid(null);
           void onSave(kept)
-            .then(() => {
+            .then((answer) => {
               setText('');
-              onClose();
+              if (answer === undefined || answer === null) onClose();
+              else setSaid(answer);
             })
             .finally(() => setSaving(false));
         }}
@@ -151,6 +158,7 @@ export function NoteDialog({
             {words.noteSave}
           </Button>
         </div>
+        {said && <div role="status">{said}</div>}
       </form>
     </Dialog>
   );
@@ -227,7 +235,8 @@ export function AppFrame({
   /** The drawer beside the page, when the product opened it. */
   beside?: { open: boolean; label: string; onClose: () => void; content: ReactNode };
   onFiles?: () => void;
-  onNote?: (text: string) => Promise<void>;
+  /** Keeps a note; what it returns is shown in the dialog (see `NoteDialog`). */
+  onNote?: (text: string) => Promise<ReactNode>;
   sync?: SyncState;
   bell?: { href: string; count?: number };
   /** The ids of up to four places on the phone's tabs; « Demander » sits in the middle. */

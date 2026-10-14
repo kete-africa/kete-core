@@ -34,6 +34,7 @@ import { CanvasPage } from './canvas';
 import { AgentPage } from './agent';
 import { BoardPage } from './board';
 import { ClosurePage } from './closure';
+import { PhonePage } from './phone';
 import { PlanPage } from './plan';
 import { ChatPage, SlotsPage } from './slots';
 
@@ -484,6 +485,16 @@ const frames: Record<
     label: 'déléguer · clair',
     attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
     page: <AgentPage />,
+  },
+  'phone-dark': {
+    label: 'téléphone · sombre',
+    attributes: { 'data-design': 'workspace' },
+    page: <PhonePage />,
+  },
+  'phone-light': {
+    label: 'téléphone · clair',
+    attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
+    page: <PhonePage />,
   },
   'kete-light': { label: 'kete · clair', attributes: {}, page: <KetePage /> },
   'kete-dark': {

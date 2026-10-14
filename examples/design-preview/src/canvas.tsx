@@ -186,7 +186,11 @@ export function CanvasPage() {
           />
         ),
       }}
-      onNote={async () => undefined}
+      onNote={async (text) =>
+        /jeudi/i.test(text) ? (
+          <p className="m-0 text-body-sm">Gardée. Rappel jeudi 9 h dans Planifier.</p>
+        ) : undefined
+      }
       onFiles={() => setBeside(true)}
       sync={{ state: 'ok' }}
       bell={{ href: '#notifications', count: 2 }}

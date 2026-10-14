@@ -77,6 +77,11 @@ flowchart LR
 `ThemeChoice`; `themeFromCookies` lets the server render the chosen mode at once. See
 [spec 044](../../specs/044-forms-and-modes/spec.md).
 
+**« Plein soleil »** (spec 106): with `data-sun="on"` on <html> — `useSunlight` of `@kete/shell` sets
+it — every design wears its light mode at its strongest, for a screen read outdoors: surfaces in
+the surface's color, texts and lines in the text's. The generator derives it from the light mode
+of each design, apps' own designs included, and checks its contrasts too.
+
 ## Use in an app (Tailwind 4)
 
 ```css
