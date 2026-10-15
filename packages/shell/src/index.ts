@@ -1,7 +1,7 @@
 // The public entry point of @kete/shell. Anything not exported here is internal.
 export {
   AppFrame,
-  Beside,
+  type FrameApps,
   NoteDialog,
   SyncPill,
   type ShellWords,

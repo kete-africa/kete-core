@@ -141,3 +141,35 @@
     }
   }
 }
+
+/* Kete Intelligence's line « what it does now » (spec 108): a light runs across the words. */
+@keyframes kete-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Kete Intelligence's caret (spec 108): it ends the last words of an answer while they come. */
+.kete-caret > div > :last-child::after {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 15px;
+  margin-left: 1px;
+  vertical-align: -2px;
+  background: var(--color-fg);
+  animation: kete-blink 1s steps(1) infinite;
+}
+@keyframes kete-blink {
+  50% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kete-caret > div > :last-child::after {
+    animation: none;
+  }
+}

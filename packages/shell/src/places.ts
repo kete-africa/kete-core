@@ -1,3 +1,4 @@
+import type { PlaceExtra } from '@kete/design';
 import type { Manifest } from '@kete/sdk';
 
 // An app's places come from its manifest (contract manifest.v1, spec 099): the shell builds the
@@ -15,6 +16,10 @@ export interface Place {
   label: string;
   href: string;
   icon?: string;
+  /** A project's square in the places, in its color (`true`: the muted one). */
+  dot?: string | true;
+  /** What it says beside its name: a count, an agent at work, « 1 conflit ». */
+  extra?: PlaceExtra;
 }
 
 /** Places under one heading, in the manifest's order; the first ones may have none. */

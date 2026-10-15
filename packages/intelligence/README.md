@@ -48,10 +48,24 @@ const { turns, running, send, stop } = useIntelligence(postTo('/api/intelligence
   onSend={send}
   onStop={stop}
   words={words} // from the product's catalogs
-  context="Devis D-2026-0004"
+  head={{ tab, onTab, onHistory, onNew, wide, onWide, onClose }} // in the drawer only
+  files={<Files />}
+  context={{ label: 'Kete Finance', onRemove }}
+  scope={{ value, label, options: [{ value: 'kete', label: 'Dans tout Kete' }, …], onChange }}
+  intro={<p>Bonjour Afi…</p>}
   suggestions={['Quelles factures relancer ?']}
-  toolLabel={(name) => toolWords[name] ?? name}
+  renderDraft={(draft) => <VerificationCard … />}
+  onRetry={(turn) => send(turn.question)}
+  composerTools={{ attach, cite, gestures, dictate }}
 />;
 ```
 
-It goes in `@kete/shell`'s drawer (`AppFrame` `beside`); one question at a time, the next waits.
+It goes in `@kete/shell`'s drawer (`AppFrame` `beside`), or fills the page « Demander » without
+its `head`; one question at a time, the next waits. As the validated canvas v3.1 draws it (spec 108):
+
+- the head: « Demander » and « Fichiers », the threads, a new thread, wider, close;
+- the page she asks from as a chip she may remove, and how far it looks;
+- its greeting stays on top; each answer shows its seconds, what it does now, its plan checked as it
+  goes, each capability with its level — opened, what it was called with (→) and what it found (←) —
+  the draft as its verification card, its words, its sources, « Copier », « Régénérer » and its tally;
+- the suggestions wait above the field whenever it is not answering.

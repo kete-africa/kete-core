@@ -1,5 +1,16 @@
 # @kete-africa/create-app
 
+## 0.9.0
+
+### Minor Changes
+
+- The frame and Kete Intelligence of the validated canvas v3.1 (spec 108): `CanvasFrame` and its
+  `Frame*` parts, `CanvasIcon`, `FramePage` and `FramePageHead`, the canvas's `VerificationCard`, `KpiTile`
+  and `ghost` button in `@kete/design`; `AppFrame` on them, with the app's head, what waits in each
+  place, the apps at the bottom and the page « Demander » on a phone; the drawer's head, context, scope,
+  plan, capabilities with what they were called with, drafts as their card, « Régénérer » and tally.
+  The template wears them.
+
 ## 0.8.0
 
 ### Minor Changes

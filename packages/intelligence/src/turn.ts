@@ -8,6 +8,8 @@ export interface TurnTool {
   name: string;
   level: number;
   state: 'running' | 'done' | 'failed';
+  /** What it was called with, as the stream said it. */
+  input?: string;
   summary?: string;
 }
 
@@ -28,10 +30,22 @@ export interface Turn {
   reason?: string;
   /** How long it took and how many capabilities it called, once done. */
   ms?: number;
+  /** When it was asked, in milliseconds: the drawer counts the seconds. */
+  startedAt?: number;
 }
 
-export function newTurn(id: string, question: string): Turn {
-  return { id, question, plan: [], tools: [], drafts: [], sources: [], text: '', state: 'running' };
+export function newTurn(id: string, question: string, startedAt?: number): Turn {
+  return {
+    id,
+    question,
+    plan: [],
+    tools: [],
+    drafts: [],
+    sources: [],
+    text: '',
+    state: 'running',
+    ...(startedAt !== undefined ? { startedAt } : {}),
+  };
 }
 
 /** The turn after one more event. */
@@ -56,6 +70,7 @@ export function reduceTurn(turn: Turn, event: IntelligenceEvent): Turn {
         name: event.name,
         level: event.level,
         state: event.state,
+        ...(event.input ? { input: event.input } : {}),
         ...(event.summary ? { summary: event.summary } : {}),
       };
       const known = turn.tools.some((item) => item.id === event.id);

@@ -600,6 +600,7 @@ flowchart TB
 | L6   | `104-proposals-and-voice` | Proposal sets in `@kete/drafts`; a note or a transcript understood by `@kete/ai`; the voice through the dictation port, WhatsApp voice notes included                                  |
 | L7   | `105-lifecycle`           | Lessons from use, test cases, versions, tiers and their review; an agent's card, triggers, budget, six states and autonomy earned by proofs                                            |
 | L8   | `106-phone`               | The phone's own screens in the shell: the morning's pile, the evening's voice, « Terrain » and « Plein soleil »                                                                        |
+| L9   | `108-canvas-frame`        | The frame and the drawer of Kete Intelligence rebuilt to the validated canvas v3.1, compared with it on a computer and a phone, light and dark                                         |
 
 ### Proof
 

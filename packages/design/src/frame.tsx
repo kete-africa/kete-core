@@ -481,8 +481,10 @@ export function KpiTile({
 }) {
   const content = (
     <>
-      <span className="text-body-sm text-fg-muted">{label}</span>
-      <span className="font-number text-[26px] leading-tight font-semibold">{value}</span>
+      <span className="text-[12px] text-fg-muted">{label}</span>
+      <span className="mt-0.5 font-number text-[clamp(17px,2.6cqi,22px)] leading-[1.3] font-medium tracking-[-0.02em]">
+        {value}
+      </span>
       {trend && (
         <span
           data-tone={trend.tone}
@@ -499,12 +501,12 @@ export function KpiTile({
           {trend.label}
         </span>
       )}
-      {hint && <span className="text-body-sm text-fg-muted">{hint}</span>}
+      {hint && <span className="text-[12px] text-fg-muted">{hint}</span>}
       {!href && why && <span className="text-body-sm">{why}</span>}
     </>
   );
   const className =
-    'flex min-w-0 flex-col gap-1 rounded-box border border-line bg-surface px-4 py-3 text-fg';
+    'flex min-w-0 flex-col gap-1 rounded-[5px] border border-line bg-surface px-4 py-3.5 text-left text-fg';
   return href ? (
     <a href={href} className={cx(className, 'hover:border-accent hover:bg-surface-raised')}>
       {content}
@@ -518,7 +520,7 @@ export function KpiTile({
 export function KpiGrid({ label, children }: { label?: string; children: ReactNode }) {
   return (
     <div
-      className="mb-6 grid grid-cols-4 gap-3 max-[1100px]:grid-cols-2"
+      className="mb-6 grid grid-cols-[repeat(auto-fit,minmax(min(100%,160px),1fr))] gap-3"
       {...(label ? { role: 'group', 'aria-label': label } : {})}
     >
       {children}

@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { CanvasIcon } from './canvas-icon.js';
 import { Button, cx, dialogClassName } from './components.js';
 
 // The doctrine's components, provided to every Kete product (CONCEPTION 12): the verification
@@ -39,8 +40,10 @@ export interface VerificationField {
 }
 
 /**
- * The signature component: a draft prepared by the agent, each field with its provenance, and the
- * gestures that decide it (Correct, Validate). Once decided, `decision` says who and when.
+ * The signature component (the canvas's verification card): a draft prepared by the agent — its
+ * mark, its title, where it stands — each field with its provenance, what is uncertain in the
+ * verify color, the gestures that decide it (Valider, Corriger, Refuser), and the lesson a
+ * correction becomes. Once decided, `decision` says who and when.
  */
 export function VerificationCard({
   title,
@@ -48,6 +51,9 @@ export function VerificationCard({
   fields,
   actions,
   decision,
+  mark,
+  badge,
+  lesson,
 }: {
   title: ReactNode;
   /** The agent state, with its word. */
@@ -57,39 +63,57 @@ export function VerificationCard({
   actions?: ReactNode;
   /** The trace of the decision: who, when. */
   decision?: ReactNode;
+  /** Before the title: Kete Intelligence's spark, or what the draft was read from. */
+  mark?: ReactNode;
+  /** On the right of the head, before the state: « une personne valide ». */
+  badge?: ReactNode;
+  /** Under the card: what a correction teaches, and who owns it. */
+  lesson?: ReactNode;
 }) {
   const titleId = useId();
   return (
     <section
       aria-labelledby={titleId}
-      className="flex flex-col gap-4 rounded-box border border-line bg-surface p-6 text-fg"
+      className="overflow-hidden rounded-[5px] border border-line-strong bg-surface text-fg"
     >
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id={titleId} className="font-heading text-title font-semibold">
+      <header className="flex flex-wrap items-center gap-2.5 border-b border-line bg-surface-raised px-3.5 py-2.5">
+        {mark}
+        <h2 id={titleId} className="m-0 text-body font-semibold">
           {title}
         </h2>
-        <AgentState state={state.name}>{state.label}</AgentState>
+        <span className="ml-auto flex flex-wrap items-center gap-2.5">
+          {badge && (
+            <span className="inline-flex h-[22px] items-center whitespace-nowrap rounded-[5px] bg-surface-selected px-[7px] text-[12px] font-semibold text-fg-soft">
+              {badge}
+            </span>
+          )}
+          <AgentState state={state.name}>{state.label}</AgentState>
+        </span>
       </header>
-      <dl className="flex flex-col divide-y divide-line">
+      <dl className="m-0 flex flex-col divide-y divide-line">
         {fields.map((field, index) => (
           <div
             key={index}
             className={cx(
-              'grid gap-1 py-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:gap-4',
-              field.uncertain && 'bg-state-verify-surface px-3',
+              'grid grid-cols-[112px_minmax(0,1fr)] items-start gap-3 px-3.5 py-2.5 text-[13px]',
+              field.uncertain && 'bg-state-verify-surface',
             )}
           >
-            <dt className="text-body-sm text-fg-muted">{field.label}</dt>
-            <dd className="flex flex-col gap-1">
-              <span className="text-body">{field.value}</span>
+            <dt className={field.uncertain ? 'text-state-verify-fg' : 'text-fg-muted'}>
+              {field.label}
+            </dt>
+            <dd className="m-0 min-w-0 font-semibold">
+              {field.value}
               <span
                 className={cx(
-                  'inline-flex items-center gap-1.5 text-body-sm',
+                  'mt-[3px] flex items-center gap-1.5 text-[12px] font-normal',
                   field.uncertain ? 'text-state-verify-fg' : 'text-fg-muted',
                 )}
               >
                 {field.uncertain && (
-                  <span className="inline-block size-2 bg-state-verify" aria-hidden="true" />
+                  <span className="inline-flex shrink-0" aria-hidden="true">
+                    <CanvasIcon name="alert" size={12} />
+                  </span>
                 )}
                 {field.provenance}
               </span>
@@ -97,8 +121,20 @@ export function VerificationCard({
           </div>
         ))}
       </dl>
-      {actions && <div className="flex flex-wrap justify-end gap-3">{actions}</div>}
-      {decision && <p className="text-body-sm text-fg-muted">{decision}</p>}
+      {(actions || decision) && (
+        <div className="flex flex-wrap items-center gap-2 border-t border-line bg-surface-control px-3.5 py-3">
+          {actions}
+          {decision && <p className="m-0 text-body-sm text-fg-muted">{decision}</p>}
+        </div>
+      )}
+      {lesson && (
+        <p className="m-0 flex items-start gap-1.5 border-t border-line px-3.5 py-2 text-[12px] leading-[1.5] text-fg-muted">
+          <span className="mt-0.5 inline-flex shrink-0" aria-hidden="true">
+            <CanvasIcon name="read" size={12} />
+          </span>
+          <span>{lesson}</span>
+        </p>
+      )}
     </section>
   );
 }

@@ -12,11 +12,11 @@ export function cx(...classes: (string | false | undefined)[]): string {
 export const labelClassName =
   'font-heading text-label-caps [text-transform:var(--label-transform)] tracking-(--label-tracking) text-fg-muted';
 
-type ButtonVariant = 'primary' | 'secondary';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 /**
  * Primary: the action's fill. Secondary: outlined, on the control surface (in `workspace`, the
- * toolbar's buttons).
+ * toolbar's buttons). Ghost: no border, no fill, until hovered.
  */
 export function Button({
   variant = 'primary',
@@ -33,6 +33,7 @@ export function Button({
         variant === 'primary' && 'bg-action text-on-action hover:bg-action-strong',
         variant === 'secondary' &&
           'border border-line-control bg-surface-control text-fg hover:bg-surface-hover',
+        variant === 'ghost' && 'bg-transparent text-fg hover:bg-surface-hover',
         className,
       )}
       {...props}
