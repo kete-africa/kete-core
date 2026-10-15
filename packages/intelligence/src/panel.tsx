@@ -1,5 +1,6 @@
 import { CanvasIcon, FrameSpark, Markdown, type CanvasIconName } from '@kete/design';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Composer, type ComposerOptions, type PickedItem } from './composer.js';
 import type { Turn } from './turn.js';
 
 // Kete Intelligence's drawer (kete-core specs 101, 108; the validated canvas v3.1): its head —
@@ -154,6 +155,7 @@ function Answer({
   onCopy,
   onRetry,
   actions,
+  after,
 }: {
   turn: Turn;
   words: IntelligenceWords;
@@ -162,6 +164,7 @@ function Answer({
   onCopy?: (text: string) => void;
   onRetry?: () => void;
   actions?: ReactNode;
+  after?: ReactNode;
 }) {
   const running = turn.state === 'running';
   const tool = [...turn.tools].reverse().find((item) => item.state === 'running');
@@ -242,7 +245,9 @@ function Answer({
                     <CanvasIcon name={call.state === 'failed' ? 'x' : 'ok'} size={16} />
                   )}
                 </span>
-                <span className="font-number text-[12px]">{toolLabel(call.name)}</span>
+                <span className="font-number text-[12px]" title={toolLabel(call.name)}>
+                  {call.name}
+                </span>
                 <span
                   className={
                     call.level >= 3
@@ -300,6 +305,7 @@ function Answer({
           {turn.text && <Markdown text={turn.text} />}
         </div>
       )}
+      {after}
       {turn.sources.length > 0 && (
         <ul aria-label={words.sources} className="m-0 flex list-none flex-wrap gap-1.5 p-0">
           {turn.sources.map((source, index) => {
@@ -394,13 +400,15 @@ export function IntelligencePanel({
   intro,
   toolLabel = (name) => name,
   renderDraft,
+  renderAfter,
   onRetry,
   answerActions,
-  composerTools,
+  composer,
 }: {
   turns: readonly Turn[];
   running: boolean;
-  onSend: (question: string) => void;
+  /** A question, with what she picked and kept in it (@ an object, / a gesture). */
+  onSend: (question: string, picks: PickedItem[]) => void;
   onStop: () => void;
   words: IntelligenceWords;
   head?: IntelligenceHead;
@@ -421,42 +429,23 @@ export function IntelligencePanel({
   toolLabel?: (name: string) => string;
   /** The product's own verification card for a draft. */
   renderDraft?: (draft: Turn['drafts'][number]) => ReactNode;
+  /**
+   * What the product shows after an answer's words, beyond the contract: a table it read, an app's
+   * view. `index` is the turn's place in the thread.
+   */
+  renderAfter?: (turn: Turn, index: number) => ReactNode;
   /** Asks the same question again. */
   onRetry?: (turn: Turn) => void;
   /** The product's gestures on a finished answer, before « Copier »: « Épingler au tableau ». */
   answerActions?: (turn: Turn) => ReactNode;
-  /** The composer's tools the product offers: attach, cite, gestures, dictate. */
-  composerTools?: {
-    attach?: () => void;
-    cite?: () => void;
-    gestures?: () => void;
-    dictate?: () => void;
-  };
+  /** What the field offers beyond the words: files, objects to cite, gestures, her voice. */
+  composer?: ComposerOptions;
 }) {
-  const [question, setQuestion] = useState('');
   const thread = useRef<HTMLDivElement>(null);
   const last = turns.at(-1);
   useEffect(() => {
     thread.current?.scrollTo({ top: thread.current.scrollHeight });
   }, [turns.length, last?.text, last?.tools.length, last?.state]);
-  const send = () => {
-    const asked = question.trim();
-    if (!asked || running) return;
-    onSend(asked);
-    setQuestion('');
-  };
-  const tool = (label: string, icon: CanvasIconName, onClick?: () => void) =>
-    onClick && (
-      <button
-        type="button"
-        aria-label={label}
-        title={label}
-        onClick={onClick}
-        className="inline-grid size-8 place-items-center rounded-[5px] text-fg-soft hover:bg-surface-hover hover:text-fg"
-      >
-        <CanvasIcon name={icon} />
-      </button>
-    );
   const showFiles = head?.tab === 'files' && files;
 
   return (
@@ -516,7 +505,7 @@ export function IntelligencePanel({
                 <div className="text-[14px] leading-[1.65]">{intro}</div>
               </div>
             )}
-            {turns.map((turn) => (
+            {turns.map((turn, index) => (
               <div key={turn.id} className="flex flex-col gap-[18px]">
                 <div className="max-w-[86%] self-end rounded-[10px_10px_3px_10px] bg-surface-selected px-[13px] py-[9px] leading-[1.5]">
                   {turn.question}
@@ -528,6 +517,7 @@ export function IntelligencePanel({
                   {...(renderDraft ? { renderDraft } : {})}
                   {...(onRetry && !running ? { onRetry: () => onRetry(turn) } : {})}
                   {...(answerActions ? { actions: answerActions(turn) } : {})}
+                  {...(renderAfter ? { after: renderAfter(turn, index) } : {})}
                   onCopy={(text) =>
                     void navigator.clipboard?.writeText(text).catch(() => undefined)
                   }
@@ -542,7 +532,7 @@ export function IntelligencePanel({
                   <button
                     key={suggestion}
                     type="button"
-                    onClick={() => onSend(suggestion)}
+                    onClick={() => onSend(suggestion, [])}
                     {...(suggestion.length > 54 ? { title: suggestion } : {})}
                     className="rounded-[5px] border border-line-control bg-surface-control px-2.5 py-[5px] text-left text-[12px] leading-[1.35] text-fg-soft hover:border-accent hover:text-fg"
                   >
@@ -551,49 +541,13 @@ export function IntelligencePanel({
                 ))}
               </div>
             )}
-            <form
-              aria-label={words.composer}
-              onSubmit={(event) => {
-                event.preventDefault();
-                if (running) onStop();
-                else send();
-              }}
-              className="rounded-[7px] border border-line-strong bg-surface-control pb-1.5 pl-3 pr-2 pt-2 focus-within:outline focus-within:outline-2 focus-within:outline-offset-1 focus-within:outline-focus"
-            >
-              <textarea
-                aria-label={words.composer}
-                rows={2}
-                value={question}
-                placeholder={words.placeholder}
-                onChange={(event) => setQuestion(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault();
-                    send();
-                  }
-                }}
-                className="max-h-40 min-h-11 w-full resize-none border-0 bg-transparent leading-[1.5] text-fg outline-0 placeholder:text-fg-muted"
-              />
-              <div className="flex items-center gap-0.5">
-                {tool(words.attach, 'clip', composerTools?.attach)}
-                {tool(words.cite, 'at', composerTools?.cite)}
-                {tool(words.gestures, 'slash', composerTools?.gestures)}
-                {tool(words.dictate, 'mic', composerTools?.dictate)}
-                <div className="flex-1" />
-                <button
-                  type="submit"
-                  aria-label={running ? words.stop : words.send}
-                  title={running ? words.stop : words.send}
-                  className={
-                    running
-                      ? 'grid size-8 place-items-center rounded-[5px] bg-agent text-on-agent'
-                      : 'grid size-8 place-items-center rounded-[5px] bg-action text-on-action hover:bg-action-strong'
-                  }
-                >
-                  <CanvasIcon name={running ? 'stop' : 'up'} />
-                </button>
-              </div>
-            </form>
+            <Composer
+              running={running}
+              words={words}
+              onSend={onSend}
+              onStop={onStop}
+              {...(composer ? { options: composer } : {})}
+            />
             {words.hint && (
               <p className="mb-0 mt-2 text-center text-[11px] text-fg-muted">{words.hint}</p>
             )}

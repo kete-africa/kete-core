@@ -27,8 +27,9 @@ export function postTo(endpoint: string, extra: Record<string, unknown> = {}): A
     });
 }
 
-export function useIntelligence(ask: AskTransport) {
-  const [turns, setTurns] = useState<Turn[]>([]);
+/** `initial`: the turns of a thread opened again, already answered. */
+export function useIntelligence(ask: AskTransport, initial: readonly Turn[] = []) {
+  const [turns, setTurns] = useState<Turn[]>(() => [...initial]);
   const [running, setRunning] = useState(false);
   const controller = useRef<AbortController | null>(null);
   const past = useRef<Turn[]>([]);

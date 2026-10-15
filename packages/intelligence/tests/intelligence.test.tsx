@@ -7,9 +7,11 @@ import {
   newTurn,
   readEvents,
   reduceTurn,
+  useIntelligence,
   type IntelligenceWords,
   type Turn,
 } from '../src/index.js';
+import { Composer, typing } from '../src/composer.js';
 import { intelligenceResponse, refused, toIntelligence } from '../src/server.js';
 
 // Spec 101: a turn of the agents' runtime, streamed as the contract, and the drawer that shows it.
@@ -286,6 +288,57 @@ describe('the drawer', () => {
     expect(html).toContain('bg-agent');
   });
 
+  it('names a capability as the canvas does, and shows what the product adds after the words', () => {
+    const done = reduceTurn(
+      reduceTurn(newTurn('1', 'Combien ?', 0), {
+        type: 'tool',
+        id: 't1',
+        name: 'team_data_rows',
+        level: 1,
+        state: 'done',
+      }),
+      { type: 'text', delta: 'Voici.' },
+    );
+    const html = renderToStaticMarkup(
+      <IntelligencePanel
+        turns={[done]}
+        running={false}
+        onSend={() => undefined}
+        onStop={() => undefined}
+        words={words}
+        toolLabel={() => 'les lignes'}
+        renderAfter={(turn, index) => <table data-after={`${turn.id}-${index}`} />}
+      />,
+    );
+    expect(html).toContain('>team_data_rows<');
+    expect(html).toContain('title="les lignes"');
+    expect(html).toContain('data-after="1-0"');
+  });
+
+  it('opens a thread again with its answered turns', () => {
+    const answered = reduceTurn(newTurn('1', 'Où en est le devis ?'), {
+      type: 'done',
+      tools: 0,
+      ms: 1_000,
+    });
+    function Thread() {
+      const { turns, running } = useIntelligence(
+        () => Promise.reject(new Error('not asked')),
+        [answered],
+      );
+      return (
+        <IntelligencePanel
+          turns={turns}
+          running={running}
+          onSend={() => undefined}
+          onStop={() => undefined}
+          words={words}
+        />
+      );
+    }
+    expect(renderToStaticMarkup(<Thread />)).toContain('Où en est le devis ?');
+  });
+
   it('offers suggestions before anything is asked', () => {
     const html = renderToStaticMarkup(
       <IntelligencePanel
@@ -300,5 +353,45 @@ describe('the drawer', () => {
     );
     expect(html).toContain('Quelles factures relancer ?');
     expect(html).toContain('Bonjour Afi.');
+  });
+});
+
+describe('the field', () => {
+  it('finds the word typed after @ or /, before the caret', () => {
+    expect(typing('Demande à @Kos', 14)).toEqual({ trigger: '@', query: 'Kos', at: 10 });
+    expect(typing('/clô', 4)).toEqual({ trigger: '/', query: 'clô', at: 0 });
+    expect(typing('a/b', 3)).toBeNull();
+    expect(typing('@Kossi Adjo ', 12)).toBeNull();
+  });
+
+  it('offers its tools only when the product gives them, and shows the files joined', () => {
+    const bare = renderToStaticMarkup(
+      <Composer running={false} words={words} onSend={() => undefined} onStop={() => undefined} />,
+    );
+    expect(bare).not.toContain('Citer un objet');
+    const full = renderToStaticMarkup(
+      <Composer
+        running={false}
+        words={words}
+        onSend={() => undefined}
+        onStop={() => undefined}
+        options={{
+          mentions: [{ id: 'usr_1', label: 'Kossi Adjo' }],
+          gestures: [{ id: 'summarize', label: 'résumer' }],
+          attach: {
+            files: [
+              { id: 'att_1', name: 'reçu.jpg', state: 'ready' },
+              { id: 'att_2', name: 'relevé.pdf', state: 'failed' },
+            ],
+            onFiles: () => undefined,
+            onRemove: () => undefined,
+          },
+        }}
+      />,
+    );
+    for (const label of ['Joindre un fichier', 'Citer un objet', 'Gestes', 'reçu.jpg']) {
+      expect(full).toContain(label);
+    }
+    expect(full).toContain('data-file="failed"');
   });
 });

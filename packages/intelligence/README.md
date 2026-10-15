@@ -41,6 +41,7 @@ No word is written on the server: a reason travels as a code (`not_connected`, `
 
 ```tsx
 const { turns, running, send, stop } = useIntelligence(postTo('/api/intelligence', { page }));
+// A thread opened again: useIntelligence(transport, turnsAlreadyAnswered)
 
 <IntelligencePanel
   turns={turns}
@@ -55,8 +56,9 @@ const { turns, running, send, stop } = useIntelligence(postTo('/api/intelligence
   intro={<p>Bonjour Afi…</p>}
   suggestions={['Quelles factures relancer ?']}
   renderDraft={(draft) => <VerificationCard … />}
+  renderAfter={(turn, index) => <Extras … />} // what the product adds after the words
   onRetry={(turn) => send(turn.question)}
-  composerTools={{ attach, cite, gestures, dictate }}
+  composer={{ attach: { files, onFiles, onRemove }, mentions, gestures, dictate: {} }}
 />;
 ```
 
@@ -69,3 +71,10 @@ its `head`; one question at a time, the next waits. As the validated canvas v3.1
   goes, each capability with its level — opened, what it was called with (→) and what it found (←) —
   the draft as its verification card, its words, its sources, « Copier », « Régénérer » and its tally;
 - the suggestions wait above the field whenever it is not answering.
+- a capability is named as the canvas names it — its technical name, in mono — and the line « what
+  it does now » says it in her words (`toolLabel`);
+- the field: files joined as chips; @ and / open the product's objects and gestures, picked with the
+  keyboard or the mouse; her voice written as she speaks; `onSend(question, picks)` says what she
+  picked and kept, for the product to tell its model;
+- `renderAfter` shows what a product adds beyond the contract after an answer's words: a table it
+  read, an app's view.
