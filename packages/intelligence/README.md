@@ -41,6 +41,7 @@ No word is written on the server: a reason travels as a code (`not_connected`, `
 
 ```tsx
 const { turns, running, send, stop } = useIntelligence(postTo('/api/intelligence', { page }));
+// A thread opened again: useIntelligence(transport, turnsAlreadyAnswered)
 
 <IntelligencePanel
   turns={turns}

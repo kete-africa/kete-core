@@ -6,6 +6,7 @@
 
 - `renderAfter` shows what a product adds after an answer's words (a table, an app's view); a
   capability's row names it as the canvas does, its technical name in mono, her words in its title.
+- `useIntelligence(ask, initial)` opens a thread again with its answered turns.
 
 ## 0.2.0
 

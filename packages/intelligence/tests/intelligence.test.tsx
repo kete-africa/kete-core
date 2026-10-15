@@ -7,6 +7,7 @@ import {
   newTurn,
   readEvents,
   reduceTurn,
+  useIntelligence,
   type IntelligenceWords,
   type Turn,
 } from '../src/index.js';
@@ -311,6 +312,30 @@ describe('the drawer', () => {
     expect(html).toContain('>team_data_rows<');
     expect(html).toContain('title="les lignes"');
     expect(html).toContain('data-after="1-0"');
+  });
+
+  it('opens a thread again with its answered turns', () => {
+    const answered = reduceTurn(newTurn('1', 'Où en est le devis ?'), {
+      type: 'done',
+      tools: 0,
+      ms: 1_000,
+    });
+    function Thread() {
+      const { turns, running } = useIntelligence(
+        () => Promise.reject(new Error('not asked')),
+        [answered],
+      );
+      return (
+        <IntelligencePanel
+          turns={turns}
+          running={running}
+          onSend={() => undefined}
+          onStop={() => undefined}
+          words={words}
+        />
+      );
+    }
+    expect(renderToStaticMarkup(<Thread />)).toContain('Où en est le devis ?');
   });
 
   it('offers suggestions before anything is asked', () => {
