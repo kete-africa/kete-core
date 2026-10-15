@@ -51,6 +51,26 @@ export {
 export { BoardGrid, SummaryCard, type BoardCardSlot, type SummaryLine } from './board.js';
 export { AgentCard, LessonCard, TierLadder, type AgentGesture } from './lifecycle.js';
 export {
+  CanvasFrame,
+  FrameAskButton,
+  FrameAvatar,
+  FrameIconButton,
+  FrameMark,
+  FrameNavGroup,
+  FrameNavLabel,
+  FrameOrg,
+  FramePage,
+  FramePageHead,
+  FramePlace,
+  FrameSearch,
+  FrameSource,
+  FrameSpaceHead,
+  FrameSpark,
+  FrameTab,
+  type PlaceExtra,
+} from './canvas-frame.js';
+export { CanvasIcon, isCanvasIconName, type CanvasIconName } from './canvas-icon.js';
+export {
   ProposalList,
   VoiceCapture,
   type ProposalOutcomeState,

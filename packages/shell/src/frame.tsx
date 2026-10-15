@@ -1,21 +1,27 @@
 import {
   applyTheme,
   Button,
+  CanvasFrame,
+  CanvasIcon,
   CommandPalette,
-  CommandTrigger,
-  CountBadge,
   Dialog,
-  Icon,
-  IconButton,
+  FrameAskButton,
+  FrameAvatar,
+  FrameIconButton,
+  FrameMark,
+  FrameNavGroup,
+  FrameNavLabel,
+  FrameOrg,
+  FramePlace,
+  FrameSearch,
+  FrameSpaceHead,
+  FrameTab,
+  isCanvasIconName,
   isIconName,
-  NavItem,
-  NavSection,
-  Shell,
-  TabBar,
-  TabBarItem,
   TextAreaField,
   ThemeChoice,
   useCommandShortcut,
+  type CanvasIconName,
   type CommandGroup,
   type CommandItem,
   type IconName,
@@ -58,6 +64,8 @@ export interface ShellWords {
   noteSave: string;
   /** Closing a dialog or the drawer. */
   close: string;
+  /** Her avatar's name: « Profil ». */
+  profile: string;
   /** The person's mode. */
   theme: string;
   themes: { dark: string; light: string; auto: string };
@@ -164,53 +172,53 @@ export function NoteDialog({
   );
 }
 
-/**
- * The drawer beside the page: « Demander » and « Fichiers » live there and keep the page in view;
- * full screen on a phone. Its content comes from the product (@kete/intelligence).
- */
-export function Beside({
-  open,
-  label,
-  closeLabel,
-  onClose,
-  children,
-}: {
-  open: boolean;
+/** A manifest's icon in the canvas's set: its own name, or the one the canvas draws for it. */
+const canvasNames: Record<string, CanvasIconName> = {
+  check: 'decide',
+  calendar: 'cal',
+  chart: 'board',
+  sparkle: 'spark',
+  agent: 'bot',
+  list: 'doc',
+  file: 'doc',
+  tool: 'gear',
+  library: 'book',
+  close: 'x',
+  attach: 'clip',
+  chevron: 'down',
+  new: 'plus',
+};
+function canvasIconOf(place: Place): CanvasIconName | undefined {
+  if (!place.icon) return undefined;
+  if (isCanvasIconName(place.icon)) return place.icon;
+  return canvasNames[place.icon];
+}
+
+/** The apps of her organization, under « Apps » at the bottom of the places. */
+export interface FrameApps {
   label: string;
-  closeLabel: string;
-  onClose: () => void;
-  children: ReactNode;
-}) {
-  if (!open) return null;
-  return (
-    <aside
-      aria-label={label}
-      className="fixed inset-y-0 right-0 z-30 flex w-[min(440px,100vw)] flex-col border-l border-line bg-surface text-fg shadow-[-8px_0_24px_#0004]"
-    >
-      <div className="flex h-[54px] shrink-0 items-center justify-end border-b border-line px-2">
-        <IconButton label={closeLabel} onClick={onClose}>
-          <Icon name="close" />
-        </IconButton>
-      </div>
-      <div className="flex min-h-0 flex-1 flex-col">{children}</div>
-    </aside>
-  );
+  items: { id: string; label: string; href: string; color?: string }[];
 }
 
 /**
- * The frame of every signed-in screen. Its places come from the manifest (`placesFor`); `current`
- * names the place shown. With `onAsk`, « Demander » (Ctrl J, and Ctrl K's question) opens `beside`;
- * with `onNote`, « Noter » (N) opens its dialog anywhere.
+ * The frame of every signed-in screen (the validated canvas v3.1, spec 108): the top bar across the
+ * whole width — the brand, her organization, the search, the tools, her avatar — the places on the
+ * left with what waits in each, Kete Intelligence's drawer on the right, the phone's five tabs.
+ * Its places come from the manifest (`placesFor`); `current` names the place shown.
  */
 export function AppFrame({
   brand,
+  org,
+  space,
   sections,
+  foot,
   current,
   counts = {},
   person,
   words,
   find,
   onAsk,
+  askHref,
   beside,
   onFiles,
   onNote,
@@ -221,10 +229,23 @@ export function AppFrame({
   tools,
   children,
 }: {
-  brand: ReactNode;
+  /** Kete, or the product: its name and the letter of its mark. */
+  brand: { name: string; mark?: string };
+  /** The organization she works in. */
+  org?: { name: string; onClick?: () => void };
+  /** In an app: its own head — its mark, its color, its question, the way back to the center. */
+  space?: {
+    name: string;
+    mark?: string;
+    color?: string;
+    question?: string;
+    back?: { href: string; label: string };
+  };
   sections: readonly PlaceSection[];
+  /** The bottom of the places: « Apps », « Toutes les apps », « Administration ». */
+  foot?: { apps?: FrameApps; places?: readonly Place[] };
   current?: string;
-  /** What waits in each place, by its id. */
+  /** What waits in each place, by its id: a count said in bold. */
   counts?: Record<string, number>;
   person: { name: string; detail?: string };
   words: ShellWords;
@@ -232,17 +253,19 @@ export function AppFrame({
   find?: (query: string) => Promise<CommandItem[]>;
   /** Ask a question; with none, open the drawer. */
   onAsk?: (question?: string) => void;
-  /** The drawer beside the page, when the product opened it. */
-  beside?: { open: boolean; label: string; onClose: () => void; content: ReactNode };
+  /** The page « Demander »: the phone's middle tab opens it (its place id is `ask`). */
+  askHref?: string;
+  /** Kete Intelligence beside the page, when the product opened it: its own header included. */
+  beside?: { open: boolean; wide?: boolean; label: string; content: ReactNode };
   onFiles?: () => void;
   /** Keeps a note; what it returns is shown in the dialog (see `NoteDialog`). */
   onNote?: (text: string) => Promise<ReactNode>;
   sync?: SyncState;
   bell?: { href: string; count?: number };
-  /** The ids of up to four places on the phone's tabs; « Demander » sits in the middle. */
+  /** The ids of three places on the phone's tabs: « Demander » sits in the middle, « Menu » last. */
   tabs?: readonly string[];
   signOutHref?: string;
-  /** More of the product's own controls in the toolbar (the feedback button). */
+  /** More of the product's own controls in the top bar (the feedback button). */
   tools?: ReactNode;
   children: ReactNode;
 }) {
@@ -251,7 +274,7 @@ export function AppFrame({
   const [query, setQuery] = useState('');
   const [found, setFound] = useState<CommandItem[]>([]);
   const [noting, setNoting] = useState(false);
-  const places = allPlaces(sections);
+  const places = [...allPlaces(sections), ...(foot?.places ?? [])];
 
   const openPalette = useCallback(() => setPalette(true), []);
   useCommandShortcut(openPalette);
@@ -301,140 +324,194 @@ export function AppFrame({
       }),
     },
   ];
+
+  const placeLink = (place: Place, main = false) => {
+    const icon = canvasIconOf(place);
+    const count = counts[place.id];
+    const extra =
+      place.extra ?? (count ? { kind: 'count' as const, value: count, hot: true } : undefined);
+    return (
+      <FramePlace
+        key={place.id}
+        href={place.href}
+        current={place.id === current}
+        main={main}
+        {...(place.dot ? { dot: place.dot } : icon ? { icon } : {})}
+        {...(extra ? { extra } : {})}
+      >
+        {place.label}
+      </FramePlace>
+    );
+  };
   const tabPlaces = tabs
     .map((id) => places.find((place) => place.id === id))
     .filter((place): place is Place => Boolean(place))
-    .slice(0, 4);
-  const half = Math.ceil(tabPlaces.length / 2);
+    .slice(0, 3);
   const tab = (place: Place) => (
-    <TabBarItem
+    <FrameTab
       key={place.id}
       href={place.href}
-      icon={iconOf(place) ?? 'apps'}
+      icon={canvasIconOf(place) ?? 'apps'}
       current={place.id === current}
-      {...(counts[place.id] ? { count: counts[place.id] } : {})}
+      {...(counts[place.id] ? { badge: counts[place.id] } : {})}
     >
       {place.label}
-    </TabBarItem>
+    </FrameTab>
   );
 
   return (
     <>
-      <Shell
-        brand={brand}
-        navLabel={words.nav}
-        showNavLabel={words.showNav}
-        hideNavLabel={words.hideNav}
-        search={<CommandTrigger label={words.search} onOpen={openPalette} />}
-        nav={sections.map((section, index) => (
-          <NavSection key={index} {...(section.label ? { label: section.label } : {})}>
-            {section.places.map((place) => {
-              const icon = iconOf(place);
-              return (
-                <NavItem
-                  key={place.id}
-                  href={place.href}
-                  current={place.id === current}
-                  {...(icon ? { icon } : {})}
-                  {...(counts[place.id] ? { count: counts[place.id] } : {})}
-                >
-                  {place.label}
-                </NavItem>
-              );
-            })}
-          </NavSection>
-        ))}
-        toolbar={
-          <div className="flex items-center gap-1">
+      <CanvasFrame
+        brand={
+          <>
+            <FrameMark>{brand.mark ?? brand.name.slice(0, 1)}</FrameMark>
+            <span>{brand.name}</span>
+          </>
+        }
+        {...(org
+          ? { org: <FrameOrg name={org.name} {...(org.onClick ? { onClick: org.onClick } : {})} /> }
+          : {})}
+        search={<FrameSearch label={words.search} onOpen={openPalette} />}
+        tools={
+          <>
             {sync && <SyncPill sync={sync} words={words.sync} />}
             {tools}
             {onNote && (
-              <IconButton label={words.note} onClick={() => setNoting(true)}>
-                <Icon name="pen" />
-              </IconButton>
+              <FrameIconButton
+                label={words.note}
+                icon="pen"
+                onClick={() => setNoting(true)}
+                className="max-[640px]:hidden"
+              />
             )}
             {onAsk && (
-              <Button
-                variant="secondary"
+              <FrameAskButton
+                label={words.ask}
                 onClick={() => onAsk()}
-                aria-keyshortcuts="Control+J"
-                // On a phone, « Demander » sits in the middle of the tabs.
-                {...(tabPlaces.length > 0 ? { className: 'max-[760px]:hidden' } : {})}
-              >
-                <Icon name="sparkle" size={18} />
-                {words.ask}
-              </Button>
+                {...(beside ? { pressed: beside.open } : {})}
+              />
             )}
-            {onFiles && (
-              <IconButton label={words.files} onClick={onFiles}>
-                <Icon name="attach" />
-              </IconButton>
-            )}
+            {onFiles && <FrameIconButton label={words.files} icon="clip" onClick={onFiles} />}
             {bell && (
               <a
                 href={bell.href}
                 aria-label={bell.count ? `${words.bell} (${bell.count})` : words.bell}
                 title={words.bell}
-                className="relative inline-flex size-(--icon-button-size) items-center justify-center rounded-control text-fg hover:bg-surface-hover"
+                className="relative inline-grid size-8 place-items-center rounded-[5px] text-fg-soft hover:bg-surface-hover hover:text-fg max-[640px]:size-10"
               >
-                <Icon name="bell" />
+                <CanvasIcon name="bell" />
                 {bell.count !== undefined && bell.count > 0 && (
-                  <CountBadge count={bell.count} floating />
+                  <span className="absolute -right-0.5 top-0 h-4 min-w-4 rounded-full bg-action px-1 text-[10px] font-bold leading-4 text-on-action shadow-[0_0_0_2px_var(--color-surface)]">
+                    {bell.count}
+                  </span>
                 )}
               </a>
             )}
-          </div>
-        }
-        footer={
-          <div className="grid gap-4">
-            <div className="flex items-center gap-3">
-              <span
-                aria-hidden="true"
-                className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-action text-[13px] font-semibold text-on-action"
-              >
-                {initials(person.name)}
-              </span>
-              <span className="grid min-w-0">
-                <span className="truncate font-semibold">{person.name}</span>
-                {person.detail && (
-                  <span className="truncate text-body-sm text-fg-muted">{person.detail}</span>
+            <FrameAvatar initials={initials(person.name)} label={words.profile}>
+              <div className="grid gap-3">
+                <span className="grid min-w-0">
+                  <span className="truncate font-semibold">{person.name}</span>
+                  {person.detail && (
+                    <span className="truncate text-body-sm text-fg-muted">{person.detail}</span>
+                  )}
+                </span>
+                <ThemeChoice
+                  label={words.theme}
+                  value={theme}
+                  labels={words.themes}
+                  onChange={(choice) => {
+                    setTheme(choice);
+                    applyTheme(choice);
+                  }}
+                />
+                {signOutHref && (
+                  <a href={signOutHref} className="text-body-sm text-link underline">
+                    {words.signOut}
+                  </a>
                 )}
-              </span>
-            </div>
-            <ThemeChoice
-              label={words.theme}
-              value={theme}
-              labels={words.themes}
-              onChange={(choice) => {
-                setTheme(choice);
-                applyTheme(choice);
-              }}
-            />
-            {signOutHref && (
-              <a href={signOutHref} className="text-body-sm text-link underline">
-                {words.signOut}
-              </a>
-            )}
-          </div>
+              </div>
+            </FrameAvatar>
+          </>
         }
+        navLabel={words.nav}
+        menuLabel={words.showNav}
+        nav={
+          <>
+            {space ? (
+              <FrameSpaceHead
+                mark={space.mark ?? space.name.slice(0, 1)}
+                name={space.name}
+                {...(space.color ? { color: space.color } : {})}
+                {...(space.question ? { question: space.question } : {})}
+                {...(space.back ? { back: space.back } : {})}
+              />
+            ) : (
+              <div className="h-2" />
+            )}
+            {sections.map((section, index) => (
+              <div key={index} className="flex flex-col">
+                {section.label && <FrameNavLabel>{section.label}</FrameNavLabel>}
+                {section.places.map((place) => placeLink(place, !space && index === 0))}
+              </div>
+            ))}
+          </>
+        }
+        {...(foot
+          ? {
+              navFoot: (
+                <>
+                  {foot.apps && (
+                    <FrameNavGroup icon="apps" label={foot.apps.label}>
+                      {foot.apps.items.map((app) => (
+                        <FramePlace key={app.id} href={app.href} sub dot={app.color ?? true}>
+                          {app.label}
+                        </FramePlace>
+                      ))}
+                    </FrameNavGroup>
+                  )}
+                  {(foot.places ?? []).map((place) => placeLink(place))}
+                </>
+              ),
+            }
+          : {})}
+        {...(beside
+          ? {
+              drawer: {
+                open: beside.open,
+                ...(beside.wide ? { wide: true } : {}),
+                label: beside.label,
+                content: beside.content,
+              },
+            }
+          : {})}
         {...(tabPlaces.length > 0
           ? {
-              tabBar: (
-                <TabBar label={words.tabs}>
-                  {tabPlaces.slice(0, half).map(tab)}
-                  {onAsk && (
-                    <TabBarItem icon="sparkle" primary onClick={() => onAsk()}>
+              tabsLabel: words.tabs,
+              tabs: (openMenu: () => void) => (
+                <>
+                  {tabPlaces.slice(0, 2).map(tab)}
+                  {askHref ? (
+                    <FrameTab icon="spark" raised href={askHref} current={current === 'ask'}>
                       {words.ask}
-                    </TabBarItem>
+                    </FrameTab>
+                  ) : (
+                    onAsk && (
+                      <FrameTab icon="spark" raised onClick={() => onAsk()}>
+                        {words.ask}
+                      </FrameTab>
+                    )
                   )}
-                  {tabPlaces.slice(half).map(tab)}
-                </TabBar>
+                  {tabPlaces.slice(2).map(tab)}
+                  <FrameTab icon="menu" onClick={openMenu}>
+                    {words.menu}
+                  </FrameTab>
+                </>
               ),
             }
           : {})}
       >
         {children}
-      </Shell>
+      </CanvasFrame>
       <CommandPalette
         open={palette}
         onOpenChange={(next) => {
@@ -463,16 +540,6 @@ export function AppFrame({
       />
       {onNote && (
         <NoteDialog open={noting} onClose={() => setNoting(false)} onSave={onNote} words={words} />
-      )}
-      {beside && (
-        <Beside
-          open={beside.open}
-          label={beside.label}
-          closeLabel={words.close}
-          onClose={beside.onClose}
-        >
-          {beside.content}
-        </Beside>
       )}
     </>
   );

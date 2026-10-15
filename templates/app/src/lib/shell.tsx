@@ -49,6 +49,7 @@ function shellWords(): ShellWords {
     theme: m.theme_label(),
     themes: { dark: m.theme_dark(), light: m.theme_light(), auto: m.theme_auto() },
     signOut: m.nav_sign_out(),
+    profile: m.shell_profile(),
     sync: {
       ok: m.shell_sync_ok(),
       offline: (pending) => m.shell_sync_offline({ count: String(pending) }),
@@ -65,32 +66,44 @@ function intelligenceWords(): IntelligenceWords {
     confirmation_required: m.intelligence_confirmation,
   };
   return {
+    name: m.intelligence_label(),
     thread: m.intelligence_thread(),
-    you: m.intelligence_you(),
-    assistant: m.intelligence_assistant(),
     composer: m.intelligence_composer(),
     placeholder: m.intelligence_placeholder(),
     send: m.intelligence_send(),
     stop: m.intelligence_stop(),
     hint: m.intelligence_hint(),
     context: m.intelligence_context(),
+    removeContext: m.intelligence_remove_context(),
     suggestions: m.intelligence_suggestions(),
     thinking: m.intelligence_thinking(),
     reading: (tool) => m.intelligence_reading({ tool }),
     plan: m.intelligence_plan(),
     level: (level) => m.intelligence_level({ level: String(level) }),
-    toolState: {
-      running: m.intelligence_running(),
-      done: m.intelligence_done_tool(),
-      failed: m.intelligence_failed_tool(),
-    },
     sources: m.intelligence_sources(),
     draft: m.intelligence_draft(),
     verify: m.intelligence_verify(),
-    done: (tools, seconds) =>
-      m.intelligence_done({ tools: String(tools), seconds: String(seconds) }),
+    tally: (steps, gestures, seconds) =>
+      m.intelligence_tally({
+        steps: String(steps),
+        gestures: String(gestures),
+        seconds: String(seconds),
+      }),
+    seconds: (seconds) => m.intelligence_seconds({ seconds: String(seconds) }),
     stopped: m.intelligence_stopped(),
     reason: (code) => (reasons[code] ?? m.intelligence_failed)(),
+    copy: m.intelligence_copy(),
+    retry: m.intelligence_retry(),
+    ask: m.shell_ask(),
+    files: m.shell_files(),
+    history: m.intelligence_history(),
+    newThread: m.intelligence_new_thread(),
+    wide: m.intelligence_wide(),
+    close: m.shell_close(),
+    attach: m.intelligence_attach(),
+    cite: m.intelligence_cite(),
+    gestures: m.intelligence_gestures(),
+    dictate: m.intelligence_dictate(),
   };
 }
 
@@ -114,9 +127,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const transport = useMemo(() => postTo('/api/intelligence', page ? { page } : {}), [page]);
   const intelligence = useIntelligence(transport);
   const [open, setOpen] = useState(false);
+  const [wide, setWide] = useState(false);
   return (
     <AppFrame
-      brand={m.app_name()}
+      brand={{ name: m.app_name() }}
       sections={sections}
       {...(current ? { current } : {})}
       person={{ name: context.person?.name ?? '' }}
@@ -127,8 +141,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       }}
       beside={{
         open,
+        wide,
         label: m.intelligence_label(),
-        onClose: () => setOpen(false),
         content: (
           <IntelligencePanel
             turns={intelligence.turns}
@@ -136,13 +150,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             onSend={(question) => void intelligence.send(question)}
             onStop={intelligence.stop}
             words={intelligenceWords()}
-            {...(page ? { context: page } : {})}
+            head={{
+              tab: 'ask',
+              wide,
+              onWide: () => setWide((value) => !value),
+              onClose: () => setOpen(false),
+            }}
+            {...(page ? { context: { label: page } } : {})}
+            onRetry={(turn) => void intelligence.send(turn.question)}
             intro={m.intelligence_intro()}
             suggestions={[m.intelligence_suggest_open(), m.intelligence_suggest_late()]}
           />
         ),
       }}
-      tabs={app.places.map((place) => place.id)}
+      tabs={app.places.map((place) => place.id).slice(0, 3)}
       signOutHref="/auth/sortie"
       tools={
         <FeedbackButton

@@ -154,27 +154,38 @@ describe('the turn on the screen', () => {
 });
 
 const words: IntelligenceWords = {
+  name: 'Kete Intelligence',
   thread: 'Conversation',
-  you: 'Vous',
-  assistant: 'Kete Intelligence',
   composer: 'Votre demande',
-  placeholder: 'Demandez, ou confiez une tâche…',
+  placeholder: 'Demandez, ou confiez une tâche… @ pour citer, / pour un geste',
   send: 'Envoyer',
   stop: 'Arrêter',
-  hint: 'Agit avec vos droits · prépare, vous décidez',
+  hint: 'Agit avec vos droits · prépare, vous décidez · chaque chiffre est calculé, jamais inventé',
   context: 'Contexte',
+  removeContext: 'Retirer le contexte',
   suggestions: 'Suggestions',
   thinking: 'Je réfléchis…',
   reading: (tool) => `Je consulte ${tool}…`,
   plan: 'Plan',
   level: (level) => `niveau ${level}`,
-  toolState: { running: 'en cours', done: 'fait', failed: 'échoué' },
   sources: 'Sources',
   draft: 'Brouillon',
   verify: 'Vérifier',
-  done: (tools, seconds) => `${tools} gestes · ${seconds} s`,
-  stopped: 'Arrêté : rien d’autre n’a été fait.',
+  tally: (steps, gestures, seconds) => `${steps} étapes · ${gestures} gestes · ${seconds} s`,
+  seconds: (seconds) => `${seconds} s`,
+  stopped: 'Arrêté. Ce qui a été lu est gardé ; rien n’a été modifié.',
   reason: (code) => ({ not_connected: 'Aucun modèle n’est connecté.' })[code] ?? code,
+  copy: 'Copier',
+  ask: 'Demander',
+  files: 'Fichiers',
+  history: 'Fils',
+  newThread: 'Nouveau fil',
+  wide: 'Agrandir',
+  close: 'Fermer',
+  attach: 'Joindre un fichier',
+  cite: 'Citer un objet',
+  gestures: 'Gestes',
+  dictate: 'Dicter',
 };
 
 describe('the drawer', () => {
@@ -193,7 +204,7 @@ describe('the drawer', () => {
         onSend={() => undefined}
         onStop={() => undefined}
         words={words}
-        context="Devis D-2026-0004"
+        context={{ label: 'Devis D-2026-0004', onRemove: () => undefined }}
         toolLabel={(name) => (name === 'quote_get' ? 'le devis' : name)}
       />,
     );
@@ -232,9 +243,47 @@ describe('the drawer', () => {
     );
     expect(html).toContain('href="/verification/drf_1"');
     expect(html).toContain('href="/devis/4"');
-    expect(html).toContain('0 gestes · 3 s');
+    expect(html).toContain('0 étapes · 0 gestes · 3 s');
     expect(html).toContain('role="alert"');
     expect(html).toContain('Aucun modèle n’est connecté.');
+  });
+
+  it('wears the drawer’s head: its two tabs, the threads, a new one, wider, close', () => {
+    const html = renderToStaticMarkup(
+      <IntelligencePanel
+        turns={[
+          reduceTurn(newTurn('1', 'Combien ?', 0), {
+            type: 'tool',
+            id: 't1',
+            name: 'metrics_query',
+            level: 3,
+            state: 'done',
+            input: '{ "metric": "finance.available" }',
+            summary: '4 339 500 F',
+          }),
+        ]}
+        running={false}
+        onSend={() => undefined}
+        onStop={() => undefined}
+        words={words}
+        head={{
+          tab: 'ask',
+          onTab: () => undefined,
+          onHistory: () => undefined,
+          onNew: () => undefined,
+          onWide: () => undefined,
+          onClose: () => undefined,
+        }}
+      />,
+    );
+    for (const label of ['Demander', 'Fichiers', 'Fils', 'Nouveau fil', 'Agrandir', 'Fermer']) {
+      expect(html).toContain(label);
+    }
+    expect(html).toContain('aria-selected="true"');
+    // A capability shows what it was called with and what it found.
+    expect(html).toContain('→ { &quot;metric&quot;: &quot;finance.available&quot; }');
+    expect(html).toContain('← 4 339 500 F');
+    expect(html).toContain('bg-agent');
   });
 
   it('offers suggestions before anything is asked', () => {

@@ -149,6 +149,26 @@ flowchart TB
   S --- TB[TabBar below 760 px]
 ```
 
+`Shell` stays the frame of Compte Kete (spec 046). Every signed-in screen of the center and the apps
+wears **`CanvasFrame`**, the validated canvas v3.1 (spec 108), assembled by `@kete/shell`:
+
+```mermaid
+flowchart TB
+  F[CanvasFrame] --- T[top bar · FrameMark, FrameOrg, FrameSearch, FrameAskButton, FrameIconButton, FrameAvatar]
+  F --- S[places · FrameSpaceHead, FrameNavLabel, FramePlace, FrameNavGroup]
+  F --- M[main · FramePage, FramePageHead, FrameSource]
+  F --- D[drawer · Kete Intelligence, 440 px or wide]
+  F --- B[below 640 px · five FrameTab, « Demander » raised]
+```
+
+- Below 1000 px the places and the drawer slide over the page; below 640 px the tabs appear and the
+  search, « Demander » and the organization leave the top bar.
+- `CanvasIcon` draws the canvas's own icons (`canvasIconShapes`, generated from the canvas).
+- `FramePage` measures the page from the frame's width (container queries on `main`), not the
+  window's.
+- `VerificationCard` is the canvas's card: a raised head, each field with its provenance, the
+  uncertain ones in the verify color, the gestures in its foot, the lesson a correction becomes.
+
 ## A client's brand
 
 ```ts

@@ -62,6 +62,7 @@ const words: ShellWords = {
   theme: 'Apparence',
   themes: { dark: 'Sombre', light: 'Clair', auto: 'Automatique' },
   signOut: 'Se déconnecter',
+  profile: 'Profil',
   sync: { ok: 'À jour', offline: (n) => `Hors ligne · ${n} en attente`, sending: 'Envoi…' },
 };
 
@@ -94,7 +95,7 @@ describe('the frame', () => {
   it('draws the sidebar, Ctrl K, « Demander », « Noter », the bell and the phone’s tabs', () => {
     const html = renderToStaticMarkup(
       <AppFrame
-        brand="Kete Finance"
+        brand={{ name: 'Kete Finance' }}
         sections={placesFor(places, { lang: 'fr', can: () => true })}
         current="quotes"
         counts={{ quotes: 5 }}
@@ -128,7 +129,7 @@ describe('the frame', () => {
   it('leaves out what the product does not offer', () => {
     const html = renderToStaticMarkup(
       <AppFrame
-        brand="Kete"
+        brand={{ name: 'Kete' }}
         sections={placesFor(places, { lang: 'fr', can: () => true })}
         person={{ name: 'Yao' }}
         words={words}

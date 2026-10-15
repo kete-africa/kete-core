@@ -1,7 +1,10 @@
 # @kete/shell
 
 The frame every Kete product wears — the center and every app — so that a person never learns two
-(spec 100; doctrine D-042, D-045, D-050 to D-054). Its places come from the app's manifest; Ctrl K
+(specs 100 and 108; doctrine D-042, D-045, D-050 to D-054). It is the validated canvas v3.1: the
+top bar across the whole width (Kete or the product, her organization, the search, « Demander »,
+the tools, her avatar), the places on the left with what waits in each, Kete Intelligence's drawer on
+the right, five tabs on a phone. Its places come from the app's manifest; Ctrl K
 goes, finds or asks; « Demander » opens the drawer beside the page; « Noter » works from every page;
 the toolbar says whether the gestures reached the center; the phone has its tabs.
 
@@ -12,7 +15,7 @@ flowchart LR
   F --> N[the sidebar]
   F --> C[Ctrl K · places, what she may find, a question]
   F --> T[the phone's tabs · « Demander » in the middle]
-  F --> B[Beside · the drawer, filled by @kete/intelligence]
+  F --> B[beside · the drawer, filled by @kete/intelligence]
   F --> O[« Noter » · N]
   F --> S[SyncPill · up to date, offline, sending]
 ```
@@ -26,15 +29,20 @@ import app from '../kete.json';
 const sections = placesFor(app.places, { lang: 'fr', can: (p) => grants.includes(p) });
 
 <AppFrame
-  brand="Kete Finance"
+  brand={{ name: 'Kete' }}
+  org={{ name: 'Soleil d’Afrique' }}
+  space={{ name: 'Kete Finance', mark: 'F', question: 'Combien ai-je vraiment ?', back }}
   sections={sections}
+  foot={{ apps, places: [catalogue, settings] }}
   current="quotes"
   person={{ name: 'Afi Mensah', detail: 'Direction' }}
   words={words} // every word from the product's catalogs
   onAsk={(question) => openDrawer(question)}
-  beside={{ open, label: 'Kete Intelligence', onClose, content: <Drawer /> }}
+  askHref="/demander" // the phone's middle tab opens the page « Demander »
+  beside={{ open, wide, label: 'Kete Intelligence', content: <IntelligencePanel head={…} /> }}
   onNote={(text) => keepNote({ data: { text } })}
   sync={{ state: 'ok' }}
+  bell={{ href: '/notifications', count: 2 }}
   tabs={['home', 'quotes', 'treasury']}
 >
   {page}
@@ -46,8 +54,14 @@ const sections = placesFor(app.places, { lang: 'fr', can: (p) => grants.includes
 - **Keys**: Ctrl K opens the palette, Ctrl J asks, N notes (when she is not typing).
 - **A note's answer**: `onNote` may return what to show under the field — the reminder it filed,
   with its undo — and the dialog stays open; nothing returned closes it.
+- **Inside an app**: `space` puts the app's head above its places — its mark in its color, its
+  question, « Retour au centre ».
+- **What waits**: a place's `extra` says it — a count, « 2 à lire » in bold, a spinner while an agent
+  works; `dot` draws a project's square instead of an icon.
+- **The drawer** has no head of its own: `IntelligencePanel`'s `head` closes it and widens it.
 - **Words**: no word is written in the package; `ShellWords` lists them all.
-- The parts it composes are `@kete/design`'s: `Shell`, `NavItem`, `CommandPalette`, `TabBar`.
+- The parts it composes are `@kete/design`'s: `CanvasFrame` and its `Frame*` parts,
+  `CommandPalette`, `ThemeChoice`.
 
 ## The phone's own screens (spec 106)
 

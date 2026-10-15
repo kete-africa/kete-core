@@ -43,7 +43,7 @@ export function useIntelligence(ask: AskTransport) {
         { role: 'user', text: turn.question },
         ...(turn.text ? [{ role: 'assistant' as const, text: turn.text }] : []),
       ]);
-      setTurns((list) => [...list, newTurn(id, asked)]);
+      setTurns((list) => [...list, newTurn(id, asked, Date.now())]);
       setRunning(true);
       const abort = new AbortController();
       controller.current = abort;
