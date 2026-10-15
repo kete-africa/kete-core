@@ -1,5 +1,6 @@
 import { CanvasIcon, FrameSpark, Markdown, type CanvasIconName } from '@kete/design';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Composer, type ComposerOptions, type PickedItem } from './composer.js';
 import type { Turn } from './turn.js';
 
 // Kete Intelligence's drawer (kete-core specs 101, 108; the validated canvas v3.1): its head —
@@ -402,11 +403,12 @@ export function IntelligencePanel({
   renderAfter,
   onRetry,
   answerActions,
-  composerTools,
+  composer,
 }: {
   turns: readonly Turn[];
   running: boolean;
-  onSend: (question: string) => void;
+  /** A question, with what she picked and kept in it (@ an object, / a gesture). */
+  onSend: (question: string, picks: PickedItem[]) => void;
   onStop: () => void;
   words: IntelligenceWords;
   head?: IntelligenceHead;
@@ -436,38 +438,14 @@ export function IntelligencePanel({
   onRetry?: (turn: Turn) => void;
   /** The product's gestures on a finished answer, before « Copier »: « Épingler au tableau ». */
   answerActions?: (turn: Turn) => ReactNode;
-  /** The composer's tools the product offers: attach, cite, gestures, dictate. */
-  composerTools?: {
-    attach?: () => void;
-    cite?: () => void;
-    gestures?: () => void;
-    dictate?: () => void;
-  };
+  /** What the field offers beyond the words: files, objects to cite, gestures, her voice. */
+  composer?: ComposerOptions;
 }) {
-  const [question, setQuestion] = useState('');
   const thread = useRef<HTMLDivElement>(null);
   const last = turns.at(-1);
   useEffect(() => {
     thread.current?.scrollTo({ top: thread.current.scrollHeight });
   }, [turns.length, last?.text, last?.tools.length, last?.state]);
-  const send = () => {
-    const asked = question.trim();
-    if (!asked || running) return;
-    onSend(asked);
-    setQuestion('');
-  };
-  const tool = (label: string, icon: CanvasIconName, onClick?: () => void) =>
-    onClick && (
-      <button
-        type="button"
-        aria-label={label}
-        title={label}
-        onClick={onClick}
-        className="inline-grid size-8 place-items-center rounded-[5px] text-fg-soft hover:bg-surface-hover hover:text-fg"
-      >
-        <CanvasIcon name={icon} />
-      </button>
-    );
   const showFiles = head?.tab === 'files' && files;
 
   return (
@@ -554,7 +532,7 @@ export function IntelligencePanel({
                   <button
                     key={suggestion}
                     type="button"
-                    onClick={() => onSend(suggestion)}
+                    onClick={() => onSend(suggestion, [])}
                     {...(suggestion.length > 54 ? { title: suggestion } : {})}
                     className="rounded-[5px] border border-line-control bg-surface-control px-2.5 py-[5px] text-left text-[12px] leading-[1.35] text-fg-soft hover:border-accent hover:text-fg"
                   >
@@ -563,49 +541,13 @@ export function IntelligencePanel({
                 ))}
               </div>
             )}
-            <form
-              aria-label={words.composer}
-              onSubmit={(event) => {
-                event.preventDefault();
-                if (running) onStop();
-                else send();
-              }}
-              className="rounded-[7px] border border-line-strong bg-surface-control pb-1.5 pl-3 pr-2 pt-2 focus-within:outline focus-within:outline-2 focus-within:outline-offset-1 focus-within:outline-focus"
-            >
-              <textarea
-                aria-label={words.composer}
-                rows={2}
-                value={question}
-                placeholder={words.placeholder}
-                onChange={(event) => setQuestion(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault();
-                    send();
-                  }
-                }}
-                className="max-h-40 min-h-11 w-full resize-none border-0 bg-transparent leading-[1.5] text-fg outline-0 placeholder:text-fg-muted"
-              />
-              <div className="flex items-center gap-0.5">
-                {tool(words.attach, 'clip', composerTools?.attach)}
-                {tool(words.cite, 'at', composerTools?.cite)}
-                {tool(words.gestures, 'slash', composerTools?.gestures)}
-                {tool(words.dictate, 'mic', composerTools?.dictate)}
-                <div className="flex-1" />
-                <button
-                  type="submit"
-                  aria-label={running ? words.stop : words.send}
-                  title={running ? words.stop : words.send}
-                  className={
-                    running
-                      ? 'grid size-8 place-items-center rounded-[5px] bg-agent text-on-agent'
-                      : 'grid size-8 place-items-center rounded-[5px] bg-action text-on-action hover:bg-action-strong'
-                  }
-                >
-                  <CanvasIcon name={running ? 'stop' : 'up'} />
-                </button>
-              </div>
-            </form>
+            <Composer
+              running={running}
+              words={words}
+              onSend={onSend}
+              onStop={onStop}
+              {...(composer ? { options: composer } : {})}
+            />
             {words.hint && (
               <p className="mb-0 mt-2 text-center text-[11px] text-fg-muted">{words.hint}</p>
             )}

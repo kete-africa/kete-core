@@ -7,6 +7,9 @@
 - `renderAfter` shows what a product adds after an answer's words (a table, an app's view); a
   capability's row names it as the canvas does, its technical name in mono, her words in its title.
 - `useIntelligence(ask, initial)` opens a thread again with its answered turns.
+- The field (`Composer`, `composer` in place of `composerTools`): files joined as chips, objects cited
+  with @ and gestures asked with / picked from the product's lists, her voice written by the
+  browser's speech recognition; `onSend` receives what she picked and kept.
 
 ## 0.2.0
 

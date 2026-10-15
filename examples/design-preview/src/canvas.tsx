@@ -16,6 +16,7 @@ import {
   IntelligencePanel,
   useIntelligence,
   type AskTransport,
+  type ComposerFile,
   type IntelligenceWords,
 } from '@kete/intelligence';
 import type { IntelligenceEvent } from '@kete/sdk';
@@ -258,6 +259,7 @@ export function CanvasPage() {
   const [beside, setBeside] = useState(false);
   const [tab, setTab] = useState<'ask' | 'files'>('ask');
   const [wide, setWide] = useState(false);
+  const [joined, setJoined] = useState<ComposerFile[]>([]);
   const intelligence = useIntelligence(scripted);
   return (
     <AppFrame
@@ -323,11 +325,30 @@ export function CanvasPage() {
               ],
               onChange: () => undefined,
             }}
-            composerTools={{
-              attach: () => undefined,
-              cite: () => undefined,
-              gestures: () => undefined,
-              dictate: () => undefined,
+            composer={{
+              attach: {
+                files: joined,
+                onFiles: (chosen) =>
+                  setJoined((list) => [
+                    ...list,
+                    ...chosen.map((file) => ({
+                      id: file.name,
+                      name: file.name,
+                      state: 'ready' as const,
+                    })),
+                  ]),
+                onRemove: (id) => setJoined((list) => list.filter((file) => file.id !== id)),
+              },
+              mentions: [
+                { id: 'colombe', label: 'École La Colombe', hint: 'Tiers · client' },
+                { id: 'kossi', label: 'Kossi Adjo', hint: 'Chef de projet' },
+                { id: 'devis', label: 'Devis D-2026-0004', hint: 'Kete Finance' },
+              ],
+              gestures: [
+                { id: 'close', label: 'clôturer', hint: 'Clore ma journée' },
+                { id: 'summarize', label: 'résumer', hint: 'Résumer ce que je regarde' },
+              ],
+              dictate: { lang: 'fr-FR' },
             }}
             intro={
               <p className="m-0">

@@ -63,8 +63,9 @@ flowchart TB
     now » says it in her words;
   - what a product adds beyond the contract (a table, an app's view) shows after the words
     (`renderAfter`);
-  - the field carries « Joindre », « Citer », « Gestes », « Dicter », and « Arrêter » while it
-    answers.
+  - the field joins files (shown as chips), cites an object after @ and asks a gesture after /,
+    both picked from the product's lists, writes her voice as she speaks, and says « Arrêter » while
+    it answers.
 - **FR-004 — The verification card** (`VerificationCard`):
   - a raised head with its mark, its title and « une personne valide »;
   - each field with its provenance, the uncertain ones in the verify color with an alert;

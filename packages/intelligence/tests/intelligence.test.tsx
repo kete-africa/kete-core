@@ -11,6 +11,7 @@ import {
   type IntelligenceWords,
   type Turn,
 } from '../src/index.js';
+import { Composer, typing } from '../src/composer.js';
 import { intelligenceResponse, refused, toIntelligence } from '../src/server.js';
 
 // Spec 101: a turn of the agents' runtime, streamed as the contract, and the drawer that shows it.
@@ -352,5 +353,45 @@ describe('the drawer', () => {
     );
     expect(html).toContain('Quelles factures relancer ?');
     expect(html).toContain('Bonjour Afi.');
+  });
+});
+
+describe('the field', () => {
+  it('finds the word typed after @ or /, before the caret', () => {
+    expect(typing('Demande à @Kos', 14)).toEqual({ trigger: '@', query: 'Kos', at: 10 });
+    expect(typing('/clô', 4)).toEqual({ trigger: '/', query: 'clô', at: 0 });
+    expect(typing('a/b', 3)).toBeNull();
+    expect(typing('@Kossi Adjo ', 12)).toBeNull();
+  });
+
+  it('offers its tools only when the product gives them, and shows the files joined', () => {
+    const bare = renderToStaticMarkup(
+      <Composer running={false} words={words} onSend={() => undefined} onStop={() => undefined} />,
+    );
+    expect(bare).not.toContain('Citer un objet');
+    const full = renderToStaticMarkup(
+      <Composer
+        running={false}
+        words={words}
+        onSend={() => undefined}
+        onStop={() => undefined}
+        options={{
+          mentions: [{ id: 'usr_1', label: 'Kossi Adjo' }],
+          gestures: [{ id: 'summarize', label: 'résumer' }],
+          attach: {
+            files: [
+              { id: 'att_1', name: 'reçu.jpg', state: 'ready' },
+              { id: 'att_2', name: 'relevé.pdf', state: 'failed' },
+            ],
+            onFiles: () => undefined,
+            onRemove: () => undefined,
+          },
+        }}
+      />,
+    );
+    for (const label of ['Joindre un fichier', 'Citer un objet', 'Gestes', 'reçu.jpg']) {
+      expect(full).toContain(label);
+    }
+    expect(full).toContain('data-file="failed"');
   });
 });
