@@ -286,6 +286,33 @@ describe('the drawer', () => {
     expect(html).toContain('bg-agent');
   });
 
+  it('names a capability as the canvas does, and shows what the product adds after the words', () => {
+    const done = reduceTurn(
+      reduceTurn(newTurn('1', 'Combien ?', 0), {
+        type: 'tool',
+        id: 't1',
+        name: 'team_data_rows',
+        level: 1,
+        state: 'done',
+      }),
+      { type: 'text', delta: 'Voici.' },
+    );
+    const html = renderToStaticMarkup(
+      <IntelligencePanel
+        turns={[done]}
+        running={false}
+        onSend={() => undefined}
+        onStop={() => undefined}
+        words={words}
+        toolLabel={() => 'les lignes'}
+        renderAfter={(turn, index) => <table data-after={`${turn.id}-${index}`} />}
+      />,
+    );
+    expect(html).toContain('>team_data_rows<');
+    expect(html).toContain('title="les lignes"');
+    expect(html).toContain('data-after="1-0"');
+  });
+
   it('offers suggestions before anything is asked', () => {
     const html = renderToStaticMarkup(
       <IntelligencePanel

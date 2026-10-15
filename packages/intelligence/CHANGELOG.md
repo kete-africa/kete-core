@@ -1,5 +1,12 @@
 # @kete-africa/intelligence
 
+## 0.3.0
+
+### Minor Changes
+
+- `renderAfter` shows what a product adds after an answer's words (a table, an app's view); a
+  capability's row names it as the canvas does, its technical name in mono, her words in its title.
+
 ## 0.2.0
 
 ### Minor Changes

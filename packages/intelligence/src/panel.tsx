@@ -154,6 +154,7 @@ function Answer({
   onCopy,
   onRetry,
   actions,
+  after,
 }: {
   turn: Turn;
   words: IntelligenceWords;
@@ -162,6 +163,7 @@ function Answer({
   onCopy?: (text: string) => void;
   onRetry?: () => void;
   actions?: ReactNode;
+  after?: ReactNode;
 }) {
   const running = turn.state === 'running';
   const tool = [...turn.tools].reverse().find((item) => item.state === 'running');
@@ -242,7 +244,9 @@ function Answer({
                     <CanvasIcon name={call.state === 'failed' ? 'x' : 'ok'} size={16} />
                   )}
                 </span>
-                <span className="font-number text-[12px]">{toolLabel(call.name)}</span>
+                <span className="font-number text-[12px]" title={toolLabel(call.name)}>
+                  {call.name}
+                </span>
                 <span
                   className={
                     call.level >= 3
@@ -300,6 +304,7 @@ function Answer({
           {turn.text && <Markdown text={turn.text} />}
         </div>
       )}
+      {after}
       {turn.sources.length > 0 && (
         <ul aria-label={words.sources} className="m-0 flex list-none flex-wrap gap-1.5 p-0">
           {turn.sources.map((source, index) => {
@@ -394,6 +399,7 @@ export function IntelligencePanel({
   intro,
   toolLabel = (name) => name,
   renderDraft,
+  renderAfter,
   onRetry,
   answerActions,
   composerTools,
@@ -421,6 +427,11 @@ export function IntelligencePanel({
   toolLabel?: (name: string) => string;
   /** The product's own verification card for a draft. */
   renderDraft?: (draft: Turn['drafts'][number]) => ReactNode;
+  /**
+   * What the product shows after an answer's words, beyond the contract: a table it read, an app's
+   * view. `index` is the turn's place in the thread.
+   */
+  renderAfter?: (turn: Turn, index: number) => ReactNode;
   /** Asks the same question again. */
   onRetry?: (turn: Turn) => void;
   /** The product's gestures on a finished answer, before « Copier »: « Épingler au tableau ». */
@@ -516,7 +527,7 @@ export function IntelligencePanel({
                 <div className="text-[14px] leading-[1.65]">{intro}</div>
               </div>
             )}
-            {turns.map((turn) => (
+            {turns.map((turn, index) => (
               <div key={turn.id} className="flex flex-col gap-[18px]">
                 <div className="max-w-[86%] self-end rounded-[10px_10px_3px_10px] bg-surface-selected px-[13px] py-[9px] leading-[1.5]">
                   {turn.question}
@@ -528,6 +539,7 @@ export function IntelligencePanel({
                   {...(renderDraft ? { renderDraft } : {})}
                   {...(onRetry && !running ? { onRetry: () => onRetry(turn) } : {})}
                   {...(answerActions ? { actions: answerActions(turn) } : {})}
+                  {...(renderAfter ? { after: renderAfter(turn, index) } : {})}
                   onCopy={(text) =>
                     void navigator.clipboard?.writeText(text).catch(() => undefined)
                   }

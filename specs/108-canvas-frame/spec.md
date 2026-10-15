@@ -59,6 +59,10 @@ flowchart TB
     - the draft as its verification card, then its words and its sources;
     - « Copier », « Régénérer » and « N étapes · N gestes · N s »;
   - the suggestions wait above the field whenever it is not answering;
+  - a capability shows its technical name in mono, as the canvas draws it; the line « what it does
+    now » says it in her words;
+  - what a product adds beyond the contract (a table, an app's view) shows after the words
+    (`renderAfter`);
   - the field carries « Joindre », « Citer », « Gestes », « Dicter », and « Arrêter » while it
     answers.
 - **FR-004 — The verification card** (`VerificationCard`):
