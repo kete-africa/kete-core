@@ -9,7 +9,8 @@
 - `useIntelligence(ask, initial)` opens a thread again with its answered turns.
 - The field (`Composer`, `composer` in place of `composerTools`): files joined as chips, objects cited
   with @ and gestures asked with / picked from the product's lists, her voice written by the
-  browser's speech recognition; `onSend` receives what she picked and kept.
+  browser's speech recognition; `onSend` receives what she picked and kept; `prefill` puts the
+  product's words in the field for her to finish.
 
 ## 0.2.0
 

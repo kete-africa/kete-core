@@ -39,6 +39,8 @@ export interface ComposerOptions {
   gestures?: readonly ComposerPick[];
   /** Her voice, written by the browser's speech recognition where it has one. */
   dictate?: { lang?: string };
+  /** Words the product puts in the field for her to finish — rows of a table she chose. */
+  prefill?: { text: string; at: number };
 }
 
 interface Recognition {
@@ -100,6 +102,17 @@ export function Composer({
   const [Speech, setSpeech] = useState<(new () => Recognition) | null>(null);
   useEffect(() => setSpeech(() => speechRecognition()), []);
   useEffect(() => () => recognition.current?.stop(), []);
+  const prefill = options.prefill;
+  useEffect(() => {
+    if (!prefill) return;
+    setQuestion(prefill.text);
+    setCaret(prefill.text.length);
+    requestAnimationFrame(() => {
+      field.current?.focus();
+      field.current?.setSelectionRange(prefill.text.length, prefill.text.length);
+    });
+    // A new prefill is a new moment, even with the same words.
+  }, [prefill?.at]);
 
   const word = closed ? null : typing(question, caret);
   const list =
