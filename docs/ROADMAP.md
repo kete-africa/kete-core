@@ -663,6 +663,35 @@ flowchart LR
 
 ---
 
+## Phase 11 — Shipping Kete (decided 2026-10-16)
+
+### Objective
+
+What Kete needs to sell, deploy and watch itself, built as autonomous modules every product shares
+(doctrine D-059: generalize at each step), on the order of the doctrine's « La sortie de Kete 1.0 »
+(lanes B to E). It starts once phase 10's policy engine (step P) exists.
+
+| Module                  | Used by                                                                      | Delivers                                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@kete/connections`     | Kete Enterprise, the apps, the Cockpit, Pono                                 | Connected tools (OAuth or key), secrets sealed and never shown to an agent, a connection's health, revocation                                                               |
+| `@kete/metering`        | Kete Enterprise (AI spend), the Cockpit, Pono (sandboxes, branches, deploys) | Who consumed what, how much, each figure known, estimated or unavailable                                                                                                    |
+| `@kete/infrastructure`  | the Cockpit's fleet, Pono                                                    | A provisioning port and its adapters (Coolify, Neon or Postgres, S3, DNS, secrets, backups): an instance or an environment created, updated, backed up, restored, destroyed |
+| `@kete/environments`    | Pono, kete-core's and Kete Enterprise's own previews                         | A Git branch, a Neon branch and a deployment target bound together; previews created and destroyed                                                                          |
+| Compte Kete, Mon espace | every customer                                                               | Self-service deployment of Kete Enterprise (shared, dedicated, at the customer's, autonomous); billing behind the payment port                                              |
+
+Every app, Pono and the Cockpit included, ships with Kete Intelligence inside and its public demo
+(principles 8 and 9).
+
+### Proof
+
+- `[agent]` A test instance created, backed up, restored and destroyed through the provisioning port
+  alone.
+- `[agent]` An organization signs up and finds its Kete Enterprise ready, with no Kete operator's
+  gesture.
+- `[blocking]` At the end, the author, then KYA, use it; prices come after.
+
+---
+
 ## Later, when a real need appears
 
 `@kete/ai` (model routing) · phone sign-in by one-time code · additional payment adapters (Moneroo,
