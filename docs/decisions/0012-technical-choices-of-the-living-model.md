@@ -148,8 +148,8 @@ field's reference) in `@kete/sandbox` for a fine calculation, rather than rewrit
 
 - Good, because one database, one journal and one set of contracts serve every module and app.
 - Good, because each library is replaceable behind its port.
-- Bad, because Cedar's WebAssembly build, WhatsApp's rules on AI assistants and spoken-French
-  transcription are not yet proven for us; each is checked first in its step.
+- Bad, because spoken-French transcription is not yet proven for us; it is checked first in its
+  step. Cedar and WhatsApp's rules were checked on 2026-10-16 (below).
 
 ### Confirmation
 
@@ -160,9 +160,23 @@ step's spec cites this decision.
 
 Open questions for the author, to settle before or within their step:
 
-1. Cedar for policies: a first trial on the six policies.
+1. Cedar for policies: a first trial on the six policies. **Checked on 2026-10-16**
+   (`specs/112-policies/first-check.md`): 17 of 17 gestures decided right, 2 ms a decision with
+   preparsed policy sets, 4.3 MB of WebAssembly; three policy sets give the three effects. Its
+   symbolic analysis is not in the WebAssembly build: contradictions are caught by a table of
+   expected decisions instead. Proposed: keep Cedar.
 2. WhatsApp: Meta's API directly, or through an approved provider (BSP) handling templates and
-   billing.
+   billing. **Meta's rules checked on 2026-10-16**: since 15 January 2026 the WhatsApp Business
+   Solution Terms bar « AI providers » whose general-purpose assistant is the product itself;
+   AI serving one business (its clients, its people, its tasks) stays allowed, and Meta judges
+   what is « primary ». The European Commission ordered interim measures against the ban on
+   9 June 2026; outside the EU (Togo, KYA) the terms apply as written. What follows for Kete:
+   each organization connects **its own** WhatsApp Business number and Kete Intelligence answers
+   only about that organization (never a shared Kete number with a general assistant); messages
+   outside the 24-hour window go through approved templates (a card to decide is a « utility »
+   template); opt-in and STOP are kept by policy 6. Proposed: Meta's Cloud API directly, Kete
+   registered as a Tech Provider so an organization connects its number by Embedded Signup; a BSP
+   only if a client already pays one.
 3. Transcription: through an API (simple, paid per use) or a hosted open model (data kept home).
 4. PV sizing: TypeScript formulas only, or pvlib from the start.
 5. KYA's mobile-money aggregator.
