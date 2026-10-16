@@ -1,5 +1,12 @@
 # @kete-africa/work
 
+## 0.1.1
+
+### Patch Changes
+
+- Built against `@kete-africa/sdk` 0.11.0: a product reading dated facts with the sdk 0.11 (for
+  `holding.v1`) and passing them to `@kete-africa/time` now meets one `DatedFact` type, not two.
+
 ## 0.1.0
 
 ### Minor Changes
