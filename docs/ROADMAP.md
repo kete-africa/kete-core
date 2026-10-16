@@ -608,8 +608,87 @@ flowchart TB
   manifest's places; no page `/demander` is left in the template.
 - `[agent]` The center and an app show the same frame, the same drawer and the same cards, from the
   same packages.
-- `[blocking]` A person at KYA uses the method for a week: the morning's pile, the evening's
-  closure, Planifier.
+- `[blocking]` At the end of phase 10, the author, then a person at KYA, use the method: « Pour moi »,
+  the threads, Planifier.
+
+---
+
+## Phase 10 — The unification (decided 2026-10-15)
+
+### Objective
+
+One living model for every Kete product (doctrine D-056 to D-058; decision 0011): the **journal**
+of events, the **thread** of each object, the **holding** — every thing in progress with its holder,
+never nobody — the **gesture**, and the **policy** that decides it. Kete Enterprise's six ways of
+saying « a thing in progress », its five ways of talking and its two engines for « who may do
+what » melt into them; the four apps adopt them. The screen opens on « Pour moi », with the
+conversation in the middle and the state beside it (D-057).
+
+```mermaid
+flowchart LR
+  S0[0 · decide] --> SIM[simulation of the flow, validated by the author]
+  SIM --> U[1 · holdings and the relay]
+  U --> P[2 · one policy engine]
+  P --> M[3 · threads and channels]
+  M --> E[4 · screens, from a validated v5 canvas]
+  E --> A[6 · the four apps]
+  A --> F[7 · finish: the whole journey in the demo, real accounts]
+  F --> T[the author, then KYA, test]
+  R[5 · references and knowledge] -.in parallel.-> E
+```
+
+### Steps, in order
+
+| Step | Where                  | Delivers                                                                                                                                                                                    |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0    | doctrine, both repos   | D-056 to D-058; decision 0011 here and Kete Enterprise's module decision; Kete Enterprise's spec 085 finished                                                                               |
+| SIM  | an artifact            | A complete simulation of the system in HTML, CSS and JS: events arriving, the router, holdings and the relay, gestures and policies, threads, « Pour moi », WhatsApp cards; validated       |
+| U    | `@kete/work` (111)     | `holding.v1`, the holding's states, never nobody, the relay (age, nudge, deputy, manager); the references' contracts (person, party, project); Kete Enterprise's six sources write holdings |
+| P    | `@kete/policies` (112) | A policy evaluated at the gesture; circuits and agents' rules melt into it; compliance controls point to it; the six missing policies                                                       |
+| M    | `@kete/threads` (113)  | Threads attached to objects, members, messages, cards, events; inbound channels (WhatsApp Business, IMAP) on simulators; the router; cards sent to WhatsApp, a voice answer as gestures     |
+| E    | `shell`, `design`      | « Pour moi », the thread with its state, the thread « Kete », Planifier, Mon tableau, an agent's settings, the phone — each compared with the validated v5 canvas                           |
+| R    | contracts, center      | Places, assets and the installed base, the catalogue, the group; one knowledge (library, documents, dossiers, skills, memory)                                                               |
+| A    | the four apps          | Kete Finance, Team, Commitments and Support write their holdings, pass their gestures through policies, have a thread per object, cite the references                                       |
+| F    | the demo, production   | The whole journey as an end-to-end test in the demo (a message or a mail, the card, the gesture, the invoice, the payment, an absence and its relay); fluidity figures; real accounts       |
+
+### Proof
+
+- `[agent]` No holding without a holder; an absence moves its holdings the same day; « Pour moi »
+  gathers every source.
+- `[agent]` The same gesture, by a person then by an agent, goes through the same policy; a refusal
+  is journaled with its policy.
+- `[agent]` A client's WhatsApp message lands in its project's thread with a holder; a card decided
+  on WhatsApp is settled everywhere.
+- `[blocking]` At the end, the author, then a person at KYA, use it.
+
+---
+
+## Phase 11 — Shipping Kete (decided 2026-10-16)
+
+### Objective
+
+What Kete needs to sell, deploy and watch itself, built as autonomous modules every product shares
+(doctrine D-059: generalize at each step), on the order of the doctrine's « La sortie de Kete 1.0 »
+(lanes B to E). It starts once phase 10's policy engine (step P) exists.
+
+| Module                  | Used by                                                                      | Delivers                                                                                                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@kete/connections`     | Kete Enterprise, the apps, the Cockpit, Pono                                 | Connected tools (OAuth or key), secrets sealed and never shown to an agent, a connection's health, revocation                                                               |
+| `@kete/metering`        | Kete Enterprise (AI spend), the Cockpit, Pono (sandboxes, branches, deploys) | Who consumed what, how much, each figure known, estimated or unavailable                                                                                                    |
+| `@kete/infrastructure`  | the Cockpit's fleet, Pono                                                    | A provisioning port and its adapters (Coolify, Neon or Postgres, S3, DNS, secrets, backups): an instance or an environment created, updated, backed up, restored, destroyed |
+| `@kete/environments`    | Pono, kete-core's and Kete Enterprise's own previews                         | A Git branch, a Neon branch and a deployment target bound together; previews created and destroyed                                                                          |
+| Compte Kete, Mon espace | every customer                                                               | Self-service deployment of Kete Enterprise (shared, dedicated, at the customer's, autonomous); billing behind the payment port                                              |
+
+Every app, Pono and the Cockpit included, ships with Kete Intelligence inside and its public demo
+(principles 8 and 9).
+
+### Proof
+
+- `[agent]` A test instance created, backed up, restored and destroyed through the provisioning port
+  alone.
+- `[agent]` An organization signs up and finds its Kete Enterprise ready, with no Kete operator's
+  gesture.
+- `[blocking]` At the end, the author, then KYA, use it; prices come after.
 
 ---
 
