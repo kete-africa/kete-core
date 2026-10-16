@@ -1015,6 +1015,25 @@ importers:
         specifier: ^2.3.0
         version: 2.3.3(rollup@4.63.5)(vite@8.3.1(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
 
+  packages/work:
+    dependencies:
+      '@kete/records':
+        specifier: workspace:@kete-africa/records@*
+        version: link:../records
+      '@kete/sdk':
+        specifier: workspace:@kete-africa/sdk@*
+        version: link:../sdk
+      '@kete/tenancy':
+        specifier: workspace:@kete-africa/tenancy@*
+        version: link:../tenancy
+      '@kete/time':
+        specifier: workspace:@kete-africa/time@*
+        version: link:../time
+    devDependencies:
+      '@kete/testing':
+        specifier: workspace:@kete-africa/testing@*
+        version: link:../testing
+
   templates/app:
     dependencies:
       '@kete/admin':

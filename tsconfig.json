@@ -95,6 +95,9 @@
       "path": "packages/time"
     },
     {
+      "path": "packages/work"
+    },
+    {
       "path": "packages/metrics"
     },
     {

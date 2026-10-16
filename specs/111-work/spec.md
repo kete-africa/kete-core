@@ -1,7 +1,8 @@
 # Spec 111 — Holdings and the relay (`@kete/work`)
 
-Step **U** of phase 10 (`docs/ROADMAP.md`; doctrine D-056; decisions 0011 and 0012). **Ready for
-the author's go**; nothing is coded before it.
+Step **U** of phase 10 (`docs/ROADMAP.md`; doctrine D-056; decisions 0011 and 0012). The author's
+go came on 2026-10-16 (« vas au bout proprement ») with the simulation validated. `@kete/work`
+ships it (`packages/work`).
 
 ## Why
 
@@ -30,8 +31,9 @@ stateDiagram-v2
   ticket…), `what`, `holder` (`{ kind: person | agent, id }`, required), `waiting_on` (a person, an
   agent, a party, or none), `since`, `due`, `state` (`held`, `waiting`, `done`), `source`
   (`{ app, kind, ref }`: where it comes from), `for` (`action` or `information`).
-- **Events** (`event-data.v1` types): `holding.created`, `holding.waiting`, `holding.nudged`,
-  `holding.taken_over`, `holding.handed_back`, `holding.done`.
+- **Events**, the holding's own append-only journal (`kete_holding_events`): `holding.created`,
+  `holding.waiting`, `holding.nudged`, `holding.taken_over`, `holding.handed_back`,
+  `holding.done`. They are not Cockpit events (`event-data.v1`).
 - Reads: the structure's deputies and managers, absences as dated facts (`dated-fact.v1`).
 
 ## Requirements
@@ -61,4 +63,6 @@ stateDiagram-v2
 
 ## Not done here
 
-Kete Enterprise's six sources writing holdings (its spec 087); the screens (phase 10, step E).
+Kete Enterprise's six sources writing holdings (its spec 087); the screens (phase 10, step E); the
+references' contracts (person, party, project) of step U, with step R; the human time per sale
+(FR-006), once sales write their holdings.

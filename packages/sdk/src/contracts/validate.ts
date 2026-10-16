@@ -52,6 +52,8 @@ export const validateLesson = validator(`${base}lesson.v1.schema.json`);
 export const validateFileLink = validator(`${base}file-link.v1.schema.json`);
 /** One event of a Kete Intelligence turn (spec 099). */
 export const validateIntelligenceEvent = validator(`${base}intelligence-event.v1.schema.json`);
+/** A thing in progress and who holds it (doctrine D-056, spec 111). */
+export const validateHolding = validator(`${base}holding.v1.schema.json`);
 export const validateDeliveryRequest = validator(`${base}delivery-request.v1.schema.json`);
 export const validateDeliveryResult = validator(`${base}delivery-result.v1.schema.json`);
 

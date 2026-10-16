@@ -655,6 +655,161 @@ export const schemas = {
       }
     }
   },
+  "holding.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/holding.v1.schema.json",
+    "title": "Holding",
+    "description": "A thing in progress and who holds it (doctrine D-056, spec 111): a request, a step of a circuit, a draft to check, an action from a meeting, an agent's task. It always has a holder — a person or an agent — and may wait on someone. An app says it under its source; said again under the same source, it replaces what was said. The center gives it its id.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "source",
+      "object",
+      "what",
+      "holder",
+      "state"
+    ],
+    "properties": {
+      "id": {
+        "description": "Given by the center when it keeps the holding; absent when an app says it.",
+        "type": "string",
+        "pattern": "^hld_[0-9A-Za-z_-]{4,70}$"
+      },
+      "source": {
+        "description": "Where it comes from: one holding per app, kind and reference.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "app",
+          "kind",
+          "ref"
+        ],
+        "properties": {
+          "app": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "kind": {
+            "description": "What it is in that app: request, todo, meeting_action, circuit_step, draft, agent_task…",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        }
+      },
+      "object": {
+        "description": "What it is about: a project, a party, a quote, a ticket, an asset.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        }
+      },
+      "what": {
+        "description": "What is to be done, as a person reads it: « Chiffrer le devis Garage Bè ».",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300
+      },
+      "holder": {
+        "description": "Who holds it now. Never nobody.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "person",
+              "agent"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "waiting_on": {
+        "description": "Who it waits for: a colleague, an agent, a party outside; none when it is in the holder's hands.",
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "id"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "person",
+                  "agent",
+                  "party"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
+            }
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "since": {
+        "description": "Since when it is in progress.",
+        "type": "string",
+        "format": "date-time"
+      },
+      "due": {
+        "description": "The day it is due, in the organization's time.",
+        "type": "string",
+        "format": "date"
+      },
+      "state": {
+        "description": "held: in the holder's hands. waiting: it waits on someone. done: finished.",
+        "enum": [
+          "held",
+          "waiting",
+          "done"
+        ]
+      },
+      "for": {
+        "description": "action: the holder must act. information: the holder is told, nothing more.",
+        "enum": [
+          "action",
+          "information"
+        ],
+        "default": "action"
+      }
+    }
+  },
   "intelligence-event.v1": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://kete.africa/contracts/intelligence-event.v1.schema.json",
