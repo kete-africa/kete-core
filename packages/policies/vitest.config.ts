@@ -4,7 +4,7 @@ export default defineProject({
   test: {
     // Compiled copies of the tests are not tests (Vitest 4 no longer skips dist by default).
     exclude: ['**/node_modules/**', '**/dist/**'],
-    name: 'work',
+    name: 'policies',
     environment: 'node',
     setupFiles: ['./tests/setup.ts'],
     testTimeout: 30_000,
