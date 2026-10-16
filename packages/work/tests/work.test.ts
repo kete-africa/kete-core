@@ -5,12 +5,14 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   awayOn,
   dueNudges,
+  finishHolding,
   fluidity,
   forMe,
   getHolding,
   handBack,
   HoldingError,
   holdingEvents,
+  openHoldings,
   inWorkingHours,
   reclaimUnheld,
   relayAbsences,
@@ -115,6 +117,29 @@ describe('a holding', () => {
         'holding.done',
       ]);
       expect(await getHolding(tx, first.holdingId)).toMatchObject({ state: 'done' });
+    });
+  });
+});
+
+describe('open holdings', () => {
+  it('are listed by app, and one whose item finished is closed once', async () => {
+    const org = fresh();
+    await inOrganization(db.app, org, async (tx) => {
+      const mine = await sayHolding(tx, org, said('Q-20'));
+      await sayHolding(tx, org, {
+        ...said('Q-21'),
+        source: { app: 'finance', kind: 'invoice', ref: 'F-1' },
+      });
+      expect((await openHoldings(tx, { app: 'enterprise' })).map((h) => h.source.ref)).toEqual([
+        'Q-20',
+      ]);
+      expect(await openHoldings(tx)).toHaveLength(2);
+      expect(await finishHolding(tx, org, mine.holdingId)).toMatchObject({ state: 'done' });
+      expect(await finishHolding(tx, org, mine.holdingId)).toBeNull();
+      expect((await holdingEvents(tx, mine.holdingId)).map((e) => e.type)).toEqual([
+        'holding.created',
+        'holding.done',
+      ]);
     });
   });
 });

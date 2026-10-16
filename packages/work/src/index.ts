@@ -3,10 +3,12 @@
 export { byUrgency, forMe, type ForMe } from './for-me.js';
 export { fluidity, type Fluidity } from './fluidity.js';
 export {
+  finishHolding,
   getHolding,
   handBack,
   HoldingError,
   holdingEvents,
+  openHoldings,
   sayHolding,
   type Holder,
   type Holding,

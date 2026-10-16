@@ -252,6 +252,39 @@ export async function sayHolding(
   return kept;
 }
 
+/** The open holdings of the active organization, the oldest first; of one app when given. */
+export async function openHoldings(
+  db: SqlExecutor,
+  query: { app?: string } = {},
+): Promise<Holding[]> {
+  const { rows } = await db.query<HoldingRow>(
+    `select ${holdingColumns} from kete_holdings
+      where state <> 'done' and ($1::text is null or source_app = $1)
+      order by since, holding_id`,
+    [query.app ?? null],
+  );
+  return rows.map(toHolding);
+}
+
+/** Closes a holding whose source item is finished; journaled once. */
+export async function finishHolding(
+  db: SqlExecutor,
+  organizationId: string,
+  holdingId: string,
+  now = new Date(),
+): Promise<Holding | null> {
+  const { rows } = await db.query<HoldingRow>(
+    `update kete_holdings
+        set state = 'done', waiting_on_kind = null, waiting_on_id = null, waiting_since = null,
+            done_at = $2, updated_at = now()
+      where holding_id = $1 and state <> 'done' returning ${holdingColumns}`,
+    [holdingId, now],
+  );
+  if (!rows[0]) return null;
+  await journal(db, organizationId, holdingId, 'holding.done', {}, now);
+  return toHolding(rows[0]);
+}
+
 /** A holding of the active organization, or null. */
 export async function getHolding(db: SqlExecutor, holdingId: string): Promise<Holding | null> {
   const { rows } = await db.query<HoldingRow>(
