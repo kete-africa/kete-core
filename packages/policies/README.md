@@ -75,7 +75,10 @@ await executeCommand(tx, sendToClient, {
 - **One engine for people and agents.** An agent is a principal of its own; its policies read the
   person it acts for (`principal.onBehalfOf`).
 - **Explained.** Every decision names its policies, their versions and their sentences.
-- **Never fail open.** A policy that cannot be evaluated refuses the gesture.
+- **Never fail open.** An authority policy that cannot be evaluated refuses the gesture; an
+  approval policy that cannot be evaluated asks its approver.
+- **Its own rules.** A policy set is preparsed per content of its rules: organizations never share
+  one by the ids and versions of their policies.
 - **Its own organization only, append-only.** `policiesMigrationSql` creates `kete_policies` and
   `kete_policy_decisions` with their RLS policy in the same migration; the application role may
   insert and read them, never change or delete them.

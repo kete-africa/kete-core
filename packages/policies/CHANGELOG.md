@@ -1,5 +1,14 @@
 # @kete-africa/policies
 
+## 0.1.1
+
+### Patch Changes
+
+- A policy set is preparsed once per content of its rules, never per ids and versions: two
+  organizations each holding a version 1 of a policy of the same id, with different rules, were
+  decided by whichever was read first. An approval policy that fails to evaluate now asks its
+  approver instead of being passed over: the engine never fails open.
+
 ## 0.1.0
 
 ### Minor Changes
