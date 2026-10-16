@@ -101,6 +101,28 @@ describe('a client’s WhatsApp message', () => {
   });
 });
 
+describe('a client the product knows', () => {
+  it('lands in her open project’s thread, by her number', async () => {
+    const org = fresh();
+    await inOrg(org, async (tx) => {
+      const routing = await route(
+        tx,
+        org,
+        fromChat(whatsapp('wamid.k1', '22890000009', 'Bonjour, où en est mon installation ?')),
+        {
+          ...options,
+          known: async (received) =>
+            received.from.phone === '22890000009'
+              ? { object: colombe, intent: 'client_message' }
+              : null,
+        },
+      );
+      expect(routing).toMatchObject({ object: colombe, by: 'rule', intent: 'client_message' });
+      expect((await threadOf(tx, colombe))?.holder).toEqual(engineer);
+    });
+  });
+});
+
 describe('an unknown mail', () => {
   it('raises a card « à classer »; settled, it lands and its sender is known from then on', async () => {
     const org = fresh();

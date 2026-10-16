@@ -48,13 +48,13 @@ await settle(tx, organizationId, { via, ref, object, intent: 'incident', by: abl
 
 ## What it does
 
-| Piece                                         | What it does                                                                                                                                                                      |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fromChat`, `fromMail`, `fromForm`            | What was received, the same whatever the channel: its reference there, its sender's key (`whatsapp:228…`, `mail:abla@kya.tg`), its recipients, its words, its files.              |
-| `route`                                       | Once per reference: a thread's address, then a rule (a sender, then a mail domain), then the model above the threshold; otherwise a card « à classer ». Journaled (`routing.v1`). |
-| `settle`, `addRoutingRule`                    | A person places a card: it lands in its thread, the card is done, the sender is a rule from now on. An administrator writes a rule for a sender or a domain (`domain:kya.tg`).    |
-| `readMailbox`, `imapMailbox`, `memoryMailbox` | A person's mailbox read by IMAP (ImapFlow) from where it stopped; each mail routed. In memory for tests and the demo.                                                             |
-| `answerByMail`, `smtpSender`, `memorySender`  | A thread's message sent by SMTP (Nodemailer) from her own box to the thread's mail contacts, Reply-To its address, answering the last mail; kept in her Sent folder.              |
+| Piece                                         | What it does                                                                                                                                                                                                                  |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fromChat`, `fromMail`, `fromForm`            | What was received, the same whatever the channel: its reference there, its sender's key (`whatsapp:228…`, `mail:abla@kya.tg`), its recipients, its words, its files.                                                          |
+| `route`                                       | Once per reference: a thread's address, then a rule (a sender, then a mail domain, then a contact the product knows — `known`), then the model above the threshold; otherwise a card « à classer ». Journaled (`routing.v1`). |
+| `settle`, `addRoutingRule`                    | A person places a card: it lands in its thread, the card is done, the sender is a rule from now on. An administrator writes a rule for a sender or a domain (`domain:kya.tg`).                                                |
+| `readMailbox`, `imapMailbox`, `memoryMailbox` | A person's mailbox read by IMAP (ImapFlow) from where it stopped; each mail routed. In memory for tests and the demo.                                                                                                         |
+| `answerByMail`, `smtpSender`, `memorySender`  | A thread's message sent by SMTP (Nodemailer) from her own box to the thread's mail contacts, Reply-To its address, answering the last mail; kept in her Sent folder.                                                          |
 
 ## Guarantees
 

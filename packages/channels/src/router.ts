@@ -27,6 +27,11 @@ export interface Reading {
 export interface RouterOptions {
   /** Who settles what nobody could place: the card « à classer » is hers. */
   triage: Holder;
+  /**
+   * The product's own contacts, after the learned rules: a client known by her number or address,
+   * with the object she belongs to (her open project). A rule too: sure, never a guess.
+   */
+  known?: (received: Received) => Promise<{ object: ObjectRef; intent: string } | null>;
   /** The model's reading (`@kete/ai` behind the product); none: rules, then a person. */
   read?: (received: Received) => Promise<Reading | null>;
   /** Under it, a person decides (default 0.8). */
@@ -222,7 +227,8 @@ export async function route(
     }
   }
 
-  const rule = await ruleFor(db, received);
+  const rule =
+    (await ruleFor(db, received)) ?? (options.known ? await options.known(received) : null);
   if (rule) {
     const placed = await place(db, organizationId, received, rule.object, options, now);
     return journal(
