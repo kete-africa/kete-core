@@ -51,10 +51,10 @@ flowchart LR
 
 - Tests: the same gesture by a person and by an agent goes through the same policy; a refusal is
   journaled with its policy and version; a policy on trial never blocks; a contradiction between
-  two policies is reported by Cedar's analysis.
+  two policies is caught by the table of expected decisions (`first-check.md`).
 - The simulation's scenarios « Kossi demande à l'agent », « le client écrit STOP » as tests.
 
-## First check
+## First check (done: `first-check.md`)
 
 Cedar's WebAssembly build (`@cedar-policy/cedar-wasm`) is evaluated first on the six policies:
 size, speed, Node and edge runtimes. If it falls short, the engine keeps the same contracts on a
