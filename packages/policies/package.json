@@ -1,0 +1,39 @@
+{
+  "name": "@kete-africa/policies",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Kete policies (spec 112; doctrine D-058): one engine at the gesture, for a person and an agent alike — a policy refuses, asks someone's approval or allows; a new one observes on trial before it is enforced; every decision is journaled with the policies and versions that made it. Cedar, in the process.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/policies"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@cedar-policy/cedar-wasm": "4.13.0",
+    "@kete/records": "workspace:@kete-africa/records@*",
+    "@kete/sdk": "workspace:@kete-africa/sdk@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}

@@ -164,7 +164,8 @@ Open questions for the author, to settle before or within their step:
    (`specs/112-policies/first-check.md`): 17 of 17 gestures decided right, 2 ms a decision with
    preparsed policy sets, 4.3 MB of WebAssembly; three policy sets give the three effects. Its
    symbolic analysis is not in the WebAssembly build: contradictions are caught by a table of
-   expected decisions instead. Proposed: keep Cedar.
+   expected decisions instead. **Kept** on 2026-10-16 (the author: « suis le plan »):
+   `@kete/policies` (spec 112).
 2. WhatsApp: Meta's API directly, or through an approved provider (BSP) handling templates and
    billing. **Meta's rules checked on 2026-10-16**: since 15 January 2026 the WhatsApp Business
    Solution Terms bar « AI providers » whose general-purpose assistant is the product itself;

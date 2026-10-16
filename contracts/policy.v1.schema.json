@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/policy.v1.schema.json",
+  "title": "Policy",
+  "description": "A rule of the organization, written as a sentence by a person and kept as a Cedar rule (doctrine D-058, spec 112). It decides what may be done at all (authority), or what needs someone's approval (approval). A new one observes first (trial): its decisions are journaled, never enforced. Each change is a new version.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "sentence", "rule", "set", "owner", "version", "status"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z0-9_-]+)*$",
+      "maxLength": 80
+    },
+    "sentence": {
+      "description": "The policy as the organization says it: « Un agent n'écrit pas aux clients après 19 h ».",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "rule": {
+      "description": "Its Cedar rule: one permit or forbid.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "set": {
+      "description": "authority: a forbid refuses, a permit allows. approval: a permit means the gesture needs the approver's approval.",
+      "enum": ["authority", "approval"]
+    },
+    "approver": {
+      "description": "Who approves, for an approval policy: a relation or a role the product resolves (manager, project.holder, direction, on_behalf_of).",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "owner": {
+      "description": "Who answers for it: a person's id.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "version": { "type": "integer", "minimum": 1 },
+    "status": {
+      "description": "active: enforced. trial: observed, never enforced. off: kept, not read.",
+      "enum": ["active", "trial", "off"]
+    }
+  }
+}

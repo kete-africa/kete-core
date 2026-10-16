@@ -1,7 +1,8 @@
 # Spec 112 — One policy engine at the gesture (`@kete/policies`)
 
-Step **P** of phase 10 (`docs/ROADMAP.md`; doctrine D-058; decisions 0011 and 0012). **Ready for
-the author's go**; nothing is coded before it.
+Step **P** of phase 10 (`docs/ROADMAP.md`; doctrine D-058; decisions 0011 and 0012). The author's
+go came on 2026-10-16 (« suis le plan »), Cedar kept after its first check. `@kete/policies`
+ships it (`packages/policies`); `@kete/commands` asks it before a command runs.
 
 ## Why
 

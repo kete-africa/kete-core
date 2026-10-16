@@ -54,6 +54,12 @@ export const validateFileLink = validator(`${base}file-link.v1.schema.json`);
 export const validateIntelligenceEvent = validator(`${base}intelligence-event.v1.schema.json`);
 /** A thing in progress and who holds it (doctrine D-056, spec 111). */
 export const validateHolding = validator(`${base}holding.v1.schema.json`);
+/** A gesture about to be made, as the policy engine reads it (doctrine D-058, spec 112). */
+export const validateGesture = validator(`${base}gesture.v1.schema.json`);
+/** A rule of the organization, as a sentence and a Cedar rule (doctrine D-058, spec 112). */
+export const validatePolicy = validator(`${base}policy.v1.schema.json`);
+/** What the policy engine decided for a gesture (doctrine D-058, spec 112). */
+export const validatePolicyDecision = validator(`${base}policy-decision.v1.schema.json`);
 export const validateDeliveryRequest = validator(`${base}delivery-request.v1.schema.json`);
 export const validateDeliveryResult = validator(`${base}delivery-result.v1.schema.json`);
 

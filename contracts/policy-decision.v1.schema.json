@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/policy-decision.v1.schema.json",
+  "title": "PolicyDecision",
+  "description": "What the policy engine decided for a gesture (doctrine D-058, spec 112): allowed, to approve by someone, or refused — with the policies that decided it, their versions and why. A refusal wins over an approval, an approval over an allowance. What the policies on trial would have said is kept beside, never enforced.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["effect", "policies", "trial"],
+  "properties": {
+    "effect": {
+      "enum": ["allow", "approve", "refuse"]
+    },
+    "approvers": {
+      "description": "Who must approve, when the effect is approve: the relations or roles of the policies that asked.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80
+      }
+    },
+    "policies": {
+      "description": "The policies that decided. Empty for a refusal means nothing gave the power.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "version", "effect", "reason"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "effect": {
+            "enum": ["allow", "approve", "refuse"]
+          },
+          "reason": {
+            "description": "The policy's sentence, as the person reads it on the card.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "trial": {
+      "description": "The policies on trial that would have refused or asked, had they been active.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "version", "effect", "reason"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "effect": {
+            "enum": ["allow", "approve", "refuse"]
+          },
+          "reason": {
+            "description": "The policy's sentence, as the person reads it on the card.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      }
+    }
+  }
+}
