@@ -296,6 +296,68 @@ export interface HealthReport {
 }
 
 /**
+ * A thing in progress and who holds it (doctrine D-056, spec 111): a request, a step of a circuit, a draft to check, an action from a meeting, an agent's task. It always has a holder — a person or an agent — and may wait on someone. An app says it under its source; said again under the same source, it replaces what was said. The center gives it its id.
+ */
+export interface Holding {
+  /**
+   * Given by the center when it keeps the holding; absent when an app says it.
+   */
+  id?: string;
+  /**
+   * Where it comes from: one holding per app, kind and reference.
+   */
+  source: {
+    app: string;
+    /**
+     * What it is in that app: request, todo, meeting_action, circuit_step, draft, agent_task…
+     */
+    kind: string;
+    ref: string;
+  };
+  /**
+   * What it is about: a project, a party, a quote, a ticket, an asset.
+   */
+  object: {
+    kind: string;
+    id: string;
+  };
+  /**
+   * What is to be done, as a person reads it: « Chiffrer le devis Garage Bè ».
+   */
+  what: string;
+  /**
+   * Who holds it now. Never nobody.
+   */
+  holder: {
+    kind: 'person' | 'agent';
+    id: string;
+  };
+  /**
+   * Who it waits for: a colleague, an agent, a party outside; none when it is in the holder's hands.
+   */
+  waiting_on?: {
+    kind: 'person' | 'agent' | 'party';
+    id: string;
+  } | null;
+  /**
+   * Since when it is in progress.
+   */
+  since?: string;
+  /**
+   * The day it is due, in the organization's time.
+   */
+  due?: string;
+  /**
+   * held: in the holder's hands. waiting: it waits on someone. done: finished.
+   */
+  state: 'held' | 'waiting' | 'done';
+  /**
+   * action: the holder must act. information: the holder is told, nothing more.
+   */
+  for?: 'action' | 'information';
+}
+
+/**
  * One event of a Kete Intelligence turn, streamed from the agents' runtime to the screen: what it is doing now, its plan and each step, each tool it calls with its level, a draft for the person, a source, the answer's text as it is written, a wait for the person, the end or the failure. The same stream is shown in the center and in every app.
  */
 export type IntelligenceEvent =
