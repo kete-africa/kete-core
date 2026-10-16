@@ -30,8 +30,8 @@
     "@kete/sdk": "workspace:@kete-africa/sdk@*",
     "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
     "@react-email/components": "^1.0.12",
-    "@tanstack/react-router": "^1.170.40",
-    "@tanstack/react-start": "^1.168.59",
+    "@tanstack/react-router": "^1.170.44",
+    "@tanstack/react-start": "^1.169.2",
     "better-auth": "^1.7.6",
     "better-call": "1.4.0",
     "drizzle-orm": "^0.45.3",
@@ -54,12 +54,12 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^5.2.0",
+    "@vitejs/plugin-react": "^6.1.2",
     "drizzle-kit": "^0.31.11",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.15",
-    "vite": "^7.3.6",
+    "vite": "^8.3.1",
     "vitest": "^4.1.11"
   }
 }
