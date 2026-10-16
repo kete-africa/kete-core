@@ -1,5 +1,12 @@
 # @kete-africa/create-app
 
+## 0.9.1
+
+### Patch Changes
+
+- The app template moves to TanStack Start 1.169 (the fix for GHSA-qx66-fv34-fjm8, a reflected XSS in
+  TanStack Start's server) and to Vite 8 with `@vitejs/plugin-react` 6, which that version needs.
+
 ## 0.9.0
 
 ### Minor Changes
