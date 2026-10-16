@@ -1774,6 +1774,167 @@ export const schemas = {
       }
     }
   },
+  "message.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/message.v1.schema.json",
+    "title": "Message",
+    "description": "One thing said in a thread (doctrine D-057), by a person, an agent, or a contact through a channel. Never rewritten: an edit is a new message naming the one it replaces. « for action » asks someone to act and becomes a holding; « for information » tells.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "thread",
+      "author",
+      "text",
+      "for",
+      "via",
+      "at"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
+      },
+      "thread": {
+        "type": "string",
+        "pattern": "^thr_[0-9A-Za-z_-]{8,70}$"
+      },
+      "author": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "person",
+              "agent",
+              "contact"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "text": {
+        "type": "string",
+        "maxLength": 20000
+      },
+      "attachments": {
+        "type": "array",
+        "maxItems": 20,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "name"
+          ],
+          "properties": {
+            "id": {
+              "description": "The file kept in the product's storage.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "media_type": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "bytes": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "for": {
+        "enum": [
+          "action",
+          "information"
+        ]
+      },
+      "to": {
+        "description": "Who must act, for a message « for action »; the thread's holder otherwise.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "person",
+              "agent"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "via": {
+        "enum": [
+          "kete",
+          "whatsapp",
+          "mail",
+          "telegram",
+          "form"
+        ]
+      },
+      "reply_to": {
+        "type": "string",
+        "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
+      },
+      "edited_from": {
+        "description": "The message this one replaces; the original is kept.",
+        "type": "string",
+        "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
+      },
+      "mentions": {
+        "type": "array",
+        "maxItems": 50,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "id"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "person",
+                "agent"
+              ]
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          }
+        }
+      },
+      "at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
   "metric-reading.v1": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://kete.africa/contracts/metric-reading.v1.schema.json",
@@ -2407,6 +2568,243 @@ export const schemas = {
             "minimum": 0
           }
         }
+      }
+    }
+  },
+  "routing.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/routing.v1.schema.json",
+    "title": "Routing",
+    "description": "Where the router tied something received from outside (doctrine D-056): its object, its thread, the holding it made — by a rule, by the model's intent with its confidence, or by a person. Under the threshold it is not guessed: a card « à classer » asks a person.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "received",
+      "intent",
+      "confidence",
+      "by"
+    ],
+    "properties": {
+      "received": {
+        "description": "What was received: its channel and its own reference there.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "via",
+          "ref"
+        ],
+        "properties": {
+          "via": {
+            "enum": [
+              "whatsapp",
+              "mail",
+              "telegram",
+              "form"
+            ]
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        }
+      },
+      "object": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        }
+      },
+      "thread": {
+        "type": "string",
+        "pattern": "^thr_[0-9A-Za-z_-]{8,70}$"
+      },
+      "holding": {
+        "type": "string",
+        "pattern": "^hld_[0-9A-Za-z_-]{4,70}$"
+      },
+      "intent": {
+        "description": "What it is about, in the product's words: incident, quote_request, invoice_request…",
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,59}$"
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "by": {
+        "description": "rule: a known number, address or thread. model: its intent above the threshold. person: a card « à classer » settled.",
+        "enum": [
+          "rule",
+          "model",
+          "person"
+        ]
+      },
+      "asked": {
+        "description": "The holding of the card « à classer », when a person must decide.",
+        "type": "string",
+        "pattern": "^hld_[0-9A-Za-z_-]{4,70}$"
+      }
+    }
+  },
+  "thread.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/thread.v1.schema.json",
+    "title": "Thread",
+    "description": "Where people talk about one thing (doctrine D-056, D-057): born with its object and put away when it closes, a group from the structure or created, a direct exchange, or a person's thread with Kete. It always has a holder; its members say who knew, and since when.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "kind",
+      "title",
+      "holder",
+      "state",
+      "opened_at"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^thr_[0-9A-Za-z_-]{8,70}$"
+      },
+      "kind": {
+        "description": "object: born with its object. group: a unit, a project's team, a board, or created. direct: between two. kete: a person and Kete Intelligence.",
+        "enum": [
+          "object",
+          "group",
+          "direct",
+          "kete"
+        ]
+      },
+      "object": {
+        "description": "What the thread is about; required for an object thread.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        }
+      },
+      "title": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "holder": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "person",
+              "agent"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "members": {
+        "type": "array",
+        "maxItems": 500,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "id",
+            "since"
+          ],
+          "properties": {
+            "kind": {
+              "description": "contact: someone outside, reached through a channel.",
+              "enum": [
+                "person",
+                "agent",
+                "contact"
+              ]
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "role": {
+              "description": "member: takes part. subscriber: is told, follows.",
+              "enum": [
+                "member",
+                "subscriber"
+              ],
+              "default": "member"
+            },
+            "since": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "until": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      },
+      "address": {
+        "description": "Its own address for replies by mail.",
+        "type": "string",
+        "maxLength": 200
+      },
+      "retention": {
+        "description": "The policy that keeps or puts it away.",
+        "type": "string",
+        "maxLength": 80
+      },
+      "state": {
+        "enum": [
+          "open",
+          "closed"
+        ]
+      },
+      "opened_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "closed_at": {
+        "type": "string",
+        "format": "date-time"
       }
     }
   }

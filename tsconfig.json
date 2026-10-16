@@ -98,6 +98,12 @@
       "path": "packages/work"
     },
     {
+      "path": "packages/threads"
+    },
+    {
+      "path": "packages/channels"
+    },
+    {
       "path": "packages/policies"
     },
     {

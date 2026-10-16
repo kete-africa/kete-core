@@ -892,6 +892,1976 @@ export interface Manifest {
 }
 
 /**
+ * One thing said in a thread (doctrine D-057), by a person, an agent, or a contact through a channel. Never rewritten: an edit is a new message naming the one it replaces. « for action » asks someone to act and becomes a holding; « for information » tells.
+ */
+export interface Message {
+  id: string;
+  thread: string;
+  author: {
+    kind: 'person' | 'agent' | 'contact';
+    id: string;
+  };
+  text: string;
+  /**
+   * @maxItems 20
+   */
+  attachments?:
+    | []
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+        },
+      ];
+  for: 'action' | 'information';
+  /**
+   * Who must act, for a message « for action »; the thread's holder otherwise.
+   */
+  to?: {
+    kind: 'person' | 'agent';
+    id: string;
+  };
+  via: 'kete' | 'whatsapp' | 'mail' | 'telegram' | 'form';
+  reply_to?: string;
+  /**
+   * The message this one replaces; the original is kept.
+   */
+  edited_from?: string;
+  /**
+   * @maxItems 50
+   */
+  mentions?: {
+    kind: 'person' | 'agent';
+    id: string;
+  }[];
+  at: string;
+}
+
+/**
  * A figure an app declared (metric.v1), read at a moment for a reader, under her rights (doctrine D-052): its value over a period, the value of the period before when she compares, and the filters it applied. A board, an app's home and a summary show readings; a summary keeps them frozen.
  */
 export interface MetricReading {
@@ -1205,4 +3175,86 @@ export interface Resource {
     total: number;
     passed: number;
   };
+}
+
+/**
+ * Where the router tied something received from outside (doctrine D-056): its object, its thread, the holding it made — by a rule, by the model's intent with its confidence, or by a person. Under the threshold it is not guessed: a card « à classer » asks a person.
+ */
+export interface Routing {
+  /**
+   * What was received: its channel and its own reference there.
+   */
+  received: {
+    via: 'whatsapp' | 'mail' | 'telegram' | 'form';
+    ref: string;
+  };
+  object?: {
+    kind: string;
+    id: string;
+  };
+  thread?: string;
+  holding?: string;
+  /**
+   * What it is about, in the product's words: incident, quote_request, invoice_request…
+   */
+  intent: string;
+  confidence: number;
+  /**
+   * rule: a known number, address or thread. model: its intent above the threshold. person: a card « à classer » settled.
+   */
+  by: 'rule' | 'model' | 'person';
+  /**
+   * The holding of the card « à classer », when a person must decide.
+   */
+  asked?: string;
+}
+
+/**
+ * Where people talk about one thing (doctrine D-056, D-057): born with its object and put away when it closes, a group from the structure or created, a direct exchange, or a person's thread with Kete. It always has a holder; its members say who knew, and since when.
+ */
+export interface Thread {
+  id: string;
+  /**
+   * object: born with its object. group: a unit, a project's team, a board, or created. direct: between two. kete: a person and Kete Intelligence.
+   */
+  kind: 'object' | 'group' | 'direct' | 'kete';
+  /**
+   * What the thread is about; required for an object thread.
+   */
+  object?: {
+    kind: string;
+    id: string;
+  };
+  title: string;
+  holder: {
+    kind: 'person' | 'agent';
+    id: string;
+  };
+  /**
+   * @maxItems 500
+   */
+  members?: {
+    /**
+     * contact: someone outside, reached through a channel.
+     */
+    kind: 'person' | 'agent' | 'contact';
+    id: string;
+    /**
+     * member: takes part. subscriber: is told, follows.
+     */
+    role?: 'member' | 'subscriber';
+    since: string;
+    until?: string;
+  }[];
+  /**
+   * Its own address for replies by mail.
+   */
+  address?: string;
+  /**
+   * The policy that keeps or puts it away.
+   */
+  retention?: string;
+  state: 'open' | 'closed';
+  opened_at: string;
+  closed_at?: string;
 }

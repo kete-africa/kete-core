@@ -60,6 +60,12 @@ export const validateGesture = validator(`${base}gesture.v1.schema.json`);
 export const validatePolicy = validator(`${base}policy.v1.schema.json`);
 /** What the policy engine decided for a gesture (doctrine D-058, spec 112). */
 export const validatePolicyDecision = validator(`${base}policy-decision.v1.schema.json`);
+/** Where people talk about one thing (doctrine D-056, D-057, spec 113). */
+export const validateThread = validator(`${base}thread.v1.schema.json`);
+/** One thing said in a thread, never rewritten (doctrine D-057, spec 113). */
+export const validateMessage = validator(`${base}message.v1.schema.json`);
+/** Where the router tied something received from outside (doctrine D-056, spec 113). */
+export const validateRouting = validator(`${base}routing.v1.schema.json`);
 export const validateDeliveryRequest = validator(`${base}delivery-request.v1.schema.json`);
 export const validateDeliveryResult = validator(`${base}delivery-result.v1.schema.json`);
 

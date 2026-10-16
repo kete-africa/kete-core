@@ -1,5 +1,11 @@
 # @kete-africa/time
 
+## 0.2.3
+
+### Patch Changes
+
+- Published against the sdk of this release, so that a product meets one copy of the contracts.
+
 ## 0.2.2
 
 ### Patch Changes
