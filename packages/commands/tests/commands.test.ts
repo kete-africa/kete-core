@@ -130,6 +130,45 @@ describe('executeCommand', () => {
     ).rejects.toMatchObject({ code: 'idempotency_conflict' });
   });
 
+  it('asks the policies before it runs: a refusal or an approval stops it', async () => {
+    const refused = {
+      effect: 'refuse' as const,
+      policies: [{ id: 'spend.limit', version: 2, effect: 'refuse' as const, reason: 'Trop cher' }],
+      trial: [],
+    };
+    const run = (
+      key: string,
+      decision:
+        | typeof refused
+        | { effect: 'approve' | 'allow'; approvers?: string[]; policies: []; trial: [] },
+    ) =>
+      inOrganization(db.app, 'org_a', (tx) =>
+        executeCommand(tx, createDeposit, {
+          organizationId: 'org_a',
+          actor: agent,
+          idempotencyKey: key,
+          input: { id: `dep_${key}`, items: 2 },
+          authorize: async (input, actor) => {
+            expect(input).toEqual({ id: `dep_${key}`, items: 2 });
+            expect(actor.kind).toBe('agent');
+            return decision;
+          },
+        }),
+      );
+    const before = calls;
+    await expect(run('key-policy-1', refused)).rejects.toMatchObject({
+      code: 'refused_by_policy',
+      decision: refused,
+    });
+    await expect(
+      run('key-policy-2', { effect: 'approve', approvers: ['manager'], policies: [], trial: [] }),
+    ).rejects.toMatchObject({ code: 'approval_required', decision: { approvers: ['manager'] } });
+    expect(calls).toBe(before);
+    expect(
+      (await run('key-policy-3', { effect: 'allow', policies: [], trial: [] })).output,
+    ).toEqual({ id: 'dep_key-policy-3' });
+  });
+
   it('leaves nothing behind when the handler fails, and the key stays free', async () => {
     await expect(
       inOrganization(db.app, 'org_a', (tx) =>

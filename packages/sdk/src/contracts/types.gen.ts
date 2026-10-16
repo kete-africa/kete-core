@@ -278,6 +278,63 @@ export interface FileLink {
 }
 
 /**
+ * A gesture about to be made, by a person or an agent acting for one, as the policy engine reads it before the command runs (doctrine D-058, spec 112): who, what, on what, how much, through which channel, towards whom. The same gesture by a person and by her agent is the same gesture.
+ */
+export interface Gesture {
+  /**
+   * Who makes it. An agent always acts for a person.
+   */
+  actor: {
+    kind: 'person' | 'agent';
+    id: string;
+    /**
+     * The person an agent acts for.
+     */
+    on_behalf_of?: string;
+  };
+  /**
+   * What it does, named by the product: invoice.validate, message.client, purchase.commit, contract.sign, document.read…
+   */
+  kind: string;
+  /**
+   * What it acts on: a project, a party, a document, a card.
+   */
+  object: {
+    kind: string;
+    id: string;
+  };
+  /**
+   * How much it commits, in the currency's smallest unit.
+   */
+  amount?: {
+    value: number;
+    currency: string;
+  };
+  /**
+   * Through which channel it goes out, when it reaches someone: whatsapp, telegram, mail, web.
+   */
+  channel?: string;
+  /**
+   * The party outside it reaches, when it does.
+   */
+  party?: string;
+  /**
+   * The approved template it uses, when it writes to someone outside.
+   */
+  template?: string;
+  /**
+   * What else the product's policies read (an hour, a retention, an absence), flat.
+   */
+  context?: {
+    [k: string]: string | number | boolean;
+  };
+  /**
+   * When it is about to be made.
+   */
+  at: string;
+}
+
+/**
  * A Kete app's health, served at GET /health. Never exposes secrets or connection strings.
  */
 export interface HealthReport {
@@ -956,6 +1013,73 @@ export interface MoneyFact {
    * Where the piece that proves it is read, in the app.
    */
   href?: string;
+}
+
+/**
+ * What the policy engine decided for a gesture (doctrine D-058, spec 112): allowed, to approve by someone, or refused — with the policies that decided it, their versions and why. A refusal wins over an approval, an approval over an allowance. What the policies on trial would have said is kept beside, never enforced.
+ */
+export interface PolicyDecision {
+  effect: 'allow' | 'approve' | 'refuse';
+  /**
+   * Who must approve, when the effect is approve: the relations or roles of the policies that asked.
+   */
+  approvers?: string[];
+  /**
+   * The policies that decided. Empty for a refusal means nothing gave the power.
+   */
+  policies: {
+    id: string;
+    version: number;
+    effect: 'allow' | 'approve' | 'refuse';
+    /**
+     * The policy's sentence, as the person reads it on the card.
+     */
+    reason: string;
+  }[];
+  /**
+   * The policies on trial that would have refused or asked, had they been active.
+   */
+  trial: {
+    id: string;
+    version: number;
+    effect: 'allow' | 'approve' | 'refuse';
+    /**
+     * The policy's sentence, as the person reads it on the card.
+     */
+    reason: string;
+  }[];
+}
+
+/**
+ * A rule of the organization, written as a sentence by a person and kept as a Cedar rule (doctrine D-058, spec 112). It decides what may be done at all (authority), or what needs someone's approval (approval). A new one observes first (trial): its decisions are journaled, never enforced. Each change is a new version.
+ */
+export interface Policy {
+  id: string;
+  /**
+   * The policy as the organization says it: « Un agent n'écrit pas aux clients après 19 h ».
+   */
+  sentence: string;
+  /**
+   * Its Cedar rule: one permit or forbid.
+   */
+  rule: string;
+  /**
+   * authority: a forbid refuses, a permit allows. approval: a permit means the gesture needs the approver's approval.
+   */
+  set: 'authority' | 'approval';
+  /**
+   * Who approves, for an approval policy: a relation or a role the product resolves (manager, project.holder, direction, on_behalf_of).
+   */
+  approver?: string;
+  /**
+   * Who answers for it: a person's id.
+   */
+  owner: string;
+  version: number;
+  /**
+   * active: enforced. trial: observed, never enforced. off: kept, not read.
+   */
+  status: 'active' | 'trial' | 'off';
 }
 
 /**

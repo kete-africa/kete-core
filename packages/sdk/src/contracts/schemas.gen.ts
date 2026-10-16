@@ -580,6 +580,140 @@ export const schemas = {
       }
     }
   },
+  "gesture.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/gesture.v1.schema.json",
+    "title": "Gesture",
+    "description": "A gesture about to be made, by a person or an agent acting for one, as the policy engine reads it before the command runs (doctrine D-058, spec 112): who, what, on what, how much, through which channel, towards whom. The same gesture by a person and by her agent is the same gesture.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "actor",
+      "kind",
+      "object",
+      "at"
+    ],
+    "properties": {
+      "actor": {
+        "description": "Who makes it. An agent always acts for a person.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "person",
+              "agent"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "on_behalf_of": {
+            "description": "The person an agent acts for.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        }
+      },
+      "kind": {
+        "description": "What it does, named by the product: invoice.validate, message.client, purchase.commit, contract.sign, document.read…",
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+        "maxLength": 80
+      },
+      "object": {
+        "description": "What it acts on: a project, a party, a document, a card.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        }
+      },
+      "amount": {
+        "description": "How much it commits, in the currency's smallest unit.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "value",
+          "currency"
+        ],
+        "properties": {
+          "value": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          }
+        }
+      },
+      "channel": {
+        "description": "Through which channel it goes out, when it reaches someone: whatsapp, telegram, mail, web.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 40
+      },
+      "party": {
+        "description": "The party outside it reaches, when it does.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "template": {
+        "description": "The approved template it uses, when it writes to someone outside.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "context": {
+        "description": "What else the product's policies read (an hour, a retention, an absence), flat.",
+        "type": "object",
+        "propertyNames": {
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_]{0,59}$"
+        },
+        "additionalProperties": {
+          "oneOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "at": {
+        "description": "When it is about to be made.",
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
   "health.v1": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://kete.africa/contracts/health.v1.schema.json",
@@ -1895,6 +2029,181 @@ export const schemas = {
         "type": "string",
         "format": "uri",
         "maxLength": 600
+      }
+    }
+  },
+  "policy-decision.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/policy-decision.v1.schema.json",
+    "title": "PolicyDecision",
+    "description": "What the policy engine decided for a gesture (doctrine D-058, spec 112): allowed, to approve by someone, or refused — with the policies that decided it, their versions and why. A refusal wins over an approval, an approval over an allowance. What the policies on trial would have said is kept beside, never enforced.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "effect",
+      "policies",
+      "trial"
+    ],
+    "properties": {
+      "effect": {
+        "enum": [
+          "allow",
+          "approve",
+          "refuse"
+        ]
+      },
+      "approvers": {
+        "description": "Who must approve, when the effect is approve: the relations or roles of the policies that asked.",
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      },
+      "policies": {
+        "description": "The policies that decided. Empty for a refusal means nothing gave the power.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "version",
+            "effect",
+            "reason"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "effect": {
+              "enum": [
+                "allow",
+                "approve",
+                "refuse"
+              ]
+            },
+            "reason": {
+              "description": "The policy's sentence, as the person reads it on the card.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          }
+        }
+      },
+      "trial": {
+        "description": "The policies on trial that would have refused or asked, had they been active.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "version",
+            "effect",
+            "reason"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "effect": {
+              "enum": [
+                "allow",
+                "approve",
+                "refuse"
+              ]
+            },
+            "reason": {
+              "description": "The policy's sentence, as the person reads it on the card.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          }
+        }
+      }
+    }
+  },
+  "policy.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/policy.v1.schema.json",
+    "title": "Policy",
+    "description": "A rule of the organization, written as a sentence by a person and kept as a Cedar rule (doctrine D-058, spec 112). It decides what may be done at all (authority), or what needs someone's approval (approval). A new one observes first (trial): its decisions are journaled, never enforced. Each change is a new version.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "sentence",
+      "rule",
+      "set",
+      "owner",
+      "version",
+      "status"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z0-9_-]+)*$",
+        "maxLength": 80
+      },
+      "sentence": {
+        "description": "The policy as the organization says it: « Un agent n'écrit pas aux clients après 19 h ».",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "rule": {
+        "description": "Its Cedar rule: one permit or forbid.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "set": {
+        "description": "authority: a forbid refuses, a permit allows. approval: a permit means the gesture needs the approver's approval.",
+        "enum": [
+          "authority",
+          "approval"
+        ]
+      },
+      "approver": {
+        "description": "Who approves, for an approval policy: a relation or a role the product resolves (manager, project.holder, direction, on_behalf_of).",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80
+      },
+      "owner": {
+        "description": "Who answers for it: a person's id.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "version": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "status": {
+        "description": "active: enforced. trial: observed, never enforced. off: kept, not read.",
+        "enum": [
+          "active",
+          "trial",
+          "off"
+        ]
       }
     }
   },

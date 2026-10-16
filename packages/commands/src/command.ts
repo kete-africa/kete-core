@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { uuidv7 } from '@kete/sdk';
+import { uuidv7, type PolicyDecision } from '@kete/sdk';
 import { ORGANIZATION_SETTING, type SqlExecutor } from '@kete/tenancy';
 import type { z } from 'zod';
 import { actorSchema, type Actor } from './actor.js';
@@ -54,6 +54,11 @@ export interface CommandRequest {
   input: unknown;
   /** Why, when a person says it. */
   reason?: string;
+  /**
+   * The policies at the gesture (doctrine D-058, `@kete/policies`): asked once the input is valid
+   * and the key new, before anything runs. A refusal or an approval to obtain stops the command.
+   */
+  authorize?(input: unknown, actor: Actor): Promise<PolicyDecision>;
 }
 
 export interface CommandResult<Output> {
@@ -70,9 +75,13 @@ export class CommandError extends Error {
       | 'invalid_actor'
       | 'invalid_idempotency_key'
       | 'organization_mismatch'
-      | 'idempotency_conflict',
+      | 'idempotency_conflict'
+      | 'refused_by_policy'
+      | 'approval_required',
     message: string,
     readonly issues?: z.ZodError['issues'],
+    /** The policies' decision, when they stopped the command. */
+    readonly decision?: PolicyDecision,
   ) {
     super(message);
     this.name = 'CommandError';
@@ -162,6 +171,26 @@ export async function executeCommand<Input extends z.ZodType, Output>(
       );
     }
     return { commandId: done.command_id, output: done.output as Output, replayed: true };
+  }
+
+  if (request.authorize) {
+    const decision = await request.authorize(parsed.data, actor.data);
+    if (decision.effect === 'refuse') {
+      throw new CommandError(
+        'refused_by_policy',
+        'A policy refuses this gesture.',
+        undefined,
+        decision,
+      );
+    }
+    if (decision.effect === 'approve') {
+      throw new CommandError(
+        'approval_required',
+        'This gesture needs an approval first.',
+        undefined,
+        decision,
+      );
+    }
   }
 
   const commandId = `cmd_${uuidv7()}`;

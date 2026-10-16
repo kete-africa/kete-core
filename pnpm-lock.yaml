@@ -832,6 +832,25 @@ importers:
 
   packages/payments: {}
 
+  packages/policies:
+    dependencies:
+      '@cedar-policy/cedar-wasm':
+        specifier: 4.13.0
+        version: 4.13.0
+      '@kete/records':
+        specifier: workspace:@kete-africa/records@*
+        version: link:../records
+      '@kete/sdk':
+        specifier: workspace:@kete-africa/sdk@*
+        version: link:../sdk
+      '@kete/tenancy':
+        specifier: workspace:@kete-africa/tenancy@*
+        version: link:../tenancy
+    devDependencies:
+      '@kete/testing':
+        specifier: workspace:@kete-africa/testing@*
+        version: link:../testing
+
   packages/records:
     dependencies:
       '@kete/sdk':
@@ -1777,6 +1796,9 @@ packages:
   '@capsizecss/unpack@4.0.1':
     resolution: {integrity: sha512-CuNiSqg7+e1cO/GjffyMOm5Tt2jUF9CWHHnvQ/UkqvtkGfHdgwEC0wpmq7fkN3gxwpRnrAN0WzO3vREKmNolMQ==}
     engines: {node: '>=18'}
+
+  '@cedar-policy/cedar-wasm@4.13.0':
+    resolution: {integrity: sha512-1omEd/J0c7RjcfSUWiXZc6zk6XUs1IuY7Yk9TVysoKV/LpFWIk45RpjvRFVioPUR3RQmgA/DaqKhK3pucbBx1A==}
 
   '@cfworker/json-schema@4.1.1':
     resolution: {integrity: sha512-gAmrUZSGtKc3AiBL71iNWxDsyUC5uMaKKGdvzYsBoTW/xi42JQHl7eKV2OYzCUqvc+D2RCcf7EXY2iCyFIk6og==}
@@ -9293,6 +9315,8 @@ snapshots:
   '@capsizecss/unpack@4.0.1':
     dependencies:
       fontkitten: 1.0.3
+
+  '@cedar-policy/cedar-wasm@4.13.0': {}
 
   '@cfworker/json-schema@4.1.1': {}
 
