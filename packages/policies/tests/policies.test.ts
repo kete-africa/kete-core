@@ -125,6 +125,48 @@ describe('a policy that fails to evaluate', () => {
     expect(decided).toMatchObject({ effect: 'refuse' });
     expect(decided.policies.map((p) => p.id)).toEqual(['clients.hours-broken']);
   });
+
+  it('asks, when it is an approval: never allowed for want of an answer', () => {
+    const broken: Policy = {
+      ...nth(policies, 5),
+      id: 'clients.minute-broken',
+      approver: 'direction',
+      rule: `permit (principal is Kete::Agent, action == Kete::Action::"message.client", resource)
+        when { context.minute > 30 };`,
+    };
+    const decided = engine.decide({
+      policies: [...policies, broken],
+      gesture: nth(expectations, 8).gesture,
+      entities,
+    });
+    expect(decided).toMatchObject({ effect: 'approve', approvers: ['direction'] });
+  });
+});
+
+describe('policies of the same id and version in two organizations', () => {
+  it('are decided each by its own rule', () => {
+    const one = (rule: string): Policy => ({
+      id: 'docs.read',
+      version: 1,
+      sentence: 'On lit les documents',
+      rule,
+      set: 'authority',
+      owner: 'usr_abla',
+      status: 'active',
+    });
+    const read = gesture({ kind: 'person', id: 'abla' }, 'document.read', {
+      kind: 'document',
+      id: 'paie',
+    });
+    const permits = `permit (principal, action == Kete::Action::"document.read", resource);`;
+    const forbids = `forbid (principal, action == Kete::Action::"document.read", resource);`;
+    expect(engine.decide({ policies: [one(permits)], gesture: read, entities }).effect).toBe(
+      'allow',
+    );
+    expect(engine.decide({ policies: [one(forbids)], gesture: read, entities }).effect).toBe(
+      'refuse',
+    );
+  });
 });
 
 describe('checking a rule', () => {

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import * as cedar from '@cedar-policy/cedar-wasm/nodejs';
 import type { Gesture, Policy, PolicyDecision } from '@kete/sdk';
 
@@ -103,11 +104,15 @@ export function createPolicyEngine(options: {
   if (parsed.type !== 'success') {
     throw new TypeError(`The policy schema does not parse: ${messages(parsed.errors).join('; ')}`);
   }
-  // A preparsed set per content: a policy's change makes a new set.
+  // A preparsed set per content: a policy's change makes a new set. The key is the rules
+  // themselves, never their ids and versions: two organizations may each have a version 1 of a
+  // policy of the same id with different rules.
   const preparsed = new Map<string, string>();
   const setOf = (policies: readonly Policy[]): string | null => {
     if (policies.length === 0) return null;
-    const key = policies.map((p) => `${p.id}@${p.version}`).join('|');
+    const key = createHash('sha256')
+      .update(JSON.stringify(policies.map((p) => [p.id, p.rule])))
+      .digest('hex');
     const known = preparsed.get(key);
     if (known) return known;
     const id = `set-${++sets}`;
@@ -207,17 +212,12 @@ export function createPolicyEngine(options: {
       if (power.decision === 'deny') {
         return { effect: 'refuse', policies: cite(byId, power.reason, 'refuse'), trial };
       }
+      // An approval policy that fails to evaluate asks too: the engine never fails open.
       const asking = evaluate(approval, request, entities);
-      if (asking.reason.length > 0) {
-        const approvers = [
-          ...new Set(asking.reason.map((id) => byId.get(id)?.approver ?? 'manager')),
-        ];
-        return {
-          effect: 'approve',
-          approvers,
-          policies: cite(byId, asking.reason, 'approve'),
-          trial,
-        };
+      const asked = [...new Set([...asking.reason, ...asking.errors])];
+      if (asked.length > 0) {
+        const approvers = [...new Set(asked.map((id) => byId.get(id)?.approver ?? 'manager'))];
+        return { effect: 'approve', approvers, policies: cite(byId, asked, 'approve'), trial };
       }
       return { effect: 'allow', policies: cite(byId, power.reason, 'allow'), trial };
     },
