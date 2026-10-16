@@ -1,7 +1,10 @@
 # Spec 113 — Threads, channels and the router (`@kete/threads`, `@kete/channels`)
 
 Step **M** of phase 10 (`docs/ROADMAP.md`; doctrine D-056, D-057; decisions 0011 and 0012).
-**Ready for the author's go**; nothing is coded before it.
+The author's go came on 2026-10-16 (« vas au bout proprement », « fais tout »). `@kete/threads`
+and `@kete/channels` ship it (`packages/threads`, `packages/channels`); the cards with buttons on
+WhatsApp and Telegram (FR-006) and asking the right person when information is missing come with
+Kete Enterprise's spec 089.
 
 ## Why
 

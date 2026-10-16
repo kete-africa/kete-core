@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/routing.v1.schema.json",
+  "title": "Routing",
+  "description": "Where the router tied something received from outside (doctrine D-056): its object, its thread, the holding it made — by a rule, by the model's intent with its confidence, or by a person. Under the threshold it is not guessed: a card « à classer » asks a person.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["received", "intent", "confidence", "by"],
+  "properties": {
+    "received": {
+      "description": "What was received: its channel and its own reference there.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["via", "ref"],
+      "properties": {
+        "via": { "enum": ["whatsapp", "mail", "telegram", "form"] },
+        "ref": { "type": "string", "minLength": 1, "maxLength": 300 }
+      }
+    },
+    "object": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "id": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    },
+    "thread": {
+      "type": "string",
+      "pattern": "^thr_[0-9A-Za-z_-]{8,70}$"
+    },
+    "holding": {
+      "type": "string",
+      "pattern": "^hld_[0-9A-Za-z_-]{4,70}$"
+    },
+    "intent": {
+      "description": "What it is about, in the product's words: incident, quote_request, invoice_request…",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,59}$"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "by": {
+      "description": "rule: a known number, address or thread. model: its intent above the threshold. person: a card « à classer » settled.",
+      "enum": ["rule", "model", "person"]
+    },
+    "asked": {
+      "description": "The holding of the card « à classer », when a person must decide.",
+      "type": "string",
+      "pattern": "^hld_[0-9A-Za-z_-]{4,70}$"
+    }
+  }
+}

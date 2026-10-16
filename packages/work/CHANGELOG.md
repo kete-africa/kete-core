@@ -1,5 +1,11 @@
 # @kete-africa/work
 
+## 0.1.3
+
+### Patch Changes
+
+- Published against the sdk of this release, so that a product meets one copy of the contracts.
+
 ## 0.1.2
 
 ### Patch Changes

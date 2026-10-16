@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/message.v1.schema.json",
+  "title": "Message",
+  "description": "One thing said in a thread (doctrine D-057), by a person, an agent, or a contact through a channel. Never rewritten: an edit is a new message naming the one it replaces. « for action » asks someone to act and becomes a holding; « for information » tells.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "thread", "author", "text", "for", "via", "at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
+    },
+    "thread": {
+      "type": "string",
+      "pattern": "^thr_[0-9A-Za-z_-]{8,70}$"
+    },
+    "author": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "enum": ["person", "agent", "contact"] },
+        "id": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 20000
+    },
+    "attachments": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name"],
+        "properties": {
+          "id": {
+            "description": "The file kept in the product's storage.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "media_type": { "type": "string", "maxLength": 100 },
+          "bytes": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "for": {
+      "enum": ["action", "information"]
+    },
+    "to": {
+      "description": "Who must act, for a message « for action »; the thread's holder otherwise.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "enum": ["person", "agent"] },
+        "id": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "via": {
+      "enum": ["kete", "whatsapp", "mail", "telegram", "form"]
+    },
+    "reply_to": {
+      "type": "string",
+      "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
+    },
+    "edited_from": {
+      "description": "The message this one replaces; the original is kept.",
+      "type": "string",
+      "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
+    },
+    "mentions": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "id"],
+        "properties": {
+          "kind": { "enum": ["person", "agent"] },
+          "id": { "type": "string", "minLength": 1, "maxLength": 100 }
+        }
+      }
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

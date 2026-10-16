@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/thread.v1.schema.json",
+  "title": "Thread",
+  "description": "Where people talk about one thing (doctrine D-056, D-057): born with its object and put away when it closes, a group from the structure or created, a direct exchange, or a person's thread with Kete. It always has a holder; its members say who knew, and since when.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "kind", "title", "holder", "state", "opened_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^thr_[0-9A-Za-z_-]{8,70}$"
+    },
+    "kind": {
+      "description": "object: born with its object. group: a unit, a project's team, a board, or created. direct: between two. kete: a person and Kete Intelligence.",
+      "enum": ["object", "group", "direct", "kete"]
+    },
+    "object": {
+      "description": "What the thread is about; required for an object thread.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "id": { "type": "string", "minLength": 1, "maxLength": 200 }
+      }
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "holder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "enum": ["person", "agent"] },
+        "id": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "members": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "id", "since"],
+        "properties": {
+          "kind": {
+            "description": "contact: someone outside, reached through a channel.",
+            "enum": ["person", "agent", "contact"]
+          },
+          "id": { "type": "string", "minLength": 1, "maxLength": 100 },
+          "role": {
+            "description": "member: takes part. subscriber: is told, follows.",
+            "enum": ["member", "subscriber"],
+            "default": "member"
+          },
+          "since": { "type": "string", "format": "date-time" },
+          "until": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "address": {
+      "description": "Its own address for replies by mail.",
+      "type": "string",
+      "maxLength": 200
+    },
+    "retention": {
+      "description": "The policy that keeps or puts it away.",
+      "type": "string",
+      "maxLength": 80
+    },
+    "state": {
+      "enum": ["open", "closed"]
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "closed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

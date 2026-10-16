@@ -1,5 +1,12 @@
 # @kete-africa/sdk
 
+## 0.13.0
+
+### Minor Changes
+
+- Threads, channels and the router (spec 113, step M; doctrine D-056, D-057): `thread.v1`,
+  `message.v1` and `routing.v1`, with `validateThread`, `validateMessage` and `validateRouting`.
+
 ## 0.12.0
 
 ### Minor Changes

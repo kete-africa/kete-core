@@ -11,6 +11,7 @@ export type {
   Gesture,
   IntelligenceEvent,
   Lesson,
+  Message,
   DeliveryRequest,
   DeliveryResult,
   HealthReport,
@@ -27,7 +28,9 @@ export type {
   PolicyDecision,
   ProposalSet,
   Resource,
+  Routing,
   SubscriptionRenewalDue,
+  Thread,
 } from './contracts/types.gen.js';
 export {
   validateCapability,
@@ -48,7 +51,10 @@ export {
   validatePolicy,
   validatePolicyDecision,
   validateManifest,
+  validateMessage,
   validateProposalSet,
+  validateRouting,
+  validateThread,
   validateResource,
   type ValidationResult,
 } from './contracts/validate.js';
