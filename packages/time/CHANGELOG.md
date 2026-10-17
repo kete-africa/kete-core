@@ -1,5 +1,13 @@
 # @kete-africa/time
 
+## 0.3.0
+
+### Minor Changes
+
+- 4a178d7: The organization's calendar (spec 118): `calendarFrom` reads the working days, hours and holidays
+  from Kete's settings; `isWorkingDay`, `holidayOn`, `workingDaysBetween` and `addWorkingDays`
+  compute with them; `workdayOf` hands the same calendar to the planner.
+
 ## 0.2.4
 
 ### Patch Changes
