@@ -648,7 +648,7 @@ flowchart LR
 | M    | `@kete/threads` (113)  | Threads attached to objects, members, messages, cards, events; inbound channels (WhatsApp Business, IMAP) on simulators; the router; cards sent to WhatsApp, a voice answer as gestures     |
 | E    | `shell`, `design`      | « Pour moi », the thread with its state, the thread « Kete », Planifier, Mon tableau, an agent's settings, the phone — each compared with the validated v5 canvas                           |
 | R    | contracts, center      | Places, assets and the installed base, the catalogue, the group; one knowledge (library, documents, dossiers, skills, memory)                                                               |
-| A    | the four apps          | Kete Finance, Team, Commitments and Support write their holdings, pass their gestures through policies, have a thread per object, cite the references                                       |
+| A    | the four apps (114)    | Kete Finance, Team, Commitments and Support write their holdings, pass their gestures through policies, have a thread per object, cite the references                                       |
 | F    | the demo, production   | The whole journey as an end-to-end test in the demo (a message or a mail, the card, the gesture, the invoice, the payment, an absence and its relay); fluidity figures; real accounts       |
 
 ### Proof

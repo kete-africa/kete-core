@@ -3,7 +3,10 @@
 export {
   createCenter,
   datedFactBody,
+  holdingBody,
   moneyFactBody,
+  type AppGesture,
+  type AppHolding,
   type Center,
   type CenterGrants,
   type CenterOptions,
@@ -17,6 +20,7 @@ export {
   type DirectoryCard,
   type DirectoryPerson,
   type DirectoryUnit,
+  type GestureVerdict,
   type MoneyFact,
   type PartyFact,
   type ProjectOpened,

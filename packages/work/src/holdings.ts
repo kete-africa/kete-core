@@ -31,6 +31,8 @@ export interface Holding {
   due: string | null;
   state: HoldingState;
   purpose: 'action' | 'information';
+  /** Where it opens, as its app said it: an https address of the app, or a path of the center. */
+  href: string | null;
   /** Whose it was before the relay took it over: who may have it handed back. */
   takenOverFrom: Holder | null;
   lastNudgedAt: Date | null;
@@ -81,6 +83,7 @@ export interface HoldingRow extends Record<string, unknown> {
   due: string | Date | null;
   state: HoldingState;
   purpose: 'action' | 'information';
+  href: string | null;
   taken_over_from_kind: Holder['kind'] | null;
   taken_over_from_id: string | null;
   last_nudged_at: Date | null;
@@ -89,7 +92,7 @@ export interface HoldingRow extends Record<string, unknown> {
 
 export const holdingColumns = `holding_id, source_app, source_kind, source_ref, object_kind, object_id,
   what, holder_kind, holder_id, waiting_on_kind, waiting_on_id, waiting_since, since,
-  to_char(due, 'YYYY-MM-DD') as due, state, purpose, taken_over_from_kind, taken_over_from_id,
+  to_char(due, 'YYYY-MM-DD') as due, state, purpose, href, taken_over_from_kind, taken_over_from_id,
   last_nudged_at, done_at`;
 
 const date = (value: Date | null) => (value ? new Date(value) : null);
@@ -110,6 +113,7 @@ export function toHolding(row: HoldingRow): Holding {
     due: row.due === null ? null : String(row.due),
     state: row.state,
     purpose: row.purpose,
+    href: row.href ?? null,
     takenOverFrom:
       row.taken_over_from_kind && row.taken_over_from_id
         ? { kind: row.taken_over_from_kind, id: row.taken_over_from_id }
@@ -193,14 +197,16 @@ export async function sayHolding(
     state,
     holding.for ?? 'action',
     state === 'done' ? (previous?.doneAt ?? now) : null,
+    holding.href ?? null,
   ];
   let row: HoldingRow;
   if (!previous) {
     const { rows } = await db.query<HoldingRow>(
       `insert into kete_holdings (holding_id, organization_id, source_app, source_kind, source_ref,
          object_kind, object_id, what, holder_kind, holder_id, waiting_on_kind, waiting_on_id,
-         waiting_since, due, state, purpose, done_at, since)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+         waiting_since, due, state, purpose, done_at, href, since)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
+         $19)
        returning ${holdingColumns}`,
       [
         newId('hld'),
@@ -218,7 +224,7 @@ export async function sayHolding(
       `update kete_holdings
           set object_kind = $2, object_id = $3, what = $4, holder_kind = $5, holder_id = $6,
               waiting_on_kind = $7, waiting_on_id = $8, waiting_since = $9, due = $10, state = $11,
-              purpose = $12, done_at = $13, updated_at = now(),
+              purpose = $12, done_at = $13, href = $14, updated_at = now(),
               taken_over_from_kind = case when holder_kind = $5 and holder_id = $6
                 then taken_over_from_kind end,
               taken_over_from_id = case when holder_kind = $5 and holder_id = $6

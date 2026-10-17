@@ -17,7 +17,7 @@ export {
   type HoldingState,
   type WaitingOn,
 } from './holdings.js';
-export { workMigrationSql, type WorkMigrationOptions } from './migration.js';
+export { workLinksMigrationSql, workMigrationSql, type WorkMigrationOptions } from './migration.js';
 export {
   awayOn,
   defaultWorkingHours,
@@ -31,3 +31,4 @@ export {
   type Structure,
   type WorkingHours,
 } from './relay.js';
+export { syncSource } from './sync.js';

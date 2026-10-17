@@ -2,7 +2,7 @@ import type { ChatInbound } from '@kete/notify';
 import { inOrganization, type SqlExecutor } from '@kete/tenancy';
 import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '@kete/testing';
 import { messagesOf, openThread, threadOf, threadsMigrationSql } from '@kete/threads';
-import { getHolding, workMigrationSql } from '@kete/work';
+import { getHolding, workLinksMigrationSql, workMigrationSql } from '@kete/work';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   addRoutingRule,
@@ -28,6 +28,7 @@ beforeAll(async () => {
   db = await createTestSchema({
     migrate: async (owner, { schema, appRole }) => {
       await owner.query(workMigrationSql({ schema, appRole }));
+      await owner.query(workLinksMigrationSql({ schema }));
       await owner.query(threadsMigrationSql({ schema, appRole }));
       await owner.query(channelsMigrationSql({ schema, appRole }));
     },
