@@ -1,13 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { serve } from '@hono/node-server';
+import { coolify, neon } from '@kete/infrastructure';
 import { createJobs, defineJob } from '@kete/jobs';
 import { boatProvider } from '@kete/sandbox';
 import pg from 'pg';
 import { compteKete } from './adapters/account.js';
 import { claudeCode, codex, integratedAgent } from './adapters/agents.js';
-import { neon } from './adapters/databases.js';
 import { githubApp } from './adapters/github.js';
-import { coolify } from './adapters/hosting.js';
 import { reportTo } from './adapters/report.js';
 import type { Ports } from './ports.js';
 import { ENTERPRISE_PRODUCT, factoryServer } from './server.js';
