@@ -2,10 +2,12 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import pg from 'pg';
 import { neon } from '../../../packages/infrastructure/src/index.js';
 
-// The Compte Kete's test database, made through the provisioning port (spec 121) on the
-// kete-core project's `test` branch — where CI's compute already runs — with the roles its
-// migrations name (`account_owner`, `account_app`), bootstrapped once. Its two addresses go to the
-// file given, never to the screen: `pnpm tsx scripts/test-database.ts <secrets> <out>` (from apps/account).
+// A Compte Kete database, made through the provisioning port (spec 121) with the roles its
+// migrations name (`account_owner`, `account_app`), bootstrapped once. By default its test
+// database, on the kete-core project's `test` branch where CI's compute already runs; with a
+// project and a branch, another — the staging one has its own project, `kete-account-staging`.
+// Its two addresses go to the file given, never to the screen:
+// `pnpm tsx scripts/test-database.ts <secrets> <out> [project id] [branch]` (from apps/account).
 
 const envOf = (path: string): Record<string, string> =>
   Object.fromEntries(
@@ -25,8 +27,8 @@ if (!out || !secrets.NEON_API_KEY || !core.NEON_PROJECT_ID) {
 
 const databases = neon({
   apiKey: secrets.NEON_API_KEY,
-  projectId: core.NEON_PROJECT_ID,
-  branch: 'test',
+  projectId: process.argv[4] ?? core.NEON_PROJECT_ID,
+  branch: process.argv[5] ?? 'test',
 });
 const { ownerUrl, appUrl } = await databases.create('account');
 
@@ -41,4 +43,4 @@ try {
 writeFileSync(out, `ACCOUNT_TEST_OWNER_URL=${ownerUrl}\nACCOUNT_TEST_APP_URL=${appUrl}\n`, {
   mode: 0o600,
 });
-console.log(`database « account » ready on the test branch; its addresses are in ${out}`);
+console.log(`database « account » ready; its addresses are in ${out}`);
