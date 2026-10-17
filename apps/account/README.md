@@ -132,6 +132,12 @@ pnpm --filter @kete/account dev
 Migrations (owner role): `pnpm --filter @kete/account db:generate` after a schema change, then
 `db:migrate`. A new Neon branch first runs `db/bootstrap.sql`.
 
+The tests and CI (`ACCOUNT_TEST_OWNER_URL`, `ACCOUNT_TEST_APP_URL`) use the database `account` on
+the kete-core project's `test` branch, where CI's compute already runs — moved there on 2026-10-17
+when the `kete-account` project spent its free compute hours. It was made through the provisioning
+port (`@kete/infrastructure`) with `scripts/test-database.ts`, which also bootstraps it; its two
+addresses go to a file, never to the screen.
+
 Storage: each branch has a private bucket `files`. Browsers may upload only from the Compte
 Kete's origins: `ACCOUNT_STORAGE_CORS_ORIGINS="https://…" pnpm --filter @kete/account storage:cors`
 (with the `ACCOUNT_STORAGE_*` variables of that branch).
