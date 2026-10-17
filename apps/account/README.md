@@ -15,6 +15,7 @@ Every address is declared once in `src/routes.ts`: the files of `src/routes` are
 | `/forgot-password`              | Ask for a link to choose a new password (spec 025)                                               |
 | `/reset-password`               | Choose the new password from the e-mailed link; every other session is closed                    |
 | `/espace`                       | My tools: the Kete apps of the active organization                                               |
+| `/espace/kete`                  | My Kete: deploy Kete Enterprise — shared at once, or dedicated, at its place, autonomous (B3)    |
 | `/espace/nouvelle-organisation` | Create an organization (the creator becomes its owner)                                           |
 | `/espace/abonnements`           | Subscriptions: offers and their limits, a free trial once per tool, paying, access per tool      |
 | `/espace/organisation`          | Members, roles, invitations                                                                      |
@@ -119,6 +120,27 @@ Better Auth would add a password to an account that has none; a passkey-only acc
 none (spec 016), so it never gets a link; it adds one itself in Sécurité, right after using a
 passkey. An unknown address gets nothing, and the screen says the
 same thing in every case.
+
+## My Kete (spec 123)
+
+An organization deploys its Kete Enterprise itself (phase 11, step B3): its owner or an
+administrator chooses how it runs, its region (`KETE_DEPLOY_REGIONS`) and the apps beside it.
+**Shared** is ready at once at `KETE_ENTERPRISE_URL`, with no gesture of Kete's; **dedicated**,
+**at its place** and **autonomous** are requests Kete's fleet makes (the Cockpit, step B2), heard
+through `deployment.requested`; `deployment.ready` says when one runs. Once one runs, asking another
+mode is kept beside it until the fleet makes it. One deployment per organization and product
+(`deployments`, isolated per organization).
+
+```mermaid
+flowchart LR
+  O[owner or admin · Mon Kete] -->|shared| R[ready at once · KETE_ENTERPRISE_URL]
+  O -->|dedicated, at its place, autonomous| Q[requested]
+  R --> E1[deployment.requested + deployment.ready]
+  Q --> E2[deployment.requested]
+  E1 --> C[Kete Cockpit · the fleet]
+  E2 --> C
+  R --> T[My tools · Kete Enterprise, open]
+```
 
 ## Run locally
 

@@ -61,6 +61,33 @@
           "additionalProperties": { "type": "integer", "minimum": 0 }
         }
       }
+    },
+    "DeploymentRequested": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deployment_id", "product", "mode", "region", "apps"],
+      "properties": {
+        "deployment_id": { "type": "string", "maxLength": 64 },
+        "product": { "type": "string", "pattern": "^prd_[a-z0-9_]{2,40}$" },
+        "mode": { "enum": ["shared", "dedicated", "on_premises", "autonomous"] },
+        "region": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,40}$" },
+        "apps": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^prd_[a-z0-9_]{2,40}$" }
+        }
+      }
+    },
+    "DeploymentReady": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deployment_id", "product", "mode", "url"],
+      "properties": {
+        "deployment_id": { "type": "string", "maxLength": 64 },
+        "product": { "type": "string", "pattern": "^prd_[a-z0-9_]{2,40}$" },
+        "mode": { "enum": ["shared", "dedicated", "on_premises", "autonomous"] },
+        "url": { "type": "string", "format": "uri", "maxLength": 300 }
+      }
     }
   }
 }

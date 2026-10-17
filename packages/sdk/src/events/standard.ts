@@ -2,6 +2,8 @@ import type {
   AccountActivated,
   AccountClosed,
   AccountCreated,
+  DeploymentReady,
+  DeploymentRequested,
   MetricsDaily,
   PaymentFailed,
   PaymentSucceeded,
@@ -17,6 +19,8 @@ export const standardEventTypes = {
   'subscription.renewal_due': 'SubscriptionRenewalDue',
   'account.closed': 'AccountClosed',
   'metrics.daily': 'MetricsDaily',
+  'deployment.requested': 'DeploymentRequested',
+  'deployment.ready': 'DeploymentReady',
 } as const;
 
 export type StandardEventType = keyof typeof standardEventTypes;
@@ -29,6 +33,8 @@ export interface StandardEventDataMap {
   'subscription.renewal_due': SubscriptionRenewalDue;
   'account.closed': AccountClosed;
   'metrics.daily': MetricsDaily;
+  'deployment.requested': DeploymentRequested;
+  'deployment.ready': DeploymentReady;
 }
 
 export function isStandardEventType(type: string): type is StandardEventType {

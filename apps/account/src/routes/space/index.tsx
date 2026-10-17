@@ -18,7 +18,7 @@ const purpose: Record<ToolEntry['id'], () => string> = {
 };
 
 function Tools() {
-  const tools = Route.useLoaderData();
+  const { tools, enterprise } = Route.useLoaderData();
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
@@ -26,6 +26,29 @@ function Tools() {
         <p className="text-body-lg text-bark">{m.tools_intro()}</p>
       </div>
       <ul className="grid gap-px border border-rule bg-rule sm:grid-cols-2">
+        <li className="flex flex-col gap-4 bg-paper p-6">
+          <div className="flex flex-col gap-1">
+            <h2 className="font-title text-title font-bold">{m.tool_enterprise_name()}</h2>
+            <p className="text-body-sm text-bark">{m.tool_enterprise()}</p>
+          </div>
+          <div className="mt-auto flex flex-wrap items-center gap-3">
+            {enterprise?.url ? (
+              <a
+                href={enterprise.url}
+                className="inline-flex h-10 items-center rounded-control border border-ink px-4 text-body-sm font-semibold hover:bg-clay"
+              >
+                {m.tool_open()}
+              </a>
+            ) : (
+              <Link
+                to="/espace/kete"
+                className="inline-flex h-10 items-center rounded-control border border-ink px-4 text-body-sm font-semibold hover:bg-clay"
+              >
+                {enterprise ? m.kete_requested() : m.tool_enterprise_deploy()}
+              </Link>
+            )}
+          </div>
+        </li>
         {tools.map((tool) => (
           <li key={tool.id} className="flex flex-col gap-4 bg-paper p-6">
             <div className="flex flex-col gap-1">

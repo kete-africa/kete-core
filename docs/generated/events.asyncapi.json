@@ -36,6 +36,12 @@
         },
         "MetricsDaily": {
           "$ref": "#/components/messages/MetricsDaily"
+        },
+        "DeploymentRequested": {
+          "$ref": "#/components/messages/DeploymentRequested"
+        },
+        "DeploymentReady": {
+          "$ref": "#/components/messages/DeploymentReady"
         }
       }
     }
@@ -68,6 +74,12 @@
         },
         {
           "$ref": "#/channels/deliveries/messages/MetricsDaily"
+        },
+        {
+          "$ref": "#/channels/deliveries/messages/DeploymentRequested"
+        },
+        {
+          "$ref": "#/channels/deliveries/messages/DeploymentReady"
         }
       ]
     }
@@ -497,6 +509,168 @@
                     "type": "integer",
                     "minimum": 0
                   }
+                }
+              }
+            }
+          }
+        }
+      },
+      "DeploymentRequested": {
+        "name": "deployment.requested",
+        "title": "deployment.requested",
+        "summary": "The deployment.requested event.",
+        "contentType": "application/json",
+        "payload": {
+          "description": "An immutable fact announced by a Kete app. Facts and counters only: no names, e-mails or phone numbers.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "specversion",
+            "product",
+            "organization",
+            "occurred_at",
+            "data"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "type": {
+              "const": "deployment.requested"
+            },
+            "specversion": {
+              "const": "1"
+            },
+            "product": {
+              "type": "string",
+              "pattern": "^prd_[a-z0-9_]{2,40}$"
+            },
+            "organization": {
+              "type": "string",
+              "pattern": "^org_[A-Za-z0-9_-]{4,64}$"
+            },
+            "occurred_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "deployment_id",
+                "product",
+                "mode",
+                "region",
+                "apps"
+              ],
+              "properties": {
+                "deployment_id": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "product": {
+                  "type": "string",
+                  "pattern": "^prd_[a-z0-9_]{2,40}$"
+                },
+                "mode": {
+                  "enum": [
+                    "shared",
+                    "dedicated",
+                    "on_premises",
+                    "autonomous"
+                  ]
+                },
+                "region": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]{1,40}$"
+                },
+                "apps": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "pattern": "^prd_[a-z0-9_]{2,40}$"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "DeploymentReady": {
+        "name": "deployment.ready",
+        "title": "deployment.ready",
+        "summary": "The deployment.ready event.",
+        "contentType": "application/json",
+        "payload": {
+          "description": "An immutable fact announced by a Kete app. Facts and counters only: no names, e-mails or phone numbers.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "specversion",
+            "product",
+            "organization",
+            "occurred_at",
+            "data"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^evt_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            "type": {
+              "const": "deployment.ready"
+            },
+            "specversion": {
+              "const": "1"
+            },
+            "product": {
+              "type": "string",
+              "pattern": "^prd_[a-z0-9_]{2,40}$"
+            },
+            "organization": {
+              "type": "string",
+              "pattern": "^org_[A-Za-z0-9_-]{4,64}$"
+            },
+            "occurred_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "deployment_id",
+                "product",
+                "mode",
+                "url"
+              ],
+              "properties": {
+                "deployment_id": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "product": {
+                  "type": "string",
+                  "pattern": "^prd_[a-z0-9_]{2,40}$"
+                },
+                "mode": {
+                  "enum": [
+                    "shared",
+                    "dedicated",
+                    "on_premises",
+                    "autonomous"
+                  ]
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "maxLength": 300
                 }
               }
             }

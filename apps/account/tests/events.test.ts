@@ -64,6 +64,9 @@ describe('the Compte Kete announces', () => {
       'account.created',
       'account.activated',
       'payment.succeeded',
+      // An organization deploying its Kete (spec 123): heard by Kete's fleet.
+      'deployment.requested',
+      'deployment.ready',
     ]);
   });
 

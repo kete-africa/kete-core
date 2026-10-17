@@ -18,6 +18,8 @@ export const DECLARED_EVENTS = [
   'account.created',
   'account.activated',
   'payment.succeeded',
+  'deployment.requested',
+  'deployment.ready',
 ] as const;
 type Declared = (typeof DECLARED_EVENTS)[number];
 

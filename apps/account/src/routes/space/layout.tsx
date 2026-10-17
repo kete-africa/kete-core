@@ -38,6 +38,7 @@ function Space() {
 
   const links = [
     { to: '/espace', label: m.nav_tools(), exact: true },
+    { to: '/espace/kete', label: m.nav_kete(), exact: false },
     { to: '/espace/organisation', label: m.nav_organization(), exact: false },
     { to: '/espace/abonnements', label: m.nav_billing(), exact: false },
     { to: '/espace/parametres', label: m.nav_settings(), exact: false },
