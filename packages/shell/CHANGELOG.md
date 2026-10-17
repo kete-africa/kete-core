@@ -1,5 +1,19 @@
 # @kete-africa/shell
 
+## 0.4.0
+
+### Minor Changes
+
+- 72aee61: Settings in layers (spec 115): `@kete/settings` 0.1.0 — declared once, resolved from Kete's default
+  through the organization, the app, the entity and the person to the device, journaled; the frame
+  says a theme choice (`onTheme`) so the product saves it as her preference; a new app reads its
+  settings through the module and its theme and language follow the person.
+- f251c61: « Réglages » (spec 116): `@kete/shell` draws the same settings page in every app from the
+  declarations (`SettingsPanel`, `controlOf`, `sayValue`) — her preferences first, then the
+  organization's, each value with where it comes from; a declaration says the words of its choices
+  (`choices`); a new app has « Réglages » at the foot of its places, her preferences saved in the
+  Compte Kete and the app's settings journaled under `settings:manage`.
+
 ## 0.3.0
 
 ### Minor Changes
