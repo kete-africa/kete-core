@@ -1,5 +1,23 @@
 # @kete-africa/create-app
 
+## 0.11.0
+
+### Minor Changes
+
+- 72aee61: Settings in layers (spec 115): `@kete/settings` 0.1.0 — declared once, resolved from Kete's default
+  through the organization, the app, the entity and the person to the device, journaled; the frame
+  says a theme choice (`onTheme`) so the product saves it as her preference; a new app reads its
+  settings through the module and its theme and language follow the person.
+- 5c5c341: Settings where a command runs (spec 117): the Compte Kete's client keeps an organization's layer by
+  its id (`organization(id)`, five minutes) and `settingsHere` resolves inside the organization's
+  transaction — the app's layer over the organization's, never a person's; a new app's commands read
+  theirs with `settingsIn(db, organizationId)`.
+- f251c61: « Réglages » (spec 116): `@kete/shell` draws the same settings page in every app from the
+  declarations (`SettingsPanel`, `controlOf`, `sayValue`) — her preferences first, then the
+  organization's, each value with where it comes from; a declaration says the words of its choices
+  (`choices`); a new app has « Réglages » at the foot of its places, her preferences saved in the
+  Compte Kete and the app's settings journaled under `settings:manage`.
+
 ## 0.10.0
 
 ### Minor Changes
