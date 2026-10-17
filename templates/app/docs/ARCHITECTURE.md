@@ -30,6 +30,7 @@ flowchart TB
 | The center        | `platform/center.ts`         | `@kete/center` (Kete Enterprise)     |
 | What it holds     | `platform/holdings.ts`       | `@kete/center` (spec 114)            |
 | Policies          | `platform/policies.ts`       | `@kete/center` (spec 114)            |
+| Settings          | `platform/settings.ts`       | `@kete/settings` (spec 115)          |
 | Gestures, journal | `features/*/commands`        | `@kete/commands`                     |
 | Agents, drafts    | `platform/registry.ts`       | `@kete/capabilities`, `@kete/drafts` |
 | Copilots          | `platform/mcp.ts`            | `@kete/capabilities`, `@kete/views`  |
@@ -59,3 +60,12 @@ flowchart LR
   W[the worker · every minute] --> H
   H --> E[the center · « Pour moi », the relay]
 ```
+
+## Settings (kete-core spec 115)
+
+Kete's settings and the app's own are declared once (`platform/settings.ts`) and resolved by
+layers: the Compte Kete's (the organization's, the person's), the app's kept here
+(`kete_settings`), the device's cookie — the most precise wins. The page's theme and language come
+from her preferences, so they follow her in every Kete app; a theme chosen in the frame is saved
+there (`saveMyPreference`). The device's cookie is only their copy, rewritten from her preference,
+so the page renders without a flash. No business setting is read from an environment variable.

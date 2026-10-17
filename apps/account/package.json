@@ -28,6 +28,7 @@
     "@kete/notify": "workspace:@kete-africa/notify@*",
     "@kete/payments": "workspace:@kete-africa/payments@*",
     "@kete/sdk": "workspace:@kete-africa/sdk@*",
+    "@kete/settings": "workspace:@kete-africa/settings@*",
     "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
     "@react-email/components": "^1.0.12",
     "@tanstack/react-router": "^1.170.44",

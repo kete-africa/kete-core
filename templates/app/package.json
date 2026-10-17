@@ -32,6 +32,7 @@
     "@kete/notify": "workspace:@kete-africa/notify@*",
     "@kete/records": "workspace:@kete-africa/records@*",
     "@kete/sdk": "workspace:@kete-africa/sdk@*",
+    "@kete/settings": "workspace:@kete-africa/settings@*",
     "@kete/shell": "workspace:@kete-africa/shell@*",
     "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
     "@kete/views": "workspace:@kete-africa/views@*",

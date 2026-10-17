@@ -227,6 +227,7 @@ export function AppFrame({
   tabs = [],
   signOutHref,
   tools,
+  onTheme,
   children,
 }: {
   /** Kete, or the product: its name and the letter of its mark. */
@@ -267,6 +268,11 @@ export function AppFrame({
   signOutHref?: string;
   /** More of the product's own controls in the top bar (the feedback button). */
   tools?: ReactNode;
+  /**
+   * Her choice of theme, once shown: the product saves it as her preference (kete-core spec 115),
+   * so it follows her in every app.
+   */
+  onTheme?: (choice: ThemeChoiceValue) => void;
   children: ReactNode;
 }) {
   const [theme, setTheme] = useState<ThemeChoiceValue>('auto');
@@ -422,6 +428,7 @@ export function AppFrame({
                   onChange={(choice) => {
                     setTheme(choice);
                     applyTheme(choice);
+                    onTheme?.(choice);
                   }}
                 />
                 {signOutHref && (

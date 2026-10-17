@@ -1,0 +1,38 @@
+{
+  "name": "@kete-africa/settings",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Kete settings in layers (spec 115; decision 0013; doctrine D-060): each setting declared once by its owner, resolved from Kete's default through the organization, the legal entity or unit, the app and the person to the device — the most precise wins, and the screen says where a value comes from.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/settings"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kete/records": "workspace:@kete-africa/records@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}

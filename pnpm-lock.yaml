@@ -78,6 +78,9 @@ importers:
       '@kete/sdk':
         specifier: workspace:@kete-africa/sdk@*
         version: link:../../packages/sdk
+      '@kete/settings':
+        specifier: workspace:@kete-africa/settings@*
+        version: link:../../packages/settings
       '@kete/tenancy':
         specifier: workspace:@kete-africa/tenancy@*
         version: link:../../packages/tenancy
@@ -931,6 +934,22 @@ importers:
         specifier: workspace:@kete-africa/testing@*
         version: link:../testing
 
+  packages/settings:
+    dependencies:
+      '@kete/records':
+        specifier: workspace:@kete-africa/records@*
+        version: link:../records
+      '@kete/tenancy':
+        specifier: workspace:@kete-africa/tenancy@*
+        version: link:../tenancy
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@kete/testing':
+        specifier: workspace:@kete-africa/testing@*
+        version: link:../testing
+
   packages/shell:
     dependencies:
       '@kete/design':
@@ -1168,6 +1187,9 @@ importers:
       '@kete/sdk':
         specifier: workspace:@kete-africa/sdk@*
         version: link:../../packages/sdk
+      '@kete/settings':
+        specifier: workspace:@kete-africa/settings@*
+        version: link:../../packages/settings
       '@kete/shell':
         specifier: workspace:@kete-africa/shell@*
         version: link:../../packages/shell
