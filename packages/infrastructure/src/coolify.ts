@@ -64,7 +64,8 @@ export function coolify(options: CoolifyOptions): Hosting {
         dockerfile_location: '/Dockerfile',
         base_directory: '/',
         ports_exposes: '3000',
-        domains: domain,
+        // The port says a host (`kya.kete.software`); Coolify serves an address.
+        domains: /^https?:\/\//.test(domain) ? domain : `https://${domain}`,
         name,
         description,
         instant_deploy: false,
