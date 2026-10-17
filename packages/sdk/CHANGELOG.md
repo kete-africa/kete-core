@@ -1,5 +1,12 @@
 # @kete-africa/sdk
 
+## 0.15.0
+
+### Minor Changes
+
+- 98758a2: Two standard events (spec 123): `deployment.requested` and `deployment.ready` — an organization
+  deploying its Kete, heard by Kete's fleet.
+
 ## 0.14.0
 
 ### Minor Changes

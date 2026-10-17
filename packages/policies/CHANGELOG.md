@@ -1,5 +1,12 @@
 # @kete-africa/policies
 
+## 0.1.4
+
+### Patch Changes
+
+- Published on `@kete/sdk` with the deployment events (spec 123), so an app upgrading the SDK keeps
+  one copy of it.
+
 ## 0.1.3
 
 ### Patch Changes

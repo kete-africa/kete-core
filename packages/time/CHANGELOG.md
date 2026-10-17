@@ -1,5 +1,12 @@
 # @kete-africa/time
 
+## 0.3.1
+
+### Patch Changes
+
+- Published on `@kete/sdk` with the deployment events (spec 123), so an app upgrading the SDK keeps
+  one copy of it.
+
 ## 0.3.0
 
 ### Minor Changes
