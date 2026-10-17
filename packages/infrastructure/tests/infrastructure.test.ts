@@ -172,11 +172,19 @@ describe('the database adapter', () => {
   it('creates a database with its owner and its application role, and destroys all three', async () => {
     const sql: string[] = [];
     let appRole = false;
+    let busy = 1;
+    let created = false;
     const api = fakeApi((method, path) => {
+      // Neon still applies the database's removal: the owner's goes on the next try.
+      if (method === 'DELETE' && path.endsWith('/roles/kya_owner') && busy-- > 0)
+        return [422, { message: 'operation in progress' }];
       if (path === '/api/v2/projects/prj/branches')
         return [200, { branches: [{ id: 'br', name: 'main' }] }];
       if (method === 'GET' && path.endsWith('/roles')) return [200, { roles: [] }];
-      if (method === 'GET' && path.endsWith('/databases')) return [200, { databases: [] }];
+      if (method === 'POST' && path.endsWith('/databases')) created = true;
+      if (method === 'DELETE' && path.endsWith('/databases/kya')) created = false;
+      if (method === 'GET' && path.endsWith('/databases'))
+        return [200, { databases: created ? [{ name: 'kya' }] : [] }];
       if (path.startsWith('/api/v2/projects/prj/connection_uri'))
         return [200, { uri: 'postgres://kya_owner:pw@db.test/kya' }];
       return [200, {}];
@@ -209,6 +217,7 @@ describe('the database adapter', () => {
       'grant connect on database kya to kya_app',
       'grant usage on schema public to kya_app',
       'select 1 from pg_roles where rolname = $1',
+      'grant kya_app to kya_owner',
       'drop owned by kya_app',
       'drop role kya_app',
     ]);
@@ -217,7 +226,12 @@ describe('the database adapter', () => {
       'POST /api/v2/projects/prj/branches/br/databases',
       'DELETE /api/v2/projects/prj/branches/br/databases/kya',
       'DELETE /api/v2/projects/prj/branches/br/roles/kya_owner',
+      'DELETE /api/v2/projects/prj/branches/br/roles/kya_owner',
     ]);
+    // Destroying again, once gone, is harmless: nothing is connected to.
+    const before = sql.length;
+    await databases.destroy('kya');
+    expect(sql.length).toBe(before);
     await expect(databases.create('Bad name')).rejects.toThrow(/Not a database name/);
   });
 });

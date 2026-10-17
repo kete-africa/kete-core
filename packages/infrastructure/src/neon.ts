@@ -115,12 +115,22 @@ export function neon(options: NeonOptions): Databases {
       const branch = await branchId();
       const owner = `${name}_owner`;
       const app = `${name}_app`;
-      // The application role first, by its owner, while the database is still there.
-      const found = await api<{ uri: string }>(
-        `/projects/${project}/connection_uri?branch_id=${branch}&database_name=${name}&role_name=${owner}&pooled=false`,
-        {},
-        true,
-      );
+      // The application role first, by its owner, while the database is still there — Neon gives
+      // an address even for a database that is gone, so its list says whether it is.
+      const present = (
+        (
+          await api<{ databases: { name: string }[] }>(
+            `/projects/${project}/branches/${branch}/databases`,
+          )
+        )?.databases ?? []
+      ).some((d) => d.name === name);
+      const found = present
+        ? await api<{ uri: string }>(
+            `/projects/${project}/connection_uri?branch_id=${branch}&database_name=${name}&role_name=${owner}&pooled=false`,
+            {},
+            true,
+          )
+        : null;
       if (found?.uri) {
         const sql = client(found.uri);
         await sql.connect();
@@ -128,6 +138,9 @@ export function neon(options: NeonOptions): Databases {
           const exists = (await sql.query('select 1 from pg_roles where rolname = $1', [app]))
             .rowCount;
           if (exists) {
+            // Since PostgreSQL 16 its creator administers the role without holding its privileges:
+            // it takes them first, so what the role was granted can go with it.
+            await sql.query(`grant ${app} to ${owner}`);
             await sql.query(`drop owned by ${app}`);
             await sql.query(`drop role ${app}`);
           }
@@ -135,16 +148,27 @@ export function neon(options: NeonOptions): Databases {
           await sql.end();
         }
       }
-      await api(
+      const dropped = await api(
         `/projects/${project}/branches/${branch}/databases/${name}`,
         { method: 'DELETE' },
         true,
       );
-      await api(
-        `/projects/${project}/branches/${branch}/roles/${owner}`,
-        { method: 'DELETE' },
-        true,
-      );
+      // The owner goes once Neon has applied the database's removal: while it works, it refuses.
+      if (dropped) await settle();
+      for (let attempt = 1; ; attempt += 1) {
+        try {
+          await api(
+            `/projects/${project}/branches/${branch}/roles/${owner}`,
+            { method: 'DELETE' },
+            true,
+          );
+          break;
+        } catch (error) {
+          const busy = error instanceof Error && /: 42[23]$/.test(error.message);
+          if (!busy || attempt >= 6) throw error;
+          await settle();
+        }
+      }
     },
   };
 }

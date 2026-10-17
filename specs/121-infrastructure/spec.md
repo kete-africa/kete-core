@@ -39,11 +39,17 @@ flowchart LR
   states in the port's words; Neon's calls and SQL — the owner and application roles created, then
   dropped with the database. The factory's tests on the package's adapters.
 
-## Waiting for the author
+## The proof on real accounts (2026-10-17)
 
-The phase's proof on real accounts — « une instance de test créée puis détruite par le port
-seul » — creates and destroys resources on Kete's Neon and Coolify: it runs when the author says
-so.
+Run on the author's word (`tooling/scripts/prove-provisioning.ts`): Support's `dev` branch as the
+instance, a database on the kete-core project's `test` branch of Neon, an app in Coolify's
+project Kete (staging), served at `<name>.13.140.178.49.sslip.io`.
+
+| Run | What happened |
+| --- | --- |
+| 1 | Created and answering `healthy` at 146 s; the app destroyed; the database's removal refused — PostgreSQL 16 does not give a role's creator its privileges, so `drop owned by` failed. Finished through the port once fixed (the owner takes the role first). |
+| 2 | Created and answering at 136 s; the application role and the database gone; the owner role refused (422) while Neon still applied the database's removal. Finished through the port once fixed (a pause, then retries while Neon is busy; an absent database never connected to). |
+| 3 | Created, answering `healthy` at 146 s (database up, 12 ms), destroyed at 152 s: no database, no role, no app left; the address no longer answers. |
 
 ## Not done here
 
