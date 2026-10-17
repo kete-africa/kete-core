@@ -1,3 +1,4 @@
+import { settingsMigrationSql } from '@kete/settings';
 import { agentConversationsMigrationSql, agentMemoryMigrationSql } from '@kete/agents';
 import { usageMigrationSql } from '@kete/analytics';
 import { businessRolesMigrationSql } from '@kete/capabilities';
@@ -57,4 +58,6 @@ export const migrations: Migration[] = [
   { name: '0007_kete_usage', sql: (context) => usageMigrationSql(context) },
   // What the assistant proposes at once, decided by one gesture (kete-core spec 104).
   { name: '0008_kete_proposal_sets', sql: (context) => proposalSetsMigrationSql(context) },
+  // This app's settings and their journal (kete-core spec 115).
+  { name: '0009_kete_settings', sql: (context) => settingsMigrationSql(context) },
 ];

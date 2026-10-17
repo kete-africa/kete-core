@@ -121,6 +121,19 @@ export const organizationSettings = pgTable(
   ],
 ).enableRLS();
 
+/**
+ * A person's preferences (spec 115; decision 0013): her layer of Kete's settings — language, theme,
+ * time zone, quiet hours… — the same in every Kete app. Identity data, global like the other identity
+ * tables (decision 0003): a person is one across her organizations.
+ */
+export const userPreferences = pgTable('user_preferences', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  values: jsonb('values').$type<Record<string, unknown>>().notNull().default({}),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 /** The Kete apps an organization can subscribe to. */
 export type KeteApp = 'firmo' | 'nettio' | 'nyatefe' | 'cockpit';
 

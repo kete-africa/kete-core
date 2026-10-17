@@ -28,6 +28,7 @@ const error = (description: string) =>
 
 const appToken = [{ appToken: [] }];
 const operatorToken = [{ operatorToken: [] }];
+const personToken = [{ personToken: [] }];
 
 export const accountSecuritySchemes = {
   appToken: {
@@ -36,6 +37,13 @@ export const accountSecuritySchemes = {
     bearerFormat: 'JWT',
     description:
       'A `client_credentials` access token of a trusted Kete app, carrying the `kete:people` scope (spec 013).',
+  },
+  personToken: {
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+    description:
+      "A person's access token this Compte Kete issued for the Kete apps (`urn:kete:apps`), with her organization (spec 115).",
   },
   operatorToken: {
     type: 'http',
@@ -218,6 +226,74 @@ export const accountPaths: Record<string, Schema> = {
         '401': error('No valid app token'),
         '403': error('The app may not read access'),
         '422': error('Invalid organization id'),
+      },
+    },
+  },
+  '/api/apps/settings': {
+    get: {
+      tags: ['Apps'],
+      summary: "Her organization's settings and her own preferences",
+      description:
+        "The Compte Kete's two layers of Kete's settings (spec 115): the organization's generic settings and the person's preferences, which follow her in every app.",
+      security: personToken,
+      responses: {
+        '200': json(
+          {
+            type: 'object',
+            properties: {
+              organization: {
+                type: 'object',
+                additionalProperties: true,
+                description: 'Settings by their key (`kete.locale`…), only those set',
+              },
+              person: {
+                type: 'object',
+                additionalProperties: true,
+                description: 'Settings by their key (`kete.locale`…), only those set',
+              },
+            },
+            required: ['organization', 'person'],
+          },
+          'Both layers',
+        ),
+        '401': error('No valid token'),
+        '403': error('A token without an organization'),
+      },
+    },
+    put: {
+      tags: ['Apps'],
+      summary: 'Save one of her preferences',
+      description:
+        "Checked against Kete's declaration of the setting and the person's layer; `null` takes it back to what she inherits. Never by an agent acting for her.",
+      security: personToken,
+      requestBody: {
+        required: true,
+        ...json(
+          {
+            type: 'object',
+            properties: { key: { type: 'string' }, value: {} },
+            required: ['key', 'value'],
+          },
+          'The preference',
+        ),
+      },
+      responses: {
+        '200': json(
+          {
+            type: 'object',
+            properties: {
+              person: {
+                type: 'object',
+                additionalProperties: true,
+                description: 'Settings by their key (`kete.locale`…), only those set',
+              },
+            },
+          },
+          'Her preferences now',
+        ),
+        '401': error('No valid token'),
+        '403': error('An agent acting for her, or no organization'),
+        '422': error("An unknown setting, a value it does not take, or not a person's setting"),
       },
     },
   },

@@ -2,12 +2,16 @@ import { type FormEvent, useState } from 'react';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { Button, Panel, TextField } from '@kete/design';
 import { LogoPanel } from '@/features/files/LogoPanel';
-import { fetchSettings, updateSettings } from '@/features/settings/functions';
+import { MyPreferences } from '@/features/settings/MyPreferences';
+import { fetchMyPreferences, fetchSettings, updateSettings } from '@/features/settings/functions';
 import { Notice, SelectField, useHydrated } from '@/lib/ui';
 import * as m from '@/paraglide/messages.js';
 
 export const Route = createFileRoute('/espace/parametres')({
-  loader: () => fetchSettings(),
+  loader: async () => {
+    const [settings, preferences] = await Promise.all([fetchSettings(), fetchMyPreferences()]);
+    return { ...settings, preferences };
+  },
   component: Settings,
 });
 
@@ -75,6 +79,7 @@ function Settings() {
         <h1 className="font-headline text-headline font-extrabold">{m.settings_title()}</h1>
         <p className="text-body-lg text-bark">{m.settings_intro()}</p>
       </div>
+      <MyPreferences preferences={settings.preferences} />
       {readOnly && <Notice tone="info">{m.settings_read_only()}</Notice>}
       <LogoPanel logoUrl={settings.logoUrl} canEdit={settings.canEdit} />
       <form method="post" onSubmit={submit} className="flex flex-col gap-6">

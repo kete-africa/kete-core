@@ -9,6 +9,7 @@ import { AppFrame, allPlaces, placesFor, type ShellWords } from '@kete/shell';
 import { useRouteContext, useRouterState } from '@tanstack/react-router';
 import { useMemo, useState, type ReactNode } from 'react';
 import app from '../../kete.json' with { type: 'json' };
+import { saveMyPreference } from '@/lib/preferences';
 import * as m from '@/paraglide/messages.js';
 import { getLocale } from '@/paraglide/runtime.js';
 
@@ -135,6 +136,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {...(current ? { current } : {})}
       person={{ name: context.person?.name ?? '' }}
       words={shellWords()}
+      onTheme={(choice) => void saveMyPreference({ data: { key: 'kete.theme', value: choice } })}
       onAsk={(question) => {
         setOpen(true);
         if (question) void intelligence.send(question);

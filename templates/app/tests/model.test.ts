@@ -6,6 +6,7 @@ import { migrations } from '../db/migrations';
 import { taskHoldings } from '../src/features/tasks';
 import { transaction, usePool } from '../src/platform/db';
 import { passGesture, sentencesOf } from '../src/platform/policies';
+import { settingsFrom } from '../src/platform/settings';
 
 // Kete-core spec 114: the app says what it holds to its center and passes its gestures through
 // the organization's policies.
@@ -76,5 +77,35 @@ describe('a gesture through the policies', () => {
     });
     expect(verdict.effect).toBe('refuse');
     expect(sentencesOf(verdict)).toBe('Un agent ne clôt jamais une tâche');
+  });
+});
+
+describe('the app’s settings (spec 115)', () => {
+  it('gather the Compte Kete’s layers, the app’s and the device’s, the most precise winning', () => {
+    const settings = settingsFrom({
+      account: {
+        organization: { 'kete.locale': 'fr', 'kete.currency': 'XOF' },
+        person: { 'kete.locale': 'en' },
+      },
+      app: { 'kete.currency': 'GHS' },
+      cookie: 'kete_theme=dark; other=1',
+    });
+    expect(settings.value('kete.locale')).toBe('en');
+    expect(settings.from('kete.locale')).toBe('person');
+    expect(settings.value('kete.currency')).toBe('GHS');
+    expect(settings.value('kete.theme')).toBe('dark');
+    expect(settings.from('kete.theme')).toBe('device');
+    expect(settingsFrom({ account: { organization: {}, person: {} } }).from('kete.theme')).toBe(
+      'kete',
+    );
+  });
+
+  it('let the theme she chose in another app win over this device’s old copy', () => {
+    const settings = settingsFrom({
+      account: { organization: {}, person: { 'kete.theme': 'light' } },
+      cookie: 'kete_theme=dark',
+    });
+    expect(settings.value('kete.theme')).toBe('light');
+    expect(settings.from('kete.theme')).toBe('person');
   });
 });
