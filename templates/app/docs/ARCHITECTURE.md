@@ -69,3 +69,17 @@ layers: the Compte Kete's (the organization's, the person's), the app's kept her
 from her preferences, so they follow her in every Kete app; a theme chosen in the frame is saved
 there (`saveMyPreference`). The device's cookie is only their copy, rewritten from her preference,
 so the page renders without a flash. No business setting is read from an environment variable.
+
+« Réglages » (`/reglages`, at the foot of the places; kete-core spec 116) is the same page as in
+every Kete app, drawn by `@kete/shell` from the declarations: her preferences (saved in the Compte
+Kete), then the app's settings for the whole organization (`settings:manage`, journaled in
+`kete_setting_events`); what the organization sets in the Compte Kete is shown with where it comes
+from.
+
+```mermaid
+flowchart LR
+  S[platform/settings.ts · declarations] --> R[settingRows · value, layer, who sets it]
+  R --> P[« Réglages » · SettingsPanel]
+  P -->|her preference| C[Compte Kete · PUT /api/apps/settings]
+  P -->|settings:manage| K[kete_settings · journal]
+```

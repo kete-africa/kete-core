@@ -117,7 +117,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const context = useRouteContext({ strict: false }) as { person?: { name: string } };
   const path = useRouterState({ select: (state) => state.location.pathname });
   const sections = placesFor(app.places, { lang: getLocale() === 'en' ? 'en' : 'fr' });
-  const current = allPlaces(sections).find(
+  // « Réglages » at the foot of the places, as in every Kete app (kete-core spec 116).
+  const foot = [{ id: 'settings', label: m.settings_place(), href: '/reglages', icon: 'gear' }];
+  const current = [...allPlaces(sections), ...foot].find(
     (place) => place.href === path || (place.href !== '/' && path.startsWith(`${place.href}/`)),
   )?.id;
   // Kete Intelligence beside the page (kete-core spec 101): the page she asks from goes with her
@@ -133,6 +135,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <AppFrame
       brand={{ name: m.app_name() }}
       sections={sections}
+      foot={{ places: foot }}
       {...(current ? { current } : {})}
       person={{ name: context.person?.name ?? '' }}
       words={shellWords()}

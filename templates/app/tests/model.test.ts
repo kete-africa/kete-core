@@ -6,7 +6,7 @@ import { migrations } from '../db/migrations';
 import { taskHoldings } from '../src/features/tasks';
 import { transaction, usePool } from '../src/platform/db';
 import { passGesture, sentencesOf } from '../src/platform/policies';
-import { settingsFrom } from '../src/platform/settings';
+import { settingRows, settingsFrom } from '../src/platform/settings';
 
 // Kete-core spec 114: the app says what it holds to its center and passes its gestures through
 // the organization's policies.
@@ -107,5 +107,28 @@ describe('the app’s settings (spec 115)', () => {
     });
     expect(settings.value('kete.theme')).toBe('light');
     expect(settings.from('kete.theme')).toBe('person');
+  });
+
+  it('say, on « Réglages », who sets each one here: she her preferences, an admin the app’s', () => {
+    const resolved = settingsFrom({
+      account: { organization: { 'kete.currency': 'XOF' }, person: { 'kete.theme': 'dark' } },
+    });
+    const row = (rows: ReturnType<typeof settingRows>, key: string) =>
+      rows.find((r) => r.key === key);
+    const admin = settingRows(resolved, { lang: 'fr', personal: true, manage: true });
+    expect(row(admin, 'kete.theme')).toMatchObject({
+      label: 'Thème',
+      value: 'dark',
+      from: 'person',
+      editable: 'person',
+      choices: { dark: 'Sombre' },
+    });
+    expect(row(admin, 'kete.currency')).toMatchObject({ from: 'organization', editable: 'app' });
+    // The organization's identity is set in the Compte Kete, never here.
+    expect(row(admin, 'kete.company_name')?.editable).toBeUndefined();
+    const member = settingRows(resolved, { lang: 'en', personal: false, manage: false });
+    expect(row(member, 'kete.theme')).toMatchObject({ label: 'Theme' });
+    expect(row(member, 'kete.theme')?.editable).toBeUndefined();
+    expect(row(member, 'kete.currency')?.editable).toBeUndefined();
   });
 });

@@ -9,6 +9,7 @@ import {
   type Resolved,
   type SettingDeclaration,
 } from '@kete/settings';
+import type { SettingRow } from '@kete/shell';
 import { transaction } from './db';
 import { personOf, tokenOf } from './session';
 
@@ -63,6 +64,45 @@ export async function settingsOf(request: Request): Promise<Resolved> {
     account: layers,
     ...(kept ? { app: kept.app } : {}),
     cookie: request.headers.get('cookie'),
+  });
+}
+
+/**
+ * « Réglages » (kete-core spec 116): every setting in her language, with its value and where it
+ * comes from, and the layer she may set it on here — her own preferences when a Compte Kete keeps
+ * them, the app's for the whole organization with `settings:manage`. The organization's own are
+ * set in the Compte Kete.
+ */
+export function settingRows(
+  resolved: Resolved,
+  options: { lang: 'fr' | 'en'; personal: boolean; manage: boolean },
+): SettingRow[] {
+  return settingsRegistry.describe().map((d) => {
+    const editable = d.layers.includes('person')
+      ? options.personal
+        ? ('person' as const)
+        : undefined
+      : d.layers.includes('app') && options.manage
+        ? ('app' as const)
+        : undefined;
+    return {
+      key: d.key,
+      label: d.label[options.lang],
+      ...(d.description ? { description: d.description[options.lang] } : {}),
+      group: d.group,
+      schema: d.schema,
+      ...(d.choices
+        ? {
+            choices: Object.fromEntries(
+              Object.entries(d.choices).map(([value, words]) => [value, words[options.lang]]),
+            ),
+          }
+        : {}),
+      value: resolved.value(d.key),
+      from: resolved.from(d.key),
+      ...(editable ? { editable } : {}),
+      layers: d.layers,
+    };
   });
 }
 

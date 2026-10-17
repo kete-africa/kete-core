@@ -70,6 +70,7 @@ export const keteSettings = [
     sensitivity: 'public',
     group: 'language',
     label: { fr: 'Langue', en: 'Language' },
+    choices: { fr: { fr: 'Français', en: 'French' }, en: { fr: 'Anglais', en: 'English' } },
   }),
   setting({
     key: 'kete.time_zone',
@@ -103,6 +104,11 @@ export const keteSettings = [
     permission: 'organization:settings',
     group: 'notifications',
     label: { fr: 'Canaux de notification', en: 'Notification channels' },
+    choices: {
+      email: { fr: 'E-mail', en: 'E-mail' },
+      whatsapp: { fr: 'WhatsApp', en: 'WhatsApp' },
+      telegram: { fr: 'Telegram', en: 'Telegram' },
+    },
   }),
   setting({
     key: 'kete.quiet_hours',
@@ -126,6 +132,15 @@ export const keteSettings = [
     sensitivity: 'public',
     group: 'calendar',
     label: { fr: 'Jours ouvrés', en: 'Working days' },
+    choices: {
+      1: { fr: 'Lundi', en: 'Monday' },
+      2: { fr: 'Mardi', en: 'Tuesday' },
+      3: { fr: 'Mercredi', en: 'Wednesday' },
+      4: { fr: 'Jeudi', en: 'Thursday' },
+      5: { fr: 'Vendredi', en: 'Friday' },
+      6: { fr: 'Samedi', en: 'Saturday' },
+      7: { fr: 'Dimanche', en: 'Sunday' },
+    },
   }),
   setting({
     key: 'kete.working_hours',
@@ -156,6 +171,11 @@ export const keteSettings = [
     sensitivity: 'public',
     group: 'display',
     label: { fr: 'Thème', en: 'Theme' },
+    choices: {
+      auto: { fr: 'Comme l’appareil', en: 'Like the device' },
+      light: { fr: 'Clair', en: 'Light' },
+      dark: { fr: 'Sombre', en: 'Dark' },
+    },
   }),
   setting({
     key: 'kete.reduce_motion',
@@ -174,6 +194,7 @@ export const keteSettings = [
     sensitivity: 'public',
     group: 'display',
     label: { fr: 'Taille du texte', en: 'Text size' },
+    choices: { normal: { fr: 'Normale', en: 'Normal' }, large: { fr: 'Grande', en: 'Large' } },
   }),
   setting({
     key: 'kete.home_page',

@@ -26,6 +26,13 @@ export const permissions = definePermissions([
     description: words(m.perm_journal_read_body),
     roles: ['owner', 'admin'],
   },
+  // The app's settings for the whole organization (kete-core spec 116): « Réglages ».
+  {
+    name: 'settings:manage',
+    label: words(m.perm_settings_manage),
+    description: words(m.perm_settings_manage_body),
+    roles: ['owner', 'admin'],
+  },
 ]);
 
 /**

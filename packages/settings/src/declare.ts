@@ -31,6 +31,8 @@ export interface SettingDeclaration<T = unknown> {
   sensitivity?: 'public' | 'internal';
   label: Words;
   description?: Words;
+  /** The words of each choice, for a list or ticks: `{ dark: { fr: 'Sombre', en: 'Dark' } }`. */
+  choices?: Readonly<Record<string, Words>>;
   /** Where the screen groups it: `identity`, `language`, `calendar`, `notifications`… */
   group: string;
 }
@@ -44,6 +46,7 @@ export interface SettingDescription {
   sensitivity: 'public' | 'internal';
   label: Words;
   description?: Words;
+  choices?: Readonly<Record<string, Words>>;
   group: string;
   schema: Record<string, unknown>;
 }
@@ -124,6 +127,7 @@ export function defineSettings(
         sensitivity: d.sensitivity ?? 'internal',
         label: d.label,
         ...(d.description ? { description: d.description } : {}),
+        ...(d.choices ? { choices: d.choices } : {}),
         group: d.group,
         schema: z.toJSONSchema(d.schema, { unrepresentable: 'any' }) as Record<string, unknown>,
       })),
