@@ -83,3 +83,22 @@ flowchart LR
   T -->|Plein soleil| S[data-sun on · strongest light]
   T --> V[dictate the report · VoiceCapture]
 ```
+
+## « Réglages » (spec 116)
+
+The same settings page in every app (decision 0013; doctrine D-060), drawn from the declarations
+of `@kete/settings`: `SettingsPanel` takes the rows (each setting in her language, its JSON
+Schema, its value, the layer it comes from and the layer this screen sets it on) and shows her
+preferences first, then what is set for the whole organization. Each control is read from the
+schema (`controlOf`): a list, a tick, a number, a text, ticks, hours; what no control fits is said
+in words (`sayValue`) and set elsewhere. A change is saved at once; a value set here can go back to
+what it inherits.
+
+```mermaid
+flowchart LR
+  D[declarations · describe] --> R[rows · value and its layer]
+  R --> P[SettingsPanel]
+  P -->|her preference| A[Compte Kete · follows her]
+  P -->|the app's, settings:manage| K[kete_settings · journaled]
+  P -->|the organization's| C[said · set in the Compte Kete]
+```

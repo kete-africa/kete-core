@@ -16,3 +16,14 @@ export {
   type PlaceSection,
 } from './places.js';
 export { FieldFrame, MorningPile, useSunlight, type PileItem } from './phone.js';
+export {
+  controlOf,
+  sayValue,
+  SettingsPanel,
+  type EditableLayer,
+  type SettingControl,
+  type SettingLayer,
+  type SettingResult,
+  type SettingRow,
+  type SettingsWords,
+} from './settings.js';

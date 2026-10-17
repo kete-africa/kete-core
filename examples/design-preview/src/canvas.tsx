@@ -28,7 +28,7 @@ import { useState } from 'react';
 // manifest, the drawer beside the page, the first wave of parts. The words are the app's.
 
 // Kete Finance's places, as the validated canvas shows them.
-const places: ManifestPlace[] = [
+export const places: ManifestPlace[] = [
   {
     id: 'home',
     label: { fr: 'Accueil', en: 'Accueil' },
@@ -100,7 +100,7 @@ const places: ManifestPlace[] = [
   },
 ];
 
-const words: ShellWords = {
+export const words: ShellWords = {
   nav: 'Navigation principale',
   showNav: 'Afficher le menu',
   hideNav: 'Masquer le menu',
