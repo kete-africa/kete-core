@@ -840,6 +840,19 @@ importers:
         specifier: ^2.11.0
         version: 2.11.0(@opentelemetry/api@1.9.1)
 
+  packages/metering:
+    dependencies:
+      '@kete/records':
+        specifier: workspace:@kete-africa/records@*
+        version: link:../records
+      '@kete/tenancy':
+        specifier: workspace:@kete-africa/tenancy@*
+        version: link:../tenancy
+    devDependencies:
+      '@kete/testing':
+        specifier: workspace:@kete-africa/testing@*
+        version: link:../testing
+
   packages/metrics:
     dependencies:
       '@kete/sdk':
