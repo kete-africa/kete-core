@@ -1,5 +1,11 @@
 # @kete-africa/channels
 
+## 0.1.1
+
+### Patch Changes
+
+- Republished on sdk 0.14 and work 0.2 (spec 114).
+
 ## 0.1.0
 
 ### Minor Changes
