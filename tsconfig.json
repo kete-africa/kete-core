@@ -101,6 +101,9 @@
       "path": "packages/settings"
     },
     {
+      "path": "packages/metering"
+    },
+    {
       "path": "packages/threads"
     },
     {
