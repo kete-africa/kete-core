@@ -6,6 +6,7 @@ import {
   trialInput,
 } from '../features/admin/inputs';
 import { personInput, signInLinkInput } from '../features/apps/inputs';
+import { makeReadyInput } from '../features/deployments/inputs';
 
 // The Compte Kete's own API, beside the identity's (spec 026): what Kete apps and Kete Cockpit
 // call. Pure data built from the schemas the routes validate with, so the description cannot drift;
@@ -298,6 +299,42 @@ export const accountPaths: Record<string, Schema> = {
         '401': error('No valid token'),
         '403': error('An agent acting for her, or no organization'),
         '422': error("An unknown setting, a value it does not take, or not a person's setting"),
+      },
+    },
+  },
+  '/api/admin/deployments': {
+    get: {
+      tags: ['Kete Cockpit'],
+      summary: "Every organization's deployments, what waits for Kete first",
+      description:
+        "Kete's fleet (spec 125): each organization's Kete Enterprise — its mode, region, apps, state, address, and another mode asked.",
+      security: operatorToken,
+      responses: {
+        '200': { description: 'The deployments' },
+        '401': error('No valid token'),
+        '403': error('Not a Kete operator'),
+      },
+    },
+    post: {
+      tags: ['Kete Cockpit'],
+      summary: 'Say a deployment is made, at its address',
+      description:
+        'A journaled command in Kete’s organization (@kete/commands): a request becomes ready, a running one moves to the mode its organization asked; the organization hears `deployment.ready`. The same `Idempotency-Key` makes a retry harmless.',
+      security: operatorToken,
+      parameters: [
+        { name: 'Idempotency-Key', in: 'header', required: false, schema: { type: 'string' } },
+      ],
+      requestBody: {
+        required: true,
+        ...json(input(makeReadyInput), 'The deployment and its https address'),
+      },
+      responses: {
+        '200': { description: 'The deployment, made' },
+        '400': error('An invalid request'),
+        '401': error('No valid token'),
+        '403': error('Not a Kete operator'),
+        '404': error('No such deployment'),
+        '409': error('Nothing left to make'),
       },
     },
   },

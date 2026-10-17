@@ -92,6 +92,13 @@
       "when": 1790770000000,
       "tag": "0012_deployments",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790780000000,
+      "tag": "0013_deployments_admin",
+      "breakpoints": true
     }
   ]
 }

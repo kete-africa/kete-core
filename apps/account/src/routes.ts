@@ -31,6 +31,7 @@ export const routes = rootRoute('__root.tsx', [
   route('/api/apps/sign-in-links', 'api/apps/sign-in-links.ts'),
   route('/api/apps/settings', 'api/apps/settings.ts'),
   route('/api/admin/offers', 'api/admin/offers.ts'),
+  route('/api/admin/deployments', 'api/admin/deployments.ts'),
   route('/api/payments/notifications', 'api/payments/notifications.ts'),
   route('/health', 'api/health.ts'),
   route('/.well-known/kete', 'well-known/kete.ts'),
