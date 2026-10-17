@@ -1,0 +1,38 @@
+{
+  "name": "@kete-africa/connections",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Kete connections (spec 119; doctrine D-059, D-060; phase 11, step B1): the tools an organization connects — by OAuth or by a key — their credentials sealed and never shown, never handed to an agent; each connection's health, its refresh and its revocation, journaled.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/connections"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kete/records": "workspace:@kete-africa/records@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "oauth4webapi": "^3.8.8"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}
