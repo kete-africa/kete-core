@@ -15,6 +15,7 @@ export const routes = rootRoute('__root.tsx', [
   // Mon espace Kete: one layout, its pages inside.
   route('/espace', 'space/layout.tsx', [
     index('space/index.tsx'),
+    route('/kete', 'space/kete.tsx'),
     route('/abonnements', 'space/subscriptions.tsx'),
     route('/nouvelle-organisation', 'space/new-organization.tsx'),
     route('/organisation', 'space/organization.tsx'),

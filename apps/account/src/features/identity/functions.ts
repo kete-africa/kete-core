@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
+import { deploymentOf } from '@/features/deployments/deployments';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 import { z } from 'zod';
 import { accessUntil } from '@/features/payments/access';
@@ -27,8 +28,15 @@ export const fetchInvitation = createServerFn({ method: 'GET' })
 
 export const fetchTools = createServerFn({ method: 'GET' }).handler(async () => {
   const me = requireMember(await actorFromHeaders(getRequestHeaders()));
-  const access = await accessUntil(me.organizationId);
-  return toolCatalog().map((tool) => ({ ...tool, accessUntil: access[tool.id] ?? null }));
+  const [access, deployment] = await Promise.all([
+    accessUntil(me.organizationId),
+    deploymentOf(me.organizationId),
+  ]);
+  return {
+    // Kete Enterprise, as the organization deployed it (spec 123).
+    enterprise: deployment ? { status: deployment.status, url: deployment.url } : null,
+    tools: toolCatalog().map((tool) => ({ ...tool, accessUntil: access[tool.id] ?? null })),
+  };
 });
 
 export const fetchSecurity = createServerFn({ method: 'GET' }).handler(async () => {

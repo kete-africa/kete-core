@@ -134,6 +134,39 @@ export const userPreferences = pgTable('user_preferences', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+/** How an organization's Kete runs (spec 123; phase 11, step B3). */
+export type DeploymentMode = 'shared' | 'dedicated' | 'on_premises' | 'autonomous';
+
+/**
+ * Where an organization's Kete runs and since when (spec 123): its mode, its region, the apps
+ * beside it, and its address once ready. One per organization and product; a request in another
+ * mode is kept beside the running one until Kete's fleet makes it.
+ */
+export const deployments = pgTable(
+  'deployments',
+  {
+    id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
+    product: text('product').notNull(),
+    mode: text('mode').$type<DeploymentMode>().notNull(),
+    region: text('region').notNull(),
+    apps: text('apps').array().notNull().default([]),
+    status: text('status').$type<'requested' | 'ready'>().notNull().default('requested'),
+    url: text('url'),
+    /** Another mode asked while this one runs: Kete's fleet makes it, then it replaces this one. */
+    requestedMode: text('requested_mode').$type<DeploymentMode>(),
+    requestedBy: text('requested_by').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('deployments_one_per_product').on(table.organizationId, table.product),
+    organizationIsolation('deployments_isolation', accountApp),
+  ],
+).enableRLS();
+
 /** The Kete apps an organization can subscribe to. */
 export type KeteApp = 'firmo' | 'nettio' | 'nyatefe' | 'cockpit';
 

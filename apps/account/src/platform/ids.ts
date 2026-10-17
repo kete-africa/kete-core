@@ -7,4 +7,5 @@ export const prefixedId = prefixedIds({
   checkout: 'chk',
   subscription: 'sub',
   signInLink: 'lnk',
+  deployment: 'dpl',
 });

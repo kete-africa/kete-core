@@ -221,6 +221,27 @@ export interface MetricsDaily {
     [k: string]: number;
   };
 }
+/**
+ * This interface was referenced by `StandardEventData`'s JSON-Schema
+ * via the `definition` "DeploymentRequested".
+ */
+export interface DeploymentRequested {
+  deployment_id: string;
+  product: string;
+  mode: 'shared' | 'dedicated' | 'on_premises' | 'autonomous';
+  region: string;
+  apps: string[];
+}
+/**
+ * This interface was referenced by `StandardEventData`'s JSON-Schema
+ * via the `definition` "DeploymentReady".
+ */
+export interface DeploymentReady {
+  deployment_id: string;
+  product: string;
+  mode: 'shared' | 'dedicated' | 'on_premises' | 'autonomous';
+  url: string;
+}
 
 /**
  * An immutable fact announced by a Kete app. Facts and counters only: no names, e-mails or phone numbers.
