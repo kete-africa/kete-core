@@ -101,6 +101,9 @@
       "path": "packages/settings"
     },
     {
+      "path": "packages/tools"
+    },
+    {
       "path": "packages/infrastructure"
     },
     {

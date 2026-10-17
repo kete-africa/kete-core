@@ -1099,6 +1099,25 @@ importers:
         specifier: workspace:@kete-africa/sdk@*
         version: link:../sdk
 
+  packages/tools:
+    dependencies:
+      '@kete/capabilities':
+        specifier: workspace:@kete-africa/capabilities@*
+        version: link:../capabilities
+      '@kete/commands':
+        specifier: workspace:@kete-africa/commands@*
+        version: link:../commands
+      '@modelcontextprotocol/client':
+        specifier: 2.3.0
+        version: 2.3.0
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@modelcontextprotocol/server':
+        specifier: 2.3.0
+        version: 2.3.0
+
   packages/views:
     dependencies:
       '@kete/capabilities':
