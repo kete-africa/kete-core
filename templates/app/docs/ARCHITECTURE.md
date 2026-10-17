@@ -83,3 +83,6 @@ flowchart LR
   P -->|her preference| C[Compte Kete · PUT /api/apps/settings]
   P -->|settings:manage| K[kete_settings · journal]
 ```
+
+A command or a job reads its settings with `settingsIn(db, organizationId)` (kete-core spec 117):
+the app's layer over the organization's as one of its members last read it — never a person's own.

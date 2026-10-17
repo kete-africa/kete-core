@@ -28,7 +28,10 @@ export const Route = createFileRoute('/api/apps/settings')({
             organizationLayer(identity.organizationId ?? ''),
             personLayer(identity.userId),
           ]);
-          return Response.json({ organization, person }, { headers: noStore });
+          return Response.json(
+            { organizationId: identity.organizationId, organization, person },
+            { headers: noStore },
+          );
         } catch (error) {
           return refused(error);
         }

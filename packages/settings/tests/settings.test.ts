@@ -12,6 +12,7 @@ import {
   setSetting,
   setting,
   settingHistory,
+  settingsHere,
   settingsMigrationSql,
 } from '../src/index.js';
 
@@ -183,6 +184,25 @@ describe('the layers a product keeps', () => {
     });
   });
 
+  it('resolve where a command runs: the app’s layer over the organization’s, never a person’s', async () => {
+    const org = 'org_command_demo';
+    await inOrganization(db.app, org, async (tx) => {
+      await setSetting(tx, org, registry, {
+        layer: 'app',
+        key: 'prd_nettio.pickup_delay_hours',
+        value: 36,
+        by: 'usr_ama',
+      });
+      const here = await settingsHere(tx, registry, {
+        organization: { 'kete.currency': 'GHS', 'prd_nettio.pickup_delay_hours': 12 },
+      });
+      expect(here.value('prd_nettio.pickup_delay_hours')).toBe(36);
+      expect(here.from('prd_nettio.pickup_delay_hours')).toBe('app');
+      expect(here.value('kete.currency')).toBe('GHS');
+      expect((await settingsHere(tx, registry)).from('kete.currency')).toBe('kete');
+    });
+  });
+
   it('keeps each organization to its own settings', async () => {
     await assertOrganizationIsolation({
       app: db.app,
@@ -211,6 +231,7 @@ describe('the Compte Kete’s layers, as an app reads them', () => {
         calls.push({ url, ...(init ? { init } : {}) });
         if (init?.method === 'PUT') return Response.json({ ok: true });
         return Response.json({
+          organizationId: 'org_pressing_demo',
           organization: { 'kete.currency': 'XOF' },
           person: { 'kete.theme': 'dark' },
         });
@@ -230,6 +251,11 @@ describe('the Compte Kete’s layers, as an app reads them', () => {
     // What she chose is read again at once.
     await account.read('token-a');
     expect(calls).toHaveLength(3);
+    // The organization's layer is kept for the commands of its members, five minutes at most.
+    expect(account.organization('org_pressing_demo')).toEqual({ 'kete.currency': 'XOF' });
+    expect(account.organization('org_other')).toBeNull();
+    time += 300_000;
+    expect(account.organization('org_pressing_demo')).toBeNull();
   });
 
   it('falls back to nothing without a Compte Kete, a token or an answer', async () => {

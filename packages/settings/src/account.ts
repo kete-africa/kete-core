@@ -3,7 +3,8 @@ import { createHash } from 'node:crypto';
 // The Compte Kete's two layers, as an app reads them (spec 115, FR-006): the organization's
 // generic settings and the person's preferences, with the person's token. Kept five minutes per
 // token's hash — never the token itself. Without a Compte Kete or a token: nothing, the defaults
-// apply. Nothing here throws at the app.
+// apply. Nothing here throws at the app. The organization's layer, the same for all its members, is
+// also kept by organization, so a command with no person's token at hand reads it (spec 117).
 
 export interface AccountLayers {
   organization: Record<string, unknown>;
@@ -23,6 +24,11 @@ export interface AccountSettings {
   readonly connected: boolean;
   /** Both layers for the person whose token is given; empty layers without an answer. */
   read(token: string | null | undefined): Promise<AccountLayers>;
+  /**
+   * The organization's layer as one of its members last read it, five minutes at most: what a
+   * command or a job reads, with no person's token at hand. Null when no member read it lately.
+   */
+  organization(organizationId: string): Record<string, unknown> | null;
   /** Saves one of her preferences; it follows her in every app. */
   savePreference(
     token: string | null | undefined,
@@ -45,6 +51,7 @@ export function createAccountSettings(options: AccountSettingsOptions): AccountS
   const now = options.now ?? Date.now;
   const keep = Math.min(Math.max(options.keepSeconds ?? 300, 0), 300) * 1000;
   const cache = new Map<string, { at: number; value: AccountLayers }>();
+  const organizations = new Map<string, { at: number; value: Record<string, unknown> }>();
   const keyOf = (token: string) => createHash('sha256').update(token).digest('base64url');
 
   return {
@@ -64,7 +71,18 @@ export function createAccountSettings(options: AccountSettingsOptions): AccountS
       const value = { organization: record(body.organization), person: record(body.person) };
       if (cache.size >= LIMIT) cache.delete(cache.keys().next().value as string);
       cache.set(key, { at: now(), value });
+      if (typeof body.organizationId === 'string' && body.organizationId) {
+        if (organizations.size >= LIMIT) {
+          organizations.delete(organizations.keys().next().value as string);
+        }
+        organizations.set(body.organizationId, { at: now(), value: value.organization });
+      }
       return value;
+    },
+
+    organization(organizationId) {
+      const kept = organizations.get(organizationId);
+      return kept && now() - kept.at < keep ? kept.value : null;
     },
 
     async savePreference(token, key, value) {

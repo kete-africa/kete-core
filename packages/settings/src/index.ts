@@ -26,6 +26,7 @@ export {
   readLayers,
   setSetting,
   settingHistory,
+  settingsHere,
   settingsMigrationSql,
   type SettingsMigrationOptions,
   type StoredLayer,

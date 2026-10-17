@@ -16998,6 +16998,10 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "organizationId": {
+                      "type": "string",
+                      "description": "The organization these settings belong to: the token’s"
+                    },
                     "organization": {
                       "type": "object",
                       "additionalProperties": true,
@@ -17010,6 +17014,7 @@
                     }
                   },
                   "required": [
+                    "organizationId",
                     "organization",
                     "person"
                   ]
