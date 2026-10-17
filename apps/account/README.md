@@ -166,6 +166,11 @@ when the `kete-account` project spent its free compute hours. It was made throug
 port (`@kete/infrastructure`) with `scripts/test-database.ts`, which also bootstraps it; its two
 addresses go to a file, never to the screen.
 
+The staging Compte Kete's database is the database `account` of the Neon project
+`kete-account-staging`, made the same way on 2026-10-17 (`scripts/test-database.ts <secrets> <out>
+<project> main`), bootstrapped and migrated; its accounts and the staging apps' clients were
+registered again.
+
 Storage: each branch has a private bucket `files`. Browsers may upload only from the Compte
 Kete's origins: `ACCOUNT_STORAGE_CORS_ORIGINS="https://…" pnpm --filter @kete/account storage:cors`
 (with the `ACCOUNT_STORAGE_*` variables of that branch).
