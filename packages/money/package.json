@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/money",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Kete amounts of money: an integer count of the currency's smallest unit — added, split and rounded once, never a float, never written by a model.",
   "repository": {

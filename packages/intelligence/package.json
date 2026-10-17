@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/intelligence",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "Kete Intelligence (spec 101): a turn of the agents' runtime streamed as the contract intelligence-event.v1, and the drawer that shows it — its status, plan, each capability with its level, the words as they come, drafts, sources, « Arrêter » — the same in the center and in every app.",
   "repository": {

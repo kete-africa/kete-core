@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/boards",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Kete boards (spec 103; doctrine D-052): one object for a board looked at live, sent by a routine and frozen as a summary — its cards and places, what changed since the last summary, when the routine runs next, and the summary as a document to index by choice.",
   "repository": {

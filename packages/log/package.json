@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/log",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Kete logs: structured logs behind a port (pino), secrets and personal data redacted, every line tied to its trace, errors reported with what they happened to.",
   "repository": {
