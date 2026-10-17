@@ -1,5 +1,12 @@
 # @kete-africa/channels
 
+## 0.1.2
+
+### Patch Changes
+
+- Published on `@kete/sdk` with the deployment events (spec 123), so an app upgrading the SDK keeps
+  one copy of it.
+
 ## 0.1.1
 
 ### Patch Changes

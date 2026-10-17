@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/threads",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "Kete threads (spec 113; doctrine D-056, D-057): where people talk about one thing — born with its object, groups, direct exchanges, each person's thread with Kete — with a holder, members since when, messages never rewritten, « read by » with its date, « for action » as a holding, full-text search, and a thread exported with its journal.",
   "repository": {
