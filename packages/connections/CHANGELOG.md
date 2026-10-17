@@ -1,0 +1,11 @@
+# @kete-africa/connections
+
+## 0.1.0
+
+### Minor Changes
+
+- Connections (spec 119; phase 11, step B1): the tools an organization connects, by a key or by
+  OAuth (authorization code with PKCE, refresh — on `oauth4webapi`); credentials sealed with
+  AES-256-GCM, never returned by a reading, opened server-side for the call they serve; health
+  (`recordCheck`), revocation that wipes the credential; `kete_connections` with its RLS policy
+  and an append-only journal.
