@@ -88,3 +88,15 @@ revoke all on ${events} from ${app};
 grant select, insert on ${events} to ${app};
 `;
 }
+
+/**
+ * Where a holding opens (spec 114): the address its app gives it, read by « Pour moi ». Run after
+ * `workMigrationSql`.
+ */
+export function workLinksMigrationSql(options: Pick<WorkMigrationOptions, 'schema'> = {}): string {
+  const schema = checkIdentifier(options.schema ?? 'public');
+  return `
+alter table ${schema}.kete_holdings
+  add column href text check (href is null or length(href) between 1 and 500);
+`;
+}

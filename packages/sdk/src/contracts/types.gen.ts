@@ -409,6 +409,10 @@ export interface Holding {
    */
   state: 'held' | 'waiting' | 'done';
   /**
+   * Where it opens: an https address of the app that says it, or a path of the center. Absent: the center finds its way from the source.
+   */
+  href?: string;
+  /**
    * action: the holder must act. information: the holder is told, nothing more.
    */
   for?: 'action' | 'information';

@@ -181,6 +181,66 @@ export interface DatedFact {
   href?: string;
 }
 
+/**
+ * A thing in progress the app holds (contract `holding.v1`, kete-core spec 114): who holds it —
+ * a person of the center, or an agent —, on what, waiting on whom. The app says them all at once;
+ * the center finishes what it no longer says. Its source is the app's product.
+ */
+export interface AppHolding {
+  /** What it is in the app: `invoice`, `leave`, `ticket`. */
+  kind: string;
+  /** The app's own id of it: one holding per kind and reference. */
+  ref: string;
+  /** What it is about: a project, a party, a contract, a ticket. */
+  object: { kind: string; id: string };
+  /** As a person reads it: « Relancer Garage Bè pour la facture F-2026-0003 ». */
+  what: string;
+  holder: { kind: 'person' | 'agent'; id: string };
+  /** Who it waits for: a colleague, an agent, a party outside. */
+  waitingOn?: { kind: 'person' | 'agent' | 'party'; id: string } | null;
+  /** Since when it is in progress, ISO 8601. */
+  since?: string;
+  /** The day it is due, `2026-10-20`. */
+  due?: string;
+  /** `waiting` needs `waitingOn`. */
+  state: 'held' | 'waiting';
+  /** `information`: the holder is told, nothing more. */
+  for?: 'action' | 'information';
+  /** Where it opens: an https address of the app. */
+  href?: string;
+}
+
+/**
+ * A gesture the app is about to make, passed through the organization's policies (contract
+ * `gesture.v1`, doctrine D-058): the same for the person and for her agent.
+ */
+export interface AppGesture {
+  /** A gesture the center knows: `purchase.commit`, `contract.sign`, `assignment.make`… */
+  kind: string;
+  /** What it acts on: a project, a party, a subject. */
+  object: { kind: string; id: string };
+  amount?: { value: number; currency: string };
+  channel?: string;
+  party?: string;
+  /** What else the policies read, flat: `budgetLeft`, `authorised`, `days`. */
+  context?: Record<string, string | number | boolean>;
+  /** The agent making it for the person whose token is given. */
+  agent?: { id: string };
+}
+
+/**
+ * What the policies said. `unruled`: nothing the organization wrote speaks of it — or there is no
+ * center to ask —, the app follows its own rules. `refuse` stops the gesture, with the policies'
+ * sentences; `approve` names who approves, by relation or role, with the people found today.
+ */
+export interface GestureVerdict {
+  effect: 'allow' | 'approve' | 'refuse' | 'unruled';
+  policies: { id: string; sentence: string }[];
+  approvers: { approver: string; people: string[] }[];
+  /** Why it is unruled: `not_connected`, `signed_out`, `unreachable`, `nothing_ruled`… */
+  reason?: string;
+}
+
 export interface CenterOptions {
   /** The center's API, `https://api.enterprise.example`; empty when the app works alone. */
   url: string | null | undefined;
@@ -266,6 +326,21 @@ export interface Center {
   ): Promise<{ ok: boolean; error: string | null }>;
   /** Takes a dated fact back: it will not happen. */
   dropDatedFact(token: string | null | undefined, key: string): Promise<void>;
+  /**
+   * Says every thing the app has in progress for an organization, with the app's own token
+   * (`kete:center`): the center keeps them as holdings — in « Pour moi », relayed when their
+   * holder is away — and finishes those the app no longer says.
+   */
+  sayHoldings(
+    appToken: string | null | undefined,
+    organizationId: string,
+    holdings: readonly AppHolding[],
+  ): Promise<{ ok: true; said: number; finished: number } | { ok: false; error: string }>;
+  /**
+   * Passes a gesture through the organization's policies, for the person (or her agent) whose
+   * token is given, before the app makes it. Never throws: without an answer, `unruled`.
+   */
+  checkGesture(token: string | null | undefined, gesture: AppGesture): Promise<GestureVerdict>;
   /** Sends an indicator's reading for her quarter's review. */
   sendReading(
     token: string | null | undefined,
@@ -468,6 +543,48 @@ export function createCenter(options: CenterOptions): Center {
       if (token) await post(token, '/v1/workspace/tasks/close', { key, source: options.source });
     },
 
+    async sayHoldings(appToken, organizationId, holdings) {
+      if (!base) return { ok: false, error: 'not_connected' };
+      if (!appToken) return { ok: false, error: 'signed_out' };
+      const response = await call(`${base}/public/apps/holdings`, {
+        method: 'PUT',
+        headers: { authorization: `Bearer ${appToken}`, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          organization: organizationId,
+          product: options.product,
+          holdings: holdings.map((h) => holdingBody(options.product, h)),
+        }),
+        signal: AbortSignal.timeout(10_000),
+      }).catch(() => null);
+      if (!response) return { ok: false, error: 'unreachable' };
+      const answer = (await response.json().catch(() => ({}))) as {
+        said?: number;
+        finished?: number;
+        error?: string;
+      };
+      return response.ok
+        ? { ok: true, said: answer.said ?? 0, finished: answer.finished ?? 0 }
+        : { ok: false, error: answer.error ?? `http_${response.status}` };
+    },
+
+    async checkGesture(token, gesture) {
+      const unruled = (reason: string): GestureVerdict => ({
+        effect: 'unruled',
+        policies: [],
+        approvers: [],
+        reason,
+      });
+      if (!base) return unruled('not_connected');
+      if (!token) return unruled('signed_out');
+      const response = await post(
+        token,
+        `/v1/apps/${encodeURIComponent(options.product)}/gestures`,
+        gesture,
+      );
+      if (!response?.ok) return unruled(response ? `http_${response.status}` : 'unreachable');
+      return parseVerdict(await response.json().catch(() => null)) ?? unruled('unreadable');
+    },
+
     async sendReading(token, reading) {
       if (!base) return { ok: false, error: 'not_connected' };
       if (!token) return { ok: false, error: 'signed_out' };
@@ -514,6 +631,46 @@ export function datedFactBody(fact: DatedFact): Record<string, unknown> {
     ...(fact.partyId ? { party_id: fact.partyId } : {}),
     ...(fact.visibility ? { visibility: fact.visibility } : {}),
     ...(fact.href ? { href: fact.href } : {}),
+  };
+}
+
+/** A holding in its contract's shape (`contracts/holding.v1.schema.json`), under the app's source. */
+export function holdingBody(product: string, holding: AppHolding): Record<string, unknown> {
+  return {
+    source: { app: product, kind: holding.kind, ref: holding.ref },
+    object: holding.object,
+    what: holding.what.length > 300 ? `${holding.what.slice(0, 299)}…` : holding.what,
+    holder: holding.holder,
+    ...(holding.waitingOn ? { waiting_on: holding.waitingOn } : {}),
+    ...(holding.since ? { since: holding.since } : {}),
+    ...(holding.due ? { due: holding.due } : {}),
+    state: holding.state,
+    ...(holding.for ? { for: holding.for } : {}),
+    ...(holding.href ? { href: holding.href } : {}),
+  };
+}
+
+const EFFECTS = new Set(['allow', 'approve', 'refuse', 'unruled']);
+
+/** The center's verdict, checked: anything else counts as no answer. */
+function parseVerdict(value: unknown): GestureVerdict | null {
+  const v = (value as { verdict?: Record<string, unknown> } | null)?.verdict;
+  if (!v || typeof v.effect !== 'string' || !EFFECTS.has(v.effect)) return null;
+  const policies = (Array.isArray(v.policies) ? v.policies : []).flatMap((p: unknown) => {
+    const { id, sentence } = (p ?? {}) as { id?: unknown; sentence?: unknown };
+    return typeof id === 'string' && typeof sentence === 'string' ? [{ id, sentence }] : [];
+  });
+  const approvers = (Array.isArray(v.approvers) ? v.approvers : []).flatMap((a: unknown) => {
+    const { approver, people } = (a ?? {}) as { approver?: unknown; people?: unknown };
+    return typeof approver === 'string' && Array.isArray(people)
+      ? [{ approver, people: people.filter((p): p is string => typeof p === 'string') }]
+      : [];
+  });
+  return {
+    effect: v.effect as GestureVerdict['effect'],
+    policies,
+    approvers,
+    ...(typeof v.reason === 'string' ? { reason: v.reason } : {}),
   };
 }
 

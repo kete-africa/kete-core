@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { inOrganization } from '@kete/tenancy';
 import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '@kete/testing';
-import { getHolding, workMigrationSql } from '@kete/work';
+import { getHolding, workLinksMigrationSql, workMigrationSql } from '@kete/work';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   closeThread,
@@ -30,6 +30,7 @@ beforeAll(async () => {
   db = await createTestSchema({
     migrate: async (owner, { schema, appRole }) => {
       await owner.query(workMigrationSql({ schema, appRole }));
+      await owner.query(workLinksMigrationSql({ schema }));
       await owner.query(threadsMigrationSql({ schema, appRole }));
     },
   });

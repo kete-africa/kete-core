@@ -2,6 +2,7 @@
 export { taskCapabilities } from './capabilities';
 export { taskDatasets } from './datasets';
 export { taskEvents } from './events';
+export { taskHoldings } from './holdings';
 export { taskPermissions } from './policies';
 export { tasksMigrationSql } from './infrastructure/task.table';
 export type { Task } from './task.record';

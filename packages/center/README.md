@@ -113,3 +113,42 @@ await center.dropDatedFact(token, 'leave-kossi'); // it will not happen
 
 - Exactly one of `day` and `startsAt`; a fact said again under its key replaces itself.
 - What clashes and what is free is computed by `@kete/time`, never guessed.
+
+## Holdings and policies (spec 114)
+
+The center holds every thing in progress with its holder, and decides every gesture with one
+policy engine (doctrine D-056, D-058). An app says what it holds, and passes its gestures through
+the same policies as the center's own.
+
+```ts
+// Every open thing in progress, at once, with the app's own token: the center finishes the rest.
+await center.sayHoldings(appToken, organizationId, [
+  {
+    kind: 'invoice',
+    ref: 'F-2026-0003',
+    object: { kind: 'project', id: 'prj_garage_be' },
+    what: 'Encaisser la facture F-2026-0003',
+    holder: { kind: 'person', id: 'usr_abla' },
+    waitingOn: { kind: 'party', id: 'pty_garage_be' },
+    due: '2026-10-30',
+    state: 'waiting',
+    href: 'https://finance.example/ventes/factures/F-2026-0003',
+  },
+]);
+
+// Before the gesture, with the person's token (and her agent's id when it acts for her).
+const verdict = await center.checkGesture(token, {
+  kind: 'purchase.commit',
+  object: { kind: 'project', id: 'prj_garage_be' },
+  amount: { value: 700_000, currency: 'XOF' },
+  context: { budgetLeft: 450_000 },
+});
+if (verdict.effect === 'refuse') throw refused(verdict.policies.map((p) => p.sentence));
+```
+
+- `allow`: the organization allows it as it stands; `approve`: `approvers` says who, by relation
+  or role (`manager`, `project.holder`, `role:…`), with the people found today; `refuse`: the
+  policies' sentences say why; `unruled`: nothing the organization wrote speaks of it — or no
+  center answered (`reason`) — and the app follows its own rules.
+- A holding's source is the app's product; `waiting` needs `waitingOn`; `holdingBody` gives the
+  contract's shape (`contracts/holding.v1.schema.json`).

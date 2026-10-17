@@ -1,4 +1,4 @@
-import type { DatedFact } from '@kete/sdk';
+import type { DatedFact, Holding as SaidHolding } from '@kete/sdk';
 import { inOrganization } from '@kete/tenancy';
 import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '@kete/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -18,6 +18,8 @@ import {
   relayAbsences,
   relayTarget,
   sayHolding,
+  syncSource,
+  workLinksMigrationSql,
   workMigrationSql,
   type Structure,
 } from '../src/index.js';
@@ -30,6 +32,7 @@ beforeAll(async () => {
   db = await createTestSchema({
     migrate: async (owner, { schema, appRole }) => {
       await owner.query(workMigrationSql({ schema, appRole }));
+      await owner.query(workLinksMigrationSql({ schema }));
     },
   });
 });
@@ -140,6 +143,51 @@ describe('open holdings', () => {
         'holding.created',
         'holding.done',
       ]);
+    });
+  });
+});
+
+describe('a source in step (spec 114)', () => {
+  const finance = (ref: string, extra: Record<string, unknown> = {}) =>
+    ({
+      ...said(ref),
+      source: { app: 'prd_kete_finance', kind: 'invoice', ref },
+      href: `https://finance.example/sales/invoice?id=${ref}`,
+      ...extra,
+    }) as SaidHolding;
+
+  it('says what changed, finishes what it no longer says, keeps who stands in', async () => {
+    const org = fresh();
+    await inOrganization(db.app, org, async (tx) => {
+      const app = 'prd_kete_finance';
+      expect(await syncSource(tx, org, { app, said: [finance('F-1'), finance('F-2')] })).toEqual({
+        said: 2,
+        finished: 0,
+      });
+      const [first] = await openHoldings(tx, { app });
+      expect(first?.href).toBe('https://finance.example/sales/invoice?id=F-1');
+      // Said again unchanged: nothing moves.
+      expect(await syncSource(tx, org, { app, said: [finance('F-1'), finance('F-2')] })).toEqual({
+        said: 0,
+        finished: 0,
+      });
+      // Kossi is away: the relay gave F-1 to Yao; the app still names Kossi, Yao keeps it.
+      await relayAbsences(tx, org, {
+        structure,
+        absences: [absence('usr_kossi', '2026-10-23')],
+        now: new Date('2026-10-23T07:00:00Z'),
+      });
+      const result = await syncSource(tx, org, {
+        app,
+        said: [finance('F-1', { state: 'waiting', waiting_on: { kind: 'party', id: 'pty_be' } })],
+      });
+      expect(result).toEqual({ said: 1, finished: 1 });
+      const open = await openHoldings(tx, { app });
+      expect(open).toHaveLength(1);
+      expect(open[0]).toMatchObject({ holder: yao, state: 'waiting' });
+      await expect(
+        syncSource(tx, org, { app, said: [said('Q-9') as SaidHolding] }),
+      ).rejects.toThrow(/said as/);
     });
   });
 });
