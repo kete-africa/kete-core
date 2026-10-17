@@ -107,6 +107,9 @@
       "path": "packages/connections"
     },
     {
+      "path": "packages/metering"
+    },
+    {
       "path": "packages/threads"
     },
     {

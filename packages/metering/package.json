@@ -1,0 +1,37 @@
+{
+  "name": "@kete-africa/metering",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Kete metering (spec 120; doctrine D-059; phase 11, step B1): who consumed what and how much — a model's tokens, a sandbox's minutes, a deployment — each figure said known, estimated or unavailable, never a guess passed off as a count.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/metering"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@kete/records": "workspace:@kete-africa/records@*",
+    "@kete/tenancy": "workspace:@kete-africa/tenancy@*"
+  },
+  "devDependencies": {
+    "@kete/testing": "workspace:@kete-africa/testing@*"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}
