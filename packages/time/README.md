@@ -64,3 +64,25 @@ await agenda.read({ from: '2026-10-12', to: '2026-10-18' }); // « busy » facts
 `nextRun(routine, after, offsetMinutes)`: when a routine runs next — every day, working day, week on a
 day or month on a date, at a time of the organization's day. A board's routine (`@kete/boards`)
 and an agent's triggers (`@kete/lifecycle`) both use it.
+
+## The organization's calendar (spec 118)
+
+Working days, hours and holidays as the organization — or a site, a subsidiary — set them in
+Kete's settings (`kete.working_days`, `kete.working_hours`, `kete.holidays`; spec 115):
+
+```ts
+import { addWorkingDays, calendarFrom, workdayOf, workingDaysBetween } from '@kete/time';
+
+const calendar = calendarFrom(await settingsIn(db, organizationId)); // @kete/settings
+workingDaysBetween('2026-11-02', '2026-11-06', calendar); // 4: Monday 2 is a holiday
+addWorkingDays('2026-10-30', 1, calendar); // '2026-11-03'
+freeSlots({ ...options, workday: workdayOf(calendar) }); // the planner on the same calendar
+```
+
+```mermaid
+flowchart LR
+  S[settings · working days, hours, holidays] --> C[calendarFrom]
+  C --> B[workingDaysBetween · a leave, a delay]
+  C --> A[addWorkingDays · a due day]
+  C --> W[workdayOf · freeSlots, proposeBlocks]
+```

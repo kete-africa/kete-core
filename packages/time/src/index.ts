@@ -1,4 +1,15 @@
 // The public entry point of @kete/time. Anything not exported here is internal.
+export {
+  addWorkingDays,
+  calendarFrom,
+  defaultCalendar,
+  holidayOn,
+  isWorkingDay,
+  workdayOf,
+  workingDaysBetween,
+  type CalendarSettings,
+  type OrganizationCalendar,
+} from './calendar.js';
 export { icsAgenda, icsFact, parseIcs, type AgendaSource, type IcsEvent } from './agenda.js';
 export {
   DAY,
