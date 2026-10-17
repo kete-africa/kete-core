@@ -6,7 +6,8 @@ import { migrations } from '../db/migrations';
 import { taskHoldings } from '../src/features/tasks';
 import { transaction, usePool } from '../src/platform/db';
 import { passGesture, sentencesOf } from '../src/platform/policies';
-import { settingRows, settingsFrom } from '../src/platform/settings';
+import { setSetting } from '@kete/settings';
+import { settingRows, settingsFrom, settingsIn, settingsRegistry } from '../src/platform/settings';
 
 // Kete-core spec 114: the app says what it holds to its center and passes its gestures through
 // the organization's policies.
@@ -130,5 +131,22 @@ describe('the app’s settings (spec 115)', () => {
     expect(row(member, 'kete.theme')).toMatchObject({ label: 'Theme' });
     expect(row(member, 'kete.theme')?.editable).toBeUndefined();
     expect(row(member, 'kete.currency')?.editable).toBeUndefined();
+  });
+
+  it('are read where a command runs, from the app’s layer, with no person at hand (spec 117)', async () => {
+    const currency = await transaction('org_acme', async (tx) => {
+      await setSetting(tx, 'org_acme', settingsRegistry, {
+        layer: 'app',
+        key: 'kete.currency',
+        value: 'GHS',
+        by: 'usr_ama',
+      });
+      return (await settingsIn(tx, 'org_acme')).value('kete.currency');
+    });
+    expect(currency).toBe('GHS');
+    const elsewhere = await transaction('org_other', async (tx) =>
+      (await settingsIn(tx, 'org_other')).value('kete.currency'),
+    );
+    expect(elsewhere).toBe('XOF');
   });
 });

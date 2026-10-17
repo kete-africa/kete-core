@@ -17,6 +17,7 @@ import {
   readLayers,
   resolve,
   setting,
+  settingsHere,
 } from '@kete/settings';
 import { z } from 'zod';
 
@@ -38,6 +39,12 @@ const kept = await readLayers(tx, { entityIds: ['unt_be'] }); // this product's 
 const settings = resolve(registry, { organization, person, ...kept });
 settings.value('prd_nettio.pickup_delay_hours'); // 24 at the site of Bè
 settings.from('kete.locale'); // 'person'
+
+// In a command, with no person's token at hand (spec 117):
+const here = await settingsHere(tx, registry, {
+  organization: account.organization(organizationId),
+});
+here.value('kete.currency');
 ```
 
 ## What it does
@@ -49,6 +56,7 @@ settings.from('kete.locale'); // 'person'
 | `resolve`                                  | Each value with the layer it comes from. A stored value out of its schema, or on a layer its declaration does not allow, is skipped.                                                                                |
 | `settingsMigrationSql`                     | `kete_settings` (the app's layer and each entity's) with its RLS policy, and `kete_setting_events`, append-only.                                                                                                    |
 | `setSetting`, `clearSetting`, `readLayers` | Set a value checked against its layer and schema, take it back to its inheritance, read the layers kept here. Every change is journaled; the caller checks rights.                                                  |
+| `settingsHere`                             | The settings where a command or a job runs, in its transaction: the app's and the entities' layers over the organization's as a member last read it (`AccountSettings.organization`); never a person's.             |
 | `settingHistory`                           | Who changed a setting, from what to what, when.                                                                                                                                                                     |
 | `createAccountSettings`                    | The Compte Kete's two layers with the person's token (`GET /api/apps/settings`), and her preference saved there (`PUT`) so it follows her in every app.                                                             |
 

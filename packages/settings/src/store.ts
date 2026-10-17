@@ -1,6 +1,7 @@
 import { newId } from '@kete/records';
 import { ACTIVE_ORGANIZATION_SQL, type SqlExecutor } from '@kete/tenancy';
 import type { SettingsRegistry } from './declare.js';
+import { resolve, type Resolved } from './resolve.js';
 
 // The layers a product keeps itself (spec 115, FR-004): the app's, and each legal entity's or
 // unit's, with their RLS policy in the same migration and an append-only journal of every change.
@@ -217,4 +218,24 @@ export async function settingHistory(
     by: r.by,
     at: new Date(r.at),
   }));
+}
+
+/**
+ * The settings where a command or a job runs, in the active organization (spec 117): the app's
+ * layer and its entities' kept here, over the organization's layer when it is known — from
+ * `AccountSettings.organization`. Kete's defaults otherwise; never a person's own.
+ */
+export async function settingsHere(
+  db: SqlExecutor,
+  registry: SettingsRegistry,
+  input: {
+    organization?: Readonly<Record<string, unknown>> | null;
+    entityIds?: readonly string[];
+  } = {},
+): Promise<Resolved> {
+  const kept = await readLayers(db, input.entityIds ? { entityIds: input.entityIds } : {});
+  return resolve(registry, {
+    ...(input.organization ? { organization: input.organization } : {}),
+    ...kept,
+  });
 }

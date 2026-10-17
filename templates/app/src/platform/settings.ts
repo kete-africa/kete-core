@@ -5,11 +5,13 @@ import {
   keteSettings,
   readLayers,
   resolve,
+  settingsHere,
   type AccountLayers,
   type Resolved,
   type SettingDeclaration,
 } from '@kete/settings';
 import type { SettingRow } from '@kete/shell';
+import type { SqlExecutor } from '@kete/tenancy';
 import { transaction } from './db';
 import { personOf, tokenOf } from './session';
 
@@ -103,6 +105,17 @@ export function settingRows(
       ...(editable ? { editable } : {}),
       layers: d.layers,
     };
+  });
+}
+
+/**
+ * The settings where a command or a job runs (kete-core spec 117), inside its organization's
+ * transaction: the app's layer over the organization's as a member last read it — a currency, a
+ * delay — never a person's own. `(await settingsIn(db, organizationId)).value('kete.currency')`.
+ */
+export function settingsIn(db: SqlExecutor, organizationId: string): Promise<Resolved> {
+  return settingsHere(db, settingsRegistry, {
+    organization: accountSettings().organization(organizationId),
   });
 }
 

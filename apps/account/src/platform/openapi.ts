@@ -241,6 +241,10 @@ export const accountPaths: Record<string, Schema> = {
           {
             type: 'object',
             properties: {
+              organizationId: {
+                type: 'string',
+                description: 'The organization these settings belong to: the token’s',
+              },
               organization: {
                 type: 'object',
                 additionalProperties: true,
@@ -252,7 +256,7 @@ export const accountPaths: Record<string, Schema> = {
                 description: 'Settings by their key (`kete.locale`…), only those set',
               },
             },
-            required: ['organization', 'person'],
+            required: ['organizationId', 'organization', 'person'],
           },
           'Both layers',
         ),
