@@ -218,6 +218,9 @@ importers:
       '@hono/node-server':
         specifier: ^1.19.5
         version: 1.19.17(hono@4.13.12)
+      '@kete/infrastructure':
+        specifier: workspace:@kete-africa/infrastructure@*
+        version: link:../../packages/infrastructure
       '@kete/jobs':
         specifier: workspace:@kete-africa/jobs@*
         version: link:../../packages/jobs
@@ -726,6 +729,16 @@ importers:
       drizzle-orm:
         specifier: ^0.45.3
         version: 0.45.3(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(kysely@0.29.6)(pg@8.23.0)
+
+  packages/infrastructure:
+    dependencies:
+      pg:
+        specifier: ^8.23.0
+        version: 8.23.0
+    devDependencies:
+      '@types/pg':
+        specifier: ^8.23.1
+        version: 8.23.1
 
   packages/intelligence:
     dependencies:

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.5",
+    "@kete/infrastructure": "workspace:@kete-africa/infrastructure@*",
     "@kete/jobs": "workspace:@kete-africa/jobs@*",
     "@kete/sandbox": "workspace:@kete-africa/sandbox@*",
     "@kete/sdk": "workspace:@kete-africa/sdk@*",

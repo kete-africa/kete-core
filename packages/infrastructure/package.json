@@ -1,0 +1,36 @@
+{
+  "name": "@kete-africa/infrastructure",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Kete infrastructure (spec 121; doctrine D-059; phase 11, step B1): the provisioning port — a database and a hosted app — with its adapters, and an instance created, deployed and destroyed through the port alone, undoing what it made when a step fails.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/infrastructure"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  }
+}
