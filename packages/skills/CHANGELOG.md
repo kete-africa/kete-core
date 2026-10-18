@@ -1,5 +1,11 @@
 # @kete-africa/skills
 
+## 0.1.2
+
+### Patch Changes
+
+- Published again on the current `@kete-africa/ai` and `@kete-africa/agents`.
+
 ## 0.1.1
 
 ### Patch Changes

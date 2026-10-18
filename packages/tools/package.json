@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/tools",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "type": "module",
   "description": "Kete tools (spec 124; doctrine D-060, step C4): an organization's own tools — described by OpenAPI or served by a remote MCP server — imported as capabilities its agents use under the same rules: reading alone, acting as a draft a person decides, destroying only with her confirmation.",
   "repository": {
