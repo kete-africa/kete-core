@@ -6,6 +6,7 @@ import { tool, type LanguageModel, type ModelMessage } from 'ai';
 import { z } from 'zod';
 import type { AgentConversations } from './conversations.js';
 import { memoryInstructions, type AgentMemory } from './memory.js';
+import { outsideTurn, type OutsideTurn } from './outside.js';
 
 // A turn of an agent (spec 089, decision 0010). The loop — model, tools, steps, stream — is the
 // runtime's; what makes it a Kete agent stays here and is small: its only tools are the
@@ -122,14 +123,13 @@ function modelId(model: LanguageModel): string {
   return typeof model === 'string' ? model : `${model.provider}:${model.modelId}`;
 }
 
-/** What a capability that acts at once answers once outside content is in the turn. */
-export const WAITS_FOR_A_PERSON =
-  'Not run: this turn read content from outside the organization, so this gesture waits for a person to do it or ask for it herself.';
+export { WAITS_FOR_A_PERSON } from './outside.js';
 
-/** Whether outside content entered the turn: from the start, or from a tool that brought some. */
-interface TurnState {
-  tainted: boolean;
-}
+/** Whether outside content entered the turn, and the addresses it gave (spec 134). */
+type TurnState = OutsideTurn;
+
+const watchOf = (turn: AgentTurn): TurnState =>
+  outsideTurn({ tools: turn.outside?.tools ?? [], tainted: turn.outside?.input === true });
 
 /** A delegated task's answer, as the agent that delegated reads it. */
 async function delegate(
@@ -139,7 +139,6 @@ async function delegate(
   state: TurnState,
 ): Promise<InvocationResult> {
   const allowed = new Set(sub.tools);
-  const inner: TurnState = { tainted: state.tainted };
   const subTurn: AgentTurn = {
     agent: `${turn.agent}/${sub.name}`,
     name: sub.name,
@@ -152,8 +151,8 @@ async function delegate(
     ...(turn.outside?.tools ? { outside: { tools: turn.outside.tools } } : {}),
     ...(turn.abortSignal ? { abortSignal: turn.abortSignal } : {}),
   };
-  const answer = await generate(subTurn, inner);
-  if (inner.tainted) state.tainted = true;
+  // The sub-agent shares the turn's watch: what it reads counts for the agent that delegated.
+  const answer = await generate(subTurn, state);
   return {
     status: 'done',
     output: {
@@ -170,7 +169,6 @@ async function delegate(
 const taskInput = z.object({ task: z.string().min(1).max(4000) });
 
 function agentOf(turn: AgentTurn, state: TurnState): Agent {
-  const bringsOutside = new Set(turn.outside?.tools ?? []);
   const delegations = Object.fromEntries(
     (turn.subAgents ?? []).map((sub) => [
       `delegate_${sub.name}`,
@@ -188,12 +186,12 @@ function agentOf(turn: AgentTurn, state: TurnState): Agent {
         description: capability.description,
         inputSchema: capability.input,
         execute: async (input: unknown): Promise<InvocationResult> => {
-          // Levels 3 and 4 only prepare: a person decides them. Level 2 acts at once: not here.
-          if (state.tainted && capability.autonomy === 2) {
-            return { status: 'confirmation_required', message: WAITS_FOR_A_PERSON };
-          }
+          // Levels 3 and 4 only prepare: a person decides them. What acts at once or could carry
+          // data out waits once outside content is in the turn.
+          const waits = state.before(capability, input);
+          if (waits) return waits;
           const result = await capability.execute(input);
-          if (bringsOutside.has(capability.name)) state.tainted = true;
+          state.after(capability, result);
           return result;
         },
       }),
@@ -245,7 +243,7 @@ const usageOf = (
  * when a budget of the call is spent — no model is called then.
  */
 export function runAgent(turn: AgentTurn): Promise<AgentAnswer> {
-  return generate(turn, { tainted: turn.outside?.input === true });
+  return generate(turn, watchOf(turn));
 }
 
 async function generate(turn: AgentTurn, state: TurnState): Promise<AgentAnswer> {
@@ -269,10 +267,7 @@ async function generate(turn: AgentTurn, state: TurnState): Promise<AgentAnswer>
 export async function* streamAgent(turn: AgentTurn): AsyncGenerator<AgentEvent> {
   try {
     await turn.metering?.store.check(turn.metering.context);
-    const stream = await agentOf(turn, { tainted: turn.outside?.input === true }).stream(
-      turn.messages,
-      optionsOf(turn),
-    );
+    const stream = await agentOf(turn, watchOf(turn)).stream(turn.messages, optionsOf(turn));
     let steps = 0;
     for await (const part of stream.fullStream) {
       if (part.type === 'text-delta') {

@@ -8,6 +8,7 @@ import {
   connectMcp,
   inputOf,
   isPublicIp,
+  publicLookup,
   reachable,
   TOOL_CALL_DRAFT,
   toolCapabilities,
@@ -256,6 +257,13 @@ describe('a remote MCP server, over HTTP', () => {
 });
 
 describe('the public internet only', () => {
+  it('refuses, at the moment of connecting, a name that resolves to a private address (spec 134)', async () => {
+    const error = await new Promise<NodeJS.ErrnoException | null>((resolve) =>
+      publicLookup('localhost', {}, (failed) => resolve(failed)),
+    );
+    expect(error?.code).toBe('ENOTPUBLIC');
+  });
+
   it('refuses loopback, private, link-local and plain http addresses', async () => {
     expect(
       ['127.0.0.1', '10.1.2.3', '172.20.0.1', '192.168.1.1', '169.254.169.254'].map(isPublicIp),

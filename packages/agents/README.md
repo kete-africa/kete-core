@@ -160,7 +160,10 @@ await agentConversations({ pool, organizationId }).eraseAll(userId);
 Words nobody of the organization wrote — a message from a stranger, an e-mail, a web page, a
 document dropped in — may carry instructions. Once such words are in a turn, a capability that
 **acts at once** (level 2) is not run: it answers `confirmation_required`, and waits for a person.
-What only prepares (levels 3 and 4) is prepared as always, since a person decides it.
+What only prepares (levels 3 and 4) is prepared as always, since a person decides it. Nothing that
+could carry the organization's data out runs either (spec 134): the agent's computer waits, and a
+page is read only at an address the outside content gave — a search's source, never one the agent
+made up, where data could hide (`outsideTurn`, shared by an agent and its sub-agents).
 
 ```ts
 await runAgent({

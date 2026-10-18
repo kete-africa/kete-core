@@ -18,6 +18,7 @@
     "@kete/capabilities": "workspace:@kete-africa/capabilities@*",
     "@kete/commands": "workspace:@kete-africa/commands@*",
     "@modelcontextprotocol/client": "2.3.0",
+    "undici": "^7.30.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
