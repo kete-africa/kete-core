@@ -51,7 +51,9 @@ async function refusal(promise: Promise<unknown>): Promise<string> {
 
 async function eventsOf(organizationId: string) {
   const { rows } = await owner.query<{ envelope: { type: string; data: Record<string, unknown> } }>(
-    'select envelope from kete_outbox where organization_id = $1 order by created_at',
+    // Written in one transaction, a request and its readiness share their instant: the request first.
+    `select envelope from kete_outbox where organization_id = $1
+      order by created_at, (envelope->>'type') = 'deployment.ready'`,
     [organizationId],
   );
   return rows.map((r) => r.envelope).filter((e) => e.type.startsWith('deployment.'));
