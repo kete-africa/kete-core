@@ -93,11 +93,39 @@ export function coolify(options: CoolifyOptions): Hosting {
       for (const [key, value] of Object.entries(build)) await put(key, value, true);
     },
     async deploy(id) {
-      await call('POST', `/deploy?uuid=${encodeURIComponent(id)}`);
+      const answer = await call<{ deployments?: { deployment_uuid?: string }[] }>(
+        'POST',
+        `/deploy?uuid=${encodeURIComponent(id)}`,
+      );
+      return answer?.deployments?.[0]?.deployment_uuid ?? null;
+    },
+    async deployment(deploymentId) {
+      const found = await call<{ status?: string }>(
+        'GET',
+        `/deployments/${encodeURIComponent(deploymentId)}`,
+        undefined,
+        true,
+      );
+      const word = (found?.status ?? '').toLowerCase();
+      if (word === 'finished') return 'done';
+      if (word === 'failed' || word.startsWith('cancelled')) return 'failed';
+      return 'pending';
     },
     async status(id) {
       const app = await call<{ status?: string }>('GET', `/applications/${id}`, undefined, true);
       return app ? hostedStatusOf(app.status) : 'unknown';
+    },
+    async version(id) {
+      const app = await call<{ git_commit_sha?: string }>('GET', `/applications/${id}`);
+      const sha = app?.git_commit_sha?.trim();
+      // Coolify says HEAD for an application that follows its branch.
+      return !sha || sha === 'HEAD' ? null : sha;
+    },
+    async pin(id, version) {
+      await call('PATCH', `/applications/${id}`, { git_commit_sha: version ?? 'HEAD' });
+    },
+    async restart(id) {
+      await call('POST', `/applications/${encodeURIComponent(id)}/restart`);
     },
     async destroy(id) {
       await call(

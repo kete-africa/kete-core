@@ -3,7 +3,14 @@
 export { coolify, hostedStatusOf, type CoolifyOptions } from './coolify.js';
 export { memoryInfrastructure, type MemoryInfrastructure } from './memory.js';
 export { neon, type NeonOptions } from './neon.js';
-export type { Databases, HostedStatus, Hosting, ProvisioningPorts } from './ports.js';
+export {
+  backupInstance,
+  restoreInstance,
+  updateInstances,
+  type OperateOptions,
+  type UpdateReport,
+} from './operate.js';
+export type { Backup, Databases, HostedStatus, Hosting, ProvisioningPorts } from './ports.js';
 export {
   destroyInstance,
   provisionInstance,
