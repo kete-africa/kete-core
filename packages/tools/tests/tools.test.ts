@@ -1,3 +1,4 @@
+import { createCapabilityRegistry } from '@kete/capabilities';
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
@@ -183,9 +184,21 @@ describe('imported tools as capabilities', () => {
       ['crm_delete_contact', 4, 'tools:act'],
     ]);
     const create = capabilities[1];
-    expect(create && 'draft' in create && create.draft.recordType).toBe(TOOL_CALL_DRAFT);
+    expect(create && 'draft' in create && create.draft.recordType).toBe(
+      `${TOOL_CALL_DRAFT}.crm_create_contact`,
+    );
     expect(create && 'command' in create && create.command.name).toBe('crm-create-contact');
     expect(capabilities.every((c) => c.classification === 'confidential')).toBe(true);
+  });
+
+  it('register together: each act and destruction prepares drafts of its own', () => {
+    const registry = createCapabilityRegistry(capabilities, {
+      authorize: async () => true,
+      transaction: async () => {
+        throw new Error('not called');
+      },
+    });
+    expect(registry.describeAll().map((c) => c.name)).toHaveLength(4);
   });
 
   it('check their input, and read through the connection', async () => {

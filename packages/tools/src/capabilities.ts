@@ -12,8 +12,12 @@ import type { ImportedTool } from './tool.js';
 // the product (level 4). Every call goes through the host's gesture: its permission, its
 // policies, its journal.
 
-/** The record type of an imported tool's draft: the call a person is asked to make. */
+/** The record type of an imported tool's drafts: the call a person is asked to make. */
 export const TOOL_CALL_DRAFT = 'imported_tool_call';
+
+/** One record type per tool: a registry finds a draft's capability by its record type. */
+export const toolCallDraft = (tool: Pick<ImportedTool, 'name'>): string =>
+  `${TOOL_CALL_DRAFT}.${tool.name}`;
 
 export interface ToolCapabilitiesOptions {
   /** Calls the tool server-side, with the organization's connection. */
@@ -76,7 +80,7 @@ export function toolCapabilities(
       permission: permissions.act,
       autonomy: tool.effect === 'destroy' ? 4 : 3,
       command,
-      draft: { recordType: TOOL_CALL_DRAFT },
+      draft: { recordType: toolCallDraft(tool) },
     });
   }) as CapabilityDefinition[];
 }

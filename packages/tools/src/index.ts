@@ -3,6 +3,7 @@
 export {
   inputOf,
   TOOL_CALL_DRAFT,
+  toolCallDraft,
   toolCapabilities,
   type ToolCapabilitiesOptions,
 } from './capabilities.js';
