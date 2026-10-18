@@ -162,7 +162,35 @@ export const keteSettings = [
     group: 'calendar',
     label: { fr: 'Jours fériés', en: 'Holidays' },
   }),
+  // What the organization's agents may do beyond Kete (spec 129): off until it says so.
+  setting({
+    key: 'kete.agent_abilities',
+    schema: z.array(z.enum(['web', 'computer'])).max(2),
+    default: [],
+    layers: ['app', 'entity'],
+    permission: 'organization:settings',
+    sensitivity: 'public',
+    group: 'agents',
+    label: { fr: 'Ce que les agents font au-delà de Kete', en: 'What agents do beyond Kete' },
+    description: {
+      fr: 'Le web : chercher et lire des pages publiques — la question sort de l’organisation. Un ordinateur : un poste isolé, sans vos données ni vos secrets.',
+      en: 'The web: search and read public pages — the question leaves the organization. A computer: an isolated machine, without your data or secrets.',
+    },
+    choices: {
+      web: { fr: 'Chercher et lire sur le web', en: 'Search and read the web' },
+      computer: { fr: 'Travailler sur un ordinateur à eux', en: 'Work on a computer of their own' },
+    },
+  }),
   // The person's own.
+  setting({
+    key: 'kete.spoken_answers',
+    schema: z.boolean(),
+    default: false,
+    layers: ['person', 'device'],
+    sensitivity: 'public',
+    group: 'agents',
+    label: { fr: 'Lire les réponses à voix haute', en: 'Read answers aloud' },
+  }),
   setting({
     key: 'kete.theme',
     schema: z.enum(['dark', 'light', 'auto']),

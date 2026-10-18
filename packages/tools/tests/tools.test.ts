@@ -7,6 +7,8 @@ import {
   callOpenApi,
   connectMcp,
   inputOf,
+  isPublicIp,
+  reachable,
   TOOL_CALL_DRAFT,
   toolCapabilities,
   toolsFromMcp,
@@ -250,5 +252,20 @@ describe('a remote MCP server, over HTTP', () => {
     });
     expect(new Set(authorization)).toEqual(new Set(['Bearer secret-of-the-connection']));
     await client.close();
+  });
+});
+
+describe('the public internet only', () => {
+  it('refuses loopback, private, link-local and plain http addresses', async () => {
+    expect(
+      ['127.0.0.1', '10.1.2.3', '172.20.0.1', '192.168.1.1', '169.254.169.254'].map(isPublicIp),
+    ).toEqual([false, false, false, false, false]);
+    expect(['::1', 'fd00::1', '::ffff:10.0.0.1'].map(isPublicIp)).toEqual([false, false, false]);
+    expect(isPublicIp('102.176.0.1')).toBe(true);
+    expect(await reachable('https://127.0.0.1/openapi.json')).toBe(false);
+    expect(await reachable('https://[::1]/mcp')).toBe(false);
+    expect(await reachable('https://localhost/mcp')).toBe(false);
+    expect(await reachable('http://102.176.0.1/')).toBe(false);
+    expect(await reachable('https://102.176.0.1/')).toBe(true);
   });
 });

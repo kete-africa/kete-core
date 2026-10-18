@@ -36,6 +36,12 @@ const capabilities = toolCapabilities(tools, {
 // registered with the product's own: the same gesture, permission, policies and journal.
 ```
 
+## The public internet only (spec 129)
+
+`publicFetch` is the fetch every import and every call should use: an `https` address whose every
+resolved IP is public (`reachable`, `isPublicIp`), no redirection, a timeout and a bounded answer.
+Nobody uses Kete to reach a company's private network or the instance's own.
+
 ## Guarantees
 
 - **The same rules as the product's own**: a read (`GET`, an MCP tool marked read-only) runs

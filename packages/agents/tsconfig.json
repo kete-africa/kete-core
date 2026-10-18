@@ -17,7 +17,13 @@
       "path": "../records"
     },
     {
+      "path": "../sandbox"
+    },
+    {
       "path": "../tenancy"
+    },
+    {
+      "path": "../tools"
     },
     {
       "path": "../testing"

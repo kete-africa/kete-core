@@ -682,6 +682,19 @@ What Kete needs to sell, deploy and watch itself, built as autonomous modules ev
 Every app, Pono and the Cockpit included, ships with Kete Intelligence inside and its public demo
 (principles 8 and 9).
 
+### Delivered so far (KYA's path, D-060)
+
+| Step | Specs          | Delivers                                                                                                                                 |
+| ---- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| A6   | `115` to `118` | Settings in layers, « Réglages » in every app, settings where a command runs, the organization's calendar                                |
+| B1   | `119` to `121` | `@kete/connections`, `@kete/metering`, `@kete/infrastructure` (a test instance created and destroyed through the port alone)             |
+| B3   | `123`          | Mon Kete: an organization deploys its Kete Enterprise itself                                                                             |
+| B2   | `125`          | The Compte Kete's fleet API; Kete Cockpit's « Flotte » reads and makes the deployments                                                   |
+| C4   | `124`, `129`   | Imported tools (OpenAPI, remote MCP); web search and reading, a computer of its own, sub-agents, answers said aloud — under the policies |
+
+Still open here: backups restored through the port and an update pushed to two instances (B2), phone
+calls with an agent (after decision 0012), billing (B4, after KYA's test).
+
 ### Proof
 
 - `[agent]` A test instance created, backed up, restored and destroyed through the provisioning port

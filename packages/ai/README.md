@@ -103,6 +103,29 @@ const port = dictation(transcriptionModel({ provider: 'mistral', model: 'voxtral
 const { text } = await port.dictate(audio);
 ```
 
+## Said aloud, and the web searched (spec 129)
+
+**Speech**: an answer said aloud through one port, any speech model of the AI SDK — OpenAI's, or
+Mistral's Voxtral (open weights). `sayable` keeps what a voice says — no links' addresses, no code —
+and cuts a long answer at a sentence; the budget is checked before and the call counted after.
+
+**Web search**: the model provider's own search tool (OpenAI's, Anthropic's), so no search
+service nor account is added; `searchingModel(config)` is null for a provider without one. The
+answer is a short summary and each source once; the call is metered like any model call.
+
+```ts
+const voice = speech(
+  speechModel({ provider: 'mistral', model: 'voxtral-mini-tts-latest' }),
+  metering,
+);
+const { audio, mediaType } = await voice.speak(answer.text, { language: 'fr' });
+
+const searching = searchingModel(config);
+const found = searching
+  ? await webSearch(searching, metering).search('tarif du kWh au Togo')
+  : null;
+```
+
 ## Understanding a note (spec 104)
 
 What a person wrote or said at the end of her day becomes gestures proposed to her — **on the

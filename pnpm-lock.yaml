@@ -359,9 +359,15 @@ importers:
       '@kete/records':
         specifier: workspace:@kete-africa/records@*
         version: link:../records
+      '@kete/sandbox':
+        specifier: workspace:@kete-africa/sandbox@*
+        version: link:../sandbox
       '@kete/tenancy':
         specifier: workspace:@kete-africa/tenancy@*
         version: link:../tenancy
+      '@kete/tools':
+        specifier: workspace:@kete-africa/tools@*
+        version: link:../tools
       '@mastra/core':
         specifier: 1.76.0
         version: 1.76.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(supports-color@10.2.2)(valibot@1.5.0(typescript@5.9.3))(zod@4.6.5)

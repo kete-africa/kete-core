@@ -3,7 +3,7 @@ import { createDeepSeek } from '@ai-sdk/deepseek';
 import { createMistral } from '@ai-sdk/mistral';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import type { EmbeddingModel, LanguageModel, ToolSet, TranscriptionModel } from 'ai';
+import type { EmbeddingModel, LanguageModel, SpeechModel, ToolSet, TranscriptionModel } from 'ai';
 
 /**
  * The model providers Kete can use (doctrine D-029: the model is chosen by configuration, never
@@ -101,6 +101,17 @@ export function transcriptionModel(config: ModelConfig): TranscriptionModel {
     throw new ModelConfigError(`${config.provider} offers no transcription model here.`);
   }
   return createOpenAI(settings(config)).transcription(config.model);
+}
+
+/** The speech model a configuration names (answers said aloud): OpenAI or Mistral. */
+export function speechModel(config: ModelConfig): SpeechModel {
+  checkConfig(config);
+  // Mistral's Voxtral speaks too, with open weights: hosted by Mistral or by the deployment.
+  if (config.provider === 'mistral') return createMistral(settings(config)).speech(config.model);
+  if (config.provider !== 'openai') {
+    throw new ModelConfigError(`${config.provider} offers no speech model here.`);
+  }
+  return createOpenAI(settings(config)).speech(config.model);
 }
 
 /** A skill a provider's sandbox installs: its name, description and .zip (`@kete/skills`). */
