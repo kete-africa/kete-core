@@ -3,7 +3,7 @@ import type { CapabilityTool, InvocationResult } from '@kete/capabilities';
 import type { SandboxProvider } from '@kete/sandbox';
 import { publicFetch } from '@kete/tools';
 import { z } from 'zod';
-import { WAITS_FOR_A_PERSON } from './runtime.js';
+import { outsideTurn } from './outside.js';
 
 // An agent's abilities beyond the product (spec 129, doctrine D-060): search the web, read a page,
 // work on a computer of its own. Each is a tool the host gives an agent beside its capabilities —
@@ -22,24 +22,26 @@ export const OUTSIDE_ABILITIES = [
 const done = (output: unknown): InvocationResult => ({ status: 'done', output });
 
 /**
- * The outside-content rule (spec 090) for a loop that is not `runAgent`'s — a chat on `askStream`:
- * once a tool that brings outside content ran, a tool that acts at once (level 2) waits for a
- * person. The tools share one turn: guard them together, once per turn.
+ * The outside-content rule (specs 090 and 134) for a loop that is not `runAgent`'s — a chat on
+ * `askStream`: once a tool that brings outside content ran, a tool that acts at once (level 2) or
+ * could carry data out waits for a person, and a page is read only at an address that content
+ * gave. The tools share one turn: guard them together, once per turn.
  */
 export function guardOutside(
   tools: readonly CapabilityTool[],
   options: { outside?: readonly string[]; tainted?: boolean } = {},
 ): CapabilityTool[] {
-  const bringing = new Set<string>(options.outside ?? OUTSIDE_ABILITIES);
-  let tainted = options.tainted === true;
+  const watch = outsideTurn({
+    tools: options.outside ?? OUTSIDE_ABILITIES,
+    ...(options.tainted ? { tainted: true } : {}),
+  });
   return tools.map((tool) => ({
     ...tool,
     async execute(input) {
-      if (tainted && tool.autonomy === 2) {
-        return { status: 'confirmation_required', message: WAITS_FOR_A_PERSON };
-      }
+      const waits = watch.before(tool, input);
+      if (waits) return waits;
       const result = await tool.execute(input);
-      if (bringing.has(tool.name)) tainted = true;
+      watch.after(tool, result);
       return result;
     },
   }));

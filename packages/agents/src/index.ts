@@ -1,5 +1,6 @@
 // The public entry point of @kete/agents. Anything not exported here is internal.
 
+export { outsideTurn, UNSEEN_ADDRESS, type OutsideTurn } from './outside.js';
 export {
   computerTools,
   guardOutside,
