@@ -220,6 +220,10 @@ await runAgent({
   redirection, a bounded answer.
 - **A computer**: one sandbox per conversation (`ComputerSession`), created on first use and
   kept; it holds none of the organization's secrets; paths cannot climb out (`..`).
+- **Another loop**: a chat on `askStream` rather than `runAgent` guards its tools with
+  `guardOutside(tools)` — the same rule, once per turn.
+- **The organization decides**: `kete.agent_abilities` (`@kete/settings`, layers app and unit) says
+  whether its agents use the web, a computer — neither by default.
 - **Sub-agents**: `delegate_<name>` hands one task to an agent that has only the tools named for
   it among the turn's own — a name the turn does not hold is dropped — the same metering, no
   sub-agent of its own; the outside content it read counts for the turn that delegated.

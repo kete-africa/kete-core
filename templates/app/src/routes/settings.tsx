@@ -19,6 +19,7 @@ const groups: Record<string, () => string> = {
   notifications: m.settings_group_notifications,
   calendar: m.settings_group_calendar,
   display: m.settings_group_display,
+  agents: m.settings_group_agents,
 };
 const layers: Record<SettingLayer, () => string> = {
   kete: m.settings_from_kete,

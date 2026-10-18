@@ -40,13 +40,17 @@ flowchart LR
 - **FR-006 — Said aloud** (`@kete/ai`): a speech port on any speech model of the AI SDK — OpenAI's,
   Mistral's Voxtral (open weights); what a page shows but a voice does not say is dropped, a long
   answer cut at a sentence; metered.
+- **FR-007 — The organization decides**: `kete.agent_abilities` (the web, a computer; layers app
+  and unit; none by default) and the person's `kete.spoken_answers` (`@kete/settings`).
+- **FR-008 — Any loop**: `guardOutside(tools)` applies the outside-content rule to a loop that is not
+  `runAgent`'s (a chat on `askStream`).
 
 ## Proof
 
 - `packages/ai/tests/voice-and-web.test.ts` (5): the words said without links or code, counted, none
   when the budget is spent; OpenAI's or Mistral's voice by configuration; a search's summary and its
   sources once each, counted; the provider's own search or none.
-- `packages/agents/tests/abilities.test.ts` (6): a search with its question checked; a page read as
+- `packages/agents/tests/abilities.test.ts` (7): the outside-content rule in another loop; a search with its question checked; a page read as
   text, https only, and a loopback address never read; one sandbox per conversation, kept, no path
   out; a sub-agent offered only the tools the agent holds among those named for it; a sub-agent that
   read the web stops its parent's immediate gesture.

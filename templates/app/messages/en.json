@@ -188,6 +188,7 @@
   "settings_group_notifications": "Notifications",
   "settings_group_calendar": "Calendar",
   "settings_group_display": "Display",
+  "settings_group_agents": "Agents",
   "settings_from_kete": "Kete’s value",
   "settings_from_organization": "Set by the organization",
   "settings_from_app": "Set for this app",

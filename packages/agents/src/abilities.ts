@@ -3,6 +3,7 @@ import type { CapabilityTool, InvocationResult } from '@kete/capabilities';
 import type { SandboxProvider } from '@kete/sandbox';
 import { publicFetch } from '@kete/tools';
 import { z } from 'zod';
+import { WAITS_FOR_A_PERSON } from './runtime.js';
 
 // An agent's abilities beyond the product (spec 129, doctrine D-060): search the web, read a page,
 // work on a computer of its own. Each is a tool the host gives an agent beside its capabilities —
@@ -19,6 +20,30 @@ export const OUTSIDE_ABILITIES = [
 ] as const;
 
 const done = (output: unknown): InvocationResult => ({ status: 'done', output });
+
+/**
+ * The outside-content rule (spec 090) for a loop that is not `runAgent`'s — a chat on `askStream`:
+ * once a tool that brings outside content ran, a tool that acts at once (level 2) waits for a
+ * person. The tools share one turn: guard them together, once per turn.
+ */
+export function guardOutside(
+  tools: readonly CapabilityTool[],
+  options: { outside?: readonly string[]; tainted?: boolean } = {},
+): CapabilityTool[] {
+  const bringing = new Set<string>(options.outside ?? OUTSIDE_ABILITIES);
+  let tainted = options.tainted === true;
+  return tools.map((tool) => ({
+    ...tool,
+    async execute(input) {
+      if (tainted && tool.autonomy === 2) {
+        return { status: 'confirmation_required', message: WAITS_FOR_A_PERSON };
+      }
+      const result = await tool.execute(input);
+      if (bringing.has(tool.name)) tainted = true;
+      return result;
+    },
+  }));
+}
 
 function ability(
   name: string,

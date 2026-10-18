@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import {
   computerTools,
+  guardOutside,
   OUTSIDE_ABILITIES,
   runAgent,
   textOf,
@@ -238,5 +239,28 @@ describe('sub-agents', () => {
       status: 'confirmation_required',
       output: { message: WAITS_FOR_A_PERSON },
     });
+  });
+});
+
+describe('the outside-content rule in another loop', () => {
+  it('stops what acts at once once a page was read, and lets drafts be prepared', async () => {
+    log.length = 0;
+    const [read, act, prepare] = guardOutside([
+      webReadTool({ fetch: fakeFetch }),
+      capability('prices_update', 2),
+      capability('prices_propose', 3, {
+        status: 'draft',
+        draftId: 'drf_1',
+        message: 'waits',
+      } as InvocationResult),
+    ]) as [CapabilityTool, CapabilityTool, CapabilityTool];
+    expect((await act.execute({})).status).toBe('done');
+    await read.execute({ url: 'https://arse.tg/tarifs' });
+    expect(await act.execute({})).toEqual({
+      status: 'confirmation_required',
+      message: WAITS_FOR_A_PERSON,
+    });
+    expect((await prepare.execute({})).status).toBe('draft');
+    expect(log).toEqual(['prices_update', 'prices_propose']);
   });
 });

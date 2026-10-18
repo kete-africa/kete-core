@@ -2,6 +2,7 @@
 
 export {
   computerTools,
+  guardOutside,
   OUTSIDE_ABILITIES,
   textOf,
   webReadTool,
