@@ -11,6 +11,7 @@ export {
   adminErrorResponse,
   createOperatorGuard,
   operatorActor,
+  secondFactorWaived,
   type OperatorGuard,
   type OperatorGuardOptions,
 } from './operators.js';

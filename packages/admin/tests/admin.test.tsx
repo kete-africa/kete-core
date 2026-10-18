@@ -1,7 +1,13 @@
 import type { KeteIdentity } from '@kete/auth';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { AdminError, adminErrorResponse, AuditLog, createOperatorGuard } from '../src/index.js';
+import {
+  AdminError,
+  adminErrorResponse,
+  AuditLog,
+  createOperatorGuard,
+  secondFactorWaived,
+} from '../src/index.js';
 
 const operator: KeteIdentity = {
   userId: 'usr_ama',
@@ -60,6 +66,23 @@ describe('who is a Kete operator', () => {
     for (const token of ['member', 'weak', 'client', 'former']) {
       expect(await refusal(token)).toEqual({ status: 403, code: 'not_an_operator' });
     }
+  });
+
+  it('without a second factor on staging only, when it says so (spec 135)', async () => {
+    const waived = (env: NodeJS.ProcessEnv) =>
+      createOperatorGuard({
+        verify: async () => tokens['weak'] as KeteIdentity,
+        operatorsOrganizationId: () => 'org_kete',
+        secondFactorWaived: () => secondFactorWaived(env),
+      }).requireOperator(request('weak'));
+    const optional = { KETE_OPERATORS_SECOND_FACTOR: 'optional' };
+    await expect(waived({ ...optional, KETE_ENVIRONMENT: 'staging' })).resolves.toMatchObject({
+      userId: 'usr_ama',
+    });
+    // Never in production, nor where the environment does not say what it is.
+    await expect(waived({ ...optional, KETE_ENVIRONMENT: 'production' })).rejects.toThrow();
+    await expect(waived(optional)).rejects.toThrow();
+    await expect(waived({ KETE_ENVIRONMENT: 'staging' })).rejects.toThrow();
   });
 
   it('nobody at all when Kete’s organization is not configured', async () => {
