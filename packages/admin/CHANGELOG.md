@@ -1,5 +1,11 @@
 # @kete-africa/admin
 
+## 0.3.0
+
+### Minor Changes
+
+- 9c1f2e7: Operators without a second factor on staging only (spec 135): `secondFactorWaived()`, `KETE_OPERATORS_SECOND_FACTOR=optional`, never in production.
+
 ## 0.2.2
 
 ### Patch Changes
