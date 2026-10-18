@@ -38,7 +38,7 @@ export interface Hosting {
     description: string;
   }): Promise<{ id: string }>;
   setEnv(id: string, runtime: Record<string, string>, build: Record<string, string>): Promise<void>;
-  deploy(id: string): Promise<void>;
+  deploy(id: string): Promise<unknown>;
 }
 
 /** The agent that codes the first version, inside a sandbox. */
