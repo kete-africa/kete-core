@@ -1,5 +1,11 @@
 # @kete-africa/notify
 
+## 0.6.0
+
+### Minor Changes
+
+- 52206ff: The test mailbox (spec 132): `testMailbox()` keeps e-mails to any domain where no provider is configured, chosen by `emailSenderFromEnv` with `KETE_TEST_MAILBOX=on`.
+
 ## 0.5.1
 
 ### Patch Changes
