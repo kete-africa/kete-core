@@ -13,6 +13,8 @@ export interface OrganizationSummary {
 export interface Viewer {
   actor: Actor;
   organizations: OrganizationSummary[];
+  /** Whether « Boîte de test » shows (spec 132): the test mailbox is on, and she is an operator. */
+  testMailbox?: boolean;
 }
 
 /** The signed-in person and the organizations they belong to (identity tables: decision 0003). */

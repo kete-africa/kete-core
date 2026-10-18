@@ -269,5 +269,10 @@
   "kete_refused_same": "Votre Kete fonctionne déjà ainsi.",
   "kete_refused_region": "Cette région n’est pas proposée.",
   "kete_refused_forbidden": "Seul le propriétaire ou un administrateur déploie Kete.",
-  "tool_enterprise_name": "Kete Enterprise"
+  "tool_enterprise_name": "Kete Enterprise",
+  "nav_test_mailbox": "Boîte de test",
+  "test_mailbox_title": "Boîte de test",
+  "test_mailbox_intro": "Ici, aucun e-mail ne part : ce que le Compte Kete aurait envoyé — une invitation, le lien d’un nouveau mot de passe — est gardé, quelle que soit l’adresse, pour essayer ces parcours de bout en bout. Seuls les opérateurs de Kete le voient ; un redémarrage la vide.",
+  "test_mailbox_empty": "Aucun e-mail pour l’instant.",
+  "test_mailbox_to": "À {to} · {at}"
 }

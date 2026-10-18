@@ -10,6 +10,7 @@ import {
   logSender,
   mailkiteSender,
   memorySender,
+  testMailbox,
   verifyMailkiteSignature,
   type OutgoingEmail,
 } from '../src/index.js';
@@ -143,5 +144,24 @@ describe('senders', () => {
   it('chooses MailKite when its key is in the environment', () => {
     expect(emailSenderFromEnv({ MAILKITE_API_KEY: 'mk_test' }).name).toBe('mailkite');
     expect(emailSenderFromEnv({}).name).toBe('log');
+  });
+
+  it('keeps e-mails to any domain in the test mailbox, the latest first and the latest only (spec 132)', async () => {
+    let minute = 0;
+    const box = testMailbox({ limit: 2, now: () => new Date(Date.UTC(2026, 9, 18, 9, minute++)) });
+    await box.send(email);
+    await box.send({ ...email, to: 'kossi@any-domain.test', subject: 'Nouveau mot de passe' });
+    await box.send({ ...email, to: 'afi@other.example', subject: 'Invitation 2' });
+    expect(box.list().map((kept) => [kept.to, kept.subject, kept.at])).toEqual([
+      ['afi@other.example', 'Invitation 2', '2026-10-18T09:02:00.000Z'],
+      ['kossi@any-domain.test', 'Nouveau mot de passe', '2026-10-18T09:01:00.000Z'],
+    ]);
+    // Chosen without a provider when the environment asks for it, one per process; a key wins.
+    const kept = emailSenderFromEnv({ KETE_TEST_MAILBOX: 'on' });
+    expect(kept.name).toBe('test-mailbox');
+    expect(emailSenderFromEnv({ KETE_TEST_MAILBOX: 'on' })).toBe(kept);
+    expect(emailSenderFromEnv({ KETE_TEST_MAILBOX: 'on', MAILKITE_API_KEY: 'mk_test' }).name).toBe(
+      'mailkite',
+    );
   });
 });

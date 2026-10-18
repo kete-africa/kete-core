@@ -105,7 +105,14 @@ export {
   type Mailer,
   type MailerOptions,
 } from './mailer.js';
-export { emailSenderFromEnv, logSender, memorySender } from './senders.js';
+export {
+  emailSenderFromEnv,
+  logSender,
+  memorySender,
+  testMailbox,
+  type KeptEmail,
+  type TestMailbox,
+} from './senders.js';
 export {
   listNotifications,
   markRead,

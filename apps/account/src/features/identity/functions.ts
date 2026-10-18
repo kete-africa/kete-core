@@ -10,12 +10,15 @@ import { auth } from '@/platform/auth';
 import { db } from '@/platform/db';
 import { removePassword, signInMethods } from '@/platform/auth';
 import { passkey, user } from '@/platform/schema';
+import { testMailboxOpenTo } from '../test-mailbox/mailbox.server';
 import { addPasswordFor, FRESH_SIGN_IN_MS } from './password';
 import { readInvitation, readMembers, readViewer } from './viewer';
 
-export const fetchViewer = createServerFn({ method: 'GET' }).handler(async () =>
-  readViewer(await actorFromHeaders(getRequestHeaders())),
-);
+export const fetchViewer = createServerFn({ method: 'GET' }).handler(async () => {
+  const viewer = await readViewer(await actorFromHeaders(getRequestHeaders()));
+  if (!viewer) return null;
+  return { ...viewer, testMailbox: await testMailboxOpenTo(viewer.actor.userId) };
+});
 
 export const fetchMembers = createServerFn({ method: 'GET' }).handler(async () => {
   const me = requireMember(await actorFromHeaders(getRequestHeaders()));

@@ -43,7 +43,11 @@ function Space() {
     { to: '/espace/abonnements', label: m.nav_billing(), exact: false },
     { to: '/espace/parametres', label: m.nav_settings(), exact: false },
     { to: '/espace/securite', label: m.nav_security(), exact: false },
-  ] as const;
+    // Operators only, where no e-mail leaves (spec 132).
+    ...(viewer.testMailbox
+      ? [{ to: '/espace/boite-de-test', label: m.nav_test_mailbox(), exact: false } as const]
+      : []),
+  ];
 
   return (
     <div className="flex min-h-dvh flex-col">

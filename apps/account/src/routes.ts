@@ -21,6 +21,7 @@ export const routes = rootRoute('__root.tsx', [
     route('/organisation', 'space/organization.tsx'),
     route('/parametres', 'space/settings.tsx'),
     route('/securite', 'space/security.tsx'),
+    route('/boite-de-test', 'space/test-mailbox.tsx'),
   ]),
   route('/api/auth/$', 'api/auth/$.ts'),
   route('/api/apps/access', 'api/apps/access.ts'),

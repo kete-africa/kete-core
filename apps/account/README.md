@@ -106,8 +106,19 @@ hidden.
 
 ### E-mails (spec 025)
 
-Sent through `@kete/notify` (`src/platform/email.ts`): MailKite when `MAILKITE_API_KEY` is set,
-otherwise nothing leaves and only the subject is logged. Templates are React Email
+Sent through `@kete/notify` (`src/platform/email.ts`): MailKite when `MAILKITE_API_KEY` is set;
+otherwise, with `KETE_TEST_MAILBOX=on` (staging, previews — never production), the **test mailbox**
+keeps them, to any domain, and Kete's operators read them in Mon espace › « Boîte de test »
+(`/espace/boite-de-test`, spec 132), so an invitation or a new password is tried end to end;
+otherwise nothing leaves and only the subject is logged.
+
+````mermaid
+flowchart LR
+  E[an e-mail] -->|MAILKITE_API_KEY| M[MailKite · it leaves]
+  E -->|KETE_TEST_MAILBOX=on| T[test mailbox · kept, any domain]
+  T --> B[« Boîte de test » · operators only, never in production]
+  E -->|neither| L[its subject logged]
+``` Templates are React Email
 (`src/features/emails/templates.tsx`), their words in the catalogs, in the request's language.
 
 | Template                     | When                                                                         |
@@ -140,7 +151,7 @@ flowchart LR
   E1 --> C[Kete Cockpit · the fleet]
   E2 --> C
   R --> T[My tools · Kete Enterprise, open]
-```
+````
 
 Kete's fleet (spec 125) reads every organization's deployments from Kete Cockpit
 (`GET /api/admin/deployments`, a Kete operator's token, through the owner's function
