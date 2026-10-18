@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/payments",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Kete payments: a payment port, the Chariow adapter first, and a fake provider for tests.",
   "repository": {
