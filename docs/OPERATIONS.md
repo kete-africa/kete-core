@@ -121,6 +121,56 @@ On staging, Firmo (`firmo-staging`, kete-africa/firmo) is registered this way by
 Links are never e-mailed: the app hands them to the person in her conversation. They work once, for
 ten minutes, never for a person with a second factor, and land only on the app's own origin.
 
+## The whole platform on this machine
+
+`pnpm platform` (`tooling/scripts/platform.ts`) runs every Kete app on a developer's machine,
+joined: one local Compte Kete, every app signing in through it and seeded in its organization
+« KYA démo ». Development only — never a deployment.
+
+```mermaid
+flowchart LR
+  P[pnpm platform] --> O[demo-operator.ts<br/>test operator · « Kete » · « KYA démo »]
+  P --> C[clients.ts create<br/>once, kept in .env.platform]
+  P --> A[Compte Kete :3100]
+  P --> E[Kete Enterprise demo :3500]
+  P --> F[Kete Finance :3410]
+  P --> T[Kete Team :3420]
+  P --> K[Kete Commitments :3430]
+  P --> S[Support :3440]
+  P --> Q[Kete Cockpit :3300]
+  E & F & T & K & S & Q -- sign-in --> A
+  F & T & K & S -- the center --> E
+  S -- invoices --> F
+```
+
+| Who              | Where                   |
+| ---------------- | ----------------------- |
+| Compte Kete      | `http://localhost:3100` |
+| Kete Enterprise  | `http://127.0.0.1:3500` |
+| Kete Finance     | `http://127.0.0.1:3410` |
+| Kete Team        | `http://127.0.0.1:3420` |
+| Kete Commitments | `http://127.0.0.1:3430` |
+| Support          | `http://127.0.0.1:3440` |
+| Kete Cockpit     | `http://127.0.0.1:3300` |
+
+- **Where**: the repositories side by side (`../kete-enterprise`, `../kete-finance`, `../kete-team`,
+  `../kete-commitments`, `../kete-helpdesk`, `../kete-cockpit`), each installed, each with its
+  `.env` of test addresses. Each app runs its own `pnpm demo` in its joined mode
+  (`KETE_DEMO_JOINED=on`): a throwaway schema, seeded as the app alone, then speaking to the others.
+- **Who you are**: the test operator, made once by `apps/account/scripts/demo-operator.ts`; its
+  credentials are in `apps/account/.env.demo` (ignored by git, never printed). Enter by the Compte
+  Kete, choose « KYA démo », then Mes outils. In Kete Enterprise you are Abla Nyuiadzi. The
+  Compte Kete runs with the test mailbox (`/admin/mailbox`) and, for the operator, without a second
+  factor (`KETE_OPERATORS_SECOND_FACTOR=optional`, refused outside staging, preview or development).
+- **Kete Intelligence**: with `OPENAI_API_KEY` in the author's `../../.secrets/atelier-admin.env`,
+  the real model answers, speaks and searches the web; with `BOAT_API_KEY`, it has its computer.
+- **The apps on 127.0.0.1**: the Compte Kete accepts a loopback return address for a client only
+  there; Kete Enterprise accepts loopback app addresses in its registry only with
+  `KETE_ENVIRONMENT=development`.
+- **Run it from a terminal**, not from an editor's preview: a process started under a TLS-inspecting
+  proxy cannot reach the model. `pnpm platform --build` builds each app's screens again; Ctrl C
+  stops everything.
+
 ## Production
 
 Nothing follows `main` yet. The production application is created when the author decides the

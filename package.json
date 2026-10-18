@@ -32,7 +32,8 @@
     "events:check": "tsx tooling/scripts/events-generate.ts --check",
     "openapi:generate": "tsx tooling/scripts/openapi-generate.ts",
     "openapi:check": "tsx tooling/scripts/openapi-generate.ts --check",
-    "cockpit:extract": "tsx tooling/scripts/extract-cockpit.ts"
+    "cockpit:extract": "tsx tooling/scripts/extract-cockpit.ts",
+    "platform": "tsx tooling/scripts/platform.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
