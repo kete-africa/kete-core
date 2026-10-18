@@ -11,6 +11,21 @@ export class AdminError extends Error {
   }
 }
 
+const TRIAL_ENVIRONMENTS = new Set(['staging', 'preview', 'development']);
+
+/**
+ * Whether operators may do without a second factor here (spec 135): only with
+ * `KETE_OPERATORS_SECOND_FACTOR=optional` in an environment that says it is staging, a preview or
+ * development — so every flow can be tried there. Never in production, nor where
+ * `KETE_ENVIRONMENT` is unset.
+ */
+export function secondFactorWaived(env: NodeJS.ProcessEnv = process.env): boolean {
+  return (
+    env['KETE_OPERATORS_SECOND_FACTOR'] === 'optional' &&
+    TRIAL_ENVIRONMENTS.has(env['KETE_ENVIRONMENT'] ?? '')
+  );
+}
+
 export interface OperatorGuardOptions {
   /** Verifies a Compte Kete access token (@kete/auth `createTokenVerifier`). */
   verify(token: string): Promise<KeteIdentity>;
@@ -18,6 +33,8 @@ export interface OperatorGuardOptions {
   operatorsOrganizationId(): string | null;
   /** Still an operator now, in the identity's records: a token lives fifteen minutes. */
   stillOperator?(userId: string): Promise<boolean>;
+  /** Whether the second factor may be missing (default: `secondFactorWaived()`, staging only). */
+  secondFactorWaived?(): boolean;
 }
 
 export interface OperatorGuard {
@@ -45,7 +62,7 @@ export function createOperatorGuard(options: OperatorGuardOptions): OperatorGuar
         operators !== null &&
         identity.organizationId === operators &&
         (identity.role === 'owner' || identity.role === 'admin') &&
-        identity.twoFactor;
+        (identity.twoFactor || (options.secondFactorWaived ?? secondFactorWaived)());
       if (!claimsSayOperator) throw new AdminError(403, 'not_an_operator');
       if (options.stillOperator && !(await options.stillOperator(identity.userId))) {
         throw new AdminError(403, 'not_an_operator');

@@ -22,6 +22,10 @@ const identity = await requireOperator(request); // AdminError 401 / 403 otherwi
 await runOperatorGesture(transaction, setOffer, { identity, idempotencyKey }, input);
 ```
 
+On staging only, `KETE_OPERATORS_SECOND_FACTOR=optional` lets an operator in without a second
+factor, so every flow can be tried (`secondFactorWaived`, spec 135). It has no effect in
+production, nor where `KETE_ENVIRONMENT` does not say staging, a preview or development.
+
 - **Refusals say why**: `unauthenticated`, `invalid_token` (401), `not_an_operator` (403);
   `adminErrorResponse` turns them into answers.
 - **Every gesture is a named command** (@kete/commands): journaled with the operator, the channel

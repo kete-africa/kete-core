@@ -75,7 +75,9 @@ flowchart LR
 - **One sign-in for every Kete app** (spec 007): the Compte Kete is an OAuth 2.1 / OpenID Connect
   provider. Apps are trusted clients registered by operators (`pnpm --filter @kete/account
 clients`); they sign people in with `@kete/auth`. Discovery at `/.well-known/openid-configuration`.
-- **Operators**: owners and admins of `KETE_OPERATORS_ORGANIZATION_ID` with two-factor on. They
+- **Operators**: owners and admins of `KETE_OPERATORS_ORGANIZATION_ID` with two-factor on — on
+  staging only, `KETE_OPERATORS_SECOND_FACTOR=optional` lets them in without it, to try every flow
+  (spec 135; never in production nor where `KETE_ENVIRONMENT` is unset). They
   alone register apps and use `/api/admin/offers` (Kete Cockpit), whose writes go through two
   definer functions — the catalog stays read-only otherwise.
 - **Events** (spec 010): `account.created` and `payment.succeeded` go to Kete Cockpit through the

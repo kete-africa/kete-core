@@ -1,6 +1,7 @@
 import { and, eq, inArray } from 'drizzle-orm';
 import { db } from './db';
 import { member } from './schema';
+import { secondFactorWaived } from '@kete/admin';
 import { signInMethodsOf } from '@kete/identity';
 
 /**
@@ -28,5 +29,6 @@ export async function isOperator(userId: string): Promise<boolean> {
         inArray(member.role, ['owner', 'admin']),
       ),
     );
-  return row !== undefined && (await signsInStrongly(userId));
+  // Staging only, on purpose: `KETE_OPERATORS_SECOND_FACTOR=optional` (spec 135).
+  return row !== undefined && (secondFactorWaived() || (await signsInStrongly(userId)));
 }
