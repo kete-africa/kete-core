@@ -1,5 +1,12 @@
 # @kete-africa/tools
 
+## 0.1.2
+
+### Patch Changes
+
+- 087db6a: Each imported tool's drafts have their own record type (`toolCallDraft(tool)`): a registry holding two
+  tools that act no longer refuses them.
+
 ## 0.1.1
 
 ### Patch Changes
