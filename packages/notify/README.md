@@ -12,6 +12,7 @@ flowchart LR
     S -->|MAILKITE_API_KEY| MK[mailkiteSender · POST /v1/send]
     S -->|no key| LOG[logSender · subject only]
     S -->|tests| MEM[memorySender]
+    S -->|KETE_TEST_MAILBOX=on| TB[testMailbox · kept, any domain]
     WH[MailKite webhook] -->|x-mailkite-signature| V[verifyMailkiteSignature]
 ```
 
@@ -30,14 +31,15 @@ const mailer = createMailer({ sender: emailSenderFromEnv(), from: 'Kete <compte@
 await mailer.send(invitation, { to, values, locale: 'fr' });
 ```
 
-| Export                         | What it does                                                                           |
-| ------------------------------ | -------------------------------------------------------------------------------------- |
-| `mailkiteSender`               | `POST /v1/send` with a domain-restricted key; says whether a failure may be retried    |
-| `emailSenderFromEnv`           | MailKite with `MAILKITE_API_KEY`, otherwise `logSender` (nothing leaves)               |
-| `logSender`, `memorySender`    | Development without a provider (logs the subject only, never the recipient); tests     |
-| `renderEmail`                  | A React Email body to HTML and plain text                                              |
-| `verifyMailkiteSignature`      | HMAC-SHA256 of `t.rawBody`, constant-time, within 5 minutes                            |
-| `checkEmail`, `isEmailAddress` | Refuse a message without a valid sender, recipient or subject before any provider call |
+| Export                         | What it does                                                                                                                          |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `mailkiteSender`               | `POST /v1/send` with a domain-restricted key; says whether a failure may be retried                                                   |
+| `emailSenderFromEnv`           | MailKite with `MAILKITE_API_KEY`; otherwise the test mailbox with `KETE_TEST_MAILBOX=on`; otherwise `logSender` (nothing leaves)      |
+| `logSender`, `memorySender`    | Development without a provider (logs the subject only, never the recipient); tests                                                    |
+| `testMailbox`                  | Staging and previews (spec 132): e-mails kept to any domain, the latest 200, for a service to show its operators; never in production |
+| `renderEmail`                  | A React Email body to HTML and plain text                                                                                             |
+| `verifyMailkiteSignature`      | HMAC-SHA256 of `t.rawBody`, constant-time, within 5 minutes                                                                           |
+| `checkEmail`, `isEmailAddress` | Refuse a message without a valid sender, recipient or subject before any provider call                                                |
 
 ## Rules
 

@@ -269,5 +269,10 @@
   "kete_refused_same": "Your Kete already runs this way.",
   "kete_refused_region": "This region is not offered.",
   "kete_refused_forbidden": "Only the owner or an administrator deploys Kete.",
-  "tool_enterprise_name": "Kete Enterprise"
+  "tool_enterprise_name": "Kete Enterprise",
+  "nav_test_mailbox": "Test mailbox",
+  "test_mailbox_title": "Test mailbox",
+  "test_mailbox_intro": "Here no e-mail leaves: what the Compte Kete would have sent — an invitation, a new password's link — is kept, whatever the address, to try these flows end to end. Only Kete's operators see it; a restart empties it.",
+  "test_mailbox_empty": "No e-mail yet.",
+  "test_mailbox_to": "To {to} · {at}"
 }

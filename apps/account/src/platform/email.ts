@@ -3,6 +3,7 @@ import {
   emailSenderFromEnv,
   type EmailSender,
   type EmailTemplate,
+  type KeptEmail,
   type SentEmail,
 } from '@kete/notify';
 import { getLocale } from '../paraglide/runtime.js';
@@ -30,6 +31,18 @@ function requestLocale(): string {
   } catch {
     return 'fr';
   }
+}
+
+/**
+ * What the test mailbox kept (spec 132: `KETE_TEST_MAILBOX=on`, no provider key, never in
+ * production); null when the e-mails leave or are only logged.
+ */
+export function testMails(): KeptEmail[] | null {
+  if (process.env.KETE_ENVIRONMENT === 'production') return null;
+  sender ??= emailSenderFromEnv();
+  return 'list' in sender && typeof sender.list === 'function'
+    ? (sender.list() as KeptEmail[])
+    : null;
 }
 
 export function sendEmail<Values>(
