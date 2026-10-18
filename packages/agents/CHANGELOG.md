@@ -1,5 +1,11 @@
 # @kete-africa/agents
 
+## 0.5.0
+
+### Minor Changes
+
+- 877b463: Security review fixes (spec 134): `publicFetch` checks the address again when connecting (no DNS rebinding) and cuts a long body; once outside content is in a turn, the agent's computer waits for a person and `web_read` reads only an address that content gave (`outsideTurn`, `UNSEEN_ADDRESS`).
+
 ## 0.4.0
 
 ### Minor Changes
