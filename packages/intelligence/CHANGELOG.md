@@ -1,5 +1,11 @@
 # @kete-africa/intelligence
 
+## 0.3.2
+
+### Patch Changes
+
+- Published again on the current `@kete-africa/ai` and `@kete-africa/agents`.
+
 ## 0.3.1
 
 ### Patch Changes
