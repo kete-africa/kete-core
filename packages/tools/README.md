@@ -40,7 +40,9 @@ const capabilities = toolCapabilities(tools, {
 
 - **The same rules as the product's own**: a read (`GET`, an MCP tool marked read-only) runs
   alone; an act is a draft a person decides; a destruction (`DELETE`, an MCP tool not marked
-  otherwise — MCP's own default) needs her confirmation in the product.
+  otherwise — MCP's own default) needs her confirmation in the product. Each tool's drafts have
+  their own record type (`toolCallDraft(tool)`: `imported_tool_call.crm_create_contact`), so a
+  registry finds which tool a draft calls.
 - **The credential is the connection's**: an `Authorization` parameter of a description is never an
   input; the call is made server-side.
 - **Its answers stay inside**: imported capabilities are `confidential` unless said otherwise.
