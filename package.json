@@ -24,7 +24,7 @@
     "knip": "knip --no-progress",
     "audit:check": "pnpm audit --audit-level high",
     "changeset": "changeset",
-    "release:version": "changeset version",
+    "release:version": "tsx tooling/scripts/release-dependents.ts && changeset version",
     "docs:dev": "pnpm --filter @kete/docs dev",
     "docs:build": "pnpm --filter @kete/docs build",
     "docs:preview": "pnpm --filter @kete/docs preview",
