@@ -9,6 +9,7 @@ export {
 } from './capabilities.js';
 export { callMcp, connectMcp, toolsFromMcp, type McpTools } from './mcp.js';
 export { callOpenApi, toolsFromOpenApi, type OpenApiCall } from './openapi.js';
+export { isPublicIp, PUBLIC_LIMIT, publicFetch, reachable } from './public.js';
 export {
   toolName,
   ToolError,

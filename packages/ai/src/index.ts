@@ -31,12 +31,22 @@ export {
   ModelConfigError,
   modelConfigFromEnv,
   modelProviders,
+  speechModel,
   transcriptionModel,
   type HostedSkill,
   type ModelConfig,
   type ModelProvider,
 } from './providers.js';
 export { dictation, type Dictated, type DictationPort } from './dictate.js';
+export { sayable, SPEECH_LIMIT, speech, type Spoken, type SpeechPort } from './speech.js';
+export {
+  searchingModel,
+  webSearch,
+  type Found,
+  type Searched,
+  type SearchingModel,
+  type WebSearchPort,
+} from './web.js';
 export { scanReader } from './scans.js';
 export { intake, type Intake, type IntakeProvenance, type IntakeSource } from './intake.js';
 export {

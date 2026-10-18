@@ -1,6 +1,14 @@
 // The public entry point of @kete/agents. Anything not exported here is internal.
 
 export {
+  computerTools,
+  OUTSIDE_ABILITIES,
+  textOf,
+  webReadTool,
+  webSearchTool,
+  type ComputerSession,
+} from './abilities.js';
+export {
   agentConversations,
   agentConversationsMigrationSql,
   organizationPool,
@@ -45,4 +53,5 @@ export {
   type AgentCall,
   type AgentEvent,
   type AgentTurn,
+  type SubAgent,
 } from './runtime.js';

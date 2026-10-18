@@ -170,6 +170,60 @@ await runAgent({
 });
 ```
 
+## Abilities beyond the product (spec 129)
+
+Doctrine D-060: agents « à niveau » — the web searched and read, a computer of their own,
+sub-agents — always under the policies. Each ability is a tool the host gives an agent beside its
+capabilities, so the host's policy engine sees it like any other; each brings outside content.
+
+```mermaid
+flowchart LR
+  A[agent's turn] -->|web_search| S[the model provider's own search · @kete/ai]
+  A -->|web_read| R[publicFetch · https, public IPs only]
+  A -->|computer_run · write · read| C[its sandbox · @kete/sandbox, no secret]
+  A -->|delegate_name| B[sub-agent · a subset of the turn's tools, same budget]
+  S --> O[outside content in the turn]
+  R --> O
+  C --> O
+  B -->|what it read| O
+  O -->|level 2 waits| P[a person]
+```
+
+```ts
+const tools = [
+  ...(await registry.tools(caller)),
+  webSearchTool(webSearch(searchingModel(config)!, metering)),
+  webReadTool(),
+  ...computerTools(sandboxes, {
+    get: () => sandboxOf(thread),
+    keep: (id) => keepSandbox(thread, id),
+  }),
+];
+await runAgent({
+  ...turn,
+  tools: ruled(tools), // the host's policies, as for every tool
+  outside: { tools: OUTSIDE_ABILITIES },
+  subAgents: [
+    {
+      name: 'researcher',
+      description: 'Searches the web and reads pages.',
+      instructions: RESEARCHER,
+      tools: ['web_search', 'web_read'],
+    },
+  ],
+});
+```
+
+- **The web**: `web_search` is the model provider's own search (no service of ours) and sends
+  its question outside — its description tells the model never to put anything confidential in
+  it. `web_read` reads a page as text over `publicFetch`: https, every resolved IP public, no
+  redirection, a bounded answer.
+- **A computer**: one sandbox per conversation (`ComputerSession`), created on first use and
+  kept; it holds none of the organization's secrets; paths cannot climb out (`..`).
+- **Sub-agents**: `delegate_<name>` hands one task to an agent that has only the tools named for
+  it among the turn's own — a name the turn does not hold is dropped — the same metering, no
+  sub-agent of its own; the outside content it read counts for the turn that delegated.
+
 ## Evaluations (spec 090)
 
 Cases played through the very turn of production, each with what must hold, checked by code: the
@@ -196,4 +250,5 @@ The runtime has its own evaluation runner; it targets its own agent and would by
 ## Not here yet
 
 Agents that run for long and wait for a person: Kete Enterprise, step C6. Semantic recall over
-past conversations: when an app asks for it, with its own consent.
+past conversations: when an app asks for it, with its own consent. Phone calls with an agent: once
+the author has chosen how Kete reaches telephony (decision 0012).

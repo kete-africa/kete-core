@@ -3,6 +3,7 @@ import { BudgetExceededError, type Metering, type Usage } from '@kete/ai';
 import type { CapabilityTool, InvocationResult } from '@kete/capabilities';
 import { Agent } from '@mastra/core/agent';
 import { tool, type LanguageModel, type ModelMessage } from 'ai';
+import { z } from 'zod';
 import type { AgentConversations } from './conversations.js';
 import { memoryInstructions, type AgentMemory } from './memory.js';
 
@@ -47,7 +48,28 @@ export interface AgentTurn {
    * prepared as always, since a person decides them anyway.
    */
   outside?: { input?: boolean; tools?: readonly string[] };
+  /**
+   * Sub-agents (spec 129): each a tool `delegate_<name>` the agent hands a task to. A sub-agent
+   * has only the tools named here, among this turn's own — never a right more — the same budget,
+   * no sub-agent of its own, and what outside content it read counts for this turn too.
+   */
+  subAgents?: readonly SubAgent[];
   abortSignal?: AbortSignal;
+}
+
+/** An agent this one delegates a task to. */
+export interface SubAgent {
+  /** snake_case: its tool is `delegate_<name>`. */
+  name: string;
+  /** What it does, for the agent choosing it. */
+  description: string;
+  instructions: string;
+  /** Its tools, by name, among the turn's own. */
+  tools: readonly string[];
+  /** Its own model (a smaller one); the turn's when absent. */
+  model?: LanguageModel;
+  /** Default 5. */
+  maxSteps?: number;
 }
 
 /** A capability the agent called, and what became of it. */
@@ -104,10 +126,61 @@ function modelId(model: LanguageModel): string {
 export const WAITS_FOR_A_PERSON =
   'Not run: this turn read content from outside the organization, so this gesture waits for a person to do it or ask for it herself.';
 
-function agentOf(turn: AgentTurn): Agent {
-  // Whether outside content entered the turn: from the start, or from a tool that brought some.
-  let tainted = turn.outside?.input === true;
+/** Whether outside content entered the turn: from the start, or from a tool that brought some. */
+interface TurnState {
+  tainted: boolean;
+}
+
+/** A delegated task's answer, as the agent that delegated reads it. */
+async function delegate(
+  turn: AgentTurn,
+  sub: SubAgent,
+  task: string,
+  state: TurnState,
+): Promise<InvocationResult> {
+  const allowed = new Set(sub.tools);
+  const inner: TurnState = { tainted: state.tainted };
+  const subTurn: AgentTurn = {
+    agent: `${turn.agent}/${sub.name}`,
+    name: sub.name,
+    model: sub.model ?? turn.model,
+    instructions: sub.instructions,
+    messages: [{ role: 'user', content: task }],
+    tools: (turn.tools ?? []).filter((capability) => allowed.has(capability.name)),
+    maxSteps: sub.maxSteps ?? 5,
+    ...(turn.metering ? { metering: turn.metering } : {}),
+    ...(turn.outside?.tools ? { outside: { tools: turn.outside.tools } } : {}),
+    ...(turn.abortSignal ? { abortSignal: turn.abortSignal } : {}),
+  };
+  const answer = await generate(subTurn, inner);
+  if (inner.tainted) state.tainted = true;
+  return {
+    status: 'done',
+    output: {
+      text: answer.text,
+      calls: answer.calls.map((call) => ({
+        name: call.name,
+        status: call.status,
+        ...(call.draftId ? { draftId: call.draftId } : {}),
+      })),
+    },
+  };
+}
+
+const taskInput = z.object({ task: z.string().min(1).max(4000) });
+
+function agentOf(turn: AgentTurn, state: TurnState): Agent {
   const bringsOutside = new Set(turn.outside?.tools ?? []);
+  const delegations = Object.fromEntries(
+    (turn.subAgents ?? []).map((sub) => [
+      `delegate_${sub.name}`,
+      tool({
+        description: `${sub.description} Give it one task, said fully: it sees nothing of this conversation.`,
+        inputSchema: taskInput,
+        execute: ({ task }: { task: string }) => delegate(turn, sub, task, state),
+      }),
+    ]),
+  );
   const tools = Object.fromEntries(
     (turn.tools ?? []).map((capability) => [
       capability.name,
@@ -116,11 +189,11 @@ function agentOf(turn: AgentTurn): Agent {
         inputSchema: capability.input,
         execute: async (input: unknown): Promise<InvocationResult> => {
           // Levels 3 and 4 only prepare: a person decides them. Level 2 acts at once: not here.
-          if (tainted && capability.autonomy === 2) {
+          if (state.tainted && capability.autonomy === 2) {
             return { status: 'confirmation_required', message: WAITS_FOR_A_PERSON };
           }
           const result = await capability.execute(input);
-          if (bringsOutside.has(capability.name)) tainted = true;
+          if (bringsOutside.has(capability.name)) state.tainted = true;
           return result;
         },
       }),
@@ -133,7 +206,7 @@ function agentOf(turn: AgentTurn): Agent {
     // The runtime accepts the models and the tools of the AI SDK as they are; its types do not
     // say so for every version (decision 0010). These two casts are the whole seam.
     model: turn.model as unknown as AgentConfig['model'],
-    tools: tools as unknown as NonNullable<AgentConfig['tools']>,
+    tools: { ...tools, ...delegations } as unknown as NonNullable<AgentConfig['tools']>,
     ...(turn.conversation ? { memory: turn.conversation.store.memory } : {}),
   });
 }
@@ -171,9 +244,13 @@ const usageOf = (
  * One turn of an agent, in one piece: for a message, a task, a test. Throws `BudgetExceededError`
  * when a budget of the call is spent — no model is called then.
  */
-export async function runAgent(turn: AgentTurn): Promise<AgentAnswer> {
+export function runAgent(turn: AgentTurn): Promise<AgentAnswer> {
+  return generate(turn, { tainted: turn.outside?.input === true });
+}
+
+async function generate(turn: AgentTurn, state: TurnState): Promise<AgentAnswer> {
   await turn.metering?.store.check(turn.metering.context);
-  const answer = await agentOf(turn).generate(turn.messages, optionsOf(turn));
+  const answer = await agentOf(turn, state).generate(turn.messages, optionsOf(turn));
   const usage = usageOf(answer.totalUsage, answer.steps.length);
   await meter(turn, usage);
   return {
@@ -192,7 +269,10 @@ export async function runAgent(turn: AgentTurn): Promise<AgentAnswer> {
 export async function* streamAgent(turn: AgentTurn): AsyncGenerator<AgentEvent> {
   try {
     await turn.metering?.store.check(turn.metering.context);
-    const stream = await agentOf(turn).stream(turn.messages, optionsOf(turn));
+    const stream = await agentOf(turn, { tainted: turn.outside?.input === true }).stream(
+      turn.messages,
+      optionsOf(turn),
+    );
     let steps = 0;
     for await (const part of stream.fullStream) {
       if (part.type === 'text-delta') {
