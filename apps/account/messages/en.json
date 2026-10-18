@@ -274,5 +274,9 @@
   "test_mailbox_title": "Test mailbox",
   "test_mailbox_intro": "Here no e-mail leaves: what the Compte Kete would have sent — an invitation, a new password's link — is kept, whatever the address, to try these flows end to end. Only Kete's operators see it; a restart empties it.",
   "test_mailbox_empty": "No e-mail yet.",
-  "test_mailbox_to": "To {to} · {at}"
+  "test_mailbox_to": "To {to} · {at}",
+  "tool_finance": "Sales, purchases and expenses, treasury",
+  "tool_team": "The team: weeks, leave, authorisations",
+  "tool_commitments": "Contracts: what is due, and when",
+  "tool_support": "After-sales: tickets and interventions"
 }

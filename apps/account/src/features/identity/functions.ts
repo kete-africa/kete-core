@@ -38,7 +38,11 @@ export const fetchTools = createServerFn({ method: 'GET' }).handler(async () => 
   return {
     // Kete Enterprise, as the organization deployed it (spec 123).
     enterprise: deployment ? { status: deployment.status, url: deployment.url } : null,
-    tools: toolCatalog().map((tool) => ({ ...tool, accessUntil: access[tool.id] ?? null })),
+    // An app sold on its own has its access; the others are opened with the organization's Kete.
+    tools: toolCatalog().map((tool) => ({
+      ...tool,
+      accessUntil: (access as Partial<Record<string, string>>)[tool.id] ?? null,
+    })),
   };
 });
 

@@ -11,6 +11,10 @@ export const Route = createFileRoute('/espace/')({
 });
 
 const purpose: Record<ToolEntry['id'], () => string> = {
+  finance: m.tool_finance,
+  team: m.tool_team,
+  commitments: m.tool_commitments,
+  support: m.tool_support,
   firmo: m.tool_firmo,
   nettio: m.tool_nettio,
   nyatefe: m.tool_nyatefe,

@@ -274,5 +274,9 @@
   "test_mailbox_title": "Boîte de test",
   "test_mailbox_intro": "Ici, aucun e-mail ne part : ce que le Compte Kete aurait envoyé — une invitation, le lien d’un nouveau mot de passe — est gardé, quelle que soit l’adresse, pour essayer ces parcours de bout en bout. Seuls les opérateurs de Kete le voient ; un redémarrage la vide.",
   "test_mailbox_empty": "Aucun e-mail pour l’instant.",
-  "test_mailbox_to": "À {to} · {at}"
+  "test_mailbox_to": "À {to} · {at}",
+  "tool_finance": "Ventes, achats et dépenses, trésorerie",
+  "tool_team": "L’équipe : semaines, congés, habilitations",
+  "tool_commitments": "Contrats : ce qui est dû, et quand",
+  "tool_support": "Service après-vente : tickets et interventions"
 }
