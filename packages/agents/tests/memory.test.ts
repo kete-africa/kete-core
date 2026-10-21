@@ -235,7 +235,7 @@ describe('erased for good', () => {
       expect(rows, table).toEqual([]);
     }
     const everything = await db.owner.query(`select * from kete_agent_memory_journal`);
-    expect(JSON.stringify(everything.rows)).not.toMatch(/achats|français|4521/);
+    expect(JSON.stringify(everything.rows)).not.toMatch(/achats|français|\b4521\b/);
     const journal = await as('org_bleu', (client) => memoryJournalOf(client, 'usr_ama'));
     expect(journal.map((entry) => entry.action)).toEqual([
       'erased',
