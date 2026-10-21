@@ -123,3 +123,35 @@ describe('a gesture through the policies', () => {
     expect(await odd.checkGesture('t', gesture)).toMatchObject({ reason: 'unreadable' });
   });
 });
+
+describe('an object’s thread at the center (spec 139)', () => {
+  it('is opened with the person’s token, and the app keeps working without a center', async () => {
+    const { calls, fetcher } = fakeFetch(() =>
+      Response.json({
+        threadId: 'thr_01a15c43ticket12',
+        href: 'https://center.test/fils?fil=thr_01a15c43ticket12',
+      }),
+    );
+    const center = createCenter({
+      url: 'https://api.center.test',
+      product: 'prd_kete_helpdesk',
+      source: 'kete-helpdesk',
+      fetch: fetcher,
+    });
+    const ticket = {
+      kind: 'ticket',
+      id: 'tkt_sarakawa',
+      title: 'Ticket T-0012 — Hôtel Sarakawa',
+      href: 'https://support.test/tickets/tkt_sarakawa',
+    };
+    expect(await center.openObjectThread('her-token', ticket)).toEqual({
+      threadId: 'thr_01a15c43ticket12',
+      href: 'https://center.test/fils?fil=thr_01a15c43ticket12',
+    });
+    expect(calls[0]?.url).toBe('https://api.center.test/v1/apps/prd_kete_helpdesk/threads');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual(ticket);
+    const alone = createCenter({ url: '', product: 'prd_kete_helpdesk', source: 'kete-helpdesk' });
+    expect(await alone.openObjectThread('her-token', ticket)).toBeNull();
+    expect(await center.openObjectThread(null, ticket)).toBeNull();
+  });
+});

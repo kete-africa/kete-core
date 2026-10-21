@@ -152,3 +152,10 @@ if (verdict.effect === 'refuse') throw refused(verdict.policies.map((p) => p.sen
   center answered (`reason`) — and the app follows its own rules.
 - A holding's source is the app's product; `waiting` needs `waitingOn`; `holdingBody` gives the
   contract's shape (`contracts/holding.v1.schema.json`).
+
+## An object's thread (spec 139)
+
+`openObjectThread(token, { kind, id, title, href, party?, project? })` opens, at the center, the
+thread of one of the app's objects — a ticket, an invoice, a contract, a leave — with the token of
+the person who created it, and answers its id and the center's address to show it (« Fil »).
+Opened again, it is the same thread; without a center, `null`, and the app keeps working alone.

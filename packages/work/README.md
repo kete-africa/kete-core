@@ -79,3 +79,19 @@ const mine = await forMe(tx, personId);
   `holding.handed_back`, `holding.done`), never change or delete them. Nothing is deleted.
 - **The structure is the product's.** Deputies, managers and the head come through the
   `Structure` port; absences are the dated facts the apps already say (`dated-fact.v1`).
+
+## Priorities, a snooze, a holding waited on (spec 139)
+
+```mermaid
+stateDiagram-v2
+  held --> held: prioritize · urgent, high, normal, low
+  held --> held: snoozeHolding · « Pour moi » hides it until then
+  held --> waiting: waits on another holding
+  waiting --> held: that holding is done · holding.resumed
+```
+
+Run `workPrioritiesMigrationSql` after `workLinksMigrationSql`. `holding.v1` carries `priority` and
+`snoozed_until`; an app that says a holding again without a priority keeps the one set. « Pour moi »
+sorts by priority, then due day, then age, and leaves out what is snoozed (`forMe(db, person, now)`).
+`dueNudges` takes `nudgeHours` by priority (2, 8, 24 and 48 hours by default — the settings
+`kete.nudge_hours_*`); a holding waiting on another holding is never nudged.

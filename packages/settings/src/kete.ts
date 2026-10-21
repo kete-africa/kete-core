@@ -162,6 +162,71 @@ export const keteSettings = [
     group: 'calendar',
     label: { fr: 'Jours fériés', en: 'Holidays' },
   }),
+  // Holdings (spec 139, FR-011): how long a holding waits before its first nudge, by priority —
+  // counted in working hours; a party outside is nudged after its own delay.
+  ...(
+    [
+      ['urgent', 2, 'Urgent', 'Urgent'],
+      ['high', 8, 'Prioritaire', 'High'],
+      ['normal', 24, 'Normal', 'Normal'],
+      ['low', 48, 'Quand possible', 'Low'],
+    ] as const
+  ).map(([priority, hours, fr, en]) =>
+    setting({
+      key: `kete.nudge_hours_${priority}`,
+      schema: z.number().int().min(1).max(720),
+      default: hours,
+      layers: ['organization', 'entity'],
+      permission: 'organization:settings',
+      sensitivity: 'public',
+      group: 'work',
+      label: {
+        fr: `Relance d’un collègue — ${fr} (heures)`,
+        en: `Nudge a colleague — ${en} (hours)`,
+      },
+    }),
+  ),
+  setting({
+    key: 'kete.party_nudge_days',
+    schema: z.number().int().min(1).max(60),
+    default: 2,
+    layers: ['organization', 'entity'],
+    permission: 'organization:settings',
+    sensitivity: 'public',
+    group: 'work',
+    label: { fr: 'Relance d’un tiers (jours)', en: 'Nudge a party (days)' },
+  }),
+  // Threads (spec 139): a daily summary by mail, and WhatsApp after its 24-hour window.
+  setting({
+    key: 'kete.threads_digest',
+    schema: z.enum(['none', 'daily']),
+    default: 'none',
+    layers: ['person'],
+    sensitivity: 'public',
+    group: 'notifications',
+    label: { fr: 'Résumé des fils par e-mail', en: 'Threads summary by e-mail' },
+    choices: {
+      none: { fr: 'Jamais', en: 'Never' },
+      daily: { fr: 'Chaque soir, s’il reste du non-lu', en: 'Each evening, when unread remains' },
+    },
+  }),
+  setting({
+    key: 'kete.whatsapp_template',
+    schema: z.union([z.literal(''), z.string().regex(/^[a-z0-9_]{1,120}$/)]),
+    default: '',
+    layers: ['organization'],
+    permission: 'organization:settings',
+    sensitivity: 'public',
+    group: 'notifications',
+    label: {
+      fr: 'Modèle WhatsApp après 24 heures',
+      en: 'WhatsApp template after 24 hours',
+    },
+    description: {
+      fr: 'Le nom d’un modèle approuvé par Meta, avec un paramètre pour le message. Sans lui, une réponse à un client silencieux depuis 24 heures part par e-mail ou attend.',
+      en: 'The name of a template Meta approved, with one parameter for the message. Without it, an answer to a client silent for 24 hours goes by e-mail or waits.',
+    },
+  }),
   // What the organization's agents may do beyond Kete (spec 129): off until it says so.
   setting({
     key: 'kete.agent_abilities',

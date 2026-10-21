@@ -90,6 +90,34 @@ grant select, insert on ${events} to ${app};
 }
 
 /**
+ * Holdings with a priority, a snooze, and another holding waited on (spec 139). Run after
+ * `workLinksMigrationSql`.
+ */
+export function workPrioritiesMigrationSql(
+  options: Pick<WorkMigrationOptions, 'schema'> = {},
+): string {
+  const schema = checkIdentifier(options.schema ?? 'public');
+  const holdings = `${schema}.kete_holdings`;
+  const events = `${schema}.kete_holding_events`;
+  return `
+alter table ${holdings}
+  add column priority text not null default 'normal'
+    check (priority in ('low', 'normal', 'high', 'urgent')),
+  add column snoozed_until timestamptz,
+  drop constraint kete_holdings_waiting_on_kind_check,
+  add constraint kete_holdings_waiting_on_kind_check
+    check (waiting_on_kind in ('person', 'agent', 'party', 'holding'));
+create index kete_holdings_by_waited_holding on ${holdings} (organization_id, waiting_on_id)
+  where state = 'waiting' and waiting_on_kind = 'holding';
+alter table ${events}
+  drop constraint kete_holding_events_type_check,
+  add constraint kete_holding_events_type_check check (type in ('holding.created',
+    'holding.waiting', 'holding.nudged', 'holding.taken_over', 'holding.handed_back',
+    'holding.prioritized', 'holding.snoozed', 'holding.resumed', 'holding.done'));
+`;
+}
+
+/**
  * Where a holding opens (spec 114): the address its app gives it, read by « Pour moi ». Run after
  * `workMigrationSql`.
  */

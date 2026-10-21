@@ -8,8 +8,11 @@ import {
   type Holder,
   type Holding,
   type HoldingRow,
+  type Priority,
   type WaitingOn,
 } from './holdings.js';
+
+const HOUR = 3_600_000;
 
 // The relay (spec 111, FR-002 to FR-004): a holding never stays with nobody. When its holder is
 // away, it passes to the deputy, then the manager, then the organization's head; when it waits too
@@ -214,10 +217,17 @@ export interface Nudge {
   through: Holder | null;
 }
 
+/** Hours before a colleague or an agent is nudged, by the holding's priority (spec 139). */
+export type NudgeHours = Record<Priority, number>;
+export const defaultNudgeHours: NudgeHours = { urgent: 2, high: 8, normal: 24, low: 48 };
+
 /**
  * The relay on age (FR-004), in working hours only: a holding waiting on a party for longer than
  * its delay (two days by default) is offered to the agent in charge of nudges; one waiting on a
- * colleague or an agent nudges them, once a day. Each nudge is journaled; the product delivers it.
+ * colleague or an agent nudges them after the delay of its priority (`nudgeHours`, set by the
+ * organization; a day for a normal one), and again after the same delay. A holding waiting on
+ * another holding is never nudged: it comes back when that one is done. Each nudge is journaled;
+ * the product delivers it.
  */
 export async function dueNudges(
   db: SqlExecutor,
@@ -228,22 +238,32 @@ export async function dueNudges(
     offsetMinutes?: number;
     partyDelayDays?: number;
     nudger?: Holder | null;
+    nudgeHours?: Partial<NudgeHours>;
   },
 ): Promise<Nudge[]> {
   const now = input.now ?? new Date();
   if (!inWorkingHours(now, input.hours ?? defaultWorkingHours, input.offsetMinutes ?? 0)) return [];
   const partyDelay = (input.partyDelayDays ?? 2) * DAY;
+  const hours = { ...defaultNudgeHours, ...input.nudgeHours };
+  const delayOf = (holding: Holding) =>
+    holding.waitingOn?.kind === 'party' ? partyDelay : hours[holding.priority] * HOUR;
   const { rows } = await db.query<HoldingRow>(
     `select ${holdingColumns} from kete_holdings
-      where state = 'waiting'
-        and waiting_since <= $1::timestamptz - (case when waiting_on_kind = 'party'
-              then $2::double precision else $3::double precision end) * interval '1 millisecond'
-        and (last_nudged_at is null or last_nudged_at <= $1::timestamptz - interval '1 day')
+      where state = 'waiting' and waiting_on_kind <> 'holding'
       order by waiting_since, holding_id for update`,
-    [now, partyDelay, DAY],
   );
   const nudges: Nudge[] = [];
-  for (const holding of rows.map(toHolding)) {
+  const due = rows.map(toHolding).filter((holding) => {
+    const delay = delayOf(holding);
+    const waited = now.getTime() - (holding.waitingSince ?? holding.since).getTime();
+    // A party is nudged once a day once its delay passed; a colleague after each delay.
+    const again = holding.waitingOn?.kind === 'party' ? DAY : delay;
+    return (
+      waited >= delay &&
+      (holding.lastNudgedAt === null || now.getTime() - holding.lastNudgedAt.getTime() >= again)
+    );
+  });
+  for (const holding of due) {
     const to = holding.waitingOn as WaitingOn;
     const through = to.kind === 'party' ? (input.nudger ?? null) : null;
     await db.query(`update kete_holdings set last_nudged_at = $2 where holding_id = $1`, [

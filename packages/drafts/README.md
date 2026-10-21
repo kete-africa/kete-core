@@ -85,3 +85,20 @@ await undoSet(tx, set.id, { by: afi, undo: (item, result) => reverse(item, resul
 - A failure does not stop the others; each item says what became of it.
 - Frozen once dismissed or undone, by the database; `proposalSetsMigrationSql` creates the table
   with its policies (constitution V).
+
+## A draft anyone can read (spec 139)
+
+```ts
+import { describeDraft } from '@kete/drafts';
+
+const fields = describeDraft(review, {
+  locale: 'fr',
+  label: (path, title) => words[path], // `lines.total` for a field inside another
+  name: (id) => names.get(id), // prj_…, pty_… by their names
+  words: { yes: 'Oui', no: 'Non' },
+});
+```
+
+Each field with its label (the product's words, else the schema's title, else the key), its value
+as people read it — money with its currency (`76 110 F CFA`), dates in their language, a reference
+by its name, lines one per line —, where it came from and whether the agent was unsure.

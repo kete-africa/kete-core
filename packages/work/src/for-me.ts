@@ -14,8 +14,14 @@ export interface ForMe {
   information: Holding[];
 }
 
-/** Overdue first, then due soonest, then without a due day; within each, the oldest first. */
+const rank: Record<Holding['priority'], number> = { urgent: 0, high: 1, normal: 2, low: 3 };
+
+/**
+ * The most urgent first (spec 139), then overdue, then due soonest, then without a due day; within
+ * each, the oldest first.
+ */
 export function byUrgency(a: Holding, b: Holding): number {
+  if (a.priority !== b.priority) return rank[a.priority] - rank[b.priority];
   if (a.due !== b.due) {
     if (a.due === null) return 1;
     if (b.due === null) return -1;
@@ -25,15 +31,19 @@ export function byUrgency(a: Holding, b: Holding): number {
   return since(a) - since(b) || a.holdingId.localeCompare(b.holdingId);
 }
 
-/** One read for a person (FR-005): her open holdings and those waiting on her. */
-export async function forMe(db: SqlExecutor, personId: string): Promise<ForMe> {
+/**
+ * One read for a person (FR-005): her open holdings and those waiting on her — what she put off
+ * comes back at its time.
+ */
+export async function forMe(db: SqlExecutor, personId: string, now = new Date()): Promise<ForMe> {
   const { rows } = await db.query<HoldingRow>(
     `select ${holdingColumns} from kete_holdings
       where state <> 'done'
+        and (snoozed_until is null or snoozed_until <= $2)
         and ((holder_kind = 'person' and holder_id = $1)
           or (state = 'waiting' and waiting_on_kind = 'person' and waiting_on_id = $1))
       order by holding_id`,
-    [personId],
+    [personId, now],
   );
   const all = rows.map(toHolding);
   const mine = (h: Holding) => h.holder.kind === 'person' && h.holder.id === personId;

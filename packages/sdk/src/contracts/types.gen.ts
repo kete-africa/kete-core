@@ -411,10 +411,10 @@ export interface Holding {
     id: string;
   };
   /**
-   * Who it waits for: a colleague, an agent, a party outside; none when it is in the holder's hands.
+   * Who it waits for: a colleague, an agent, a party outside, or another holding (it comes back to its holder when that one is done); none when it is in the holder's hands.
    */
   waiting_on?: {
-    kind: 'person' | 'agent' | 'party';
+    kind: 'person' | 'agent' | 'party' | 'holding';
     id: string;
   } | null;
   /**
@@ -425,6 +425,14 @@ export interface Holding {
    * The day it is due, in the organization's time.
    */
   due?: string;
+  /**
+   * How urgent: « Pour moi » sorts by it first. Absent: normal.
+   */
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
+  /**
+   * Before this moment, « Pour moi » does not show it: the holder put it off.
+   */
+  snoozed_until?: string;
   /**
    * held: in the holder's hands. waiting: it waits on someone. done: finished.
    */
@@ -2871,11 +2879,19 @@ export interface Message {
     id: string;
   };
   via: 'kete' | 'whatsapp' | 'mail' | 'telegram' | 'form';
+  /**
+   * internal: between the organization's people and agents. outside: said to the thread's contacts through their channel (a contact's own words are outside). Absent: internal.
+   */
+  visibility?: 'internal' | 'outside';
   reply_to?: string;
   /**
    * The message this one replaces; the original is kept.
    */
   edited_from?: string;
+  /**
+   * The message this one was moved from; the original stays, saying where it went.
+   */
+  moved_from?: string;
   /**
    * @maxItems 50
    */

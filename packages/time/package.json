@@ -28,6 +28,7 @@
     }
   },
   "dependencies": {
-    "@kete/sdk": "workspace:@kete-africa/sdk@*"
+    "@kete/sdk": "workspace:@kete-africa/sdk@*",
+    "ical-generator": "11.1.2"
   }
 }

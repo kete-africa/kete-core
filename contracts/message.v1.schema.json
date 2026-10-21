@@ -64,12 +64,21 @@
     "via": {
       "enum": ["kete", "whatsapp", "mail", "telegram", "form"]
     },
+    "visibility": {
+      "description": "internal: between the organization's people and agents. outside: said to the thread's contacts through their channel (a contact's own words are outside). Absent: internal.",
+      "enum": ["internal", "outside"]
+    },
     "reply_to": {
       "type": "string",
       "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
     },
     "edited_from": {
       "description": "The message this one replaces; the original is kept.",
+      "type": "string",
+      "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
+    },
+    "moved_from": {
+      "description": "The message this one was moved from; the original stays, saying where it went.",
       "type": "string",
       "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
     },

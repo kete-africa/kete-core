@@ -9,17 +9,27 @@ export {
   HoldingError,
   holdingEvents,
   openHoldings,
+  prioritize,
+  priorities,
   sayHolding,
+  snoozeHolding,
   type Holder,
   type Holding,
   type HoldingEvent,
   type HoldingEventType,
   type HoldingState,
+  type Priority,
   type WaitingOn,
 } from './holdings.js';
-export { workLinksMigrationSql, workMigrationSql, type WorkMigrationOptions } from './migration.js';
+export {
+  workLinksMigrationSql,
+  workMigrationSql,
+  workPrioritiesMigrationSql,
+  type WorkMigrationOptions,
+} from './migration.js';
 export {
   awayOn,
+  defaultNudgeHours,
   defaultWorkingHours,
   dueNudges,
   inWorkingHours,
@@ -27,6 +37,7 @@ export {
   relayAbsences,
   relayTarget,
   type Move,
+  type NudgeHours,
   type Nudge,
   type Structure,
   type WorkingHours,

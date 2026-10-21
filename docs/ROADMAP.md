@@ -684,13 +684,14 @@ Every app, Pono and the Cockpit included, ships with Kete Intelligence inside an
 
 ### Delivered so far (KYA's path, D-060)
 
-| Step | Specs          | Delivers                                                                                                                                                                                  |
-| ---- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A6   | `115` to `118` | Settings in layers, « Réglages » in every app, settings where a command runs, the organization's calendar                                                                                 |
-| B1   | `119` to `121` | `@kete/connections`, `@kete/metering`, `@kete/infrastructure` (a test instance created and destroyed through the port alone)                                                              |
-| B3   | `123`          | Mon Kete: an organization deploys its Kete Enterprise itself                                                                                                                              |
-| B2   | `125`, `131`   | The Compte Kete's fleet API; Kete Cockpit's « Flotte » reads and makes the deployments; updates pushed with rollback and backups restored through the port (proved live on two instances) |
-| C4   | `124`, `129`   | Imported tools (OpenAPI, remote MCP); web search and reading, a computer of its own, sub-agents, answers said aloud — under the policies                                                  |
+| Step | Specs          | Delivers                                                                                                                                                                                                                             |
+| ---- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A6   | `115` to `118` | Settings in layers, « Réglages » in every app, settings where a command runs, the organization's calendar                                                                                                                            |
+| B1   | `119` to `121` | `@kete/connections`, `@kete/metering`, `@kete/infrastructure` (a test instance created and destroyed through the port alone)                                                                                                         |
+| B3   | `123`          | Mon Kete: an organization deploys its Kete Enterprise itself                                                                                                                                                                         |
+| B2   | `125`, `131`   | The Compte Kete's fleet API; Kete Cockpit's « Flotte » reads and makes the deployments; updates pushed with rollback and backups restored through the port (proved live on two instances)                                            |
+| C4   | `124`, `129`   | Imported tools (OpenAPI, remote MCP); web search and reading, a computer of its own, sub-agents, answers said aloud — under the policies                                                                                             |
+| A4+  | `139`          | Threads people live in (the author's test of 2026-10-21): unread, members, mentions, files, moves, live changes; answers on WhatsApp; holdings with priorities; Planifier in Outlook; drafts anyone reads; the six policies as forms |
 
 Still open here: the Cockpit's « Flotte » pushing a version and restoring a backup on screen,
 scheduled backups (B2); phone calls with an agent (after decision 0012); billing (B4, after KYA's

@@ -20,3 +20,15 @@ export {
   type JournaledDecision,
   type PoliciesMigrationOptions,
 } from './store.js';
+export {
+  fillTemplate,
+  policyTemplates,
+  simulatePolicy,
+  TemplateError,
+  type Approver,
+  type Blanks,
+  type Channel,
+  type PolicyFamily,
+  type PolicyTemplate,
+  type Simulation,
+} from './templates.js';

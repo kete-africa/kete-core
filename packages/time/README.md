@@ -86,3 +86,15 @@ flowchart LR
   C --> A[addWorkingDays · a due day]
   C --> W[workdayOf · freeSlots, proposeBlocks]
 ```
+
+## Her days in Outlook (spec 139)
+
+```ts
+import { icsFeed } from '@kete/time';
+
+const ics = icsFeed(facts, { name: 'Kete — Abla Nyuiadzi' }); // text/calendar
+```
+
+The facts as an iCalendar feed (built on `ical-generator`): whole days as days, moments at their
+time, an instant as a quarter of an hour, a taken-back fact left out, an https `href` as the event's
+link. Kete stays the agenda's source; Outlook, Google or Apple subscribe to it.

@@ -67,3 +67,20 @@ await settle(tx, organizationId, { via, ref, object, intent: 'incident', by: abl
 
 Not here yet: cards with buttons on WhatsApp and Telegram, settled anywhere (FR-006, with the
 products' screens); asking the right person in one line when information is missing.
+
+## Answers on WhatsApp and Telegram (spec 139)
+
+```ts
+import { answerByChat } from '@kete/channels';
+
+const answer = await answerByChat(tx, {
+  message: { thread: threadId, text },
+  channels, // from @kete/notify: whatsapp, telegram, or null
+  template: (words) => ({ name: 'suivi', language: 'fr', parameters: [words] }), // or null
+});
+// { sent: [...], byTemplate: [...], refused: [{ to, reason: 'outside_window' | 'no_channel' }] }
+```
+
+WhatsApp lets a business write freely within 24 hours of the person's last message
+(`WHATSAPP_WINDOW_HOURS`); after that, only the organization's approved template goes, else the
+contact is refused with the reason. Telegram has no window.

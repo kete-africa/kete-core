@@ -21,14 +21,16 @@ interface MessageRow extends Record<string, unknown> {
   to_kind: 'person' | 'agent' | null;
   to_id: string | null;
   via: Message['via'];
+  visibility: NonNullable<Message['visibility']>;
   reply_to: string | null;
   edited_from: string | null;
+  moved_from: string | null;
   mentions: NonNullable<Message['mentions']>;
   at: Date;
 }
 
 const COLUMNS = `message_id, thread_id, author_kind, author_id, text, attachments, for_what,
-  to_kind, to_id, via, reply_to, edited_from, mentions, at`;
+  to_kind, to_id, via, visibility, reply_to, edited_from, moved_from, mentions, at`;
 
 function toMessage(row: MessageRow): Message {
   return {
@@ -40,15 +42,21 @@ function toMessage(row: MessageRow): Message {
     for: row.for_what,
     ...(row.to_kind && row.to_id ? { to: { kind: row.to_kind, id: row.to_id } } : {}),
     via: row.via,
+    visibility: row.visibility,
     ...(row.reply_to ? { reply_to: row.reply_to } : {}),
     ...(row.edited_from ? { edited_from: row.edited_from } : {}),
+    ...(row.moved_from ? { moved_from: row.moved_from } : {}),
     ...(row.mentions.length > 0 ? { mentions: row.mentions } : {}),
     at: new Date(row.at).toISOString(),
   };
 }
 
 /** What a message says, as its author gives it. */
-export type SaidMessage = Omit<Message, 'id' | 'at' | 'edited_from'>;
+export type SaidMessage = Omit<Message, 'id' | 'at' | 'edited_from' | 'moved_from'>;
+
+/** A contact's own words are said outside; anything else is internal unless its author says so. */
+const visibilityOf = (said: SaidMessage): NonNullable<Message['visibility']> =>
+  said.author.kind === 'contact' ? 'outside' : (said.visibility ?? 'internal');
 
 /** The holding a message « for action » makes: under the first version of the message. */
 async function sayAction(
@@ -86,7 +94,12 @@ export async function postMessage(
   said: SaidMessage,
   now = new Date(),
 ): Promise<{ message: Message; holdingId: string | null }> {
-  const message: Message = { ...said, id: newId('msg'), at: now.toISOString() };
+  const message: Message = {
+    ...said,
+    visibility: visibilityOf(said),
+    id: newId('msg'),
+    at: now.toISOString(),
+  };
   const checked = validateMessage(message);
   if (!checked.ok) {
     throw new ThreadError(
@@ -100,10 +113,15 @@ export async function postMessage(
   if (thread.state === 'closed') throw new ThreadError('closed', 'This thread is put away.');
   await insert(db, organizationId, message);
   await joinThread(db, organizationId, thread.id, said.author as Member, now);
-  // Whoever must act knows: she is a member too.
+  // Whoever must act knows: she is a member too; so is whoever is mentioned (spec 139, FR-003).
   if (said.for === 'action' && said.to) {
     await joinThread(db, organizationId, thread.id, said.to, now);
   }
+  for (const mentioned of said.mentions ?? []) {
+    await joinThread(db, organizationId, thread.id, mentioned, now);
+  }
+  // Writing reads the thread up to one's own words (FR-001).
+  await markRead(db, organizationId, { threadId: thread.id, reader: said.author }, now);
   const holdingId =
     said.for === 'action' ? await sayAction(db, organizationId, message, message.id, now) : null;
   return { message, holdingId };
@@ -112,8 +130,9 @@ export async function postMessage(
 async function insert(db: SqlExecutor, organizationId: string, message: Message): Promise<void> {
   await db.query(
     `insert into kete_messages (message_id, organization_id, thread_id, author_kind, author_id,
-       text, attachments, for_what, to_kind, to_id, via, reply_to, edited_from, mentions, at)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+       text, attachments, for_what, to_kind, to_id, via, reply_to, edited_from, mentions, at,
+       visibility, moved_from)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
     [
       message.id,
       organizationId,
@@ -130,6 +149,8 @@ async function insert(db: SqlExecutor, organizationId: string, message: Message)
       message.edited_from ?? null,
       JSON.stringify(message.mentions ?? []),
       message.at,
+      message.visibility ?? 'internal',
+      message.moved_from ?? null,
     ],
   );
 }
@@ -149,14 +170,16 @@ export async function versionsOf(db: SqlExecutor, messageId: string): Promise<Me
        select ${COLUMNS} from kete_messages where message_id = $1
        union all
        select m.message_id, m.thread_id, m.author_kind, m.author_id, m.text, m.attachments,
-              m.for_what, m.to_kind, m.to_id, m.via, m.reply_to, m.edited_from, m.mentions, m.at
+              m.for_what, m.to_kind, m.to_id, m.via, m.visibility, m.reply_to, m.edited_from,
+              m.moved_from, m.mentions, m.at
          from kete_messages m join back b on m.message_id = b.edited_from
      ),
      forth as (
        select ${COLUMNS} from kete_messages where message_id = $1
        union all
        select m.message_id, m.thread_id, m.author_kind, m.author_id, m.text, m.attachments,
-              m.for_what, m.to_kind, m.to_id, m.via, m.reply_to, m.edited_from, m.mentions, m.at
+              m.for_what, m.to_kind, m.to_id, m.via, m.visibility, m.reply_to, m.edited_from,
+              m.moved_from, m.mentions, m.at
          from kete_messages m join forth f on m.edited_from = f.message_id
      )
      select * from back union select * from forth order by at, message_id`,
@@ -219,6 +242,8 @@ export interface Shown extends Message {
   first: string;
   edits: number;
   readBy: { kind: Member['kind']; id: string; at: string }[];
+  /** Moved to another thread: the original stays here, saying where it went (FR-005). */
+  movedTo?: { thread: string; message: string; at: string };
 }
 
 /** The messages of a thread, each in its latest version, in the order they were first said. */
@@ -240,6 +265,17 @@ export async function messagesOf(db: SqlExecutor, threadId: string): Promise<Sho
       where m.thread_id = $1 order by r.at, r.reader_id`,
     [threadId],
   );
+  const { rows: moveRows } = await db.query<{
+    message_id: string;
+    to_thread: string;
+    moved_message_id: string;
+    at: Date;
+  }>(
+    `select message_id, to_thread, moved_message_id, at from kete_message_moves
+      where thread_id = $1`,
+    [threadId],
+  );
+  const moved = new Map(moveRows.map((r) => [r.message_id, r]));
   return all
     .filter((m) => !m.edited_from)
     .map((first) => {
@@ -249,10 +285,20 @@ export async function messagesOf(db: SqlExecutor, threadId: string): Promise<Sho
         latest = n;
         edits += 1;
       }
+      const move = moved.get(first.id);
       return {
         ...latest,
         first: first.id,
         edits,
+        ...(move
+          ? {
+              movedTo: {
+                thread: move.to_thread,
+                message: move.moved_message_id,
+                at: new Date(move.at).toISOString(),
+              },
+            }
+          : {}),
         readBy: readRows
           .filter((r) => r.message_id === first.id)
           .map((r) => ({ kind: r.reader_kind, id: r.reader_id, at: new Date(r.at).toISOString() })),
@@ -279,7 +325,84 @@ export async function markRead(
      returning message_id`,
     [organizationId, input.threadId, input.reader.kind, input.reader.id, now],
   );
+  await db.query(
+    `delete from kete_thread_marks where thread_id = $1 and member_kind = $2 and member_id = $3`,
+    [input.threadId, input.reader.kind, input.reader.id],
+  );
   return rows.length;
+}
+
+/**
+ * She marks a thread unread from a message on (FR-001): her own way of reading, kept apart from
+ * the trace — « read by » keeps when she read it.
+ */
+export async function markUnread(
+  db: SqlExecutor,
+  organizationId: string,
+  input: { messageId: string; reader: Pick<Member, 'kind' | 'id'> },
+): Promise<void> {
+  const message = await findMessage(db, input.messageId);
+  if (!message) throw new ThreadError('not_found', 'No such message here.');
+  await db.query(
+    `insert into kete_thread_marks (organization_id, thread_id, member_kind, member_id, unread_from)
+     values ($1, $2, $3, $4, $5)
+     on conflict (thread_id, member_kind, member_id)
+       do update set unread_from = excluded.unread_from`,
+    [organizationId, message.thread, input.reader.kind, input.reader.id, message.at],
+  );
+}
+
+/**
+ * A message said in the wrong thread goes to the right one (FR-005), moved by its author or the
+ * holder of the thread it was said in: the target gets it, naming where it came from; the source
+ * keeps the original and where it went. A message moves once.
+ */
+export async function moveMessage(
+  db: SqlExecutor,
+  organizationId: string,
+  input: { messageId: string; to: string; by: Pick<Member, 'kind' | 'id'> },
+  now = new Date(),
+): Promise<Message> {
+  const versions = await versionsOf(db, input.messageId);
+  const first = versions[0];
+  const latest = versions.at(-1);
+  if (!first || !latest) throw new ThreadError('not_found', 'No such message here.');
+  const source = await getThread(db, first.thread);
+  if (!source) throw new ThreadError('not_found', 'No such thread here.');
+  const byAuthor = first.author.kind === input.by.kind && first.author.id === input.by.id;
+  const byHolder = source.holder.kind === input.by.kind && source.holder.id === input.by.id;
+  if (!byAuthor && !byHolder) {
+    throw new ThreadError('not_the_author', 'Its author or the thread’s holder moves it.');
+  }
+  const target = await getThread(db, input.to);
+  if (!target || target.id === source.id) throw new ThreadError('not_found', 'Which thread?');
+  if (target.state === 'closed') throw new ThreadError('closed', 'This thread is put away.');
+  const { rows: done } = await db.query(`select 1 from kete_message_moves where message_id = $1`, [
+    first.id,
+  ]);
+  if (done.length > 0) throw new ThreadError('already_moved', 'This message was moved already.');
+  const message: Message = {
+    thread: target.id,
+    author: latest.author,
+    text: latest.text,
+    ...(latest.attachments ? { attachments: latest.attachments } : {}),
+    for: 'information',
+    via: latest.via,
+    visibility: latest.visibility ?? 'internal',
+    ...(latest.mentions ? { mentions: latest.mentions } : {}),
+    moved_from: first.id,
+    id: newId('msg'),
+    at: now.toISOString(),
+  };
+  await insert(db, organizationId, message);
+  await db.query(
+    `insert into kete_message_moves (organization_id, message_id, thread_id, to_thread,
+       moved_message_id, by_kind, by_id, at)
+     values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    [organizationId, first.id, source.id, target.id, message.id, input.by.kind, input.by.id, now],
+  );
+  await joinThread(db, organizationId, target.id, input.by as Member, now);
+  return message;
 }
 
 /**

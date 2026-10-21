@@ -13,14 +13,17 @@ import {
   HoldingError,
   holdingEvents,
   openHoldings,
+  prioritize,
   inWorkingHours,
   reclaimUnheld,
   relayAbsences,
   relayTarget,
   sayHolding,
+  snoozeHolding,
   syncSource,
   workLinksMigrationSql,
   workMigrationSql,
+  workPrioritiesMigrationSql,
   type Structure,
 } from '../src/index.js';
 
@@ -33,6 +36,7 @@ beforeAll(async () => {
     migrate: async (owner, { schema, appRole }) => {
       await owner.query(workMigrationSql({ schema, appRole }));
       await owner.query(workLinksMigrationSql({ schema }));
+      await owner.query(workPrioritiesMigrationSql({ schema }));
     },
   });
 });
@@ -328,6 +332,84 @@ describe('the relay on age', () => {
       // An hour later: already nudged today.
       expect(await dueNudges(tx, org, { now: new Date('2026-10-22T10:00:00Z'), nudger })).toEqual(
         [],
+      );
+    });
+  });
+});
+
+describe('priorities, a snooze, a holding waited on (spec 139)', () => {
+  it('sorts the urgent first, hides what she put off until its time, nudges by priority', async () => {
+    const org = fresh();
+    const monday = new Date('2026-10-19T08:00:00Z');
+    await inOrganization(db.app, org, async (tx) => {
+      const normal = await sayHolding(tx, org, said('P-1'), monday);
+      const urgent = await sayHolding(tx, org, said('P-2', { priority: 'urgent' }), monday);
+      expect(urgent.priority).toBe('urgent');
+      expect((await forMe(tx, 'usr_kossi', monday)).held.map((h) => h.source.ref)).toEqual([
+        'P-2',
+        'P-1',
+      ]);
+      // An app says it again without a priority: the one set is kept.
+      await prioritize(tx, org, { holdingId: normal.holdingId, priority: 'high' });
+      expect((await sayHolding(tx, org, said('P-1'), monday)).priority).toBe('high');
+      await snoozeHolding(tx, org, {
+        holdingId: urgent.holdingId,
+        until: new Date('2026-10-19T14:00:00Z'),
+      });
+      expect((await forMe(tx, 'usr_kossi', monday)).held.map((h) => h.source.ref)).toEqual(['P-1']);
+      const afternoon = new Date('2026-10-19T15:00:00Z');
+      expect((await forMe(tx, 'usr_kossi', afternoon)).held.map((h) => h.source.ref)).toEqual([
+        'P-2',
+        'P-1',
+      ]);
+      expect((await holdingEvents(tx, urgent.holdingId)).map((e) => e.type)).toContain(
+        'holding.snoozed',
+      );
+      // Waiting on Abla: urgent after 2 hours (the organization's setting), normal after a day.
+      await sayHolding(
+        tx,
+        org,
+        said('P-3', {
+          priority: 'urgent',
+          state: 'waiting',
+          waiting_on: { kind: 'person', id: 'usr_abla' },
+        }),
+        monday,
+      );
+      await sayHolding(
+        tx,
+        org,
+        said('P-4', { state: 'waiting', waiting_on: { kind: 'person', id: 'usr_abla' } }),
+        monday,
+      );
+      const tenOClock = new Date('2026-10-19T10:00:00Z');
+      expect(
+        (await dueNudges(tx, org, { now: tenOClock, nudgeHours: { urgent: 2 } })).map(
+          (n) => n.holding.source.ref,
+        ),
+      ).toEqual(['P-3']);
+    });
+  });
+
+  it('comes back to its holder when the holding it waits on is done', async () => {
+    const org = fresh();
+    await inOrganization(db.app, org, async (tx) => {
+      const order = await sayHolding(tx, org, said('B-1', { holder: yao }));
+      const install = await sayHolding(
+        tx,
+        org,
+        said('B-2', { state: 'waiting', waiting_on: { kind: 'holding', id: order.holdingId } }),
+      );
+      expect(install.state).toBe('waiting');
+      // Never nudged: it waits on work, not on a person.
+      expect(
+        await dueNudges(tx, org, { now: new Date('2026-10-28T10:00:00Z'), nudgeHours: {} }),
+      ).toEqual([]);
+      await finishHolding(tx, org, order.holdingId);
+      const back = await getHolding(tx, install.holdingId);
+      expect(back).toMatchObject({ state: 'held', waitingOn: null, holder: kossi });
+      expect((await holdingEvents(tx, install.holdingId)).map((e) => e.type)).toContain(
+        'holding.resumed',
       );
     });
   });

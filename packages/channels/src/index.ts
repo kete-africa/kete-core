@@ -11,6 +11,7 @@ export {
   type OutgoingMail,
 } from './mail.js';
 export { answerByMail, readMailbox } from './mailboxes.js';
+export { answerByChat, WHATSAPP_WINDOW_HOURS, type ChatAnswer } from './chat-answers.js';
 export { channelsMigrationSql, type ChannelsMigrationOptions } from './migration.js';
 export {
   fromChat,

@@ -37,3 +37,9 @@ export {
   type ProposalSetStatus,
   type StoredProposalSet,
 } from './proposals.js';
+export {
+  describeDraft,
+  type DescribedField,
+  type DescribeOptions,
+  type DraftToDescribe,
+} from './describe.js';

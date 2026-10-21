@@ -70,3 +70,10 @@ here.value('kete.currency');
   migration; the journal is never changed nor deleted.
 - **Never a token in a cache key**: the Compte Kete's answer is kept per token's SHA-256, five
   minutes at most, and read again at once after she saves a preference.
+
+## Holdings and threads (spec 139)
+
+`kete.nudge_hours_urgent`, `…_high`, `…_normal`, `…_low` (hours before a colleague is nudged, by
+priority) and `kete.party_nudge_days`, in the group `work`; `kete.threads_digest` (a person's daily
+summary of unread threads by e-mail) and `kete.whatsapp_template` (the approved template for an
+answer after WhatsApp's 24 hours), in `notifications`.

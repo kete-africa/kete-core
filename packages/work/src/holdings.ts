@@ -11,11 +11,16 @@ export interface Holder {
 }
 
 export interface WaitingOn {
-  kind: 'person' | 'agent' | 'party';
+  /** A holding waited on comes back to its holder when that one is done (spec 139). */
+  kind: 'person' | 'agent' | 'party' | 'holding';
   id: string;
 }
 
 export type HoldingState = 'held' | 'waiting' | 'done';
+
+/** How urgent a holding is (spec 139, FR-010): « Pour moi » sorts by it first. */
+export type Priority = 'low' | 'normal' | 'high' | 'urgent';
+export const priorities: readonly Priority[] = ['urgent', 'high', 'normal', 'low'];
 
 export interface Holding {
   holdingId: string;
@@ -29,6 +34,9 @@ export interface Holding {
   since: Date;
   /** The day it is due, in the organization's time (`2026-10-16`). */
   due: string | null;
+  priority: Priority;
+  /** Put off by its holder until then: « Pour moi » does not show it before. */
+  snoozedUntil: Date | null;
   state: HoldingState;
   purpose: 'action' | 'information';
   /** Where it opens, as its app said it: an https address of the app, or a path of the center. */
@@ -45,6 +53,9 @@ export type HoldingEventType =
   | 'holding.nudged'
   | 'holding.taken_over'
   | 'holding.handed_back'
+  | 'holding.prioritized'
+  | 'holding.snoozed'
+  | 'holding.resumed'
   | 'holding.done';
 
 export interface HoldingEvent {
@@ -81,6 +92,8 @@ export interface HoldingRow extends Record<string, unknown> {
   waiting_since: Date | null;
   since: Date;
   due: string | Date | null;
+  priority: Priority;
+  snoozed_until: Date | null;
   state: HoldingState;
   purpose: 'action' | 'information';
   href: string | null;
@@ -92,8 +105,8 @@ export interface HoldingRow extends Record<string, unknown> {
 
 export const holdingColumns = `holding_id, source_app, source_kind, source_ref, object_kind, object_id,
   what, holder_kind, holder_id, waiting_on_kind, waiting_on_id, waiting_since, since,
-  to_char(due, 'YYYY-MM-DD') as due, state, purpose, href, taken_over_from_kind, taken_over_from_id,
-  last_nudged_at, done_at`;
+  to_char(due, 'YYYY-MM-DD') as due, priority, snoozed_until, state, purpose, href,
+  taken_over_from_kind, taken_over_from_id, last_nudged_at, done_at`;
 
 const date = (value: Date | null) => (value ? new Date(value) : null);
 
@@ -111,6 +124,8 @@ export function toHolding(row: HoldingRow): Holding {
     waitingSince: date(row.waiting_since),
     since: new Date(row.since),
     due: row.due === null ? null : String(row.due),
+    priority: row.priority,
+    snoozedUntil: date(row.snoozed_until),
     state: row.state,
     purpose: row.purpose,
     href: row.href ?? null,
@@ -198,15 +213,17 @@ export async function sayHolding(
     holding.for ?? 'action',
     state === 'done' ? (previous?.doneAt ?? now) : null,
     holding.href ?? null,
+    holding.priority ?? previous?.priority ?? 'normal',
+    holding.snoozed_until ? new Date(holding.snoozed_until) : (previous?.snoozedUntil ?? null),
   ];
   let row: HoldingRow;
   if (!previous) {
     const { rows } = await db.query<HoldingRow>(
       `insert into kete_holdings (holding_id, organization_id, source_app, source_kind, source_ref,
          object_kind, object_id, what, holder_kind, holder_id, waiting_on_kind, waiting_on_id,
-         waiting_since, due, state, purpose, done_at, href, since)
+         waiting_since, due, state, purpose, done_at, href, priority, snoozed_until, since)
        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-         $19)
+         $19, $20, $21)
        returning ${holdingColumns}`,
       [
         newId('hld'),
@@ -224,7 +241,8 @@ export async function sayHolding(
       `update kete_holdings
           set object_kind = $2, object_id = $3, what = $4, holder_kind = $5, holder_id = $6,
               waiting_on_kind = $7, waiting_on_id = $8, waiting_since = $9, due = $10, state = $11,
-              purpose = $12, done_at = $13, href = $14, updated_at = now(),
+              purpose = $12, done_at = $13, href = $14, priority = $15, snoozed_until = $16,
+              updated_at = now(),
               taken_over_from_kind = case when holder_kind = $5 and holder_id = $6
                 then taken_over_from_kind end,
               taken_over_from_id = case when holder_kind = $5 and holder_id = $6
@@ -254,8 +272,81 @@ export async function sayHolding(
   }
   if (kept.state === 'done' && previous?.state !== 'done') {
     await journal(db, organizationId, id, 'holding.done', {}, now);
+    await resumeWaiters(db, organizationId, id, now);
   }
   return kept;
+}
+
+/** The holdings that waited on one just done come back to their holders (spec 139, FR-010). */
+async function resumeWaiters(
+  db: SqlExecutor,
+  organizationId: string,
+  holdingId: string,
+  now: Date,
+): Promise<void> {
+  const { rows } = await db.query<{ holding_id: string }>(
+    `update kete_holdings
+        set state = 'held', waiting_on_kind = null, waiting_on_id = null, waiting_since = null,
+            updated_at = now()
+      where waiting_on_kind = 'holding' and waiting_on_id = $1 and state = 'waiting'
+      returning holding_id`,
+    [holdingId],
+  );
+  for (const row of rows) {
+    await journal(db, organizationId, row.holding_id, 'holding.resumed', { after: holdingId }, now);
+  }
+}
+
+/** Its holder says how urgent it is (spec 139, FR-010); journaled. */
+export async function prioritize(
+  db: SqlExecutor,
+  organizationId: string,
+  input: { holdingId: string; priority: Priority },
+  now = new Date(),
+): Promise<Holding> {
+  const { rows } = await db.query<HoldingRow>(
+    `update kete_holdings set priority = $2, updated_at = now()
+      where holding_id = $1 returning ${holdingColumns}`,
+    [input.holdingId, input.priority],
+  );
+  if (!rows[0]) throw new HoldingError('not_found', 'No such holding in this organization.');
+  await journal(
+    db,
+    organizationId,
+    input.holdingId,
+    'holding.prioritized',
+    {
+      priority: input.priority,
+    },
+    now,
+  );
+  return toHolding(rows[0]);
+}
+
+/** Its holder puts it off until a moment, or takes it back now (`until: null`); journaled. */
+export async function snoozeHolding(
+  db: SqlExecutor,
+  organizationId: string,
+  input: { holdingId: string; until: Date | null },
+  now = new Date(),
+): Promise<Holding> {
+  const { rows } = await db.query<HoldingRow>(
+    `update kete_holdings set snoozed_until = $2, updated_at = now()
+      where holding_id = $1 and state <> 'done' returning ${holdingColumns}`,
+    [input.holdingId, input.until],
+  );
+  if (!rows[0]) throw new HoldingError('not_found', 'No such open holding in this organization.');
+  await journal(
+    db,
+    organizationId,
+    input.holdingId,
+    'holding.snoozed',
+    {
+      until: input.until?.toISOString() ?? null,
+    },
+    now,
+  );
+  return toHolding(rows[0]);
 }
 
 /** The open holdings of the active organization, the oldest first; of one app when given. */
@@ -288,6 +379,7 @@ export async function finishHolding(
   );
   if (!rows[0]) return null;
   await journal(db, organizationId, holdingId, 'holding.done', {}, now);
+  await resumeWaiters(db, organizationId, holdingId, now);
   return toHolding(rows[0]);
 }
 
