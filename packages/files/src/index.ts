@@ -11,6 +11,7 @@ export {
   type PresignUploadOptions,
 } from './storage.js';
 export { s3Storage, type S3StorageOptions } from './s3.js';
+export { DiskLinkError, diskStorage } from './disk.js';
 export {
   prepareImage,
   UnsafeFileError,
