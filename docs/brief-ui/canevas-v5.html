@@ -1,0 +1,1130 @@
+<meta charset="utf-8">
+<title>Canevas Kete 5</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: the frame of canvas v3.1 (top bar, places on the left, the page in the middle) with D-057's screen —
+   « Pour moi » first, the conversation in the middle, the state beside it — in @kete/design's tokens. */
+:root{
+  --outer:#E4E4E0;--bg:#F7F7F6;--surface:#FFFFFF;--raised:#FFFFFF;--control:#FFFFFF;--hover:#ECECEA;--selected:#E2E2DF;
+  --line:#DCDCD8;--line-strong:#8A8A85;--line-control:#C9C9C4;
+  --fg:#1F1F1F;--fg-soft:#4A4A48;--fg-muted:#5F5F5B;
+  --accent:#15897A;--accent-soft:#E1F1ED;--action:#177969;--action-strong:#125F52;--on-action:#FFFFFF;
+  --focus:#B35F00;--agent:#1F1F1F;--on-agent:#FFFFFF;
+  --ok:#2F7D4F;--ok-ink:#1F5C38;--ok-surface:#E3F1E8;
+  --verify:#C98A2B;--verify-ink:#7A4A0B;--verify-surface:#FBEBD0;
+  --err:#9B1C3C;--err-ink:#7D1330;--err-surface:#F7E1E7;
+  --info:#2B5C8A;--info-ink:#1E4466;--info-surface:#E2ECF5;
+  --wa-bg:#E9EFEB;--wa-in:#FFFFFF;--wa-out:#D6EFE2;--wa-bar:#1C6B4A;--on-wa-bar:#FFFFFF;
+  --note:#FFF8E6;--note-line:#E9D9A8;--note-ink:#5A4510;
+  --p-afi:#2B5C8A;--p-kossi:#875028;--p-yao:#5F5F5B;--p-essi:#6B4E9B;--p-phebe:#9B1C3C;--p-mawuli:#125F52;--p-party:#1C8A4E;
+  --font-ui:"Segoe UI",Inter,system-ui,-apple-system,Roboto,"Helvetica Neue",sans-serif;
+  --font-num:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --rail:232px;--bar:48px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --outer:#1a1a1a;--bg:#282828;--surface:#242424;--raised:#303030;--control:#282828;--hover:#343434;--selected:#424242;
+  --line:#494949;--line-strong:#555555;--line-control:#424242;
+  --fg:#DEDEDE;--fg-soft:#BBBBBB;--fg-muted:#999999;
+  --accent:#1CA18C;--accent-soft:rgba(28,161,140,.13);--action:#177969;--action-strong:#125F52;--on-action:#FFFFFF;
+  --focus:#F99D32;--agent:#DEDEDE;--on-agent:#242424;
+  --ok:#4FA873;--ok-ink:#A6DDBA;--ok-surface:#1C3025;
+  --verify:#D9A04A;--verify-ink:#F2CC8A;--verify-surface:#3A2A12;
+  --err:#D0546F;--err-ink:#F4B0BF;--err-surface:#3E1620;
+  --info:#5C8FC2;--info-ink:#AFCDEB;--info-surface:#172A3D;
+  --wa-bg:#1d2421;--wa-in:#2b3330;--wa-out:#1d4a3f;--wa-bar:#1d4a3f;--on-wa-bar:#E6EFEA;
+  --note:#2E2716;--note-line:#5A4A22;--note-ink:#EBD9A6;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --outer:#1a1a1a;--bg:#282828;--surface:#242424;--raised:#303030;--control:#282828;--hover:#343434;--selected:#424242;
+  --line:#494949;--line-strong:#555555;--line-control:#424242;
+  --fg:#DEDEDE;--fg-soft:#BBBBBB;--fg-muted:#999999;
+  --accent:#1CA18C;--accent-soft:rgba(28,161,140,.13);--action:#177969;--action-strong:#125F52;--on-action:#FFFFFF;
+  --focus:#F99D32;--agent:#DEDEDE;--on-agent:#242424;
+  --ok:#4FA873;--ok-ink:#A6DDBA;--ok-surface:#1C3025;
+  --verify:#D9A04A;--verify-ink:#F2CC8A;--verify-surface:#3A2A12;
+  --err:#D0546F;--err-ink:#F4B0BF;--err-surface:#3E1620;
+  --info:#5C8FC2;--info-ink:#AFCDEB;--info-surface:#172A3D;
+  --wa-bg:#1d2421;--wa-in:#2b3330;--wa-out:#1d4a3f;--wa-bar:#1d4a3f;--on-wa-bar:#E6EFEA;
+  --note:#2E2716;--note-line:#5A4A22;--note-ink:#EBD9A6;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg)}
+body{color:var(--fg);font:14px/1.45 var(--font-ui);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums;font-weight:500}
+.muted{color:var(--fg-muted)}.soft{color:var(--fg-soft)}
+.ico{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ico.sm{width:14px;height:14px}
+
+/* ---------- the frame ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;height:var(--bar);display:flex;align-items:center;gap:10px;
+  background:var(--surface);border-bottom:1px solid var(--line);
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:8px;font-weight:650;font-size:15px}
+.mark{width:24px;height:24px;border-radius:6px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+.org{height:28px;border:1px solid var(--line-control);background:var(--control);border-radius:6px;padding:0 8px;font-size:12.5px;display:inline-flex;align-items:center;gap:6px;color:var(--fg-soft)}
+.search{flex:1;max-width:520px;margin-inline:auto;height:32px;border:1px solid var(--line-control);border-radius:7px;background:var(--control);display:flex;align-items:center;gap:8px;padding:0 10px;color:var(--fg-muted);font-size:13px;min-width:0}
+.search span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kbd{font:11px var(--font-num);border:1px solid var(--line-control);border-radius:4px;padding:1px 5px;color:var(--fg-muted)}
+.pill{height:26px;border:1px solid var(--line-control);border-radius:13px;padding:0 9px;display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--fg-soft);background:var(--control);white-space:nowrap}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.ib{width:32px;height:32px;border:0;background:transparent;border-radius:6px;display:inline-grid;place-items:center;color:var(--fg-soft)}
+.ib:hover{background:var(--hover)}
+.kete-btn{height:30px;border-radius:6px;border:0;background:var(--agent);color:var(--on-agent);display:inline-flex;align-items:center;gap:6px;padding:0 10px;font-weight:600;font-size:13px}
+.av{width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;font-weight:700;color:#fff;flex:none}
+.av.s{width:22px;height:22px;font-size:9.5px}
+.av.agent{border-radius:6px;background:var(--agent);color:var(--on-agent)}
+.av.party{background:var(--p-party)}
+.frame{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);min-height:calc(100vh - var(--bar))}
+.rail{position:sticky;top:calc(var(--bar) + env(safe-area-inset-top,0px));height:calc(100vh - var(--bar) - env(safe-area-inset-top,0px));
+  overflow:auto;border-right:1px solid var(--line);background:var(--surface);padding:10px 8px 70px;display:flex;flex-direction:column;gap:2px;
+  padding-left:max(8px,env(safe-area-inset-left,0px))}
+.rail button{width:100%;border:0;background:transparent;border-radius:6px;height:32px;padding:0 9px;display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--fg);text-align:left}
+.rail button:hover{background:var(--hover)}
+.rail button[aria-current="page"]{background:var(--selected);font-weight:600}
+.rail .c{margin-left:auto;font:600 12px var(--font-num);color:var(--fg-soft)}
+.rail .c.hot{min-width:20px;height:18px;border-radius:9px;background:var(--action);color:var(--on-action);display:inline-grid;place-items:center;padding:0 6px;font-size:11px}
+.rail .lab{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-muted);padding:14px 9px 4px;font-weight:600}
+.rail .sq{width:9px;height:9px;border-radius:2px;flex:none}
+.rail .spacer{flex:1}
+.rail .unread{width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:auto}
+main{min-width:0;padding-block:22px 110px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+main.flush{padding:0}
+.page-h{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.page-h h1{font-size:28px;font-weight:650;letter-spacing:-.01em}
+.page-h p{margin:4px 0 0;color:var(--fg-muted);font-size:13.5px}
+.page-h .grow{flex:1}
+
+/* ---------- shared parts ---------- */
+.btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:5px;border:1px solid var(--line-control);background:var(--control);color:var(--fg);font-weight:600;font-size:13px;white-space:nowrap}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--action);border-color:var(--action);color:var(--on-action)}
+.btn.primary:hover{background:var(--action-strong)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{height:26px;padding:0 9px;font-size:12px}
+.seg{display:inline-flex;border:1px solid var(--line-control);border-radius:6px;background:var(--control);padding:2px;gap:2px}
+.seg button{border:0;background:transparent;height:26px;padding:0 9px;border-radius:4px;font-size:12.5px;font-weight:600;color:var(--fg-muted);display:inline-flex;align-items:center;gap:5px}
+.seg button[aria-pressed="true"]{background:var(--selected);color:var(--fg)}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 7px;border-radius:4px;border:1px solid var(--line-control);font-size:12px;color:var(--fg-soft);background:var(--control);white-space:nowrap}
+.chip .k{color:var(--fg-muted);font-size:11px}
+.chip i{width:8px;height:8px;border-radius:2px;flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.tag{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 6px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap;background:var(--selected);color:var(--fg-soft)}
+.tag.ok{background:var(--ok-surface);color:var(--ok-ink)}
+.tag.verify{background:var(--verify-surface);color:var(--verify-ink)}
+.tag.err{background:var(--err-surface);color:var(--err-ink)}
+.tag.info{background:var(--info-surface);color:var(--info-ink)}
+.tag.agent{background:var(--agent);color:var(--on-agent)}
+.tag.wa{background:var(--ok-surface);color:var(--p-party)}
+.sec-h{font-size:12px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-muted);display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.sec-h .n{font:600 12px var(--font-num);color:var(--fg-soft);letter-spacing:0}
+.sec-h a,.sec-h button.link{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:600;font-size:12.5px}
+a,.link{color:var(--info-ink);text-decoration:none;background:none;border:0;padding:0;font-weight:600}
+a:hover,.link:hover{text-decoration:underline}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.panel-h{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);font-weight:650;font-size:13.5px}
+.panel-b{padding:10px 12px;display:grid;gap:8px}
+.age{font:600 12px var(--font-num);color:var(--verify-ink);white-space:nowrap}
+.age.late{color:var(--err-ink)}
+.sq-state{width:10px;height:10px;border:1.5px solid var(--fg-soft);border-radius:2px;flex:none;display:inline-block}
+.sq-state.full{background:var(--fg-soft)}
+.sq-state.ok{border-color:var(--ok);background:var(--ok)}
+.sq-state.err{border-color:var(--err);background:var(--err)}
+.sq-state.verify{border-color:var(--verify)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:20px;align-items:start}
+.stack{display:grid;gap:16px;align-content:start;min-width:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--agent);color:var(--on-agent);border-radius:7px;padding:9px 14px;font-size:13px;font-weight:600;z-index:60;max-width:calc(100% - 32px);box-shadow:0 6px 24px rgba(0,0,0,.18)}
+
+/* the design notes, for the validation */
+.notes{border:1px solid var(--note-line);background:var(--note);color:var(--note-ink);border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:13px;display:grid;gap:4px}
+.notes b{font-weight:650}
+.notes ul{margin:0;padding-left:18px;display:grid;gap:2px}
+body.no-notes .notes{display:none}
+
+/* ---------- Pour moi ---------- */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.filters button{height:28px;border:1px solid var(--line-control);background:var(--control);border-radius:14px;padding:0 11px;font-size:12.5px;font-weight:600;color:var(--fg-soft);display:inline-flex;gap:6px;align-items:center}
+.filters button b{font:600 12px var(--font-num);color:var(--fg)}
+.filters button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.filters button[aria-pressed="true"] b{color:var(--bg)}
+.card{border:1px solid var(--line-strong);border-radius:7px;background:var(--surface);overflow:hidden}
+.card-h{display:flex;align-items:flex-start;gap:10px;padding:12px 14px 6px;flex-wrap:wrap}
+.card-h h3{font-size:16px;font-weight:650;flex:1;min-width:200px}
+.card-h .amt{font:600 20px var(--font-num);letter-spacing:.01em;white-space:nowrap}
+.card-who{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:0 14px 8px;font-size:12.5px;color:var(--fg-soft)}
+.card-b{padding:4px 14px 12px;display:grid;gap:9px;font-size:13.5px;color:var(--fg-soft)}
+.policy{display:flex;align-items:flex-start;gap:8px;border:1px solid var(--line);border-left:3px solid var(--verify);border-radius:5px;padding:7px 10px;background:var(--bg);font-size:12.5px;color:var(--fg-soft)}
+.policy b{color:var(--fg);font-weight:650}
+.card-f{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--line);background:var(--bg);flex-wrap:wrap;align-items:center}
+.card-f .note{margin-left:auto;font-size:12px;color:var(--fg-muted);display:inline-flex;gap:5px;align-items:center}
+.card.done{border-color:var(--line)}
+.card.done .card-b,.card.done .card-f,.card.done .card-who{display:none}
+.card.done .card-h::after{content:attr(data-done);flex-basis:100%;font-size:12.5px;color:var(--ok-ink);font-weight:600;padding-bottom:6px}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+.row + .row{margin-top:6px}
+.row .t{font-weight:600;font-size:13.5px}
+.row small{grid-column:2/-1;color:var(--fg-muted);font-size:12px}
+.row .where{display:inline-flex;align-items:center;gap:5px}
+.triage{border:1px dashed var(--line-strong);border-radius:7px;padding:12px 14px;background:var(--surface);display:grid;gap:9px}
+.triage .q{font-size:13.5px}
+.conf{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--fg-muted)}
+.conf-bar{width:70px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.conf-bar i{display:block;height:100%;background:var(--verify)}
+.brief{display:grid;gap:8px;font-size:13.5px;color:var(--fg-soft)}
+.brief p{margin:0}
+.ref{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 6px;border-radius:4px;background:var(--selected);color:var(--fg);font-size:12px;font-weight:600}
+.slot{display:grid;grid-template-columns:66px minmax(0,1fr);gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:13px}
+.slot:first-child{border-top:0}
+.slot time{font:12px var(--font-num);color:var(--fg-muted)}
+.slot small{display:block;color:var(--fg-muted);font-size:12px}
+.fig{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;font-size:13px}
+.fig span:nth-child(odd){color:var(--fg-soft)}
+.collapsed .more{display:none}
+
+/* ---------- the thread ---------- */
+.fils{display:grid;grid-template-columns:240px minmax(0,1fr) 320px;height:calc(100vh - var(--bar) - env(safe-area-inset-top,0px));min-height:560px}
+.fil-list{border-right:1px solid var(--line);overflow:auto;padding:10px 8px 80px;background:var(--surface);display:grid;align-content:start;gap:2px}
+.fil-list .find{height:30px;border:1px solid var(--line-control);border-radius:6px;background:var(--control);display:flex;align-items:center;gap:6px;padding:0 8px;color:var(--fg-muted);font-size:12.5px;margin-bottom:6px}
+.fil-list .lab{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-muted);padding:10px 8px 4px;font-weight:600;display:flex;align-items:center}
+.fil-list .lab button{margin-left:auto;border:0;background:transparent;color:var(--fg-muted);padding:0;display:inline-grid}
+.fil-item{width:100%;border:0;background:transparent;border-radius:6px;padding:7px 8px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 8px;text-align:left;align-items:center}
+.fil-item:hover{background:var(--hover)}
+.fil-item[aria-current="true"]{background:var(--selected)}
+.fil-item b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fil-item small{grid-column:2/-1;font-size:11.5px;color:var(--fg-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fil-item .u{min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#fff;font:700 10.5px var(--font-num);display:inline-grid;place-items:center;padding:0 5px}
+.kind{width:22px;height:22px;border-radius:5px;display:grid;place-items:center;font-size:10px;font-weight:700;color:#fff;flex:none}
+.thread{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--bg)}
+.thread-h{padding:12px 18px;border-bottom:1px solid var(--line);background:var(--surface);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.thread-h h2{font-size:17px;font-weight:650}
+.thread-h .sub{font-size:12.5px;color:var(--fg-muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.thread-h .grow{flex:1}
+.msgs{flex:1;overflow:auto;padding:16px 18px 20px;display:flex;flex-direction:column;gap:14px;min-height:0}
+.day{align-self:center;font-size:11.5px;font-weight:600;color:var(--fg-muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:2px 10px}
+.m{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;max-width:760px}
+.m .w{display:flex;gap:7px;align-items:baseline;flex-wrap:wrap;font-size:12px;color:var(--fg-muted)}
+.m .w b{font-size:13.5px;color:var(--fg);font-weight:650}
+.m .tx{font-size:14px;line-height:1.55;color:var(--fg);white-space:pre-wrap;margin-top:2px}
+.m .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px;font-size:12px;color:var(--fg-muted)}
+.m .edited{border:0;background:transparent;padding:0;color:var(--fg-muted);text-decoration:underline dotted;font-size:12px}
+.original{margin-top:6px;border-left:2px solid var(--line-strong);padding:4px 10px;font-size:13px;color:var(--fg-muted);text-decoration:line-through}
+.ev{font-size:12.5px;color:var(--fg-soft);border-left:2px solid var(--line-strong);padding:3px 10px;margin-left:38px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;max-width:720px}
+.ev.ok{border-left-color:var(--ok)}.ev.relay{border-left-color:var(--info)}.ev.policy{border-left-color:var(--verify)}
+.mini{margin-top:8px;border:1px solid var(--line-strong);border-radius:7px;background:var(--surface);max-width:520px;overflow:hidden}
+.mini-h{display:flex;gap:8px;align-items:center;padding:9px 12px;flex-wrap:wrap}
+.mini-h b{flex:1;font-size:13.5px}
+.mini-f{display:flex;gap:6px;padding:8px 12px;border-top:1px solid var(--line);background:var(--bg);flex-wrap:wrap;align-items:center}
+.composer{border-top:1px solid var(--line);background:var(--surface);padding:10px 18px 12px;display:grid;gap:8px}
+.composer textarea{width:100%;min-height:44px;max-height:140px;resize:vertical;border:1px solid var(--line-strong);border-radius:7px;background:var(--control);padding:9px 11px;font-size:14px;line-height:1.45}
+.composer .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.composer .bar .grow{flex:1}
+.composer select{height:28px;border:1px solid var(--line-control);border-radius:5px;background:var(--control);font-size:12.5px;padding:0 6px}
+.window{font-size:12px;color:var(--fg-muted);display:inline-flex;gap:5px;align-items:center}
+.state{border-left:1px solid var(--line);overflow:auto;padding:14px 14px 80px;display:grid;gap:16px;align-content:start;background:var(--surface)}
+.state h4{margin:0 0 6px;font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-muted);display:flex;align-items:center;gap:6px}
+.state h4 .n{font:600 11px var(--font-num);letter-spacing:0;color:var(--fg-soft)}
+.hold{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:13px}
+.hold:first-of-type{border-top:0}
+.hold small{grid-column:2/-1;color:var(--fg-muted);font-size:11.5px}
+.money{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.money div{border:1px solid var(--line);border-radius:6px;padding:7px 9px;background:var(--bg)}
+.money small{display:block;font-size:11px;color:var(--fg-muted)}
+.money .num{font-size:14px}
+.bar-h{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar-h i{display:block;height:100%;background:var(--accent)}
+.member{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0}
+.member small{margin-left:auto;color:var(--fg-muted);font-size:11.5px}
+.file{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:4px 0}
+.file small{margin-left:auto;color:var(--fg-muted);font:11px var(--font-num)}
+.proof{font:11px/1.4 var(--font-num);color:var(--fg-muted);word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:6px 8px}
+.state-toggle{display:none}
+
+/* ---------- Kete thread ---------- */
+.k-wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;height:calc(100vh - var(--bar) - env(safe-area-inset-top,0px));min-height:560px}
+.k-wrap .msgs{background:var(--bg)}
+.k-card{margin-top:8px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);max-width:640px;overflow:hidden}
+.k-card .k-h{padding:10px 12px;border-bottom:1px solid var(--line);font-weight:650;display:flex;gap:8px;align-items:center}
+.k-card .k-b{padding:10px 12px;display:grid;gap:10px;font-size:13.5px;color:var(--fg-soft)}
+.k-line{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center}
+.k-line .t{color:var(--fg);font-weight:600}
+.k-ask{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.scope{height:28px;border:1px solid var(--line-control);border-radius:14px;background:var(--control);padding:0 10px;font-size:12.5px;display:inline-flex;align-items:center;gap:6px;color:var(--fg-soft)}
+
+/* ---------- Planifier ---------- */
+.banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--err);background:var(--err-surface);color:var(--err-ink);border-radius:7px;padding:10px 14px;margin-bottom:12px;font-size:13.5px}
+.banner b{font-weight:650}
+.banner .grow{flex:1;min-width:220px}
+.layers{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;margin-bottom:10px;align-items:center}
+.layers label{display:inline-flex;gap:6px;align-items:center}
+.layers i{width:9px;height:9px;border-radius:2px}
+.cal-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.cal{display:grid;grid-template-columns:52px repeat(5,minmax(120px,1fr));grid-template-rows:44px 30px repeat(20,24px);min-width:680px;position:relative}
+.cal .dh{border-bottom:1px solid var(--line);border-left:1px solid var(--line);padding:6px 8px;font-size:12px;color:var(--fg-muted);display:flex;align-items:baseline;gap:6px}
+.cal .dh b{font:600 18px var(--font-num);color:var(--fg)}
+.cal .dh.today b{background:var(--action);color:var(--on-action);border-radius:5px;padding:0 5px}
+.cal .allday{border-bottom:1px solid var(--line);border-left:1px solid var(--line);padding:3px 4px;display:flex;flex-direction:column;gap:2px}
+.cal .hr{font:11px var(--font-num);color:var(--fg-muted);padding:0 6px;text-align:right}
+.cal .cell{border-left:1px solid var(--line);border-top:1px solid var(--line)}
+.cal .cell.half{border-top:1px dashed var(--line)}
+.ev-b{margin:1px 3px;border-radius:4px;padding:3px 6px;font-size:11.5px;line-height:1.3;overflow:hidden;border:1px solid var(--line-strong);background:var(--raised);z-index:1;display:flex;flex-direction:column;gap:1px}
+.ev-b b{font-weight:600;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-b small{color:var(--fg-muted);font-size:10.5px}
+.ev-b.meet{border-left:3px solid var(--info);background:var(--info-surface)}
+.ev-b.due{border-left:3px solid var(--accent)}
+.ev-b.leave{background:repeating-linear-gradient(135deg,var(--selected) 0 6px,var(--surface) 6px 12px);border-style:dashed}
+.ev-b.task{border-left:3px solid var(--fg-soft)}
+.ev-b.agent{border-left:3px solid var(--agent);background:var(--bg)}
+.ev-b.prop{border-style:dashed;border-color:var(--accent);background:var(--accent-soft)}
+.ev-b.clash{border-color:var(--err);background:var(--err-surface);color:var(--err-ink)}
+.ev-b .acts{display:flex;gap:4px;margin-top:2px}
+.ev-b .acts button{height:20px;font-size:10.5px;padding:0 6px;border-radius:4px;border:1px solid var(--line-control);background:var(--control);font-weight:600}
+.ev-b .acts button.p{background:var(--action);border-color:var(--action);color:var(--on-action)}
+.now{position:absolute;left:52px;right:0;height:0;border-top:2px solid var(--err);z-index:2;pointer-events:none}
+
+/* ---------- Mon tableau ---------- */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+.tabs button{border:0;background:transparent;padding:8px 12px;font-weight:600;font-size:13.5px;color:var(--fg-muted);border-bottom:2px solid transparent;display:inline-flex;gap:6px;align-items:center}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tabs .n{font:600 12px var(--font-num);color:var(--fg-muted)}
+.board{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}
+.tile{grid-column:span 4;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0;position:relative}
+.tile.w6{grid-column:span 6}.tile.w8{grid-column:span 8}.tile.w12{grid-column:span 12}
+.tile h3{font-size:13px;font-weight:650;display:flex;align-items:center;gap:6px}
+.tile h3 .grip{margin-left:auto;color:var(--fg-muted);opacity:.6;cursor:grab;display:inline-grid}
+.tile .big{font:600 30px/1.1 var(--font-num);letter-spacing:-.01em}
+.tile .src{margin-top:auto;font-size:11.5px;color:var(--fg-muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tile .src code{font:11px var(--font-num)}
+.tile.add{border-style:dashed;align-items:center;justify-content:center;color:var(--fg-muted);min-height:120px;background:transparent}
+.flu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.flu div{border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--bg)}
+.flu small{display:block;font-size:11.5px;color:var(--fg-muted)}
+.flu .num{font-size:20px}
+.chart{width:100%;height:auto;display:block}
+.agent-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line);font-size:13px}
+.agent-row:first-of-type{border-top:0}
+.agent-row small{display:block;color:var(--fg-muted);font-size:12px}
+.summary{border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--bg);font-size:13px;color:var(--fg-soft);display:grid;gap:6px}
+
+/* ---------- an agent's settings ---------- */
+.agent-h{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.agent-h .av{width:48px;height:48px;font-size:16px}
+.agent-h h1{font-size:24px;font-weight:650}
+.agent-h .grow{flex:1}
+.mandate{width:100%;border-collapse:collapse;font-size:13px}
+.mandate th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-muted);font-weight:650;padding:8px 10px;border-bottom:1px solid var(--line)}
+.mandate td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.mandate td:first-child b{display:block;font-weight:600}
+.mandate td:first-child small{color:var(--fg-muted);font-size:12px}
+.table-wrap{overflow-x:auto}
+.proposal{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px dashed var(--accent);background:var(--accent-soft);border-radius:7px;padding:10px 12px;font-size:13.5px}
+.proposal .grow{flex:1;min-width:220px}
+.trial{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-left:3px solid var(--verify);border-radius:6px;padding:9px 12px;font-size:13px;background:var(--bg)}
+.trial .grow{flex:1;min-width:220px}
+.budget{display:flex;align-items:center;gap:10px;font-size:13px}
+.budget .bar-h{flex:1;margin:0}
+.jrow{display:grid;grid-template-columns:62px auto minmax(0,1fr) auto;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:13px}
+.jrow:first-of-type{border-top:0}
+.jrow time{font:12px var(--font-num);color:var(--fg-muted)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--fg-muted)}
+.legend span{display:inline-flex;gap:5px;align-items:center}
+
+/* ---------- phones ---------- */
+.phones{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.phone-col{display:grid;gap:10px;justify-items:center;width:300px;max-width:100%}
+.phone-col p{margin:0;font-size:12.5px;color:var(--fg-soft);text-align:center;max-width:290px}
+.phone-col h3{font-size:13px;font-weight:650}
+.device{width:300px;max-width:100%;height:600px;border:8px solid #0b0b0b;border-radius:34px;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.device .sb{height:24px;display:flex;justify-content:space-between;align-items:center;padding:0 16px;font:600 11px var(--font-num);color:var(--fg)}
+.device .ph{padding:6px 14px 8px;display:flex;align-items:center;gap:8px}
+.device .ph h4{margin:0;font-size:18px;font-weight:650;flex:1}
+.device .body{flex:1;overflow:auto;padding:4px 12px 12px;display:grid;gap:10px;align-content:start}
+.device .tabbar{height:58px;border-top:1px solid var(--line);background:var(--surface);display:grid;grid-template-columns:repeat(5,1fr)}
+.device .tabbar button{border:0;background:transparent;display:grid;justify-items:center;align-content:center;gap:2px;font-size:10px;font-weight:600;color:var(--fg-muted)}
+.device .tabbar button[aria-current="true"]{color:var(--accent)}
+.p-card{border:1px solid var(--line-strong);border-radius:12px;background:var(--surface);padding:12px;display:grid;gap:8px}
+.p-card h5{margin:0;font-size:15px;font-weight:650}
+.p-card .amt{font:600 18px var(--font-num)}
+.p-card .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.p-card .acts .btn{height:44px;justify-content:center;font-size:14px}
+.pile-count{font-size:12px;color:var(--fg-muted);text-align:center}
+.device.wa{background:var(--wa-bg)}
+.wa-h{background:var(--wa-bar);color:var(--on-wa-bar);padding:8px 12px;display:flex;gap:8px;align-items:center}
+.wa-h b{font-size:13.5px}.wa-h small{display:block;font-size:11px;opacity:.85}
+.wa-body{flex:1;overflow:auto;padding:10px 8px;display:flex;flex-direction:column;gap:8px}
+.bub{max-width:88%;border-radius:8px;padding:7px 9px;font-size:12.5px;line-height:1.45;white-space:pre-wrap;background:var(--wa-in);color:var(--fg)}
+.bub.out{align-self:flex-end;background:var(--wa-out)}
+.bub time{display:block;text-align:right;font-size:10px;color:var(--fg-muted);margin-top:2px}
+.bub .wa-btns{display:grid;margin-top:6px}
+.bub .wa-btns button{border:0;border-top:1px solid var(--line);background:transparent;color:var(--info-ink);font-weight:600;padding:7px 0 3px;font-size:12.5px}
+.voice{display:flex;align-items:center;gap:8px}
+.voice .wave{flex:1;height:18px;background:repeating-linear-gradient(90deg,var(--fg-soft) 0 2px,transparent 2px 5px);opacity:.5;border-radius:2px}
+.wa-in{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line)}
+.wa-in span{flex:1;height:34px;border-radius:17px;background:var(--wa-in);display:flex;align-items:center;padding:0 12px;font-size:12.5px;color:var(--fg-muted)}
+.wa-in i{width:34px;height:34px;border-radius:50%;background:var(--wa-bar);display:grid;place-items:center;color:var(--on-wa-bar)}
+.state-strip{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 10px;font-size:12.5px;display:flex;gap:8px;align-items:center}
+.sun .device{--bg:#FFFFFF;--surface:#FFFFFF;--fg:#000000;--fg-soft:#111111;--fg-muted:#333333;--line:#000000;--line-strong:#000000;--accent:#0A5E52}
+
+/* ---------- the switcher ---------- */
+.switch{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;gap:4px;align-items:center;background:var(--surface);border:1px solid var(--line-strong);border-radius:20px;padding:4px;box-shadow:0 6px 24px rgba(0,0,0,.14);max-width:calc(100% - 32px);overflow-x:auto}
+.switch{scrollbar-width:none}.switch::-webkit-scrollbar{display:none}
+.switch button{border:0;background:transparent;height:30px;border-radius:15px;padding:0 11px;font-size:12.5px;font-weight:600;color:var(--fg-soft);white-space:nowrap;display:inline-flex;gap:5px;align-items:center}
+.switch button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.switch .sep{width:1px;height:20px;background:var(--line);flex:none}
+
+/* ---------- the drawer ---------- */
+.drawer{position:fixed;top:calc(var(--bar) + env(safe-area-inset-top,0px));right:0;bottom:0;width:380px;max-width:100%;background:var(--surface);border-left:1px solid var(--line-strong);z-index:30;display:flex;flex-direction:column;box-shadow:-8px 0 30px rgba(0,0,0,.12);padding-right:env(safe-area-inset-right,0px)}
+.drawer .dh{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);font-weight:650}
+.drawer .db{flex:1;overflow:auto;padding:12px;display:grid;gap:10px;align-content:start;font-size:13.5px;color:var(--fg-soft)}
+
+/* ---------- narrow screens ---------- */
+@media (max-width:1180px){
+  .fils{grid-template-columns:210px minmax(0,1fr)}
+  .fils .state{display:none}
+  .fils.show-state .state{display:grid;position:fixed;right:0;top:calc(var(--bar) + env(safe-area-inset-top,0px));bottom:0;width:320px;max-width:100%;z-index:25;box-shadow:-8px 0 30px rgba(0,0,0,.12)}
+  .state-toggle{display:inline-flex}
+  .k-wrap{grid-template-columns:minmax(0,1fr)}
+  .k-wrap .state{display:none}
+  .grid2{grid-template-columns:minmax(0,1fr)}
+  .tile,.tile.w6,.tile.w8{grid-column:span 6}
+}
+@media (max-width:860px){
+  :root{--rail:0px}
+  .frame{grid-template-columns:minmax(0,1fr)}
+  .rail{display:none}
+  .search span{display:none}
+  .search{flex:0 0 auto;max-width:none;margin-inline:auto 0}
+  .org,.pill{display:none}
+  .fils{grid-template-columns:minmax(0,1fr)}
+  .fil-list{display:none}
+  .tile,.tile.w6,.tile.w8,.tile.w12{grid-column:span 12}
+  main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .switch{left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));transform:none;max-width:none}
+}
+@media (max-width:520px){
+  .card-h .amt{font-size:17px}
+  .page-h h1{font-size:23px}
+  .kete-btn span{display:none}
+  .flu{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){
+  .card,.row,.mini{transition:border-color .15s}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 13h4l2 3h4l2-3h4"/><path d="M5 6h14l1 7v5H4v-5z"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+  <symbol id="i-board" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="4" rx="1"/><rect x="13" y="10" width="7" height="10" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 5h14v10H10l-4 4v-4H5z"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="2"/><path d="M12 4v4M9 13h.01M15 13h.01M9 16h6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M15 7 8.5 13.5a2 2 0 0 0 3 3L18 10a4 4 0 0 0-6-6L5.5 10.5a6 6 0 0 0 8.5 8.5L19 14"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5"/><path d="M16 5a3 3 0 0 1 0 6M21 19c0-2-1.5-4-4-4.7"/></symbol>
+  <symbol id="i-apps" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6z"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12 20 4l-6 16-3-7z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 7"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3H7l3-3z"/><path d="M12 16v5"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 14v6h14v-6"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><path d="M6 12h.01M12 12h.01M18 12h.01"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="2"/><path d="m4 8 8 5 8-5"/></symbol>
+  <symbol id="i-wa" viewBox="0 0 24 24"><path d="M5 19l1.3-3.6A7 7 0 1 1 9 18.5z"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 24 24"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 4 8 4-8 4-8-4z"/><path d="m4 12 8 4 8-4M4 16l8 4 8-4"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M4 7h6l2 2h8v9H4z"/></symbol>
+  <symbol id="i-tiers" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="10" cy="11" r="2.5"/><path d="M6.5 17c.6-2 2-3 3.5-3s2.9 1 3.5 3M15 10h3M15 13h3"/></symbol>
+  <symbol id="i-hash" viewBox="0 0 24 24"><path d="M9 4 7 20M17 4l-2 16M4 9h16M3 15h16"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="brand"><span class="mark">K</span><span>Kete</span></div>
+  <span class="org">Soleil d'Afrique <svg class="ico sm"><use href="#i-back" transform="rotate(-90 12 12)"/></svg></span>
+  <div class="search" role="search"><svg class="ico"><use href="#i-search"/></svg><span>Chercher un fil, un projet, un tiers, un message…</span><span class="kbd">Ctrl K</span></div>
+  <span class="pill" title="Tout est à jour"><i></i>À jour</span>
+  <button class="ib" type="button" aria-label="Noter"><svg class="ico"><use href="#i-pen"/></svg></button>
+  <button class="kete-btn" type="button" id="open-drawer"><svg class="ico"><use href="#i-spark"/></svg><span>Kete</span></button>
+  <button class="ib" type="button" aria-label="Fichiers"><svg class="ico"><use href="#i-clip"/></svg></button>
+  <span class="av" style="background:var(--p-afi)" title="Afi Mensah · Directrice">AM</span>
+</header>
+
+<div class="frame">
+  <nav class="rail" aria-label="Les lieux de Kete">
+    <button type="button" data-go="pour-moi"><svg class="ico"><use href="#i-inbox"/></svg>Pour moi<span class="c hot" id="pm-count">8</span></button>
+    <button type="button" data-go="kete"><svg class="ico"><use href="#i-spark"/></svg>Kete<span class="unread" title="Le point du matin"></span></button>
+    <button type="button" data-go="planifier"><svg class="ico"><use href="#i-cal"/></svg>Planifier<span class="c">1 conflit</span></button>
+    <button type="button" data-go="tableau"><svg class="ico"><use href="#i-board"/></svg>Mon tableau</button>
+    <div class="lab">Fils actifs</div>
+    <button type="button" data-go="fil"><span class="sq" style="background:var(--accent)"></span>Éclairage — La Colombe<span class="c hot">2</span></button>
+    <button type="button" data-go="fil"><svg class="ico"><use href="#i-hash"/></svg>Direction<span class="unread"></span></button>
+    <button type="button" data-go="fil"><span class="sq" style="background:var(--p-mawuli)"></span>PC-014 · Phébé</button>
+    <button type="button" data-go="fil"><span class="sq" style="background:var(--info)"></span>Fonds Énergie Rurale</button>
+    <button type="button" data-go="fil"><svg class="ico"><use href="#i-chat"/></svg>Tous les fils<span class="c">23</span></button>
+    <div class="lab">Déléguer</div>
+    <button type="button" data-go="agent"><svg class="ico"><use href="#i-bot"/></svg>Mes agents<span class="c">5</span></button>
+    <div class="spacer"></div>
+    <button type="button"><svg class="ico"><use href="#i-folder"/></svg>Projets</button>
+    <button type="button"><svg class="ico"><use href="#i-tiers"/></svg>Tiers</button>
+    <button type="button"><svg class="ico"><use href="#i-apps"/></svg>Apps</button>
+    <button type="button"><svg class="ico"><use href="#i-shield"/></svg>Administration</button>
+  </nav>
+  <main id="main"></main>
+</div>
+
+<div class="switch" role="toolbar" aria-label="Écrans de la maquette">
+  <button type="button" data-go="pour-moi">Pour moi</button>
+  <button type="button" data-go="fil">Le fil</button>
+  <button type="button" data-go="kete">Fil Kete</button>
+  <button type="button" data-go="planifier">Planifier</button>
+  <button type="button" data-go="tableau">Mon tableau</button>
+  <button type="button" data-go="agent">Un agent</button>
+  <button type="button" data-go="telephone">Téléphone</button>
+  <span class="sep"></span>
+  <button type="button" id="toggle-notes" aria-pressed="true">Notes</button>
+  <button type="button" id="toggle-theme" aria-label="Changer de thème"><svg class="ico"><use href="#i-moon"/></svg></button>
+</div>
+
+<aside class="drawer" id="drawer" hidden aria-label="Kete, à côté de la page">
+  <div class="dh"><svg class="ico"><use href="#i-spark"/></svg>Kete <span class="tag">sur cette page</span><span style="flex:1"></span><button class="ib" type="button" id="close-drawer" aria-label="Fermer"><svg class="ico"><use href="#i-x"/></svg></button></div>
+  <div class="db">
+    <p style="margin:0">Le même fil « Kete », ouvert à côté de la page : ce que vous lui demandez ici garde la page comme contexte, et reste dans votre fil.</p>
+    <div class="k-card"><div class="k-h">Contexte</div><div class="k-b"><div class="chips"><span class="chip"><i style="background:var(--accent)"></i>la page ouverte</span><span class="chip">vos droits, jamais plus</span></div></div></div>
+    <div class="composer" style="border:1px solid var(--line);border-radius:8px;padding:10px"><textarea id="drawer-q" aria-label="Demander à Kete">Qu'est-ce qui bloque ici ?</textarea><div class="bar"><span class="scope">Cette page</span><span class="grow"></span><button class="ib" type="button" aria-label="Dicter"><svg class="ico"><use href="#i-mic"/></svg></button><button class="btn primary sm" type="button">Demander</button></div></div>
+  </div>
+</aside>
+
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const ico = (id, cls = '') => `<svg class="ico ${cls}"><use href="#i-${id}"/></svg>`;
+  const P = {
+    afi: ['Afi Mensah', 'AM', 'var(--p-afi)', 'Directrice'],
+    kossi: ['Kossi Adjo', 'KA', 'var(--p-kossi)', 'Chef de projet'],
+    yao: ['Yao Amegah', 'YA', 'var(--p-yao)', 'Technicien'],
+    essi: ['Essi Dogbe', 'ED', 'var(--p-essi)', 'Comptable'],
+    phebe: ['Phébé Akakpo', 'PA', 'var(--p-phebe)', 'Assistante administrative'],
+    mawuli: ['Mawuli Tsogbe', 'MT', 'var(--p-mawuli)', 'Responsable SI et qualité'],
+  };
+  const av = (k, s = 's') => `<span class="av ${s}" style="background:${P[k][2]}" title="${P[k][0]}">${P[k][1]}</span>`;
+  const agentAv = (s = 's') => `<span class="av ${s} agent">${ico('bot', 'sm')}</span>`;
+  const partyAv = (ini, s = 's') => `<span class="av ${s} party">${ini}</span>`;
+  const notes = (title, items) =>
+    `<section class="notes" aria-label="Ce que l'écran tranche"><b>${title}</b><ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul></section>`;
+  let toastTimer;
+  const toast = (text) => {
+    $('.toast')?.remove();
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.setAttribute('role', 'status');
+    t.textContent = text;
+    document.body.append(t);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.remove(), 3200);
+  };
+
+  /* ================= Pour moi ================= */
+  const pourMoi = () => `
+  ${notes('Pour moi — ce que l’écran tranche (D-057)', [
+    'Kete s’ouvre ici : à décider, à répondre, ce que je tiens, à classer, pour info. Il remplace Décider et la cloche ; le matin, c’est la pile.',
+    'Chaque carte cite la politique et sa version qui la met devant vous ; décidée ici, elle l’est aussi sur WhatsApp, et inversement.',
+    'Ce que je tiens montre depuis quand ça attend et chez qui ; « à classer » vient du routeur quand il n’est pas sûr, et il apprend de votre choix.',
+  ])}
+  <div class="page-h"><div><h1>Pour moi</h1><p>Mardi 13 octobre, 7 h 30 · ce qui a besoin de vous, le plus pressant d’abord</p></div><span class="grow"></span><div class="seg" role="group" aria-label="Moment"><button type="button" aria-pressed="true">${ico('sun', 'sm')}Matin</button><button type="button">Ce soir</button><button type="button">La semaine</button></div></div>
+  <div class="filters" role="group" aria-label="Filtrer">
+    <button type="button" aria-pressed="true" data-f="all">Tout <b>8</b></button>
+    <button type="button" aria-pressed="false" data-f="decide">À décider <b>2</b></button>
+    <button type="button" aria-pressed="false" data-f="answer">À répondre <b>2</b></button>
+    <button type="button" aria-pressed="false" data-f="hold">Je tiens <b>3</b></button>
+    <button type="button" aria-pressed="false" data-f="triage">À classer <b>1</b></button>
+    <button type="button" aria-pressed="false" data-f="info">Pour info <b>3</b></button>
+  </div>
+  <div class="grid2">
+    <div class="stack">
+      <section data-s="decide">
+        <h2 class="sec-h">À décider <span class="n">2</span></h2>
+        <div class="stack" style="gap:10px">
+          <article class="card" id="c-achat" data-done="">
+            <div class="card-h"><h3>Achat hors budget — câbles 2,5 mm²</h3><span class="amt">145 000 F</span></div>
+            <div class="card-who">${av('kossi')} Kossi Adjo le demande, préparé par ${agentAv()} <b>Agent Achats</b> · <span class="ref"><span class="sq" style="width:8px;height:8px;border-radius:2px;background:var(--accent);display:inline-block"></span>Éclairage — La Colombe</span> · il y a 1 h</div>
+            <div class="card-b">
+              <div class="policy">${ico('shield', 'sm')}<span><b>P1 · v2 — Dépenses hors budget</b> · au-delà de 100 000 F hors budget d’un projet, la direction approuve. C’est pour cela qu’elle est devant vous.</span></div>
+              <div class="chips">
+                <span class="chip"><i style="background:var(--accent)"></i>Budget du projet <span class="k">poste câbles épuisé</span></span>
+                <span class="chip"><i style="background:var(--info)"></i>Dernier prix payé <span class="k num">152 000 F</span></span>
+                <span class="chip"><i style="background:var(--verify)"></i>3 offres comparées <span class="k">Agent Achats</span></span>
+                <span class="chip"><i style="background:var(--ok)"></i>Acompte reçu <span class="k num">198 000 F</span></span>
+              </div>
+              <span>La moins chère des trois offres. La pose commence lundi 19 : sans les câbles, Yao attend.</span>
+            </div>
+            <div class="card-f"><button class="btn" type="button" data-decide="c-achat" data-v="Refusé">Refuser</button><button class="btn primary" type="button" data-decide="c-achat" data-v="Approuvé">Approuver</button><button class="btn" type="button" data-decide="c-achat" data-v="Renvoyé à Kossi">Renvoyer</button><button class="btn ghost" type="button" data-go="fil">${ico('chat', 'sm')}Ouvrir le fil</button><span class="note">${ico('wa', 'sm')}aussi sur votre WhatsApp</span></div>
+          </article>
+          <article class="card" id="c-facture" data-done="">
+            <div class="card-h"><h3>Valider la facture d’acompte F-2026-0007</h3><span class="amt">198 000 F</span></div>
+            <div class="card-who">${agentAv()} préparée par <b>Agent Facturation</b> pour ${av('essi')} Essi Dogbe · École La Colombe</div>
+            <div class="card-b">
+              <div class="policy">${ico('shield', 'sm')}<span><b>P5 · v1</b> · une facture préparée par un agent est validée par la comptabilité. <b>P4 · v1</b> · Essi est absente jusqu’à jeudi : vous êtes sa suppléante.</span></div>
+              <div class="chips"><span class="chip">30 % du devis D-2026-0031 <span class="k">tiré du devis</span></span><span class="chip">TVA 18 % <span class="k">tarif habituel</span></span><span class="chip">Échéance <span class="k">vendredi</span></span></div>
+            </div>
+            <div class="card-f"><button class="btn" type="button" data-decide="c-facture" data-v="Corrigée">Corriger</button><button class="btn primary" type="button" data-decide="c-facture" data-v="Validée">Valider</button><button class="btn ghost" type="button" data-decide="c-facture" data-v="Rendue à Essi pour jeudi">Rendre à Essi</button><span class="note">Essi est prévenue de ce que vous décidez</span></div>
+          </article>
+        </div>
+      </section>
+      <section data-s="answer">
+        <h2 class="sec-h">À répondre <span class="n">2</span></h2>
+        <div class="row">${partyAv('EC')}<span class="t">M. Agbeko demande la date de la pose <span class="tag wa">${ico('wa', 'sm')}WhatsApp</span></span><span class="age">2 h</span><small>Fil <a href="#" data-go="fil">Éclairage — La Colombe</a> · pour action → vous, en copie de Kossi</small></div>
+        <div class="row">${agentAv('')}<span class="t">Kete : garder le créneau de 14 h pour le rapport au Fonds ?</span><span class="age">35 min</span><small>Fil <a href="#" data-go="kete">Kete</a> · une question, une réponse suffit</small></div>
+      </section>
+      <section data-s="hold">
+        <h2 class="sec-h">Ce que je tiens <span class="n">3</span><a href="#" data-go="planifier">Voir dans Planifier</a></h2>
+        <div class="row">${ico('folder')}<span class="t">Rapport au Fonds Énergie Rurale</span><span class="age">échéance ven. 30</span><small>Fil Fonds Énergie Rurale · rien n’attend personne · 40 % écrit</small></div>
+        <div class="row">${ico('clock')}<span class="t">Contrat Pharmacie du Port</span><span class="age late">attend M. Ahouansou · 3 j</span><small>Agent Relances propose une relance par mail, depuis votre boîte · <button class="link" type="button" data-toast="Relance envoyée depuis afi@soleil.tg, gardée dans le fil">Envoyer la relance</button></small></div>
+        <div class="row">${ico('users')}<span class="t">Préparer le comité de direction</span><span class="age">jeu. 9 h</span><small>Groupe Direction · 2 points déjà proposés par Essi et Mawuli</small></div>
+      </section>
+      <section data-s="triage">
+        <h2 class="sec-h">À classer <span class="n">1</span></h2>
+        <div class="triage" id="triage">
+          <div class="q"><b>« Demande de devis — kit solaire 3 kW, hôtel à Sokodé »</b> · mail de contact@hotel-oti.tg, reçu à 6 h 48 dans la boîte de Kossi</div>
+          <span class="conf">Kete pense : une demande de devis, pour un nouveau tiers <span class="conf-bar"><i style="width:55%"></i></span><span class="num">0,55</span> — sous le seuil de 0,80, donc il vous demande</span>
+          <div class="chips"><button class="btn sm primary" type="button" data-triage="Nouveau tiers « Hôtel Oti » : son fil est né, tenu par Kossi">Nouveau tiers « Hôtel Oti »</button><button class="btn sm" type="button" data-triage="Rangé dans Pharmacie du Port">Pharmacie du Port</button><button class="btn sm" type="button" data-triage="Choisissez le fil">Autre fil…</button></div>
+          <small class="muted">Ce que vous choisirez sera appris : le prochain mail de cette adresse ira seul dans son fil.</small>
+        </div>
+      </section>
+      <section data-s="info" class="collapsed" id="info">
+        <h2 class="sec-h">Pour info <span class="n">3</span><button class="link" type="button" id="info-more">Tout voir</button></h2>
+        <div class="row">${ico('users')}<span class="t">Yao tient le chantier de Kossi jeudi 15</span><span class="muted">hier</span><small>Le relais l’a fait seul : Kossi est en congé (P4).</small></div>
+        <div class="row more">${ico('check')}<span class="t">Paiement mobile money 198 000 F reçu, rapproché</span><span class="muted">6 h 12</span><small>École La Colombe · Kete Finance · réf. MM-48213</small></div>
+        <div class="row more">${ico('shield')}<span class="t">P2 en essai a observé 2 cas cette semaine</span><span class="muted">hier</span><small>Elle en aurait refusé un : un message à 19 h 20. À vous de la mettre en vigueur.</small></div>
+      </section>
+    </div>
+    <aside class="stack">
+      <section class="panel">
+        <div class="panel-h">${ico('spark')}Le point du matin<span style="flex:1"></span><span class="muted" style="font-weight:400;font-size:12px">6 h 55 · aussi sur WhatsApp</span></div>
+        <div class="panel-b brief">
+          <p>Deux décisions vous attendent, dont un achat que la pose de lundi attend. Essi est absente : sa facture passe par vous.</p>
+          <p>La <span class="ref">Pharmacie du Port</span> n’a pas répondu depuis trois jours ; une relance est prête.</p>
+          <a href="#" data-go="kete">Ouvrir le fil Kete</a>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-h">${ico('cal')}Ma journée<span style="flex:1"></span><a href="#" data-go="planifier" style="font-size:12.5px">Planifier</a></div>
+        <div class="panel-b" style="gap:0">
+          <div class="slot"><time>9 h – 9 h 30</time><span>Point chantier La Colombe<small>réunion · groupe du projet</small></span></div>
+          <div class="slot"><time>11 h</time><span>Comparer les offres de câbles<small>proposé · l’Agent Achats aura fini</small></span></div>
+          <div class="slot"><time>14 h – 15 h 30</time><span>Rapport au Fonds Énergie Rurale<small>proposé · 2 h libres, échéance le 30</small></span></div>
+          <div class="slot"><time>18 h</time><span>Clôturer la journée<small>dictée ou écrite, Kete range</small></span></div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-h">${ico('clock')}Ce qui attend chez moi</div>
+        <div class="panel-b fig"><span>La plus vieille attente</span><span class="num">3 j</span><span>Attentes de plus de 48 h</span><span class="num">1</span><span>Sans responsable</span><span class="num">0</span></div>
+      </section>
+    </aside>
+  </div>`;
+
+  /* ================= the thread with its state ================= */
+  const fil = () => `
+  <div class="fils" id="fils">
+    <nav class="fil-list" aria-label="Fils">
+      <div class="find">${ico('search', 'sm')}Chercher dans les fils</div>
+      <div class="lab">Actifs</div>
+      <button class="fil-item" type="button" aria-current="true"><span class="kind" style="background:var(--accent)">PR</span><b>Éclairage — La Colombe</b><span class="u">2</span><small>M. Agbeko : quelle date pour la pose ?</small></button>
+      <button class="fil-item" type="button"><span class="kind" style="background:var(--fg-soft)">#</span><b>Direction</b><span></span><small>Essi : l’ordinateur de Phébé a un souci</small></button>
+      <button class="fil-item" type="button"><span class="kind" style="background:var(--p-mawuli)">PC</span><b>PC-014 · Phébé</b><span></span><small>Agent Qualité : quel est le symptôme ?</small></button>
+      <button class="fil-item" type="button"><span class="kind" style="background:var(--info)">TI</span><b>Fonds Énergie Rurale</b><span></span><small>mail · rapport@fer.tg</small></button>
+      <div class="lab">Groupes <button type="button" aria-label="Nouveau groupe">${ico('plus', 'sm')}</button></div>
+      <button class="fil-item" type="button"><span class="kind" style="background:var(--fg-soft)">#</span><b>Comité d’engagement</b><span></span><small>créé par Afi · 4 membres</small></button>
+      <button class="fil-item" type="button"><span class="kind" style="background:var(--fg-soft)">#</span><b>Service technique</b><span></span><small>né de la structure</small></button>
+      <div class="lab">Directs</div>
+      <button class="fil-item" type="button">${av('essi')}<b>Essi Dogbe</b><span></span><small>absente jusqu’à jeudi</small></button>
+      <button class="fil-item" type="button">${av('kossi')}<b>Kossi Adjo</b><span></span><small>Merci pour hier</small></button>
+      <div class="lab">Mis de côté</div>
+      <button class="fil-item" type="button"><span class="kind" style="background:var(--line-strong)">PR</span><b>Clinique Biasa</b><span></span><small>clos le 30 sept. · gardé 10 ans</small></button>
+    </nav>
+    <section class="thread" aria-label="Le fil Éclairage — La Colombe">
+      <div class="thread-h">
+        <span class="kind" style="background:var(--accent);width:30px;height:30px">PR</span>
+        <div style="min-width:0"><h2>Éclairage — La Colombe</h2><div class="sub">Projet · tenu par ${av('kossi')} Kossi Adjo · 6 membres, 2 abonnés · <span class="num">colombe@fils.soleil.tg</span></div></div>
+        <span class="grow"></span>
+        <button class="btn sm state-toggle" type="button" id="state-toggle">${ico('layers', 'sm')}État</button>
+        <button class="btn sm" type="button" data-toast="Preuve exportée : PDF horodaté avec son journal, empreinte 3f9a…c21e">${ico('export', 'sm')}Exporter la preuve</button>
+        <button class="ib" type="button" aria-label="Plus">${ico('more')}</button>
+      </div>
+      <div class="msgs" id="msgs">
+        <span class="day">lundi 12 octobre</span>
+        <div class="m">${av('kossi', '')}<div><div class="w"><b>Kossi Adjo</b><time>9 h 02</time><span class="tag info">pour info</span></div><div class="tx">Bon de commande signé reçu de l’école. Pose prévue la semaine du 19, Yao la mène.</div><div class="meta">${ico('eye', 'sm')}Lu par Afi 9 h 12 · Yao 9 h 40 · Essi 10 h 05 <span class="chip">${ico('clip', 'sm')}Bon de commande signé.pdf</span></div></div></div>
+        <div class="ev ok">${ico('check', 'sm')}Tenue créée « Commander les câbles » · tenue par l’Agent Achats · pour action</div>
+        <div class="m">${agentAv('')}<div><div class="w"><b>Agent Achats</b><span class="tag agent">agent</span><time>lun. 16 h 40</time></div><div class="tx">J’ai comparé trois offres. La moins chère dépasse le poste câbles de 45 000 F : il faut l’accord de la direction.</div>
+          <div class="mini" id="mini-achat"><div class="mini-h">${ico('shield', 'sm')}<b>Achat hors budget — câbles</b><span class="num">145 000 F</span></div><div class="mini-f"><span class="tag verify">attend Afi · 1 h</span><span class="muted" style="font-size:12px">P1 v2 · direction au-delà de 100 000 F</span><span style="flex:1"></span><button class="btn sm primary" type="button" data-decide-mini="Approuvé">Approuver</button><button class="btn sm" type="button" data-decide-mini="Refusé">Refuser</button></div></div>
+        </div></div>
+        <div class="ev policy">${ico('shield', 'sm')}Politique P1 v2 · demande l’accord d’Afi Mensah (direction) · journalisé · même règle pour une personne et pour un agent</div>
+        <span class="day">mardi 13 octobre</span>
+        <div class="m">${partyAv('EC', '')}<div><div class="w"><b>M. Agbeko</b><span>École La Colombe</span><span class="tag wa">${ico('wa', 'sm')}WhatsApp</span><time>7 h 02</time></div><div class="tx">Bonjour, quelle date pour la pose ? Les parents demandent.</div><div class="meta"><span class="tag verify">pour action → Kossi</span>Rangé par le routeur : numéro connu du tiers · confiance 1</div></div></div>
+        <div class="m">${av('kossi', '')}<div><div class="w"><b>Kossi Adjo</b><time>7 h 20</time><span class="tag wa">${ico('wa', 'sm')}parti au client</span><button class="edited" type="button" id="show-orig">modifié · voir l’original</button></div><div class="tx">Bonjour M. Agbeko, la pose commence lundi 19 et dure trois jours. Je vous confirme l’heure jeudi.</div><div class="original" id="orig" hidden>Bonjour, la pose commence lundi 19. Je vous confirme jeudi.</div><div class="meta">${ico('eye', 'sm')}Lu par M. Agbeko 7 h 24 · Afi 7 h 30</div></div></div>
+        <div class="ev relay">${ico('users', 'sm')}Kossi est en congé jeudi 15 : ses tenues de ce jour passent à Yao (P4 · suppléance). Yao est prévenu.</div>
+        <div class="m">${av('yao', '')}<div><div class="w"><b>Yao Amegah</b><time>7 h 41</time><span class="tag info">pour info</span></div><div class="tx">Bien reçu. Il me faut les câbles avant vendredi pour tenir lundi.</div></div></div>
+      </div>
+      <form class="composer" id="composer">
+        <label class="sr" for="say" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Écrire dans le fil</label>
+        <textarea id="say" placeholder="Écrire dans le fil… @ pour mentionner, / pour un geste">@Kossi la commande part dès que j’ai approuvé, ce matin.</textarea>
+        <div class="bar">
+          <div class="seg" role="group" aria-label="Pour quoi"><button type="button" aria-pressed="false" data-for="info">Pour info</button><button type="button" aria-pressed="true" data-for="action">Pour action</button></div>
+          <select id="to" aria-label="Qui doit agir"><option>→ Kossi Adjo</option><option>→ Yao Amegah</option><option>→ Agent Achats</option></select>
+          <select id="via" aria-label="Par où"><option>Dans le fil</option><option>Aussi au client, WhatsApp</option><option>Aussi par mail, depuis ma boîte</option></select>
+          <span class="window">${ico('clock', 'sm')}fenêtre WhatsApp ouverte jusqu’à demain 7 h 02</span>
+          <span class="grow"></span>
+          <button class="ib" type="button" aria-label="Joindre">${ico('clip')}</button>
+          <button class="ib" type="button" aria-label="Dicter">${ico('mic')}</button>
+          <button class="btn primary" type="submit">${ico('send', 'sm')}Envoyer</button>
+        </div>
+      </form>
+    </section>
+    <aside class="state" aria-label="L’état du projet">
+      <div><h4>Le projet</h4>
+        <div class="member">${partyAv('EC')}<b>École La Colombe</b><small>tiers · client</small></div>
+        <div class="money"><div><small>Vendu</small><span class="num">660 000 F</span></div><div><small>Encaissé</small><span class="num">198 000 F</span></div><div><small>Engagé</small><span class="num">0 F</span></div><div><small>Marge prévue</small><span class="num">240 000 F</span></div></div>
+        <div class="bar-h" title="30 % encaissé"><i style="width:30%"></i></div>
+        <small class="muted" style="font-size:11.5px">Kete Finance · faits du 13 oct., 6 h 12</small>
+      </div>
+      <div><h4>Qui tient quoi <span class="n">4</span></h4>
+        <div class="hold">${agentAv()}<span>Commander les câbles</span><span class="age">1 h</span><small>Agent Achats · attend Afi (P1)</small></div>
+        <div class="hold">${av('kossi')}<span>Répondre à M. Agbeko</span><span class="age">fait</span><small>Kossi · 18 min</small></div>
+        <div class="hold">${av('afi')}<span>Facture F-2026-0007</span><span class="age">aujourd’hui</span><small>suppléance d’Essi (P4) · P5</small></div>
+        <div class="hold">${av('yao')}<span>Pose de l’éclairage</span><span class="muted" style="font-size:12px">lun. 19</span><small>Yao · 3 jours</small></div>
+      </div>
+      <div><h4>Les dates</h4><div class="fig"><span>Acompte, échéance</span><span class="num">15 oct.</span><span>Pose</span><span class="num">19 – 21 oct.</span><span>Réception</span><span class="num">23 oct.</span></div></div>
+      <div><h4>Les politiques ici</h4>
+        <div class="fig"><span>P1 · dépenses hors budget</span><span class="tag ok">v2 · active</span><span>P2 · qui parle au client</span><span class="tag ok">v1 · active</span><span>P8 · conservation 10 ans</span><span class="tag ok">v1 · active</span></div>
+      </div>
+      <div><h4>Membres et abonnés <span class="n">8</span></h4>
+        <div class="member">${av('kossi')}Kossi Adjo<small>tient · depuis 2 oct.</small></div>
+        <div class="member">${av('afi')}Afi Mensah<small>depuis 2 oct.</small></div>
+        <div class="member">${av('yao')}Yao Amegah<small>depuis 5 oct.</small></div>
+        <div class="member">${av('essi')}Essi Dogbe<small>depuis 2 oct.</small></div>
+        <div class="member">${agentAv()}Agent Achats<small>depuis 12 oct.</small></div>
+        <div class="member">${agentAv()}Agent Facturation<small>depuis 12 oct.</small></div>
+        <div class="member">${partyAv('EC')}M. Agbeko<small>abonné · WhatsApp</small></div>
+        <div class="member"><span class="av s" style="background:var(--fg-soft)">MD</span>Mme Dossou<small>abonnée · mail</small></div>
+      </div>
+      <div><h4>Les pièces</h4>
+        <div class="file">${ico('clip', 'sm')}Bon de commande signé.pdf<small>v1</small></div>
+        <div class="file">${ico('clip', 'sm')}Devis D-2026-0031.pdf<small>v2</small></div>
+        <div class="file">${ico('clip', 'sm')}Offres câbles (3).pdf<small>v1</small></div>
+      </div>
+      <div><h4>La preuve</h4><div class="proof">dernier export 12 oct. 18 h 00 · SHA-256 3f9a1c…07c21e · 14 messages, 2 modifiés, 31 lectures</div></div>
+    </aside>
+  </div>`;
+
+  /* ================= the Kete thread ================= */
+  const kete = () => `
+  <div class="k-wrap">
+    <section class="thread" aria-label="Votre fil avec Kete">
+      <div class="thread-h"><span class="av" style="background:var(--agent);color:var(--on-agent);border-radius:7px">${ico('spark')}</span><div><h2>Kete</h2><div class="sub">Votre fil · le point du matin, ses questions, ses rappels · il agit avec vos droits, jamais plus</div></div><span class="grow"></span><button class="btn sm" type="button">${ico('search', 'sm')}Chercher</button></div>
+      <div class="msgs">
+        ${notes('Le fil « Kete » — ce que l’écran tranche (D-057)', [
+          'Il remplace la page Demander : on y parle à Kete, il y écrit seulement quand quelque chose a besoin de vous.',
+          'Le point du matin est un message du fil, le même que sur WhatsApp ; ses cartes se décident ici sans changer de page.',
+          'Chaque chiffre dit d’où il vient ; une réponse s’épingle à Mon tableau.',
+        ])}
+        <span class="day">mardi 13 octobre</span>
+        <div class="m"><span class="av agent">${ico('spark', 'sm')}</span><div><div class="w"><b>Kete</b><time>6 h 55</time><span class="tag">le point du matin</span></div>
+          <div class="k-card"><div class="k-h">Bonjour Afi. Trois choses ce matin.</div><div class="k-b">
+            <div class="k-line"><span class="sq-state"></span><span class="t">Achat hors budget — câbles, 145 000 F</span><button class="btn sm primary" type="button" data-toast="Approuvé · journalisé avec P1 v2 · Kossi est prévenu">Approuver</button></div>
+            <div class="k-line"><span class="sq-state"></span><span class="t">Facture F-2026-0007 d’Essi, absente : vous suppléez</span><button class="btn sm" type="button" data-go="pour-moi">Voir</button></div>
+            <div class="k-line"><span class="sq-state"></span><span class="t">Pharmacie du Port, sans réponse depuis 3 jours</span><button class="btn sm" type="button" data-toast="Relance envoyée depuis votre boîte">Relancer</button></div>
+            <span>Cette nuit, l’Agent Relances a préparé 3 relances ; l’Agent Facturation, une facture. Rien n’est parti sans vous.</span>
+            <div class="chips"><span class="chip"><i style="background:var(--accent)"></i>fil Éclairage — La Colombe</span><span class="chip"><i style="background:var(--info)"></i>Kete Finance</span><span class="chip">Planifier</span></div>
+          </div></div>
+        </div></div>
+        <div class="m"><span class="av agent">${ico('spark', 'sm')}</span><div><div class="w"><b>Kete</b><time>6 h 56</time><span class="tag verify">une question</span></div><div class="tx">Vous avez deux heures libres cet après-midi et le rapport au Fonds est dû le 30. Je garde 14 h – 15 h 30 pour lui ?</div><div class="k-ask" style="margin-top:8px"><button class="btn sm primary" type="button" data-toast="Créneau gardé dans Planifier">Garder</button><button class="btn sm" type="button">Un autre moment</button><button class="btn sm ghost" type="button">Non</button></div></div></div>
+        <div class="m" style="margin-left:auto">${av('afi', '')}<div><div class="w"><b>Afi Mensah</b><time>7 h 31</time></div><div class="tx">Résume-moi La Colombe en trois lignes.</div></div></div>
+        <div class="m"><span class="av agent">${ico('spark', 'sm')}</span><div><div class="w"><b>Kete</b><time>7 h 31</time></div>
+          <div class="tx">La Colombe est vendue <span class="num">660 000 F</span>, dont <span class="num">198 000 F</span> encaissés (l’acompte, ce matin). La pose démarre lundi 19 avec Yao ; elle attend les câbles, donc votre accord sur l’achat. Aucun retard client, une seule attente : la vôtre.</div>
+          <div class="chips" style="margin-top:8px"><span class="chip"><i style="background:var(--accent)"></i>fil du projet · 14 messages</span><span class="chip"><i style="background:var(--info)"></i>Kete Finance · facts</span><span class="chip">Planifier · pose</span></div>
+          <div class="k-ask" style="margin-top:8px"><button class="btn sm" type="button" data-toast="Épinglé à Mon tableau, mis à jour avec Kete">${ico('pin', 'sm')}Épingler à Mon tableau</button><button class="btn sm ghost" type="button">Copier</button></div>
+        </div></div>
+        <div class="m"><span class="av agent">${ico('spark', 'sm')}</span><div><div class="w"><b>Kete</b><time>rappel</time><span class="tag">ce soir 18 h</span></div><div class="tx">Clôture de la journée : dites ce qui est fait, pas fait, bloqué, pour demain. Je range, vous cochez.</div></div></div>
+      </div>
+      <div class="composer"><textarea aria-label="Demander à Kete" placeholder="Demander à Kete…">Qui attend quelque chose de moi depuis plus de deux jours ?</textarea><div class="bar"><span class="scope">${ico('layers', 'sm')}Tout Kete</span><span class="scope">Mes fils</span><span class="grow"></span><button class="ib" type="button" aria-label="Dicter">${ico('mic')}</button><button class="btn primary" type="button" data-toast="Kete cherche dans vos fils et vos tenues…">${ico('send', 'sm')}Demander</button></div></div>
+    </section>
+    <aside class="state" aria-label="Ce que Kete fait pour vous">
+      <div><h4>Ses rendez-vous</h4><div class="fig"><span>Point du matin</span><span class="num">6 h 55</span><span>Clôture du soir</span><span class="num">18 h 00</span><span>Revue de la semaine</span><span class="num">ven. 17 h</span></div><small class="muted">Ici et sur WhatsApp</small></div>
+      <div><h4>Ce qu’il lit</h4><div class="chips"><span class="chip">vos fils</span><span class="chip">vos tenues</span><span class="chip">Planifier</span><span class="chip">Kete Finance</span><span class="chip">Kete Team</span><span class="chip">les documents que vous lisez</span></div></div>
+      <div><h4>Il ne fait jamais</h4><div class="brief" style="font-size:13px"><p>Décider à votre place, écrire à un client sans modèle approuvé (P2), agir au-delà de vos droits.</p></div></div>
+      <div><h4>Vos agents</h4>
+        <div class="hold">${agentAv()}<span>Agent Achats</span><span class="tag">travaille</span><small>compare 3 offres</small></div>
+        <div class="hold">${agentAv()}<span>Agent Relances</span><span class="tag verify">attend vous</span><small>3 relances prêtes</small></div>
+        <div class="hold">${agentAv()}<span>Agent Facturation</span><span class="tag ok">a fini</span><small><a href="#" data-go="agent">ses réglages</a></small></div>
+      </div>
+    </aside>
+  </div>`;
+
+  /* ================= Planifier ================= */
+  const H0 = 8; // 8 h is row 3
+  const rowOf = (h) => 3 + Math.round((h - H0) * 2);
+  const evb = (day, from, to, cls, title, sub = '', extra = '') =>
+    `<div class="ev-b ${cls}" style="grid-column:${day + 2};grid-row:${rowOf(from)} / ${rowOf(to)}"><b>${title}</b>${sub ? `<small>${sub}</small>` : ''}${extra}</div>`;
+  const planifier = () => {
+    const days = [['lun.', 12], ['mar.', 13], ['mer.', 14], ['jeu.', 15], ['ven.', 16]];
+    let cells = '';
+    for (let r = 0; r < 20; r++) {
+      const h = H0 + r / 2;
+      cells += `<div class="hr" style="grid-column:1;grid-row:${3 + r}">${r % 2 === 0 ? `${h} h` : ''}</div>`;
+      for (let d = 0; d < 5; d++) cells += `<div class="cell ${r % 2 ? 'half' : ''}" style="grid-column:${d + 2};grid-row:${3 + r}"></div>`;
+    }
+    const keep = `<div class="acts"><button class="p" type="button" data-toast="Gardé">Garder</button><button type="button">Retirer</button></div>`;
+    return `
+    ${notes('Planifier — ce que l’écran tranche (D-050, D-057)', [
+      'Comme la v3.1 : ma vue, mon équipe, l’organisation selon mes droits ; les calques ; les blocs proposés à garder ou retirer.',
+      'Nouveau : les échéances des tenues arrivent ici, et un conflit se règle d’un geste en suivant la politique de suppléance.',
+      'Une absence posée ici fait passer les tenues au suppléant le jour même (le relais).',
+    ])}
+    <div class="page-h"><div><h1>Planifier</h1><p>Semaine du 12 octobre · vos rendez-vous, les échéances des tenues et des apps, les congés, les passages des agents</p></div><span class="grow"></span><div class="seg" role="group" aria-label="Vue"><button type="button" aria-pressed="true">Ma vue</button><button type="button">Mon équipe</button><button type="button">Toute l’organisation</button></div><button class="btn" type="button" data-toast="Kete propose 3 blocs pour la semaine">${ico('spark', 'sm')}Organiser ma semaine</button></div>
+    <div class="banner" role="alert">${ico('clock')}<span class="grow"><b>Conflit · jeudi 15, 10 h</b> · réception du matériel de La Colombe : Kossi, qui en est responsable, est en congé. La suppléance (P4) dit Yao.</span><button class="btn primary sm" type="button" data-toast="Confié à Yao · il est prévenu dans le fil du projet">Confier à Yao</button><button class="btn sm" type="button">Avancer à mercredi 14 h</button></div>
+    <div class="layers"><label><input type="checkbox" checked> <i style="background:var(--info)"></i>Réunions</label><label><input type="checkbox" checked> <i style="background:var(--accent)"></i>Échéances</label><label><input type="checkbox" checked> <i style="background:var(--line-strong)"></i>Congés</label><label><input type="checkbox" checked> <i style="background:var(--fg-soft)"></i>Tenues</label><label><input type="checkbox" checked> <i style="background:var(--agent)"></i>Agents et routines</label><span style="flex:1"></span><span class="muted" style="font-size:12px">Agenda Outlook relié (ICS)</span></div>
+    <div class="grid2" style="grid-template-columns:minmax(0,1fr) 300px">
+      <div class="cal-wrap"><div class="cal" role="grid" aria-label="La semaine">
+        <div style="grid-column:1;grid-row:1;border-bottom:1px solid var(--line)"></div>
+        ${days.map(([n, d], i) => `<div class="dh ${i === 1 ? 'today' : ''}" style="grid-column:${i + 2};grid-row:1">${n} <b>${d}</b></div>`).join('')}
+        <div class="hr" style="grid-column:1;grid-row:2;align-self:center">jour</div>
+        ${days.map((_, i) => `<div class="allday" style="grid-column:${i + 2};grid-row:2">${i === 3 ? '<div class="ev-b leave" style="margin:0"><b>Kossi · congé</b></div>' : i === 4 ? '<div class="ev-b due" style="margin:0"><b>Acompte F-0007</b></div>' : ''}</div>`).join('')}
+        ${cells}
+        ${evb(0, 8, 8.5, 'agent', 'Relances', 'routine')}
+        ${evb(0, 15, 16, 'meet', 'Revue trésorerie', 'avec Essi')}
+        ${evb(1, 9, 9.5, 'meet', 'Point chantier', 'La Colombe')}
+        ${evb(1, 11, 11.5, 'task', 'Comparer les offres', 'tenue')}
+        ${evb(1, 14, 15.5, 'prop', 'Rapport au Fonds', 'proposé · 2 h libres', keep)}
+        ${evb(1, 18, 18.5, 'agent', 'Clôture du soir')}
+        ${evb(2, 10, 11, 'meet', 'Ecobank', 'agenda externe')}
+        ${evb(2, 15, 16, 'prop', 'Relancer la Pharmacie', 'proposé', keep)}
+        ${evb(3, 9, 11, 'meet', 'Comité de direction', 'groupe Direction')}
+        ${evb(3, 10, 11, 'clash', 'Réception matériel', 'Kossi absent')}
+        ${evb(4, 9, 10, 'task', 'Valider le rapport qualité', 'tenue · Mawuli')}
+        ${evb(4, 16, 17, 'meet', 'Revue de la semaine', 'avec Kete')}
+      </div></div>
+      <aside class="stack">
+        <section class="panel"><div class="panel-h">${ico('spark')}Proposé par Kete</div><div class="panel-b">
+          <div><b>Rapport au Fonds Énergie Rurale</b><div class="muted" style="font-size:12.5px">mar. 14 h – 15 h 30 · seul moment de deux heures avant le 30</div><div class="k-ask" style="margin-top:6px"><button class="btn sm primary" type="button" data-toast="Gardé">Garder</button><button class="btn sm" type="button">Retirer</button></div></div>
+          <div><b>Relancer la Pharmacie du Port</b><div class="muted" style="font-size:12.5px">mer. 15 h · avant leur rendez-vous de jeudi</div><div class="k-ask" style="margin-top:6px"><button class="btn sm primary" type="button" data-toast="Gardé">Garder</button><button class="btn sm" type="button">Retirer</button></div></div>
+          <button class="btn sm" type="button" data-toast="Deux blocs gardés">Tout garder</button>
+        </div></section>
+        <section class="panel"><div class="panel-h">${ico('clock')}Ce qui tombe</div><div class="panel-b" style="gap:0">
+          <div class="slot"><time>jeu. 15</time><span>Acompte F-2026-0007 · 198 000 F<small>Kete Finance · déjà reçu</small></span></div>
+          <div class="slot"><time>lun. 19</time><span>Pose de l’éclairage<small>tenue de Yao · 3 jours</small></span></div>
+          <div class="slot"><time>ven. 30</time><span>Rapport au Fonds<small>tenue d’Afi</small></span></div>
+        </div></section>
+      </aside>
+    </div>`;
+  };
+
+  /* ================= Mon tableau ================= */
+  const tableau = () => {
+    // Open waits in the organization, these 14 days (counted by the work engine each evening).
+    const waits = [9, 8, 9, 7, 7, 6, 6, 5, 6, 5, 4, 4, 3, 4];
+    const W = 300, Hh = 80, max = 10;
+    const x = (i) => 8 + (i * (W - 16)) / (waits.length - 1);
+    const y = (v) => Hh - 14 - (v / max) * (Hh - 24);
+    const line = waits.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    const area = `${line} L${x(waits.length - 1).toFixed(1)},${y(0)} L${x(0)},${y(0)} Z`;
+    const chart = `<svg class="chart" viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Tenues en attente, de 9 à 4 en quatorze jours">
+      ${[0, 5, 10].map((v) => `<line x1="8" x2="${W - 8}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${W - 6}" y="${y(v) - 2}" text-anchor="end" font-size="9" fill="var(--fg-muted)" font-family="var(--font-num)">${v}</text>`).join('')}
+      <path d="${area}" fill="var(--accent-soft)" stroke="none"/>
+      <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <circle cx="${x(waits.length - 1)}" cy="${y(waits.at(-1))}" r="3.5" fill="var(--accent)"/>
+      <text x="8" y="${Hh - 2}" font-size="9" fill="var(--fg-muted)">30 sept.</text><text x="${W - 8}" y="${Hh - 2}" font-size="9" fill="var(--fg-muted)" text-anchor="end">13 oct.</text>
+    </svg>`;
+    return `
+    ${notes('Mon tableau — ce que l’écran tranche (D-052, D-056)', [
+      'Une grille de cartes que l’on déplace (et non une liste) : En direct, Résumés, Carnet, comme la v3.1.',
+      'Nouveau : la fluidité de l’entreprise, lue dans les tenues — la plus vieille attente, les attentes de plus de 48 h, jamais personne sans responsable.',
+      'Chaque chiffre dit sa source (app et métrique déclarée) ; une réponse du fil Kete s’épingle ici.',
+    ])}
+    <div class="page-h"><div><h1>Mon tableau</h1><p>Composé une fois, il sert trois fois : regardé en direct, envoyé à heure fixe, gardé comme résumé</p></div><span class="grow"></span><button class="btn" type="button">${ico('spark', 'sm')}Changer par une phrase</button><button class="btn" type="button">Modifier</button></div>
+    <div class="tabs" role="tablist"><button role="tab" type="button" aria-selected="true">En direct</button><button role="tab" type="button" aria-selected="false">Résumés <span class="n">4</span></button><button role="tab" type="button" aria-selected="false">Carnet <span class="n">4</span></button></div>
+    <div class="board">
+      <div class="tile"><h3>À décider<span class="grip">${ico('grip', 'sm')}</span></h3><span class="big">2</span><span class="muted" style="font-size:12.5px">la plus ancienne attend depuis 1 h</span><div><button class="btn sm" type="button" data-go="pour-moi">Pour moi</button></div><div class="src"><span class="tag">Kete</span><code>work.to_decide</code></div></div>
+      <div class="tile"><h3>Réellement disponible<span class="grip">${ico('grip', 'sm')}</span></h3><span class="big">4 339 500 F</span><span class="muted" style="font-size:12.5px">banque et caisses − réservé − engagé</span><div class="src"><span class="tag ok">Kete Finance</span><code>finance.available</code></div></div>
+      <div class="tile"><h3>À encaisser<span class="grip">${ico('grip', 'sm')}</span></h3><span class="big">768 220 F</span><span class="muted" style="font-size:12.5px">dont 177 000 F en retard</span><div class="src"><span class="tag ok">Kete Finance</span><code>finance.receivables</code></div></div>
+      <div class="tile w8"><h3>La fluidité<span class="muted" style="font-weight:400;font-size:12px">toute l’entreprise, selon vos droits</span><span class="grip">${ico('grip', 'sm')}</span></h3>
+        <div class="flu"><div><small>Plus vieille attente</small><span class="num">3 j</span><small>Pharmacie du Port</small></div><div><small>Attentes de plus de 48 h</small><span class="num">1</span><small>chez un client</small></div><div><small>Sans responsable</small><span class="num">0</span><small>le relais y veille</small></div></div>
+        <div><small class="muted">Tenues en attente, 14 jours</small>${chart}</div>
+        <div class="src"><span class="tag">Kete</span><code>work.fluidity</code> · compté chaque soir</div></div>
+      <div class="tile"><h3>Les gestes, cette semaine<span class="grip">${ico('grip', 'sm')}</span></h3>
+        <div class="fig"><span>Décidés par une personne</span><span class="num">4</span><span>Faits seuls par les agents</span><span class="num">2</span><span>Refusés par une politique</span><span class="num">1</span><span>En essai, observés</span><span class="num">2</span></div>
+        <div class="src"><span class="tag">Kete</span><code>policies.decisions</code></div></div>
+      <div class="tile w6"><h3>Pendant ce temps<span class="grip">${ico('grip', 'sm')}</span></h3>
+        <div class="agent-row">${agentAv()}<span>Agent Achats<small>compare 3 offres de câbles · étape 2 sur 3</small></span><button class="btn sm" type="button">Arrêter</button></div>
+        <div class="agent-row">${agentAv()}<span>Agent Relances<small>3 relances prêtes : attend votre choix</small></span><button class="btn sm" type="button">Répondre</button></div>
+        <div class="agent-row">${agentAv()}<span>Agent Qualité<small>attend le symptôme de Phébé · fil PC-014</small></span><button class="btn sm" type="button" data-go="fil">Voir</button></div></div>
+      <div class="tile w6"><h3>${ico('pin', 'sm')}La Colombe en trois lignes<span class="grip">${ico('grip', 'sm')}</span></h3>
+        <div class="summary"><span>Vendue 660 000 F, 198 000 F encaissés. Pose lundi 19 avec Yao ; elle attend les câbles.</span><span class="muted" style="font-size:12px">Épinglé du fil Kete · mis à jour 7 h 31</span></div>
+        <div class="src"><span class="tag">Kete</span>fil du projet · Kete Finance</div></div>
+      <div class="tile w8"><h3>Résumé de la semaine dernière<span class="tag info">figé ven. 9 oct.</span><span class="grip">${ico('grip', 'sm')}</span></h3>
+        <div class="summary"><span>Trois chantiers livrés, un en retard d’un jour (pluie). Trésorerie stable. La relance automatique a fait rentrer 412 000 F.</span><span class="muted" style="font-size:12px">Indexé : Kete peut le citer · <button class="link" type="button" data-toast="Retiré de l’index : Kete ne le citera plus">Retirer de l’index</button></span></div></div>
+      <button class="tile add" type="button">${ico('plus')}Ajouter une carte</button>
+    </div>`;
+  };
+
+  /* ================= an agent's settings ================= */
+  const levels = ['Lire', 'Préparer', 'Agir seul'];
+  const mandateRow = (title, sub, level, policy, lock) => `
+    <tr><td><b>${title}</b><small>${sub}</small></td>
+    <td><div class="seg" role="group" aria-label="${title}">${levels.map((l, i) => `<button type="button" aria-pressed="${i === level}" ${lock && i > level ? 'disabled title="Une politique l’interdit"' : ''}>${lock && i > level ? ico('lock', 'sm') : ''}${l}</button>`).join('')}</div></td>
+    <td>${policy}</td></tr>`;
+  const agent = () => `
+  ${notes('Les réglages d’un agent — ce que l’écran tranche (D-043, D-053, D-058)', [
+    'Sa fiche de poste, puis ce qu’il peut faire geste par geste : lire, préparer, agir seul. Une politique peut verrouiller un niveau, pour lui comme pour une personne.',
+    'L’autonomie se gagne par les preuves : Kete propose un niveau de plus quand les décisions passées le justifient, et on le retire d’un geste.',
+    'Il est membre de fils et parle peu ; son journal montre les six états de ce qu’il fait.',
+  ])}
+  <div class="agent-h"><span class="av agent">${ico('bot')}</span><div><h1>Agent Facturation</h1><div class="muted" style="font-size:13px">travaille pour ${av('essi')} Essi Dogbe · Comptabilité · créé le 2 octobre</div></div><span class="grow"></span><span class="tag ok" id="agent-state">Actif</span><button class="btn" type="button" id="agent-pause">${ico('pause', 'sm')}Mettre en pause</button><button class="btn" type="button" data-toast="Essayé sur le dernier mois : 24 gestes, aucun n’aurait été refusé">Essayer sur le dernier mois</button></div>
+  <div class="grid2">
+    <div class="stack">
+      <section class="panel"><div class="panel-h">Sa fiche de poste</div><div class="panel-b">
+        <p style="margin:0;font-size:14px">Préparer les factures d’acompte et de solde à partir des devis signés, les rapprocher des paiements reçus, relancer les impayés avec un modèle approuvé. Il parle peu : quand il a fini, ou quand il lui faut un geste.</p>
+        <div class="chips"><span class="chip">Kete Finance</span><span class="chip">fils des projets clients</span><span class="chip">modèles de relance approuvés</span></div>
+      </div></section>
+      <section class="panel"><div class="panel-h">Ce qu’il peut faire, geste par geste</div><div class="panel-b">
+        <div class="table-wrap"><table class="mandate"><thead><tr><th>Geste</th><th>Son niveau</th><th>Borné par</th></tr></thead><tbody>
+          ${mandateRow('Préparer une facture', 'à partir d’un devis signé', 1, '<span class="muted">—</span>', false)}
+          ${mandateRow('Valider une facture', 'avant envoi au client', 0, '<span class="tag verify">P5 · la comptabilité valide</span>', true)}
+          ${mandateRow('Écrire au client', 'WhatsApp ou mail', 2, '<span class="tag verify">P2 · modèle approuvé, 8 h – 19 h</span>', false)}
+          ${mandateRow('Rapprocher un paiement', 'reçu dans Kete Finance', 2, '<span class="muted">—</span>', false)}
+          ${mandateRow('Relancer un impayé', 'après l’échéance', 1, '<span class="tag verify">P6 · jamais un contact désinscrit</span>', false)}
+        </tbody></table></div>
+        <div class="proposal" id="proposal">${ico('spark')}<span class="grow"><b>Ses preuves :</b> 24 relances préparées en septembre, 0 corrigée, 0 refusée. Kete propose qu’il <b>relance seul</b> les impayés de moins de 50 000 F, avec le modèle « Relance J+3 ».</span><button class="btn primary sm" type="button" data-proposal="Accordé : il relancera seul, sous 50 000 F. Retirable d’un geste.">Accorder</button><button class="btn sm" type="button" data-proposal="Gardé tel quel. Kete reproposera dans un mois.">Plus tard</button></div>
+      </div></section>
+      <section class="panel"><div class="panel-h">Son journal<span style="flex:1"></span><span class="legend"><span><span class="sq-state"></span>préparé</span><span><span class="sq-state verify"></span>corrigé</span><span><span class="sq-state ok"></span>vérifié</span><span><span class="sq-state full"></span>décidé</span><span><span class="sq-state err"></span>refusé</span><span>${ico('lock', 'sm')}bloqué</span></span></div><div class="panel-b" style="gap:0">
+        <div class="jrow"><time>6 h 12</time><span class="sq-state ok"></span><span>Paiement mobile money 198 000 F rapproché de F-2026-0007</span><span class="tag">seul</span></div>
+        <div class="jrow"><time>lun. 17 h</time><span class="sq-state"></span><span>Facture F-2026-0007 préparée · attend la validation (P5)</span><span class="tag verify">Afi, suppléante</span></div>
+        <div class="jrow"><time>lun. 11 h</time><span class="sq-state verify"></span><span>Relance Pharmacie du Port · Essi a changé le délai</span><span class="tag">préparé</span></div>
+        <div class="jrow"><time>ven. 19 h 20</time>${ico('lock', 'sm')}<span>Message au client refusé : après 19 h (P2 v1)</span><span class="tag err">bloqué</span></div>
+        <div class="jrow"><time>ven. 10 h</time><span class="sq-state full"></span><span>Facture F-2026-0006 envoyée après validation d’Essi</span><span class="tag ok">décidé</span></div>
+      </div></section>
+    </div>
+    <aside class="stack">
+      <section class="panel"><div class="panel-h">${ico('shield')}Les politiques qui le bornent</div><div class="panel-b">
+        <div class="fig"><span>P2 · qui parle au client</span><span class="tag ok">v1 · active</span><span>P5 · factures d’agent</span><span class="tag ok">v1 · active</span><span>P6 · consentement</span><span class="tag ok">v1 · active</span></div>
+        <div class="trial"><span class="grow"><b>En essai :</b> « Pas de relance le vendredi après 16 h » · 2 cas observés, en aurait refusé 1</span><button class="btn sm" type="button" data-toast="Politique en vigueur · version 1">Mettre en vigueur</button></div>
+        <small class="muted">Les mêmes politiques valent pour Essi : un seul moteur pour une personne et son agent.</small>
+      </div></section>
+      <section class="panel"><div class="panel-h">${ico('clock')}Quand il se met au travail</div><div class="panel-b">
+        <div class="fig"><span>Un devis est signé</span><span class="tag">Kete Finance</span><span>Un paiement arrive</span><span class="tag">Kete Finance</span><span>Chaque lundi</span><span class="num">8 h 00</span><span>On le mentionne</span><span class="tag">dans un fil</span></div>
+      </div></section>
+      <section class="panel"><div class="panel-h">${ico('chat')}Ses fils</div><div class="panel-b" style="gap:4px">
+        <div class="member"><span class="sq" style="width:9px;height:9px;border-radius:2px;background:var(--accent)"></span>Éclairage — La Colombe<small>membre</small></div>
+        <div class="member"><span class="sq" style="width:9px;height:9px;border-radius:2px;background:var(--verify)"></span>Pharmacie du Port<small>membre</small></div>
+      </div></section>
+      <section class="panel"><div class="panel-h">Son budget ce mois</div><div class="panel-b"><div class="budget"><span class="num">1 240 F</span><div class="bar-h"><i style="width:25%"></i></div><span class="num muted">5 000 F</span></div><small class="muted">Au-delà, il attend : Essi est prévenue à 80 %.</small></div></section>
+    </aside>
+  </div>`;
+
+  /* ================= the phone ================= */
+  const tabbar = (cur) => `<nav class="tabbar">${[['inbox', 'Pour moi'], ['chat', 'Fils'], ['spark', 'Kete'], ['cal', 'Planifier'], ['more', 'Plus']].map(([i, l]) => `<button type="button" aria-current="${l === cur}">${ico(i)}${l}</button>`).join('')}</nav>`;
+  const telephone = () => `
+  ${notes('Le téléphone — ce que l’écran tranche (D-054, D-057)', [
+    'L’app native s’ouvre aussi sur « Pour moi », en pile : une carte à la fois, deux gros boutons, le pouce suffit.',
+    'Les cartes arrivent aussi sur WhatsApp : on décide d’un bouton, ou on répond à la voix et la réponse devient des gestes, confirmés avant d’être faits.',
+    'Le fil sur téléphone garde son état dans une barre que l’on ouvre ; « Plein soleil » met tout en contraste maximal.',
+  ])}
+  <div class="page-h"><div><h1>Le téléphone</h1><p>Afi, mardi matin, entre deux chantiers · Tecno Spark, réseau 3G</p></div><span class="grow"></span><button class="btn" type="button" id="sun" aria-pressed="false">${ico('sun', 'sm')}Plein soleil</button></div>
+  <div class="phones" id="phones">
+    <div class="phone-col"><h3>Pour moi, en pile</h3>
+      <div class="device"><div class="sb"><span>7 h 32</span><span>3G ▮▮▯</span></div>
+        <div class="ph"><h4>Pour moi</h4><span class="tag">1 sur 8</span></div>
+        <div class="body">
+          <div class="p-card"><span class="tag verify" style="justify-self:start">À décider · P1 v2</span><h5>Achat hors budget — câbles 2,5 mm²</h5><span class="amt">145 000 F</span><span class="soft" style="font-size:13px">Kossi le demande pour La Colombe. La moins chère de 3 offres ; la pose de lundi l’attend.</span><div class="chips"><span class="chip">dernier prix 152 000 F</span><span class="chip">acompte reçu</span></div><div class="acts"><button class="btn" type="button" data-toast="Refusé">Refuser</button><button class="btn primary" type="button" data-toast="Approuvé · journalisé avec P1 v2">Approuver</button></div><button class="btn ghost sm" type="button">Ouvrir le fil</button></div>
+          <div class="pile-count">Ensuite : la facture d’Essi · M. Agbeko attend une date · 1 à classer</div>
+          <div class="p-card" style="opacity:.65"><span class="tag">À répondre</span><h5>M. Agbeko · date de la pose</h5></div>
+        </div>${tabbar('Pour moi')}</div>
+      <p>Glisser à droite pour approuver, à gauche pour la suivante : les deux boutons restent pour qui ne glisse pas.</p></div>
+    <div class="phone-col"><h3>La carte sur WhatsApp</h3>
+      <div class="device wa"><div class="sb"><span>7 h 33</span><span>3G ▮▮▯</span></div>
+        <div class="wa-h"><span class="av s" style="background:var(--accent)">K</span><div><b>Kete · Soleil d’Afrique</b><small>le numéro de l’entreprise</small></div></div>
+        <div class="wa-body">
+          <div class="bub"><b>Votre décision est attendue</b>
+Achat hors budget — câbles, 145 000 F
+Kossi, pour La Colombe · P1 v2<time>7 h 30</time><div class="wa-btns"><button type="button">Approuver</button><button type="button">Refuser</button><button type="button">Voir dans Kete</button></div></div>
+          <div class="bub out"><div class="voice">${ico('mic', 'sm')}<span class="wave"></span><span class="num" style="font-size:11px">0:07</span></div>« Approuve, et dis à Kossi de commander dès aujourd’hui »<time>7 h 33</time></div>
+          <div class="bub">J’ai compris deux gestes :
+1. Approuver l’achat de 145 000 F
+2. Écrire à Kossi, dans le fil La Colombe : « Commande dès aujourd’hui »
+Je les fais ?<time>7 h 33</time><div class="wa-btns"><button type="button">Oui, les deux</button><button type="button">Corriger</button></div></div>
+          <div class="bub">Fait. Décidé ici, décidé partout : la carte est réglée dans Kete aussi.<time>7 h 34</time></div>
+        </div>
+        <div class="wa-in"><span>Message</span><i>${ico('mic', 'sm')}</i></div></div>
+      <p>Le client reste sur WhatsApp, lui aussi ; mais ce numéro-ci est celui de l’entreprise, et Kete n’y parle que d’elle.</p></div>
+    <div class="phone-col"><h3>Le fil, son état replié</h3>
+      <div class="device"><div class="sb"><span>7 h 40</span><span>3G ▮▮▯</span></div>
+        <div class="ph"><button class="ib" type="button" aria-label="Retour">${ico('back')}</button><h4 style="font-size:15px">Éclairage — La Colombe</h4></div>
+        <div class="body">
+          <div class="state-strip">${ico('layers', 'sm')}<span><b>4 tenues</b> · 1 attend vous · encaissé 30 %</span><span style="flex:1"></span>${ico('back', 'sm')}</div>
+          <div class="m" style="grid-template-columns:24px minmax(0,1fr)">${partyAv('EC')}<div><div class="w"><b>M. Agbeko</b><span class="tag wa">WhatsApp</span><time>7 h 02</time></div><div class="tx" style="font-size:13px">Bonjour, quelle date pour la pose ?</div></div></div>
+          <div class="m" style="grid-template-columns:24px minmax(0,1fr)">${av('kossi')}<div><div class="w"><b>Kossi</b><time>7 h 20</time></div><div class="tx" style="font-size:13px">La pose commence lundi 19 et dure trois jours.</div></div></div>
+          <div class="ev ok" style="margin-left:0">${ico('check', 'sm')}Achat approuvé par Afi · P1 v2</div>
+          <div class="m" style="grid-template-columns:24px minmax(0,1fr)">${av('yao')}<div><div class="w"><b>Yao</b><time>7 h 41</time></div><div class="tx" style="font-size:13px">Il me faut les câbles avant vendredi.</div></div></div>
+        </div>
+        <div class="wa-in" style="background:var(--surface)"><span style="background:var(--bg)">Écrire · pour action → Yao</span><i>${ico('mic', 'sm')}</i></div>
+        ${tabbar('Fils')}</div>
+      <p>Hors réseau, ce qu’on écrit attend et part dès que le réseau revient ; les fils récents sont gardés sur le téléphone.</p></div>
+  </div>`;
+
+  /* ================= navigation ================= */
+  const screens = { 'pour-moi': pourMoi, fil, kete, planifier, tableau, agent, telephone };
+  const flush = new Set(['fil', 'kete']);
+  const main = $('#main');
+
+  function wire() {
+    // filters of « Pour moi »
+    $$('.filters button', main).forEach((b) =>
+      b.addEventListener('click', () => {
+        $$('.filters button', main).forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+        const f = b.dataset.f;
+        $$('[data-s]', main).forEach((s) => (s.hidden = f !== 'all' && s.dataset.s !== f));
+      }),
+    );
+    $$('[data-decide]', main).forEach((b) =>
+      b.addEventListener('click', () => {
+        const card = $('#' + b.dataset.decide);
+        card.dataset.done = `${b.dataset.v} par vous à 7 h 34 · journalisé · réglé aussi sur WhatsApp`;
+        card.classList.add('done');
+        const n = $('#pm-count');
+        n.textContent = String(Math.max(0, Number(n.textContent) - 1));
+        toast(`${b.dataset.v} · journalisé`);
+      }),
+    );
+    $$('[data-triage]', main).forEach((b) =>
+      b.addEventListener('click', () => {
+        $('#triage').innerHTML = `<b>${b.dataset.triage}</b><small class="muted">Le routeur a appris l’adresse contact@hotel-oti.tg.</small>`;
+        toast('Classé et appris');
+      }),
+    );
+    $('#info-more')?.addEventListener('click', () => $('#info').classList.toggle('collapsed'));
+    // the thread
+    $('#show-orig')?.addEventListener('click', () => {
+      const o = $('#orig');
+      o.hidden = !o.hidden;
+    });
+    $('#state-toggle')?.addEventListener('click', () => $('#fils').classList.toggle('show-state'));
+    $$('[data-decide-mini]', main).forEach((b) =>
+      b.addEventListener('click', () => {
+        $('#mini-achat .mini-f').innerHTML = `<span class="tag ok">${b.dataset.decideMini} par Afi · 7 h 34</span><span class="muted" style="font-size:12px">P1 v2 · réglé partout</span>`;
+        toast(`${b.dataset.decideMini} · journalisé avec P1 v2`);
+      }),
+    );
+    $$('[data-for]', main).forEach((b) =>
+      b.addEventListener('click', () => {
+        $$('[data-for]', main).forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+        $('#to').hidden = b.dataset.for !== 'action';
+      }),
+    );
+    $('#composer')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = $('#say').value.trim();
+      if (!text) return;
+      const action = $('[data-for="action"]').getAttribute('aria-pressed') === 'true';
+      const div = document.createElement('div');
+      div.className = 'm';
+      div.innerHTML = `${av('afi', '')}<div><div class="w"><b>Afi Mensah</b><time>7 h 35</time>${action ? `<span class="tag verify">pour action ${$('#to').value}</span>` : '<span class="tag info">pour info</span>'}</div><div class="tx"></div><div class="meta">${$('#via').selectedIndex === 2 ? `${ico('mail', 'sm')}parti aussi par mail depuis afi@soleil.tg` : $('#via').selectedIndex === 1 ? `${ico('wa', 'sm')}parti aussi au client` : 'Pas encore lu'}</div></div>`;
+      div.querySelector('.tx').textContent = text;
+      $('#msgs').append(div);
+      if (action) {
+        const ev = document.createElement('div');
+        ev.className = 'ev ok';
+        ev.innerHTML = `${ico('check', 'sm')}Tenue créée pour ${$('#to').value.replace('→ ', '')} · pour action`;
+        $('#msgs').append(ev);
+      }
+      $('#say').value = '';
+      $('#msgs').scrollTop = $('#msgs').scrollHeight;
+    });
+    // the agent
+    $('#agent-pause')?.addEventListener('click', (e) => {
+      const st = $('#agent-state');
+      const paused = st.textContent === 'En pause';
+      st.textContent = paused ? 'Actif' : 'En pause';
+      st.className = paused ? 'tag ok' : 'tag verify';
+      e.currentTarget.innerHTML = paused ? `${ico('pause', 'sm')}Mettre en pause` : `${ico('play', 'sm')}Reprendre`;
+      toast(paused ? 'Il reprend son travail' : 'En pause : il ne prépare plus rien');
+    });
+    $$('.mandate .seg button', main).forEach((b) =>
+      b.addEventListener('click', () => {
+        if (b.disabled) return;
+        $$('button', b.parentElement).forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+        toast(`Niveau changé : ${b.textContent.trim()} · nouvelle version de son mandat`);
+      }),
+    );
+    $$('[data-proposal]', main).forEach((b) =>
+      b.addEventListener('click', () => {
+        $('#proposal').innerHTML = `${ico('check')}<span class="grow">${b.dataset.proposal}</span>`;
+      }),
+    );
+    // the phone
+    $('#sun')?.addEventListener('click', (e) => {
+      const on = $('#phones').classList.toggle('sun');
+      e.currentTarget.setAttribute('aria-pressed', String(on));
+    });
+  }
+
+  function go(name, push = true) {
+    if (!screens[name]) name = 'pour-moi';
+    main.className = flush.has(name) ? 'flush' : '';
+    main.innerHTML = screens[name]();
+    wire();
+    $$('[data-go]').forEach((b) => {
+      const on = b.dataset.go === name;
+      if (b.closest('.rail')) {
+        // in the rail, only the first entry of a place is current
+        b.toggleAttribute('aria-current', false);
+      } else if (b.closest('.switch')) b.setAttribute('aria-pressed', String(on));
+    });
+    const railBtn = $(`.rail [data-go="${name}"]`);
+    railBtn?.setAttribute('aria-current', 'page');
+    try { localStorage.setItem('kete-v5-screen', name); } catch {}
+    if (push) history.replaceState(null, '', '#' + name);
+    window.scrollTo(0, 0);
+  }
+
+  document.addEventListener('click', (e) => {
+    const g = e.target.closest('[data-go]');
+    if (g) { e.preventDefault(); go(g.dataset.go); return; }
+    const t = e.target.closest('[data-toast]');
+    if (t) toast(t.dataset.toast);
+  });
+  $('#open-drawer').addEventListener('click', () => ($('#drawer').hidden = !$('#drawer').hidden));
+  $('#close-drawer').addEventListener('click', () => ($('#drawer').hidden = true));
+  $('#toggle-notes').addEventListener('click', (e) => {
+    const off = document.body.classList.toggle('no-notes');
+    e.currentTarget.setAttribute('aria-pressed', String(!off));
+  });
+  $('#toggle-theme').addEventListener('click', () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme === 'dark' || (!root.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+    root.dataset.theme = dark ? 'light' : 'dark';
+  });
+  let start = location.hash.slice(1);
+  if (!screens[start]) { try { start = localStorage.getItem('kete-v5-screen') || 'pour-moi'; } catch { start = 'pour-moi'; } }
+  go(start, false);
+})();
+</script>
