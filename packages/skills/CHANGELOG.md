@@ -1,5 +1,11 @@
 # @kete-africa/skills
 
+## 0.1.3
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.1.2
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/channels",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "type": "module",
   "description": "Kete channels and the router (spec 113; doctrine D-056): what the outside says — WhatsApp, Telegram, mail by IMAP, forms — received once, tied by the router to its object's thread with a holder, by a rule, by the model's intent above a threshold, or by a person on a card « à classer » that becomes a rule; answers leave by mail from the person's box with the thread's address for replies.",
   "repository": {
