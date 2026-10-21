@@ -167,9 +167,10 @@ flowchart LR
 - **The apps on 127.0.0.1**: the Compte Kete accepts a loopback return address for a client only
   there; Kete Enterprise accepts loopback app addresses in its registry only with
   `KETE_ENVIRONMENT=development`.
-- **Run it from a terminal**, not from an editor's preview: a process started under a TLS-inspecting
-  proxy cannot reach the model. `pnpm platform --build` builds each app's screens again; Ctrl C
-  stops everything.
+- **An antivirus that inspects HTTPS** (Kaspersky, Avast…) signs with a root only Windows trusts:
+  on Windows, the platform exports the machine's roots and gives them to every process
+  (`NODE_EXTRA_CA_CERTS`), so the model answers from any terminal. `pnpm platform --build` builds
+  each app's screens again; Ctrl C stops everything.
 
 ## Production
 
