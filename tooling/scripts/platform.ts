@@ -44,6 +44,8 @@ const secrets = envOf(join(kete, '..', '.secrets', 'atelier-admin.env'));
 const ACCOUNT_URL = 'http://localhost:3100';
 // The apps answer on 127.0.0.1: the loopback address the Compte Kete accepts for a client's return.
 const APP = 'http://127.0.0.1';
+// Kete Enterprise's API, off 3600: another project of this machine may hold it.
+const ENTERPRISE_API_PORT = 3610;
 const tsx = join(core, 'node_modules', '.bin', 'tsx');
 const trial = { KETE_ENVIRONMENT: 'development', KETE_OPERATORS_SECOND_FACTOR: 'optional' };
 
@@ -132,7 +134,7 @@ const joined = {
   KETE_ACCOUNT_URL: ACCOUNT_URL,
   KETE_DEMO_ORGANIZATION: who.kya,
   KETE_DEMO_ME: who.userId,
-  ENTERPRISE_API_URL: `${APP}:3600`,
+  ENTERPRISE_API_URL: `${APP}:${ENTERPRISE_API_PORT}`,
 };
 const secret = () => randomBytes(32).toString('base64');
 const cockpitEnv = envOf(join(kete, 'kete-cockpit', '.env'));
@@ -171,6 +173,7 @@ const processes: {
       KETE_CLIENT_ID: client('enterprise').id,
       KETE_CLIENT_SECRET: client('enterprise').secret,
       KETE_SECRETS_KEY: secret(),
+      KETE_DEMO_API_PORT: String(ENTERPRISE_API_PORT),
       // The apps beside the center, registered in its registry as each answers.
       KETE_DEMO_APPS: [3410, 3420, 3430, 3440].map((port) => `${APP}:${port}`).join(','),
       ...(secrets.OPENAI_API_KEY
