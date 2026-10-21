@@ -71,6 +71,17 @@ export {
 } from './canvas-frame.js';
 export { CanvasIcon, isCanvasIconName, type CanvasIconName } from './canvas-icon.js';
 export {
+  FieldToggle,
+  MessageField,
+  triggered,
+  type FieldFile,
+  type FieldPick,
+  type FieldPicked,
+  type FieldTrigger,
+  type MessageFieldProps,
+  type MessageFieldWords,
+} from './message-field.js';
+export {
   ProposalList,
   VoiceCapture,
   type ProposalOutcomeState,

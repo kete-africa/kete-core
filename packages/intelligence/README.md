@@ -78,3 +78,9 @@ its `head`; one question at a time, the next waits. As the validated canvas v3.1
   picked and kept, for the product to tell its model;
 - `renderAfter` shows what a product adds beyond the contract after an answer's words: a table it
   read, an app's view.
+
+## Its field (spec 140)
+
+`Composer` is `MessageField` of `@kete/design` — the same composer as the threads': the objects
+cited (« @ »), the gestures asked (« / »), the files joined, her voice dictated, « Arrêter » while it
+answers. Its props are unchanged.

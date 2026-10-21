@@ -1,7 +1,11 @@
-import { canvasIconShapes } from './canvas-icons.gen.js';
+import { canvasIconShapesV6 } from './canvas-icons-v6.js';
+import { canvasIconShapes as v3 } from './canvas-icons.gen.js';
 
 // The canvas's icons (spec 108): the validated mockup's own set, drawn as it draws them — 1.6 px
-// strokes, round caps, the color of the text. The shapes are this package's constants.
+// strokes, round caps, the color of the text — with what the canvas v6.2 added (spec 140). The
+// shapes are this package's constants.
+
+const canvasIconShapes = { ...v3, ...canvasIconShapesV6 };
 
 export type CanvasIconName = keyof typeof canvasIconShapes;
 

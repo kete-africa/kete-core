@@ -92,6 +92,9 @@
       "path": "packages/intelligence"
     },
     {
+      "path": "packages/conversation"
+    },
+    {
       "path": "packages/time"
     },
     {
