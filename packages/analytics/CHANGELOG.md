@@ -1,5 +1,11 @@
 # @kete-africa/analytics
 
+## 0.1.2
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.1.1
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/policies",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "type": "module",
   "description": "Kete policies (spec 112; doctrine D-058): one engine at the gesture, for a person and an agent alike — a policy refuses, asks someone's approval or allows; a new one observes on trial before it is enforced; every decision is journaled with the policies and versions that made it. Cedar, in the process.",
   "repository": {
