@@ -1,7 +1,7 @@
 import { newId } from '@kete/records';
 import { validateMessage, type Message } from '@kete/sdk';
 import type { SqlExecutor } from '@kete/tenancy';
-import { sayHolding } from '@kete/work';
+import { sayHolding, type Priority } from '@kete/work';
 import { getThread, joinThread, ThreadError, type Member } from './threads.js';
 
 // Messages (spec 113, FR-002; doctrine D-057): a trace at least as good as mail. A message is
@@ -65,9 +65,17 @@ async function sayAction(
   message: Message,
   root: string,
   now: Date,
+  action: ActionOptions = {},
 ): Promise<string> {
   const thread = await getThread(db, message.thread);
   if (!thread) throw new ThreadError('not_found', 'No such thread here.');
+  // An edit says the holding again: its due day stays unless a new one is given.
+  const { rows } = await db.query<{ due: string | null }>(
+    `select to_char(due, 'YYYY-MM-DD') as due from kete_holdings
+      where source_app = 'threads' and source_kind = 'message' and source_ref = $1`,
+    [root],
+  );
+  const due = action.due ?? rows[0]?.due ?? null;
   const holding = await sayHolding(
     db,
     organizationId,
@@ -78,10 +86,19 @@ async function sayAction(
       holder: message.to ?? thread.holder,
       state: 'held',
       for: 'action',
+      ...(due ? { due } : {}),
+      ...(action.priority ? { priority: action.priority } : {}),
     },
     now,
   );
   return holding.holdingId;
+}
+
+/** What a message for action also says of its holding (spec 139): by when, how urgent. */
+export interface ActionOptions {
+  /** `2026-10-24`, in the organization's time. */
+  due?: string;
+  priority?: Priority;
 }
 
 /**
@@ -93,6 +110,7 @@ export async function postMessage(
   organizationId: string,
   said: SaidMessage,
   now = new Date(),
+  action: ActionOptions = {},
 ): Promise<{ message: Message; holdingId: string | null }> {
   const message: Message = {
     ...said,
@@ -123,7 +141,9 @@ export async function postMessage(
   // Writing reads the thread up to one's own words (FR-001).
   await markRead(db, organizationId, { threadId: thread.id, reader: said.author }, now);
   const holdingId =
-    said.for === 'action' ? await sayAction(db, organizationId, message, message.id, now) : null;
+    said.for === 'action'
+      ? await sayAction(db, organizationId, message, message.id, now, action)
+      : null;
   return { message, holdingId };
 }
 

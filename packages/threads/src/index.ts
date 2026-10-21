@@ -24,6 +24,7 @@ export {
   postMessage,
   searchMessages,
   versionsOf,
+  type ActionOptions,
   type SaidMessage,
   type Shown,
 } from './messages.js';

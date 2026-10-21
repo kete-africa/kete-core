@@ -2,6 +2,7 @@ import { inOrganization } from '@kete/tenancy';
 import { createTestSchema, type TestSchema } from '@kete/testing';
 import {
   finishHolding,
+  getHolding,
   workLinksMigrationSql,
   workMigrationSql,
   workPrioritiesMigrationSql,
@@ -156,6 +157,25 @@ describe('what is unread', () => {
         },
         at(6),
       );
+      const urgent = await postMessage(
+        tx,
+        org,
+        {
+          thread: thread.id,
+          author: abla,
+          text: 'Rappeler le client avant vendredi.',
+          for: 'action',
+          via: 'kete',
+        },
+        at(6),
+        { due: '2026-10-24', priority: 'urgent' },
+      );
+      expect(await getHolding(tx, urgent.holdingId ?? '')).toMatchObject({
+        due: '2026-10-24',
+        priority: 'urgent',
+        holder: abla,
+      });
+      await finishHolding(tx, org, urgent.holdingId ?? '', at(6));
       let summaries = await threadSummariesOf(tx, abla);
       expect(summaries.map((s) => s.thread.id)).toEqual([thread.id, group.id]);
       expect(summaries[0]?.openActions).toBe(1);
