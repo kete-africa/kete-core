@@ -11,6 +11,7 @@ export {
   type OrganizationCalendar,
 } from './calendar.js';
 export { icsAgenda, icsFact, parseIcs, type AgendaSource, type IcsEvent } from './agenda.js';
+export { icsFeed, type FeedOptions } from './feed.js';
 export {
   DAY,
   dayOf,

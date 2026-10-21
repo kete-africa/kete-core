@@ -86,3 +86,26 @@ await executeCommand(tx, sendToClient, {
   its schema declares (Cedar refuses the others).
 
 The first check of Cedar on KYA's six policies: `specs/112-policies/first-check.md`.
+
+## The six policies in plain forms, and a simulation (spec 139)
+
+```ts
+import { fillTemplate, policyTemplates, savePolicy, simulatePolicy } from '@kete/policies';
+
+const policy = fillTemplate(
+  'spending.above',
+  { amount: 1_000_000, approver: 'direction' },
+  {
+    owner: 'usr_abla',
+  },
+); // « Au-delà de 1 000 000 F, la direction approuve l’achat », on trial
+const seen = await simulatePolicy(tx, { engine, policy, since, entitiesOf });
+// { replayed: 3, changed: [{ gesture, before: 'allow', after: 'approve' }, …] }
+await savePolicy(tx, organizationId, engine, { ...policy, writtenBy: 'usr_abla' });
+```
+
+`policyTemplates` covers the six families of D-058 — who commits the company, who speaks for it,
+spending limits, deputies, retention and confidentiality, consent — each a sentence with its blanks
+(an amount, an approver, channels, hours, days), written for the center's actions. A filled template
+starts on trial. `simulatePolicy` decides the gestures journaled since a moment again, with and
+without the policy, and lists those whose effect changes.

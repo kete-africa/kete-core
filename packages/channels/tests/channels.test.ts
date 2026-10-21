@@ -1,11 +1,25 @@
-import type { ChatInbound } from '@kete/notify';
+import { memoryChatChannel, type ChatInbound } from '@kete/notify';
 import { inOrganization, type SqlExecutor } from '@kete/tenancy';
 import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '@kete/testing';
-import { messagesOf, openThread, threadOf, threadsMigrationSql } from '@kete/threads';
-import { getHolding, workLinksMigrationSql, workMigrationSql } from '@kete/work';
+import {
+  joinThread,
+  messagesOf,
+  openThread,
+  postMessage,
+  threadOf,
+  threadsLiveMigrationSql,
+  threadsMigrationSql,
+} from '@kete/threads';
+import {
+  getHolding,
+  workLinksMigrationSql,
+  workMigrationSql,
+  workPrioritiesMigrationSql,
+} from '@kete/work';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   addRoutingRule,
+  answerByChat,
   answerByMail,
   channelsMigrationSql,
   fromChat,
@@ -29,7 +43,9 @@ beforeAll(async () => {
     migrate: async (owner, { schema, appRole }) => {
       await owner.query(workMigrationSql({ schema, appRole }));
       await owner.query(workLinksMigrationSql({ schema }));
+      await owner.query(workPrioritiesMigrationSql({ schema }));
       await owner.query(threadsMigrationSql({ schema, appRole }));
+      await owner.query(threadsLiveMigrationSql({ schema, appRole }));
       await owner.query(channelsMigrationSql({ schema, appRole }));
     },
   });
@@ -320,5 +336,48 @@ describe('isolation', () => {
         },
       });
     }
+  });
+});
+
+describe('answers on WhatsApp and Telegram (spec 139)', () => {
+  it('writes within the 24-hour window, else through the template, else says why not', async () => {
+    const org = fresh();
+    const whatsappChannel = memoryChatChannel('whatsapp');
+    const telegramChannel = memoryChatChannel('telegram');
+    const channels = { whatsapp: whatsappChannel, telegram: telegramChannel };
+    const t0 = new Date(Date.UTC(2026, 9, 21, 8, 0));
+    const hours = (h: number) => new Date(t0.getTime() + h * 3600_000);
+    await inOrg(org, async (tx) => {
+      const thread = await openThread(tx, org, {
+        kind: 'object',
+        object: colombe,
+        title: 'Projet Colombe',
+        holder: engineer,
+      });
+      const client = { kind: 'contact', id: 'whatsapp:+22890112233' } as const;
+      await postMessage(
+        tx,
+        org,
+        { thread: thread.id, author: client, text: 'Bonjour', for: 'information', via: 'whatsapp' },
+        t0,
+      );
+      await joinThread(tx, org, thread.id, { kind: 'contact', id: 'telegram:4242' }, t0);
+      const message = { thread: thread.id, text: 'Nous passons vendredi à 9 h.' };
+      expect(await answerByChat(tx, { message, channels, now: hours(2) })).toEqual({
+        sent: ['telegram:4242', 'whatsapp:+22890112233'],
+        byTemplate: [],
+        refused: [],
+      });
+      expect(await answerByChat(tx, { message, channels, now: hours(25) })).toEqual({
+        sent: ['telegram:4242'],
+        byTemplate: [],
+        refused: [{ to: 'whatsapp:+22890112233', reason: 'outside_window' }],
+      });
+      const template = (text: string) => ({ name: 'suivi', language: 'fr', parameters: [text] });
+      expect(await answerByChat(tx, { message, channels, template, now: hours(25) })).toMatchObject(
+        { byTemplate: ['whatsapp:+22890112233'], refused: [] },
+      );
+      expect(whatsappChannel.sent.map((s) => s.kind)).toEqual(['text', 'template']);
+    });
   });
 });

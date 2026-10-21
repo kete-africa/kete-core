@@ -60,3 +60,27 @@ const shown = await messagesOf(tx, thread.id); // latest versions, edits counted
 - **Its own organization only.** `threadsMigrationSql` creates the four tables with their RLS
   policy in the same migration (constitution V). A thread's address is unique across the deployment,
   so a reply by mail finds its thread before its organization is known.
+
+## Threads people live in (spec 139)
+
+```mermaid
+flowchart LR
+  P[postMessage · internal or outside · mentions] --> M[(kete_messages)]
+  P -->|the author reads up to her words| R[(reads)]
+  S[saveThreadFile · same name = next version] --> F[(kete_thread_files)]
+  V[moveMessage · author or holder] --> X[(kete_message_moves)]
+  U[markUnread] --> K[(kete_thread_marks · hers, not the trace)]
+  M & R & F & X -->|triggers · pg_notify on commit| L[listenThreads]
+  Q[threadSummariesOf] --> Y[unread · last message · last activity · open actions]
+  C[changesSince] --> Y
+```
+
+Run `threadsLiveMigrationSql` after `threadsMigrationSql`. `threadSummariesOf` lists a member's
+threads by last activity with their unread count, last message and open actions (a thread with none
+is resolved); `markUnread` marks from a message on. A mentioned person joins. A file is kept with its
+fingerprint, 10 MB at most; the same name again is its next version (`filesOf`, `threadFile`). A
+message moves once, by its author or the thread's holder: the target names where it came from
+(`moved_from`), the source keeps the original and where it went (`movedTo`). A message is
+`internal` unless said `outside`; a contact's words are outside. Every change is announced on the
+channel `kete_threads` once it commits: `listenThreads(client, onChange)` on a direct connection,
+`changesSince(db, member, since)` without one.

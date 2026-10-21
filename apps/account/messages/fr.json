@@ -278,5 +278,11 @@
   "tool_finance": "Ventes, achats et dépenses, trésorerie",
   "tool_team": "L’équipe : semaines, congés, habilitations",
   "tool_commitments": "Contrats : ce qui est dû, et quand",
-  "tool_support": "Service après-vente : tickets et interventions"
+  "tool_support": "Service après-vente : tickets et interventions",
+  "switch_title": "Choisir l’organisation",
+  "switch_intro": "L’organisation choisie est celle de vos outils Kete.",
+  "switch_intro_back": "Choisissez l’organisation dans laquelle ouvrir l’application ; vous y revenez aussitôt.",
+  "switch_current": "Active",
+  "switch_choose": "Choisir",
+  "switch_stay": "Y rester"
 }

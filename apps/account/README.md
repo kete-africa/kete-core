@@ -9,20 +9,21 @@ client's single place for their tools, their organization and its generic settin
 Every address is declared once in `src/routes.ts`: the files of `src/routes` are named in English
 (`sign-in.tsx`, `space/security.tsx`, …), the addresses read in French (spec 036).
 
-| Path                            | What it is for                                                                                   |
-| ------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `/connexion`, `/inscription`    | Sign in, create an account (e-mail and password)                                                 |
-| `/forgot-password`              | Ask for a link to choose a new password (spec 025)                                               |
-| `/reset-password`               | Choose the new password from the e-mailed link; every other session is closed                    |
-| `/espace`                       | My tools: the Kete apps of the active organization                                               |
-| `/espace/kete`                  | My Kete: deploy Kete Enterprise — shared at once, or dedicated, at its place, autonomous (B3)    |
-| `/espace/nouvelle-organisation` | Create an organization (the creator becomes its owner)                                           |
-| `/espace/abonnements`           | Subscriptions: offers and their limits, a free trial once per tool, paying, access per tool      |
-| `/espace/organisation`          | Members, roles, invitations                                                                      |
-| `/espace/parametres`            | Logo, and generic settings: identity, legal identifiers, language, time zone, currency, channels |
-| `/espace/securite`              | Two-factor authentication, passkeys, dropping or adding back the password (spec 016)             |
-| `/connexion/code`               | The second step of a sign-in with two-factor                                                     |
-| `/invitation/$id`               | Accept an invitation                                                                             |
+| Path                            | What it is for                                                                                               |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `/connexion`, `/inscription`    | Sign in, create an account (e-mail and password)                                                             |
+| `/forgot-password`              | Ask for a link to choose a new password (spec 025)                                                           |
+| `/reset-password`               | Choose the new password from the e-mailed link; every other session is closed                                |
+| `/espace`                       | My tools: the Kete apps of the active organization                                                           |
+| `/espace/kete`                  | My Kete: deploy Kete Enterprise — shared at once, or dedicated, at its place, autonomous (B3)                |
+| `/espace/nouvelle-organisation` | Create an organization (the creator becomes its owner)                                                       |
+| `/espace/abonnements`           | Subscriptions: offers and their limits, a free trial once per tool, paying, access per tool                  |
+| `/espace/organisation`          | Members, roles, invitations                                                                                  |
+| `/espace/changer?retour=…`      | Change the active organization and go back to the app that asked (only a registered app's address, spec 139) |
+| `/espace/parametres`            | Logo, and generic settings: identity, legal identifiers, language, time zone, currency, channels             |
+| `/espace/securite`              | Two-factor authentication, passkeys, dropping or adding back the password (spec 016)                         |
+| `/connexion/code`               | The second step of a sign-in with two-factor                                                                 |
+| `/invitation/$id`               | Accept an invitation                                                                                         |
 
 Machine endpoints: `/api/auth/*` (the identity, including `/api/auth/token` and the published keys
 at `/api/auth/jwks`), `/api/apps/*` (trusted Kete apps), `/api/admin/offers` and `/api/admin/deployments` (Kete Cockpit),

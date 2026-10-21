@@ -116,3 +116,107 @@ grant update (state, closed_at, holder_kind, holder_id) on ${threads} to ${app};
 grant update (until) on ${members} to ${app};
 `;
 }
+
+/**
+ * The SQL that makes threads livable (spec 139), after `threadsMigrationSql`: a message internal or
+ * to the outside, a message moved (the original stays, saying where it went), files kept with their
+ * versions, a thread marked unread, and every change announced on commit through `pg_notify` on the
+ * channel `kete_threads` — `{ o: organization, t: thread, k: kind }` — for `listenThreads`.
+ */
+export function threadsLiveMigrationSql(options: ThreadsMigrationOptions): string {
+  const schema = checkIdentifier(options.schema ?? 'public');
+  const app = checkIdentifier(options.appRole);
+  const threads = `${schema}.kete_threads`;
+  const members = `${schema}.kete_thread_members`;
+  const messages = `${schema}.kete_messages`;
+  const reads = `${schema}.kete_message_reads`;
+  const moves = `${schema}.kete_message_moves`;
+  const files = `${schema}.kete_thread_files`;
+  const marks = `${schema}.kete_thread_marks`;
+  const organization = `organization_id = ${ACTIVE_ORGANIZATION_SQL}`;
+  const isolate = (table: string, name: string) => `
+alter table ${table} enable row level security;
+create policy ${name}_isolation on ${table} as permissive for all to ${app}
+  using (${organization})
+  with check (${organization});`;
+  const announce = (table: string, kind: string, event: 'insert' | 'update') => `
+create trigger ${table.split('.')[1]}_${event}_announce after ${event} on ${table}
+  referencing new table as new_rows for each statement
+  execute function ${schema}.kete_threads_announce('${kind}');`;
+  return `
+alter table ${messages}
+  add column visibility text not null default 'internal'
+    check (visibility in ('internal', 'outside')),
+  add column moved_from text references ${messages} (message_id);
+-- A contact's own words were always said outside.
+update ${messages} set visibility = 'outside' where author_kind = 'contact';
+
+create table ${moves} (
+  organization_id text not null,
+  message_id text primary key references ${messages} (message_id),
+  -- Where it was said; to_thread is where it went.
+  thread_id text not null references ${threads} (thread_id),
+  to_thread text not null references ${threads} (thread_id),
+  moved_message_id text not null references ${messages} (message_id),
+  by_kind text not null check (by_kind in ('person', 'agent')),
+  by_id text not null check (length(by_id) > 0),
+  at timestamptz not null default now()
+);
+${isolate(moves, 'kete_message_moves')}
+
+create table ${files} (
+  file_id text primary key,
+  organization_id text not null,
+  thread_id text not null references ${threads} (thread_id),
+  name text not null check (length(name) between 1 and 200),
+  media_type text not null check (length(media_type) between 1 and 100),
+  bytes integer not null check (bytes between 1 and 10485760),
+  sha256 text not null check (length(sha256) = 64),
+  content bytea not null,
+  by_kind text not null check (by_kind in ('person', 'agent', 'contact')),
+  by_id text not null check (length(by_id) > 0),
+  at timestamptz not null default now()
+);
+create index kete_thread_files_by_thread on ${files} (organization_id, thread_id, name, at);
+${isolate(files, 'kete_thread_files')}
+
+create table ${marks} (
+  organization_id text not null,
+  thread_id text not null references ${threads} (thread_id),
+  member_kind text not null check (member_kind in ('person', 'agent', 'contact')),
+  member_id text not null check (length(member_id) > 0),
+  unread_from timestamptz not null,
+  primary key (thread_id, member_kind, member_id)
+);
+${isolate(marks, 'kete_thread_marks')}
+
+grant select, insert on ${moves}, ${files} to ${app};
+-- A mark is her own way of reading, not the trace: it comes and goes.
+grant select, insert, update, delete on ${marks} to ${app};
+
+create function ${schema}.kete_threads_announce() returns trigger language plpgsql as $$
+begin
+  perform pg_notify('kete_threads', json_build_object('o', r.o, 't', r.t, 'k', tg_argv[0])::text)
+    from (select distinct organization_id as o, thread_id as t from new_rows) r;
+  return null;
+end
+$$;
+create function ${schema}.kete_threads_announce_read() returns trigger language plpgsql as $$
+begin
+  perform pg_notify('kete_threads', json_build_object('o', r.o, 't', r.t, 'k', 'read')::text)
+    from (select distinct n.organization_id as o, m.thread_id as t
+            from new_rows n join ${messages} m using (message_id)) r;
+  return null;
+end
+$$;
+${announce(messages, 'message', 'insert')}
+${announce(members, 'member', 'insert')}
+${announce(members, 'member', 'update')}
+${announce(files, 'file', 'insert')}
+${announce(moves, 'move', 'insert')}
+${announce(threads, 'thread', 'update')}
+create trigger kete_message_reads_insert_announce after insert on ${reads}
+  referencing new table as new_rows for each statement
+  execute function ${schema}.kete_threads_announce_read();
+`;
+}

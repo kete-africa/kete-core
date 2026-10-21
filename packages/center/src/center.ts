@@ -241,6 +241,25 @@ export interface GestureVerdict {
   reason?: string;
 }
 
+/**
+ * An app's object whose thread the center keeps (kete-core spec 139, FR-009; Kete Enterprise spec
+ * 098): a ticket, an invoice, a contract, a leave — born with it, where its people talk about it.
+ */
+export interface AppObjectThread {
+  /** What it is in the app: `ticket`, `invoice`, `quote`, `contract`, `leave`. */
+  kind: string;
+  /** The app's own id of it. */
+  id: string;
+  /** Its title in the thread list: « Ticket T-0012 — Hôtel Sarakawa ». */
+  title: string;
+  /** Where it opens in the app, an https address: « Ouvrir la fiche » from the thread. */
+  href?: string;
+  /** The center's third party it concerns, when known: its contacts may join the thread. */
+  party?: string;
+  /** The center's project it belongs to, when known. */
+  project?: string;
+}
+
 export interface CenterOptions {
   /** The center's API, `https://api.enterprise.example`; empty when the app works alone. */
   url: string | null | undefined;
@@ -341,6 +360,15 @@ export interface Center {
    * token is given, before the app makes it. Never throws: without an answer, `unruled`.
    */
   checkGesture(token: string | null | undefined, gesture: AppGesture): Promise<GestureVerdict>;
+  /**
+   * Opens the thread of one of the app's objects at the center, with the token of the person who
+   * created it (she holds it). Opened again, it is the same thread. Never throws: without a center,
+   * null; the app keeps working alone.
+   */
+  openObjectThread(
+    token: string | null | undefined,
+    object: AppObjectThread,
+  ): Promise<{ threadId: string; href: string } | null>;
   /** Sends an indicator's reading for her quarter's review. */
   sendReading(
     token: string | null | undefined,
@@ -583,6 +611,23 @@ export function createCenter(options: CenterOptions): Center {
       );
       if (!response?.ok) return unruled(response ? `http_${response.status}` : 'unreachable');
       return parseVerdict(await response.json().catch(() => null)) ?? unruled('unreadable');
+    },
+
+    async openObjectThread(token, object) {
+      if (!base || !token) return null;
+      const response = await post(
+        token,
+        `/v1/apps/${encodeURIComponent(options.product)}/threads`,
+        object,
+      );
+      if (!response?.ok) return null;
+      const answer = (await response.json().catch(() => ({}))) as {
+        threadId?: unknown;
+        href?: unknown;
+      };
+      return typeof answer.threadId === 'string' && typeof answer.href === 'string'
+        ? { threadId: answer.threadId, href: answer.href }
+        : null;
     },
 
     async sendReading(token, reading) {

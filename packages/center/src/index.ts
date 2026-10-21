@@ -7,6 +7,7 @@ export {
   moneyFactBody,
   type AppGesture,
   type AppHolding,
+  type AppObjectThread,
   type Center,
   type CenterGrants,
   type CenterOptions,

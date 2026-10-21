@@ -961,7 +961,7 @@ export const schemas = {
         }
       },
       "waiting_on": {
-        "description": "Who it waits for: a colleague, an agent, a party outside; none when it is in the holder's hands.",
+        "description": "Who it waits for: a colleague, an agent, a party outside, or another holding (it comes back to its holder when that one is done); none when it is in the holder's hands.",
         "oneOf": [
           {
             "type": "object",
@@ -975,7 +975,8 @@ export const schemas = {
                 "enum": [
                   "person",
                   "agent",
-                  "party"
+                  "party",
+                  "holding"
                 ]
               },
               "id": {
@@ -999,6 +1000,20 @@ export const schemas = {
         "description": "The day it is due, in the organization's time.",
         "type": "string",
         "format": "date"
+      },
+      "priority": {
+        "description": "How urgent: « Pour moi » sorts by it first. Absent: normal.",
+        "enum": [
+          "low",
+          "normal",
+          "high",
+          "urgent"
+        ]
+      },
+      "snoozed_until": {
+        "description": "Before this moment, « Pour moi » does not show it: the holder put it off.",
+        "type": "string",
+        "format": "date-time"
       },
       "state": {
         "description": "held: in the holder's hands. waiting: it waits on someone. done: finished.",
@@ -1975,12 +1990,24 @@ export const schemas = {
           "form"
         ]
       },
+      "visibility": {
+        "description": "internal: between the organization's people and agents. outside: said to the thread's contacts through their channel (a contact's own words are outside). Absent: internal.",
+        "enum": [
+          "internal",
+          "outside"
+        ]
+      },
       "reply_to": {
         "type": "string",
         "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
       },
       "edited_from": {
         "description": "The message this one replaces; the original is kept.",
+        "type": "string",
+        "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
+      },
+      "moved_from": {
+        "description": "The message this one was moved from; the original stays, saying where it went.",
         "type": "string",
         "pattern": "^msg_[0-9A-Za-z_-]{8,70}$"
       },

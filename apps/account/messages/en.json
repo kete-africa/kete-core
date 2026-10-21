@@ -278,5 +278,11 @@
   "tool_finance": "Sales, purchases and expenses, treasury",
   "tool_team": "The team: weeks, leave, authorisations",
   "tool_commitments": "Contracts: what is due, and when",
-  "tool_support": "After-sales: tickets and interventions"
+  "tool_support": "After-sales: tickets and interventions",
+  "switch_title": "Choose the organization",
+  "switch_intro": "The organization you choose is the one of your Kete tools.",
+  "switch_intro_back": "Choose the organization to open the app in; you go straight back to it.",
+  "switch_current": "Active",
+  "switch_choose": "Choose",
+  "switch_stay": "Stay in it"
 }

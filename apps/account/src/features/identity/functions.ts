@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { deploymentOf } from '@/features/deployments/deployments';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 import { z } from 'zod';
+import { isAppAddress } from '@/features/apps/returns';
 import { accessUntil } from '@/features/payments/access';
 import { toolCatalog } from '@/features/tools/catalog';
 import { eq } from 'drizzle-orm';
@@ -92,4 +93,23 @@ export const addMyPassword = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const outcome = await addPasswordFor(new Headers(getRequestHeaders()), data.password);
     return outcome === 'added' ? { ok: true as const } : { ok: false as const, reason: outcome };
+  });
+
+/**
+ * Changing organization on the way back to an app (Kete Enterprise spec 098, FR-001): her
+ * organizations, and where she goes back — only an address of a registered app.
+ */
+export const fetchSwitch = createServerFn({ method: 'GET' })
+  .validator((input: unknown) =>
+    z.object({ retour: z.string().max(2000).optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ data }) => {
+    const viewer = await readViewer(await actorFromHeaders(getRequestHeaders()));
+    if (!viewer) throw new ForbiddenError('unauthenticated');
+    const back = data.retour && (await isAppAddress(data.retour)) ? data.retour : null;
+    return {
+      current: viewer.actor.organizationId,
+      organizations: viewer.organizations.map(({ id, name }) => ({ id, name })),
+      back,
+    };
   });

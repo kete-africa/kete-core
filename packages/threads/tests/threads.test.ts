@@ -1,7 +1,12 @@
 import { createHash } from 'node:crypto';
 import { inOrganization } from '@kete/tenancy';
 import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '@kete/testing';
-import { getHolding, workLinksMigrationSql, workMigrationSql } from '@kete/work';
+import {
+  getHolding,
+  workLinksMigrationSql,
+  workMigrationSql,
+  workPrioritiesMigrationSql,
+} from '@kete/work';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   closeThread,
@@ -16,6 +21,7 @@ import {
   ThreadError,
   threadAt,
   threadOf,
+  threadsLiveMigrationSql,
   threadsMigrationSql,
   threadsOf,
   versionsOf,
@@ -31,7 +37,9 @@ beforeAll(async () => {
     migrate: async (owner, { schema, appRole }) => {
       await owner.query(workMigrationSql({ schema, appRole }));
       await owner.query(workLinksMigrationSql({ schema }));
+      await owner.query(workPrioritiesMigrationSql({ schema }));
       await owner.query(threadsMigrationSql({ schema, appRole }));
+      await owner.query(threadsLiveMigrationSql({ schema, appRole }));
     },
   });
 });
@@ -134,9 +142,9 @@ describe('the trace, at least as good as mail', () => {
         at(2),
       );
       expect(told.holdingId).toBeNull();
-      // Writing makes her a member, from then on.
+      // Writing makes her a member, from then on; so does being mentioned (spec 139).
       const members = (await threadOf(tx, computer))?.members ?? [];
-      expect(members.map((m) => m.id)).toEqual(['usr_it', 'usr_phebe']);
+      expect(members.map((m) => m.id)).toEqual(['usr_it', 'usr_phebe', 'usr_kossi']);
     });
   });
 

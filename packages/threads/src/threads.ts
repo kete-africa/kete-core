@@ -24,7 +24,10 @@ export class ThreadError extends Error {
       | 'closed'
       | 'not_the_author'
       | 'invalid_message'
-      | 'already_edited',
+      | 'already_edited'
+      | 'already_moved'
+      | 'not_a_member'
+      | 'file_too_large',
     message: string,
     readonly issues: string[] = [],
   ) {
