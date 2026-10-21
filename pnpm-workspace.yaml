@@ -18,6 +18,11 @@ overrides:
   httpsnippet>form-data: ^4.0.6
   # postcss still asks for a source-map-js that stalls on crafted source maps (GHSA-68fv-2mgg-jv7q).
   source-map-js: ^1.2.2
+  # Fixed versions of three high advisories published on 2026-10-06 to 16 (GHSA-587h-7wmj-h5pm,
+  # GHSA-gfr2-rv44-r23c, and vite's for 8.3.0 to 8.3.2), until each dependent asks for them.
+  'vite@>=8.3.0 <8.3.3': ^8.3.4
+  'launch-editor@<2.14.2': ^2.14.2
+  'markdown-it@>=14.1.0 <14.3.3': ^14.3.3
 
 # Advisories without a fix that only reach build-time code (decision 0007). Reviewed at each release.
 auditConfig:
