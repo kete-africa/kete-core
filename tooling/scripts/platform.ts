@@ -23,6 +23,7 @@
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const core = join(import.meta.dirname, '..', '..');
@@ -41,6 +42,26 @@ const envOf = (path: string): Record<string, string> =>
       )
     : {};
 const secrets = envOf(join(kete, '..', '.secrets', 'atelier-admin.env'));
+
+/**
+ * On Windows, Node trusts its own roots only; an antivirus that inspects HTTPS (Kaspersky, Avast…)
+ * signs with a root Windows trusts, and every call to the model then fails (« self-signed
+ * certificate in certificate chain »). The machine's roots are exported once per start and given to
+ * every process through `NODE_EXTRA_CA_CERTS` — public certificates, nothing secret.
+ */
+function trustWindowsRoots(): void {
+  if (process.platform !== 'win32' || process.env.NODE_EXTRA_CA_CERTS) return;
+  const file = join(tmpdir(), 'kete-platform-roots.pem');
+  const script = [
+    String.raw`$roots = Get-ChildItem Cert:\LocalMachine\Root, Cert:\CurrentUser\Root;`,
+    "$roots | ForEach-Object { '-----BEGIN CERTIFICATE-----';",
+    "[Convert]::ToBase64String($_.RawData, 'InsertLineBreaks'); '-----END CERTIFICATE-----' }",
+    `| Set-Content -Encoding ascii '${file}'`,
+  ].join(' ');
+  const run = spawnSync('powershell', ['-NoProfile', '-Command', script], { encoding: 'utf8' });
+  if (run.status === 0 && existsSync(file)) process.env.NODE_EXTRA_CA_CERTS = file;
+}
+trustWindowsRoots();
 const ACCOUNT_URL = 'http://localhost:3100';
 // The apps answer on 127.0.0.1: the loopback address the Compte Kete accepts for a client's return.
 const APP = 'http://127.0.0.1';
