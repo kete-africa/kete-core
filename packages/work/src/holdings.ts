@@ -84,11 +84,7 @@ export interface HoldingEvent {
 export class HoldingError extends Error {
   constructor(
     readonly code:
-      | 'holder_required'
-      | 'invalid_holding'
-      | 'not_found'
-      | 'not_taken_over'
-      | 'not_the_holder',
+      'holder_required' | 'invalid_holding' | 'not_found' | 'not_taken_over' | 'not_the_holder',
     message: string,
     readonly issues?: string[],
   ) {

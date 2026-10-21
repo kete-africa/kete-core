@@ -16,3 +16,4 @@ specs/
 **/.astro
 apps/docs/src/content/docs
 docs/generated
+docs/brief-ui/*.html
