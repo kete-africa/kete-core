@@ -220,3 +220,177 @@ create trigger kete_message_reads_insert_announce after insert on ${reads}
   execute function ${schema}.kete_threads_announce_read();
 `;
 }
+
+/**
+ * The SQL of threads for everyone (spec 140), after `threadsLiveMigrationSql`: reactions, pins, a
+ * message taken back (the original stays in the trace), voice notes' transcripts, the objects a
+ * message cites and the objects a thread is attached to, each member's notification level, a
+ * message for one person and its sharing, imported messages kept once, merged threads, and files
+ * kept in the product's storage (up to 100 MB). Every table has its RLS policy here; the new
+ * changes are announced on `kete_threads` like the others.
+ */
+export function threadsComfortMigrationSql(options: ThreadsMigrationOptions): string {
+  const schema = checkIdentifier(options.schema ?? 'public');
+  const app = checkIdentifier(options.appRole);
+  const threads = `${schema}.kete_threads`;
+  const messages = `${schema}.kete_messages`;
+  const files = `${schema}.kete_thread_files`;
+  const reactions = `${schema}.kete_message_reactions`;
+  const pins = `${schema}.kete_message_pins`;
+  const deletions = `${schema}.kete_message_deletions`;
+  const transcripts = `${schema}.kete_message_transcripts`;
+  const references = `${schema}.kete_message_references`;
+  const links = `${schema}.kete_thread_links`;
+  const prefs = `${schema}.kete_thread_prefs`;
+  const shares = `${schema}.kete_message_shares`;
+  const organization = `organization_id = ${ACTIVE_ORGANIZATION_SQL}`;
+  const isolate = (table: string, name: string) => `
+alter table ${table} enable row level security;
+create policy ${name}_isolation on ${table} as permissive for all to ${app}
+  using (${organization})
+  with check (${organization});`;
+  const announce = (table: string, kind: string, event: 'insert' | 'update' | 'delete') => `
+create trigger ${table.split('.')[1]}_${event}_announce after ${event} on ${table}
+  referencing ${event === 'delete' ? 'old' : 'new'} table as ${event === 'delete' ? 'old_rows' : 'new_rows'}
+  for each statement
+  execute function ${schema}.${event === 'delete' ? 'kete_threads_announce_gone' : 'kete_threads_announce'}('${kind}');`;
+  const who = `member_kind text not null check (member_kind in ('person', 'agent', 'contact')),
+  member_id text not null check (length(member_id) > 0)`;
+  return `
+alter table ${messages}
+  add column cited jsonb not null default '[]',
+  add column only_for_kind text check (only_for_kind in ('person')),
+  add column only_for_id text,
+  add column import_key text,
+  add constraint kete_messages_only_for_pair check ((only_for_kind is null) = (only_for_id is null));
+-- An imported message is kept once in its thread (FR-012).
+create unique index kete_messages_import_key on ${messages} (thread_id, import_key)
+  where import_key is not null;
+
+alter table ${threads} add column merged_into text references ${threads} (thread_id);
+grant update (merged_into) on ${threads} to ${app};
+
+alter table ${files}
+  alter column content drop not null,
+  add column storage_key text check (storage_key is null or length(storage_key) between 1 and 512),
+  drop constraint kete_thread_files_bytes_check,
+  add constraint kete_thread_files_bytes_check check (bytes between 1 and 104857600),
+  add constraint kete_thread_files_kept check (content is not null or storage_key is not null);
+
+create table ${reactions} (
+  organization_id text not null,
+  thread_id text not null references ${threads} (thread_id),
+  message_id text not null references ${messages} (message_id),
+  ${who},
+  emoji text not null check (length(emoji) between 1 and 16),
+  at timestamptz not null default now(),
+  primary key (message_id, member_kind, member_id, emoji)
+);
+${isolate(reactions, 'kete_message_reactions')}
+
+create table ${pins} (
+  pin_id text primary key,
+  organization_id text not null,
+  thread_id text not null references ${threads} (thread_id),
+  message_id text not null references ${messages} (message_id),
+  by_kind text not null check (by_kind in ('person', 'agent')),
+  by_id text not null check (length(by_id) > 0),
+  at timestamptz not null default now(),
+  unpinned_at timestamptz,
+  unpinned_by_kind text check (unpinned_by_kind in ('person', 'agent')),
+  unpinned_by_id text
+);
+create unique index kete_message_pins_one on ${pins} (message_id) where unpinned_at is null;
+${isolate(pins, 'kete_message_pins')}
+
+create table ${deletions} (
+  organization_id text not null,
+  message_id text primary key references ${messages} (message_id),
+  thread_id text not null references ${threads} (thread_id),
+  by_kind text not null check (by_kind in ('person', 'agent', 'contact')),
+  by_id text not null check (length(by_id) > 0),
+  at timestamptz not null default now()
+);
+${isolate(deletions, 'kete_message_deletions')}
+
+create table ${transcripts} (
+  organization_id text not null,
+  thread_id text not null references ${threads} (thread_id),
+  message_id text not null references ${messages} (message_id),
+  file_id text not null check (length(file_id) between 1 and 200),
+  text text not null check (length(text) <= 20000),
+  at timestamptz not null default now(),
+  search tsvector generated always as (to_tsvector('simple', text)) stored,
+  primary key (message_id, file_id)
+);
+create index kete_message_transcripts_search on ${transcripts} using gin (search);
+${isolate(transcripts, 'kete_message_transcripts')}
+
+create table ${references} (
+  organization_id text not null,
+  message_id text not null references ${messages} (message_id),
+  thread_id text not null references ${threads} (thread_id),
+  object_kind text not null check (length(object_kind) between 1 and 60),
+  object_id text not null check (length(object_id) between 1 and 200),
+  app text,
+  at timestamptz not null default now(),
+  primary key (message_id, object_kind, object_id)
+);
+create index kete_message_references_by_object on ${references}
+  (organization_id, object_kind, object_id, at desc);
+${isolate(references, 'kete_message_references')}
+
+create table ${links} (
+  organization_id text not null,
+  thread_id text not null references ${threads} (thread_id),
+  object_kind text not null check (length(object_kind) between 1 and 60),
+  object_id text not null check (length(object_id) between 1 and 200),
+  app text,
+  by_kind text not null check (by_kind in ('person', 'agent')),
+  by_id text not null check (length(by_id) > 0),
+  at timestamptz not null default now(),
+  primary key (thread_id, object_kind, object_id)
+);
+create index kete_thread_links_by_object on ${links} (organization_id, object_kind, object_id);
+${isolate(links, 'kete_thread_links')}
+
+create table ${prefs} (
+  organization_id text not null,
+  thread_id text not null references ${threads} (thread_id),
+  ${who},
+  notify text not null default 'all' check (notify in ('all', 'mentions', 'none')),
+  primary key (thread_id, member_kind, member_id)
+);
+${isolate(prefs, 'kete_thread_prefs')}
+
+create table ${shares} (
+  organization_id text not null,
+  message_id text primary key references ${messages} (message_id),
+  shared_message_id text not null references ${messages} (message_id),
+  by_kind text not null check (by_kind in ('person')),
+  by_id text not null check (length(by_id) > 0),
+  at timestamptz not null default now()
+);
+${isolate(shares, 'kete_message_shares')}
+
+-- The trace is append-only; a reaction and a notification level are one's own, and come and go.
+grant select, insert on ${deletions}, ${transcripts}, ${references}, ${links}, ${shares} to ${app};
+grant select, insert, update (unpinned_at, unpinned_by_kind, unpinned_by_id) on ${pins} to ${app};
+grant select, insert, delete on ${reactions} to ${app};
+grant select, insert, update, delete on ${prefs} to ${app};
+
+create function ${schema}.kete_threads_announce_gone() returns trigger language plpgsql as $$
+begin
+  perform pg_notify('kete_threads', json_build_object('o', r.o, 't', r.t, 'k', tg_argv[0])::text)
+    from (select distinct organization_id as o, thread_id as t from old_rows) r;
+  return null;
+end
+$$;
+${announce(reactions, 'reaction', 'insert')}
+${announce(reactions, 'reaction', 'delete')}
+${announce(pins, 'pin', 'insert')}
+${announce(pins, 'pin', 'update')}
+${announce(deletions, 'delete', 'insert')}
+${announce(transcripts, 'transcript', 'insert')}
+`;
+}

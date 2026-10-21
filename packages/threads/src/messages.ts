@@ -2,6 +2,7 @@ import { newId } from '@kete/records';
 import { validateMessage, type Message } from '@kete/sdk';
 import type { SqlExecutor } from '@kete/tenancy';
 import { sayHolding, type Priority } from '@kete/work';
+import { cite } from './references.js';
 import { getThread, joinThread, ThreadError, type Member } from './threads.js';
 
 // Messages (spec 113, FR-002; doctrine D-057): a trace at least as good as mail. A message is
@@ -26,11 +27,46 @@ interface MessageRow extends Record<string, unknown> {
   edited_from: string | null;
   moved_from: string | null;
   mentions: NonNullable<Message['mentions']>;
+  cited: NonNullable<Message['references']>;
+  only_for_kind: 'person' | null;
+  only_for_id: string | null;
+  import_key: string | null;
   at: Date;
 }
 
-const COLUMNS = `message_id, thread_id, author_kind, author_id, text, attachments, for_what,
-  to_kind, to_id, via, visibility, reply_to, edited_from, moved_from, mentions, at`;
+const NAMES = [
+  'message_id',
+  'thread_id',
+  'author_kind',
+  'author_id',
+  'text',
+  'attachments',
+  'for_what',
+  'to_kind',
+  'to_id',
+  'via',
+  'visibility',
+  'reply_to',
+  'edited_from',
+  'moved_from',
+  'mentions',
+  'cited',
+  'only_for_kind',
+  'only_for_id',
+  'import_key',
+  'at',
+];
+const COLUMNS = NAMES.join(', ');
+const COLUMNS_OF = (alias: string) => NAMES.map((name) => `${alias}.${name}`).join(', ');
+
+/** Who reads a thread: a message « only for » someone else is not hers (spec 140, FR-010). */
+export interface Viewer {
+  kind: Member['kind'];
+  id: string;
+}
+
+const VISIBLE = (alias: string, kind: string, id: string) =>
+  `(${alias}.only_for_id is null or (${alias}.only_for_kind = ${kind} and ${alias}.only_for_id = ${id}))`;
 
 function toMessage(row: MessageRow): Message {
   return {
@@ -47,6 +83,10 @@ function toMessage(row: MessageRow): Message {
     ...(row.edited_from ? { edited_from: row.edited_from } : {}),
     ...(row.moved_from ? { moved_from: row.moved_from } : {}),
     ...(row.mentions.length > 0 ? { mentions: row.mentions } : {}),
+    ...(row.cited.length > 0 ? { references: row.cited } : {}),
+    ...(row.only_for_kind && row.only_for_id
+      ? { only_for: { kind: row.only_for_kind, id: row.only_for_id } }
+      : {}),
     at: new Date(row.at).toISOString(),
   };
 }
@@ -130,6 +170,7 @@ export async function postMessage(
   if (!thread) throw new ThreadError('not_found', 'No such thread here.');
   if (thread.state === 'closed') throw new ThreadError('closed', 'This thread is put away.');
   await insert(db, organizationId, message);
+  await cite(db, organizationId, message);
   await joinThread(db, organizationId, thread.id, said.author as Member, now);
   // Whoever must act knows: she is a member too; so is whoever is mentioned (spec 139, FR-003).
   if (said.for === 'action' && said.to) {
@@ -147,12 +188,21 @@ export async function postMessage(
   return { message, holdingId };
 }
 
-async function insert(db: SqlExecutor, organizationId: string, message: Message): Promise<void> {
-  await db.query(
+/** Keeps one message as it is; an import names it by its key, kept once in its thread. */
+export async function insert(
+  db: SqlExecutor,
+  organizationId: string,
+  message: Message,
+  importKey: string | null = null,
+): Promise<boolean> {
+  const { rows } = await db.query(
     `insert into kete_messages (message_id, organization_id, thread_id, author_kind, author_id,
        text, attachments, for_what, to_kind, to_id, via, reply_to, edited_from, mentions, at,
-       visibility, moved_from)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+       visibility, moved_from, cited, only_for_kind, only_for_id, import_key)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19,
+       $20, $21)
+     on conflict (thread_id, import_key) where import_key is not null do nothing
+     returning message_id`,
     [
       message.id,
       organizationId,
@@ -171,11 +221,16 @@ async function insert(db: SqlExecutor, organizationId: string, message: Message)
       message.at,
       message.visibility ?? 'internal',
       message.moved_from ?? null,
+      JSON.stringify(message.references ?? []),
+      message.only_for?.kind ?? null,
+      message.only_for?.id ?? null,
+      importKey,
     ],
   );
+  return rows.length > 0;
 }
 
-async function findMessage(db: SqlExecutor, messageId: string): Promise<Message | null> {
+export async function findMessage(db: SqlExecutor, messageId: string): Promise<Message | null> {
   const { rows } = await db.query<MessageRow>(
     `select ${COLUMNS} from kete_messages where message_id = $1`,
     [messageId],
@@ -189,17 +244,13 @@ export async function versionsOf(db: SqlExecutor, messageId: string): Promise<Me
     `with recursive back as (
        select ${COLUMNS} from kete_messages where message_id = $1
        union all
-       select m.message_id, m.thread_id, m.author_kind, m.author_id, m.text, m.attachments,
-              m.for_what, m.to_kind, m.to_id, m.via, m.visibility, m.reply_to, m.edited_from,
-              m.moved_from, m.mentions, m.at
+       select ${COLUMNS_OF('m')}
          from kete_messages m join back b on m.message_id = b.edited_from
      ),
      forth as (
        select ${COLUMNS} from kete_messages where message_id = $1
        union all
-       select m.message_id, m.thread_id, m.author_kind, m.author_id, m.text, m.attachments,
-              m.for_what, m.to_kind, m.to_id, m.via, m.visibility, m.reply_to, m.edited_from,
-              m.moved_from, m.mentions, m.at
+       select ${COLUMNS_OF('m')}
          from kete_messages m join forth f on m.edited_from = f.message_id
      )
      select * from back union select * from forth order by at, message_id`,
@@ -264,66 +315,231 @@ export interface Shown extends Message {
   readBy: { kind: Member['kind']; id: string; at: string }[];
   /** Moved to another thread: the original stays here, saying where it went (FR-005). */
   movedTo?: { thread: string; message: string; at: string };
+  /** The reactions, each emoji once with who gave it (spec 140, FR-001). */
+  reactions: { emoji: string; by: { kind: Member['kind']; id: string }[] }[];
+  /** Pinned now, by whom and when (FR-002). */
+  pinned?: { by: { kind: Member['kind']; id: string }; at: string };
+  /**
+   * Taken back by its author (FR-003): the thread shows « Message supprimé »; its words, files
+   * and citations are not given here — the trace and the export keep them.
+   */
+  deleted?: { by: { kind: Member['kind']; id: string }; at: string };
+  /** Imported from an export (FR-012), dated as it was said. */
+  imported?: true;
+  /** A message only for her, shared with everyone since (FR-010): the shared message's id. */
+  sharedAs?: string;
 }
 
 /** The messages of a thread, each in its latest version, in the order they were first said. */
-export async function messagesOf(db: SqlExecutor, threadId: string): Promise<Shown[]> {
+export async function messagesOf(
+  db: SqlExecutor,
+  threadId: string,
+  options: { viewer?: Viewer } = {},
+): Promise<Shown[]> {
+  const viewer = options.viewer;
   const { rows } = await db.query<MessageRow>(
-    `select ${COLUMNS} from kete_messages where thread_id = $1 order by at, message_id`,
-    [threadId],
+    `select ${COLUMNS} from kete_messages m
+      where thread_id = $1 and edited_from is null
+        and ($2::text is null or ${VISIBLE('m', '$2', '$3')})
+      order by at, message_id`,
+    [threadId, viewer?.kind ?? null, viewer?.id ?? null],
   );
-  const all = rows.map(toMessage);
-  const next = new Map(all.filter((m) => m.edited_from).map((m) => [m.edited_from as string, m]));
-  const { rows: readRows } = await db.query<{
-    message_id: string;
-    reader_kind: Member['kind'];
-    reader_id: string;
-    at: Date;
-  }>(
-    `select r.message_id, r.reader_kind, r.reader_id, r.at from kete_message_reads r
-       join kete_messages m on m.message_id = r.message_id
-      where m.thread_id = $1 order by r.at, r.reader_id`,
-    [threadId],
+  return shown(db, rows);
+}
+
+/** Fifty messages at a time (spec 140, FR-006): before a message, or around one a search found. */
+export async function messagesPage(
+  db: SqlExecutor,
+  threadId: string,
+  options: { viewer?: Viewer; before?: string; around?: string; limit?: number } = {},
+): Promise<{ messages: Shown[]; older: boolean; newer: boolean }> {
+  const limit = Math.min(Math.max(options.limit ?? 50, 1), 200);
+  const viewer = options.viewer;
+  const anchorId = options.before ?? options.around ?? null;
+  const anchor = anchorId
+    ? (
+        await db.query<{ at: Date; message_id: string }>(
+          `select at, message_id from kete_messages where message_id = $1 and thread_id = $2`,
+          [anchorId, threadId],
+        )
+      ).rows[0]
+    : undefined;
+  if (anchorId && !anchor) throw new ThreadError('not_found', 'No such message in this thread.');
+  const page = async (direction: 'before' | 'after', count: number, inclusive: boolean) => {
+    const op = direction === 'before' ? (inclusive ? '<=' : '<') : '>';
+    const { rows } = await db.query<MessageRow>(
+      `select ${COLUMNS} from kete_messages m
+        where thread_id = $1 and edited_from is null
+          and ($2::text is null or ${VISIBLE('m', '$2', '$3')})
+          and ($4::timestamptz is null or (at, message_id) ${op} ($4::timestamptz, $5::text))
+        order by at ${direction === 'before' ? 'desc' : 'asc'},
+                 message_id ${direction === 'before' ? 'desc' : 'asc'}
+        limit $6`,
+      [
+        threadId,
+        viewer?.kind ?? null,
+        viewer?.id ?? null,
+        anchor?.at ?? null,
+        anchor?.message_id ?? null,
+        count + 1,
+      ],
+    );
+    return { rows: rows.slice(0, count), more: rows.length > count };
+  };
+  if (options.around && anchor) {
+    const half = Math.floor(limit / 2);
+    const back = await page('before', limit - half, true);
+    const forth = await page('after', half, false);
+    return {
+      messages: await shown(db, [...back.rows.reverse(), ...forth.rows]),
+      older: back.more,
+      newer: forth.more,
+    };
+  }
+  const back = await page('before', limit, false);
+  return { messages: await shown(db, back.rows.reverse()), older: back.more, newer: false };
+}
+
+/** The first versions given, as a thread shows them, in their order. */
+async function shown(db: SqlExecutor, firsts: MessageRow[]): Promise<Shown[]> {
+  if (firsts.length === 0) return [];
+  const ids = firsts.map((row) => row.message_id);
+  const { rows: later } = await db.query<MessageRow>(
+    `with recursive chain as (
+       select ${COLUMNS} from kete_messages where edited_from = any($1)
+       union all
+       select ${COLUMNS_OF('m')} from kete_messages m join chain c on m.edited_from = c.message_id
+     )
+     select * from chain`,
+    [ids],
   );
-  const { rows: moveRows } = await db.query<{
-    message_id: string;
-    to_thread: string;
-    moved_message_id: string;
-    at: Date;
-  }>(
-    `select message_id, to_thread, moved_message_id, at from kete_message_moves
-      where thread_id = $1`,
-    [threadId],
+  const next = new Map(later.map((row) => [row.edited_from as string, toMessage(row)]));
+  const versionIds = [...ids, ...later.map((row) => row.message_id)];
+  const [reads, moves, reactions, pins, deletions, transcripts, shares] = await Promise.all([
+    db.query<{ message_id: string; reader_kind: Member['kind']; reader_id: string; at: Date }>(
+      `select message_id, reader_kind, reader_id, at from kete_message_reads
+        where message_id = any($1) order by at, reader_id`,
+      [ids],
+    ),
+    db.query<{ message_id: string; to_thread: string; moved_message_id: string; at: Date }>(
+      `select message_id, to_thread, moved_message_id, at from kete_message_moves
+        where message_id = any($1)`,
+      [ids],
+    ),
+    db.query<{ message_id: string; emoji: string; member_kind: Member['kind']; member_id: string }>(
+      `select message_id, emoji, member_kind, member_id from kete_message_reactions
+        where message_id = any($1) order by at, emoji`,
+      [ids],
+    ),
+    db.query<{ message_id: string; by_kind: Member['kind']; by_id: string; at: Date }>(
+      `select message_id, by_kind, by_id, at from kete_message_pins
+        where message_id = any($1) and unpinned_at is null`,
+      [ids],
+    ),
+    db.query<{ message_id: string; by_kind: Member['kind']; by_id: string; at: Date }>(
+      `select message_id, by_kind, by_id, at from kete_message_deletions where message_id = any($1)`,
+      [ids],
+    ),
+    db.query<{ message_id: string; file_id: string; text: string }>(
+      `select message_id, file_id, text from kete_message_transcripts where message_id = any($1)`,
+      [versionIds],
+    ),
+    db.query<{ message_id: string; shared_message_id: string }>(
+      `select message_id, shared_message_id from kete_message_shares where message_id = any($1)`,
+      [ids],
+    ),
+  ]);
+  const by = <T extends { message_id: string }>(list: T[]) => {
+    const map = new Map<string, T[]>();
+    for (const row of list) map.set(row.message_id, [...(map.get(row.message_id) ?? []), row]);
+    return map;
+  };
+  const readsOf = by(reads.rows);
+  const moved = new Map(moves.rows.map((r) => [r.message_id, r]));
+  const reactionsOf = by(reactions.rows);
+  const pinned = new Map(pins.rows.map((r) => [r.message_id, r]));
+  const deleted = new Map(deletions.rows.map((r) => [r.message_id, r]));
+  const transcriptOf = new Map(
+    transcripts.rows.map((r) => [`${r.message_id}/${r.file_id}`, r.text]),
   );
-  const moved = new Map(moveRows.map((r) => [r.message_id, r]));
-  return all
-    .filter((m) => !m.edited_from)
-    .map((first) => {
-      let latest = first;
-      let edits = 0;
-      for (let n = next.get(latest.id); n; n = next.get(latest.id)) {
-        latest = n;
-        edits += 1;
-      }
-      const move = moved.get(first.id);
-      return {
-        ...latest,
-        first: first.id,
-        edits,
-        ...(move
-          ? {
-              movedTo: {
-                thread: move.to_thread,
-                message: move.moved_message_id,
-                at: new Date(move.at).toISOString(),
-              },
-            }
-          : {}),
-        readBy: readRows
-          .filter((r) => r.message_id === first.id)
-          .map((r) => ({ kind: r.reader_kind, id: r.reader_id, at: new Date(r.at).toISOString() })),
-      };
+  const sharedAs = new Map(shares.rows.map((r) => [r.message_id, r.shared_message_id]));
+  return firsts.map((row) => {
+    const first = toMessage(row);
+    let latest = first;
+    let edits = 0;
+    const chain = [first.id];
+    for (let n = next.get(latest.id); n; n = next.get(latest.id)) {
+      latest = n;
+      edits += 1;
+      chain.push(n.id);
+    }
+    const move = moved.get(first.id);
+    const gone = deleted.get(first.id);
+    const emojis = new Map<string, { kind: Member['kind']; id: string }[]>();
+    for (const r of reactionsOf.get(first.id) ?? []) {
+      emojis.set(r.emoji, [
+        ...(emojis.get(r.emoji) ?? []),
+        { kind: r.member_kind, id: r.member_id },
+      ]);
+    }
+    const pin = pinned.get(first.id);
+    const attachments = latest.attachments?.map((file) => {
+      const transcript = chain
+        .map((id) => transcriptOf.get(`${id}/${file.id}`))
+        .find((text) => text !== undefined);
+      return transcript !== undefined && file.transcript === undefined
+        ? { ...file, transcript }
+        : file;
     });
+    const base: Message = gone
+      ? (() => {
+          const { attachments: _a, references: _r, mentions: _m, ...rest } = latest;
+          void _a;
+          void _r;
+          void _m;
+          return { ...rest, text: '' };
+        })()
+      : { ...latest, ...(attachments ? { attachments } : {}) };
+    const share = sharedAs.get(first.id);
+    return {
+      ...base,
+      first: first.id,
+      edits,
+      ...(move
+        ? {
+            movedTo: {
+              thread: move.to_thread,
+              message: move.moved_message_id,
+              at: new Date(move.at).toISOString(),
+            },
+          }
+        : {}),
+      readBy: (readsOf.get(first.id) ?? []).map((r) => ({
+        kind: r.reader_kind,
+        id: r.reader_id,
+        at: new Date(r.at).toISOString(),
+      })),
+      reactions: [...emojis].map(([emoji, who]) => ({ emoji, by: who })),
+      ...(pin
+        ? {
+            pinned: {
+              by: { kind: pin.by_kind, id: pin.by_id },
+              at: new Date(pin.at).toISOString(),
+            },
+          }
+        : {}),
+      ...(gone
+        ? {
+            deleted: {
+              by: { kind: gone.by_kind, id: gone.by_id },
+              at: new Date(gone.at).toISOString(),
+            },
+          }
+        : {}),
+      ...(row.import_key ? { imported: true as const } : {}),
+      ...(share ? { sharedAs: share } : {}),
+    };
+  });
 }
 
 /**
@@ -426,20 +642,35 @@ export async function moveMessage(
 }
 
 /**
- * Messages whose words match, the closest first, each in the version that matched — full text,
- * whatever the language (`simple` dictionary). A thread may narrow it.
+ * Messages whose words match — in their text or a voice note's transcript —, the closest first,
+ * each in the version that matched; full text, whatever the language (`simple` dictionary). A thread
+ * may narrow it; a message taken back is never found; one only for someone else is not the
+ * viewer's.
  */
 export async function searchMessages(
   db: SqlExecutor,
-  query: { text: string; threadId?: string; limit?: number },
+  query: { text: string; threadId?: string; limit?: number; viewer?: Viewer },
 ): Promise<Message[]> {
   const { rows } = await db.query<MessageRow>(
-    `select ${COLUMNS} from kete_messages
-      where search @@ websearch_to_tsquery('simple', $1)
-        and ($2::text is null or thread_id = $2)
-      order by ts_rank(search, websearch_to_tsquery('simple', $1)) desc, at desc
+    `with q as (select websearch_to_tsquery('simple', $1) as q)
+     select ${COLUMNS_OF('m')} from kete_messages m, q
+      where (m.search @@ q.q
+             or exists (select 1 from kete_message_transcripts x
+                         where x.message_id = m.message_id and x.search @@ q.q))
+        and ($2::text is null or m.thread_id = $2)
+        and not exists (select 1 from kete_message_deletions d where d.message_id = m.message_id)
+        and ($4::text is null or ${VISIBLE('m', '$4', '$5')})
+      order by greatest(ts_rank(m.search, q.q),
+                        coalesce((select max(ts_rank(x.search, q.q)) from kete_message_transcripts x
+                                   where x.message_id = m.message_id), 0)) desc, m.at desc
       limit $3`,
-    [query.text, query.threadId ?? null, Math.min(Math.max(query.limit ?? 20, 1), 100)],
+    [
+      query.text,
+      query.threadId ?? null,
+      Math.min(Math.max(query.limit ?? 20, 1), 100),
+      query.viewer?.kind ?? null,
+      query.viewer?.id ?? null,
+    ],
   );
   return rows.map(toMessage);
 }

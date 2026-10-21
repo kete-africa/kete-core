@@ -1990,6 +1990,16 @@ export const schemas = {
             "bytes": {
               "type": "integer",
               "minimum": 0
+            },
+            "duration_ms": {
+              "description": "A voice note's or a video's length (spec 140).",
+              "type": "integer",
+              "minimum": 0
+            },
+            "transcript": {
+              "description": "A voice note's words, once transcribed (spec 140); searched like text.",
+              "type": "string",
+              "maxLength": 20000
             }
           }
         }
@@ -2074,6 +2084,56 @@ export const schemas = {
               "minLength": 1,
               "maxLength": 100
             }
+          }
+        }
+      },
+      "references": {
+        "description": "The objects it cites with « # » (spec 140): a project, a third party, a ticket, an invoice… each shown in its state of now, to who may read it.",
+        "type": "array",
+        "maxItems": 20,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "id"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "app": {
+              "description": "The app the object lives in; absent: the center.",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          }
+        }
+      },
+      "only_for": {
+        "description": "The one person who reads it (spec 140): Kete's answer that uses what not every member may read. Absent: every member.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "const": "person"
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
           }
         }
       },

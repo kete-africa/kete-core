@@ -3,12 +3,21 @@ import { newId } from '@kete/records';
 import type { SqlExecutor } from '@kete/tenancy';
 import { getThread, ThreadError, type Member } from './threads.js';
 
-// Files in a thread (spec 139, FR-004): kept under the organization's row-level security with their
-// name, type, size and fingerprint; sent again under the same name, a file is a new version and the
-// earlier ones stay. A message names its files by their ids (`message.v1` attachments).
+// Files in a thread (spec 139, FR-004; spec 140, FR-009): their name, type, size and fingerprint
+// kept under the organization's row-level security; their bytes in the product's storage (a bucket,
+// a disk) — or, without one, in the database as before. Sent again under the same name, a file is a
+// new version and the earlier ones stay. A message names its files by their ids.
 
-/** At most 10 MB a file, as a mail would carry. */
-export const MAX_THREAD_FILE_BYTES = 10 * 1024 * 1024;
+/** At most 100 MB a file in the product's storage: a video of a site, a long voice note. */
+export const MAX_THREAD_FILE_BYTES = 100 * 1024 * 1024;
+/** At most 10 MB a file kept in the database, when the product gives no storage. */
+export const MAX_INLINE_FILE_BYTES = 10 * 1024 * 1024;
+
+/** Where a product keeps the bytes: `@kete-africa/files`' storage fits it. */
+export interface ThreadFileStore {
+  put(key: string, body: Uint8Array, contentType: string): Promise<void>;
+  get(key: string): Promise<Uint8Array | null>;
+}
 
 export interface ThreadFile {
   id: string;
@@ -63,28 +72,34 @@ export async function saveThreadFile(
     by: Pick<Member, 'kind' | 'id'>;
   },
   now = new Date(),
+  options: { store?: ThreadFileStore } = {},
 ): Promise<ThreadFile> {
   const thread = await getThread(db, input.threadId);
   if (!thread) throw new ThreadError('not_found', 'No such thread here.');
   if (thread.state === 'closed') throw new ThreadError('closed', 'This thread is put away.');
-  if (input.content.byteLength === 0 || input.content.byteLength > MAX_THREAD_FILE_BYTES) {
-    throw new ThreadError('file_too_large', 'A file of 10 MB at most.');
+  const most = options.store ? MAX_THREAD_FILE_BYTES : MAX_INLINE_FILE_BYTES;
+  if (input.content.byteLength === 0 || input.content.byteLength > most) {
+    throw new ThreadError('file_too_large', `A file of ${most / 1024 / 1024} MB at most.`);
   }
   const name = input.name.trim().replace(/[\\/]/g, '_').slice(0, 200) || 'fichier';
   const fileId = newId('fil');
+  const mediaType = (input.mediaType || 'application/octet-stream').slice(0, 100);
+  const key = options.store ? `threads/${organizationId}/${thread.id}/${fileId}` : null;
+  if (options.store && key) await options.store.put(key, input.content, mediaType);
   await db.query(
     `insert into kete_thread_files (file_id, organization_id, thread_id, name, media_type, bytes,
-       sha256, content, by_kind, by_id, at)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+       sha256, content, storage_key, by_kind, by_id, at)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
     [
       fileId,
       organizationId,
       thread.id,
       name,
-      (input.mediaType || 'application/octet-stream').slice(0, 100),
+      mediaType,
       input.content.byteLength,
       createHash('sha256').update(input.content).digest('hex'),
-      Buffer.from(input.content),
+      key ? null : Buffer.from(input.content),
+      key,
       input.by.kind,
       input.by.id,
       now,
@@ -104,13 +119,14 @@ export async function filesOf(db: SqlExecutor, threadId: string): Promise<Thread
   return rows.map(toFile);
 }
 
-/** A file and its bytes, for a reader the product already allowed. */
+/** A file and its bytes, for a reader the product already allowed; from its storage if kept there. */
 export async function threadFile(
   db: SqlExecutor,
   fileId: string,
+  options: { store?: ThreadFileStore } = {},
 ): Promise<(ThreadFile & { content: Uint8Array }) | null> {
-  const { rows } = await db.query<FileRow & { content: Buffer }>(
-    `select f.*, c.content from (select ${COLUMNS} from kete_thread_files
+  const { rows } = await db.query<FileRow & { content: Buffer | null; storage_key: string | null }>(
+    `select f.*, c.content, c.storage_key from (select ${COLUMNS} from kete_thread_files
                                   where thread_id = (select thread_id from kete_thread_files
                                                       where file_id = $1)) f
        join kete_thread_files c on c.file_id = f.file_id
@@ -118,5 +134,8 @@ export async function threadFile(
     [fileId],
   );
   const row = rows[0];
-  return row ? { ...toFile(row), content: new Uint8Array(row.content) } : null;
+  if (!row) return null;
+  if (row.content) return { ...toFile(row), content: new Uint8Array(row.content) };
+  const stored = row.storage_key && options.store ? await options.store.get(row.storage_key) : null;
+  return stored ? { ...toFile(row), content: stored } : null;
 }
