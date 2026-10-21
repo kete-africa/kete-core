@@ -374,7 +374,7 @@ export interface HealthReport {
 }
 
 /**
- * A thing in progress and who holds it (doctrine D-056, spec 111): a request, a step of a circuit, a draft to check, an action from a meeting, an agent's task. It always has a holder — a person or an agent — and may wait on someone. An app says it under its source; said again under the same source, it replaces what was said. The center gives it its id.
+ * A thing in progress and who holds it (doctrine D-056, spec 111): a request, a step of a circuit, a draft to check, an action from a meeting, an agent's task. It always has a holder — a person, who answers for it (D-061); an agent works it as its delegate — and may wait on someone. An app says it under its source; said again under the same source, it replaces what was said. The center gives it its id.
  */
 export interface Holding {
   /**
@@ -404,9 +404,23 @@ export interface Holding {
    */
   what: string;
   /**
-   * Who holds it now. Never nobody.
+   * Who holds it now, and answers for it. Never nobody. A person (D-061): an agent is its delegate. The kind `agent` is still read, deprecated: the center makes the agent's person the holder and the agent its delegate.
    */
   holder: {
+    kind: 'person' | 'agent';
+    id: string;
+  };
+  /**
+   * The agent working it for its holder (D-061, spec 140): the holder still answers for it.
+   */
+  delegate?: {
+    kind: 'agent';
+    id: string;
+  };
+  /**
+   * Whom the result goes to when it is done: the next step's person by the policy or the circuit, else whoever entrusted it (D-061, spec 140).
+   */
+  return_to?: {
     kind: 'person' | 'agent';
     id: string;
   };

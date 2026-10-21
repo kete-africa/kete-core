@@ -68,15 +68,16 @@ const mine = await forMe(tx, personId);
 
 ## Guarantees
 
-- **A holder, always.** The database refuses a holding without one; its holder is a person or an
-  agent.
+- **A holder, always.** The database refuses a holding without one; its holder is a person, an
+  agent being its delegate (spec 140). Holdings said before D-061 may still name an agent.
 - **Where it opens.** `workLinksMigrationSql`, after `workMigrationSql`, adds the `href` its app
   gives a holding (`holding.v1`).
 - **Its own organization only.** `workMigrationSql` creates `kete_holdings` and
   `kete_holding_events` with their RLS policy in the same migration.
 - **An append-only journal.** The application role may insert and read a holding's events
   (`holding.created`, `holding.waiting`, `holding.nudged`, `holding.taken_over`,
-  `holding.handed_back`, `holding.done`), never change or delete them. Nothing is deleted.
+  `holding.handed_back`, `holding.delegated`, `holding.undelegated`, `holding.returned`,
+  `holding.done`…), never change or delete them. Nothing is deleted.
 - **The structure is the product's.** Deputies, managers and the head come through the
   `Structure` port; absences are the dated facts the apps already say (`dated-fact.v1`).
 
@@ -95,3 +96,21 @@ Run `workPrioritiesMigrationSql` after `workLinksMigrationSql`. `holding.v1` car
 sorts by priority, then due day, then age, and leaves out what is snoozed (`forMe(db, person, now)`).
 `dueNudges` takes `nudgeHours` by priority (2, 8, 24 and 48 hours by default — the settings
 `kete.nudge_hours_*`); a holding waiting on another holding is never nudged.
+
+## A person holds, an agent is delegated, the result returns (spec 140)
+
+```mermaid
+stateDiagram-v2
+  held --> held: delegateHolding · an agent works it · holding.delegated
+  held --> held: undelegate · its holder takes it back · holding.undelegated
+  held --> done: finishHolding
+  done --> [*]: holding.returned · to return_to, else the holder
+```
+
+Run `workDelegatesMigrationSql` after `workPrioritiesMigrationSql`. A holding's holder is a person,
+who answers for it (doctrine D-061); an agent is its `delegate`, given and taken back by the holder
+only (`not_the_holder` otherwise). `holding.v1` carries `delegate` and `return_to`; an app that says a
+holding again without them keeps those set. An agent said as holder by an older app is read through
+`sayHolding(…, { personOf })`: its person holds, the agent is delegated. When a holding is done,
+`holding.returned` names whom it returns to (`returnToOf`: `return_to`, else the holder) — the
+product tells her. `delegatedTo` lists what an agent works.

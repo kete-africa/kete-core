@@ -4,6 +4,8 @@ import { assertOrganizationIsolation, createTestSchema, type TestSchema } from '
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   awayOn,
+  delegatedTo,
+  delegateHolding,
   dueNudges,
   finishHolding,
   fluidity,
@@ -18,9 +20,13 @@ import {
   reclaimUnheld,
   relayAbsences,
   relayTarget,
+  returnToOf,
   sayHolding,
+  setReturnTo,
   snoozeHolding,
   syncSource,
+  undelegate,
+  workDelegatesMigrationSql,
   workLinksMigrationSql,
   workMigrationSql,
   workPrioritiesMigrationSql,
@@ -37,6 +43,7 @@ beforeAll(async () => {
       await owner.query(workMigrationSql({ schema, appRole }));
       await owner.query(workLinksMigrationSql({ schema }));
       await owner.query(workPrioritiesMigrationSql({ schema }));
+      await owner.query(workDelegatesMigrationSql({ schema }));
     },
   });
 });
@@ -122,6 +129,7 @@ describe('a holding', () => {
         'holding.created',
         'holding.waiting',
         'holding.done',
+        'holding.returned',
       ]);
       expect(await getHolding(tx, first.holdingId)).toMatchObject({ state: 'done' });
     });
@@ -146,6 +154,7 @@ describe('open holdings', () => {
       expect((await holdingEvents(tx, mine.holdingId)).map((e) => e.type)).toEqual([
         'holding.created',
         'holding.done',
+        'holding.returned',
       ]);
     });
   });
@@ -411,6 +420,73 @@ describe('priorities, a snooze, a holding waited on (spec 139)', () => {
       expect((await holdingEvents(tx, install.holdingId)).map((e) => e.type)).toContain(
         'holding.resumed',
       );
+    });
+  });
+});
+
+describe('a person holds, an agent is delegated (spec 140)', () => {
+  const personOf = async (agent: string) => (agent === 'agt_achats' ? 'usr_kossi' : null);
+
+  it('reads an agent said as holder as its person holding it, the agent delegated', async () => {
+    const org = fresh();
+    await inOrganization(db.app, org, async (tx) => {
+      const agent = { kind: 'agent', id: 'agt_achats' } as const;
+      const kept = await sayHolding(tx, org, said('Q-40', { holder: agent }), new Date(), {
+        personOf,
+      });
+      expect(kept.holder).toEqual(kossi);
+      expect(kept.delegate).toEqual(agent);
+      // Said again by its person, without a delegate: the delegate stays.
+      const again = await sayHolding(tx, org, said('Q-40'));
+      expect(again.delegate).toEqual(agent);
+      const types = (await holdingEvents(tx, kept.holdingId)).map((e) => e.type);
+      expect(types).toEqual(['holding.created', 'holding.delegated']);
+      // Unknown to the product, an agent holder is kept as said.
+      const kept2 = await sayHolding(tx, org, said('Q-41', { holder: agent }));
+      expect(kept2.holder).toEqual(agent);
+    });
+  });
+
+  it('is given to an agent and taken back by its holder only', async () => {
+    const org = fresh();
+    await inOrganization(db.app, org, async (tx) => {
+      const held = await sayHolding(tx, org, said('Q-42'));
+      await expect(
+        delegateHolding(tx, org, { holdingId: held.holdingId, agent: 'agt_relances', by: yao }),
+      ).rejects.toMatchObject({ code: 'not_the_holder' });
+      const given = await delegateHolding(tx, org, {
+        holdingId: held.holdingId,
+        agent: 'agt_relances',
+        by: kossi,
+      });
+      expect(given.delegate).toEqual({ kind: 'agent', id: 'agt_relances' });
+      expect((await delegatedTo(tx, 'agt_relances')).map((h) => h.holdingId)).toEqual([
+        held.holdingId,
+      ]);
+      const back = await undelegate(tx, org, { holdingId: held.holdingId, by: kossi });
+      expect(back.delegate).toBeNull();
+      expect(await delegatedTo(tx, 'agt_relances')).toEqual([]);
+      const types = (await holdingEvents(tx, held.holdingId)).map((e) => e.type);
+      expect(types).toEqual(['holding.created', 'holding.delegated', 'holding.undelegated']);
+    });
+  });
+
+  it('returns to whom it says when done, else to its holder', async () => {
+    const org = fresh();
+    await inOrganization(db.app, org, async (tx) => {
+      const asked = await sayHolding(tx, org, said('Q-43', { return_to: abla }));
+      expect(asked.returnTo).toEqual(abla);
+      await finishHolding(tx, org, asked.holdingId);
+      const returned = (await holdingEvents(tx, asked.holdingId)).at(-1);
+      expect(returned).toMatchObject({ type: 'holding.returned', data: { to: abla, by: kossi } });
+
+      const plain = await sayHolding(tx, org, said('Q-44'));
+      expect(returnToOf(plain)).toEqual(kossi);
+      const told = await setReturnTo(tx, { holdingId: plain.holdingId, to: yao });
+      expect(returnToOf(told)).toEqual(yao);
+      await sayHolding(tx, org, said('Q-44', { state: 'done' }));
+      const last = (await holdingEvents(tx, plain.holdingId)).at(-1);
+      expect(last).toMatchObject({ type: 'holding.returned', data: { to: yao } });
     });
   });
 });
