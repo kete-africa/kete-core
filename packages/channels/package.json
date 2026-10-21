@@ -21,6 +21,7 @@
     "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
     "@kete/threads": "workspace:@kete-africa/threads@*",
     "@kete/work": "workspace:@kete-africa/work@*",
+    "email-reply-parser": "2.3.9",
     "imapflow": "2.2.1",
     "mailparser": "3.9.33",
     "nodemailer": "10.0.13"

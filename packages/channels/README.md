@@ -84,3 +84,32 @@ const answer = await answerByChat(tx, {
 WhatsApp lets a business write freely within 24 hours of the person's last message
 (`WHATSAPP_WINDOW_HOURS`); after that, only the organization's approved template goes, else the
 contact is refused with the reason. Telegram has no window.
+
+## Mail as decided (spec 140; doctrine D-061)
+
+```mermaid
+flowchart LR
+  B[a mailbox · INBOX, Sent, « Kete »] -->|readMailbox · accept: the product's rule| R[fromMail · cleaned, the original kept]
+  R --> A{answers a mail a thread knows?}
+  A -->|In-Reply-To · References · kete_mail_refs| T[that thread · whatever the address]
+  A -->|no| N[the thread's address · a known sender · the model · « à classer »]
+  S[answerByMail · organizationId] -->|its Message-ID remembered| K[(kete_mail_refs)]
+  T & N --> K
+```
+
+Run `channelsMailRefsMigrationSql` after `channelsMigrationSql` (and threads' and work's
+spec 140 migrations).
+
+- **A reply finds its thread** by what it answers, before any other rule. The router remembers the
+  Message-ID of each mail a thread received, and of each answer sent with an `organizationId`.
+  `In-Reply-To` and `References` then lead back to that thread, whatever address the reply comes
+  from.
+- **What is read.** `readMailbox` reads one folder, the INBOX by default, and keeps a cursor per
+  folder.
+  - A Sent folder is read as `direction: 'out'`. Its mail is shown as written by the person
+    (`authorOf`), for information, said outside.
+  - `accept` is the product's rule for a personal box (a known contact, the « Kete » folder, a
+    thread in copy). A mail it refuses is never routed, nor kept.
+- **How a mail shows.** `fromMail` (also `fromEml`, for a `.eml` file) keeps the cleaned words in
+  `text`: the quoted history and the signature are removed by `email-reply-parser` (`cleanMail`).
+  The whole words stay in `original`. A mail read in two boxes is received once, by its Message-ID.

@@ -549,6 +549,9 @@ importers:
       '@kete/work':
         specifier: workspace:@kete-africa/work@*
         version: link:../work
+      email-reply-parser:
+        specifier: 2.3.9
+        version: 2.3.9
       imapflow:
         specifier: 2.2.1
         version: 2.2.1
@@ -5984,6 +5987,15 @@ packages:
 
   electron-to-chromium@1.5.439:
     resolution: {integrity: sha512-qu6QIPXhsb+CRcAiTMNjR4A1y/7tCYKkKjr5CZXRVih6qkDf79peZ2BpEU3qoDBNCRrcy3Mra3X9nG5oruuA7Q==}
+
+  email-reply-parser@2.3.9:
+    resolution: {integrity: sha512-k5w4cjqLSZABTyxkFHQLnMKJgrK2l6mPptmOnQHlwIosw86S05Xnupy4PPdw8XdXv/kXzn2PAnLfFMNFVUH4YQ==}
+    engines: {node: '>= 22.0.0'}
+    peerDependencies:
+      re2: 1.x
+    peerDependenciesMeta:
+      re2:
+        optional: true
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -13253,6 +13265,8 @@ snapshots:
       safe-buffer: 5.2.1
 
   electron-to-chromium@1.5.439: {}
+
+  email-reply-parser@2.3.9: {}
 
   emoji-regex@8.0.0: {}
 

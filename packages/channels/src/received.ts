@@ -1,4 +1,5 @@
 import type { ChatInbound } from '@kete/notify';
+import EmailReplyParser from 'email-reply-parser';
 import { simpleParser, type AddressObject } from 'mailparser';
 
 // What the outside says (spec 113, FR-003), the same whatever the channel: a WhatsApp or Telegram
@@ -29,7 +30,15 @@ export interface Received {
   /** Where it was sent: a mail's recipients, so a thread's own address is recognized. */
   to: string[];
   subject: string | null;
+  /** Its words; a mail's without the quoted history nor the signature (spec 140, FR-015). */
   text: string;
+  /** A mail's whole words, as it came: what « Voir le mail d'origine » shows. */
+  original?: string;
+  /** The mail it answers, and the conversation before it: where a reply finds its thread. */
+  inReplyTo?: string;
+  references?: string[];
+  /** `out`: read from a Sent folder — the organization's person wrote it, to the outside. */
+  direction?: 'in' | 'out';
   attachments: ReceivedAttachment[];
   at: string;
 }
@@ -69,11 +78,31 @@ const addresses = (field: AddressObject | AddressObject[] | undefined) =>
     .flatMap((group) => group.value)
     .flatMap((entry) => (entry.address ? [lower(entry.address)] : []));
 
-/** A mail as its raw source (RFC 5322), parsed: its sender, its recipients, its words, its files. */
-export async function fromMail(source: string | Uint8Array): Promise<Received> {
+const ids = (value: string | string[] | undefined) =>
+  (Array.isArray(value) ? value : value ? value.split(/\s+/) : [])
+    .map((id) => id.trim())
+    .filter((id) => id.length > 0);
+
+/** A mail's words without what it quotes nor its signature; the whole words if nothing is left. */
+export function cleanMail(text: string): string {
+  const visible = new EmailReplyParser().parseReply(text).trim();
+  return visible || text.trim();
+}
+
+/**
+ * A mail as its raw source (RFC 5322, a `.eml` file), parsed: its sender, its recipients, its words
+ * cleaned and whole, what it answers, its files. Read from a Sent folder, it is `out`.
+ */
+export async function fromMail(
+  source: string | Uint8Array,
+  options: { direction?: 'in' | 'out' } = {},
+): Promise<Received> {
   const mail = await simpleParser(Buffer.from(source));
   const sender = mail.from?.value[0];
   const address = sender?.address ? lower(sender.address) : null;
+  const whole = (mail.text ?? '').trim();
+  const inReplyTo = ids(mail.inReplyTo)[0];
+  const references = ids(mail.references);
   return {
     via: 'mail',
     ref: mail.messageId ?? `mail:${address ?? 'unknown'}:${mail.date?.toISOString() ?? ''}`,
@@ -85,7 +114,11 @@ export async function fromMail(source: string | Uint8Array): Promise<Received> {
     },
     to: [...addresses(mail.to), ...addresses(mail.cc)],
     subject: mail.subject ?? null,
-    text: (mail.text ?? '').trim(),
+    text: cleanMail(whole),
+    ...(whole ? { original: whole } : {}),
+    ...(inReplyTo ? { inReplyTo } : {}),
+    ...(references.length > 0 ? { references } : {}),
+    ...(options.direction === 'out' ? { direction: 'out' as const } : {}),
     attachments: mail.attachments.map((file) => ({
       name: file.filename ?? 'piece',
       mediaType: file.contentType ?? null,
