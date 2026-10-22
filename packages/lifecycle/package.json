@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/lifecycle",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "One lifecycle for skills, agents and apps (spec 105; doctrine D-053): created, used, learning from lessons gathered with consent, evaluated by test cases, promoted one tier at a time with a review by its risk; an agent's six states, triggers, budget, and autonomy earned by proofs.",
   "repository": {

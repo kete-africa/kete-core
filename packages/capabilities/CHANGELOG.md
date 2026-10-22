@@ -1,5 +1,11 @@
 # @kete-africa/capabilities
 
+## 0.5.3
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.5.2
 
 ### Patch Changes

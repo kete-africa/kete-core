@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/metering",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "Kete metering (spec 120; doctrine D-059; phase 11, step B1): who consumed what and how much — a model's tokens, a sandbox's minutes, a deployment — each figure said known, estimated or unavailable, never a guess passed off as a count.",
   "repository": {

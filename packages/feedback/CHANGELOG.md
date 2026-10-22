@@ -1,5 +1,11 @@
 # @kete-africa/feedback
 
+## 0.1.4
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.1.3
 
 ### Patch Changes
