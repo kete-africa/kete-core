@@ -16,6 +16,8 @@ export {
   type CenterReading,
   type CenterDecision,
   type CenterTask,
+  type CenterThread,
+  type CenterThreadMessage,
   type DatedFact,
   type DecisionAsked,
   type DirectoryCard,

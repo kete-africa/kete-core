@@ -159,3 +159,22 @@ if (verdict.effect === 'refuse') throw refused(verdict.policies.map((p) => p.sen
 thread of one of the app's objects — a ticket, an invoice, a contract, a leave — with the token of
 the person who created it, and answers its id and the center's address to show it (« Fil »).
 Opened again, it is the same thread; without a center, `null`, and the app keeps working alone.
+
+## A thread, in the app (spec 141)
+
+`thread(token, threadId)` reads a thread at the center as the person reads it — its last messages,
+the names they need, where she stopped — and `sayInThread(token, threadId, { text, mentions? })`
+says something in it as her, internal. The app shows the thread in its own page, drawn by
+`@kete/conversation` (a ticket's thread beside the ticket). Neither throws: without a center, a
+token or her right to it, `null` or the reason in `error`.
+
+```mermaid
+sequenceDiagram
+  participant A as The app (a ticket's page)
+  participant C as The center
+  A->>C: openObjectThread(her token, the ticket) → threadId
+  A->>C: thread(her token, threadId)
+  C-->>A: messages · names · unreadFrom
+  A->>C: sayInThread(her token, threadId, « Pièce commandée »)
+  C-->>A: ok — every member sees it in « Fils »
+```

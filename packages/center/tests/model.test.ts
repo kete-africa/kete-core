@@ -155,3 +155,101 @@ describe('an object’s thread at the center (spec 139)', () => {
     expect(await center.openObjectThread(null, ticket)).toBeNull();
   });
 });
+
+describe('a thread at the center, read and written from the app (spec 141)', () => {
+  const view = {
+    thread: { id: 'thr_01a15c43ticket12', title: 'Ticket T-0012', kind: 'object', state: 'open' },
+    messages: [
+      {
+        id: 'msg_01a15c43hello001',
+        first: 'msg_01a15c43hello001',
+        thread: 'thr_01a15c43ticket12',
+        author: { kind: 'person', id: 'usr_kossi' },
+        text: 'Je passe demain.',
+        for: 'information',
+        via: 'kete',
+        at: '2026-10-22T09:00:00.000Z',
+        edits: 0,
+        readBy: [],
+        reactions: [],
+      },
+    ],
+    names: { usr_kossi: 'Kossi' },
+    unreadFrom: null,
+    older: false,
+    actions: {},
+  };
+
+  it('reads it with her token, and is null without a center, a token or the right', async () => {
+    const { calls, fetcher } = fakeFetch(() => Response.json(view));
+    const center = createCenter({
+      url: 'https://api.center.test',
+      product: 'prd_kete_helpdesk',
+      source: 'kete-helpdesk',
+      fetch: fetcher,
+    });
+    const read = await center.thread('her-token', 'thr_01a15c43ticket12');
+    expect(read).toMatchObject({
+      thread: { id: 'thr_01a15c43ticket12', title: 'Ticket T-0012', state: 'open' },
+      names: { usr_kossi: 'Kossi' },
+      unreadFrom: null,
+      older: false,
+    });
+    expect(read?.messages.map((m) => m.text)).toEqual(['Je passe demain.']);
+    expect(calls[0]?.url).toBe('https://api.center.test/v1/threads/thr_01a15c43ticket12');
+    expect(await center.thread(null, 'thr_01a15c43ticket12')).toBeNull();
+    expect(await center.thread('her-token', 'not-a-thread')).toBeNull();
+    const refused = createCenter({
+      url: 'https://api.center.test',
+      product: 'prd_x',
+      source: 'x',
+      fetch: fakeFetch(() => Response.json({ error: 'forbidden' }, { status: 403 })).fetcher,
+    });
+    expect(await refused.thread('her-token', 'thr_01a15c43ticket12')).toBeNull();
+    const alone = createCenter({ url: '', product: 'prd_x', source: 'x' });
+    expect(await alone.thread('her-token', 'thr_01a15c43ticket12')).toBeNull();
+  });
+
+  it('says something in it as her, and says why it could not', async () => {
+    const { calls, fetcher } = fakeFetch(() => Response.json({ message: {} }, { status: 201 }));
+    const center = createCenter({
+      url: 'https://api.center.test',
+      product: 'prd_kete_helpdesk',
+      source: 'kete-helpdesk',
+      fetch: fetcher,
+    });
+    expect(
+      await center.sayInThread('her-token', 'thr_01a15c43ticket12', {
+        text: '  Pièce commandée.  ',
+      }),
+    ).toEqual({ ok: true, error: null });
+    expect(calls[0]?.url).toBe('https://api.center.test/v1/threads/thr_01a15c43ticket12/messages');
+    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({
+      text: 'Pièce commandée.',
+      mentions: [],
+    });
+    expect(await center.sayInThread(null, 'thr_01a15c43ticket12', { text: 'x' })).toEqual({
+      ok: false,
+      error: 'signed_out',
+    });
+    expect(await center.sayInThread('t', 'thr_01a15c43ticket12', { text: '   ' })).toEqual({
+      ok: false,
+      error: 'invalid_input',
+    });
+    const refused = createCenter({
+      url: 'https://api.center.test',
+      product: 'prd_x',
+      source: 'x',
+      fetch: fakeFetch(() => Response.json({ error: 'forbidden' }, { status: 403 })).fetcher,
+    });
+    expect(await refused.sayInThread('t', 'thr_01a15c43ticket12', { text: 'x' })).toEqual({
+      ok: false,
+      error: 'forbidden',
+    });
+    const alone = createCenter({ url: '', product: 'prd_x', source: 'x' });
+    expect(await alone.sayInThread('t', 'thr_01a15c43ticket12', { text: 'x' })).toEqual({
+      ok: false,
+      error: 'not_connected',
+    });
+  });
+});

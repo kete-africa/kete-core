@@ -245,6 +245,40 @@ export interface GestureVerdict {
  * An app's object whose thread the center keeps (kete-core spec 139, FR-009; Kete Enterprise spec
  * 098): a ticket, an invoice, a contract, a leave — born with it, where its people talk about it.
  */
+/**
+ * A message of a thread at the center, as the center shows it to the person (kete-core spec 141):
+ * the shape `@kete/conversation` draws.
+ */
+export interface CenterThreadMessage {
+  id: string;
+  first: string;
+  thread: string;
+  author: { kind: 'person' | 'agent' | 'contact'; id: string };
+  text: string;
+  for: 'information' | 'action';
+  via: string;
+  at: string;
+  edits: number;
+  readBy: { kind: 'person' | 'agent' | 'contact'; id: string; at: string }[];
+  reactions: { emoji: string; by: { kind: 'person' | 'agent' | 'contact'; id: string }[] }[];
+  visibility?: 'internal' | 'outside';
+  reply_to?: string;
+  mentions?: { kind: 'person' | 'agent'; id: string }[];
+  attachments?: { id: string; name: string; media_type?: string; bytes?: number }[];
+  [more: string]: unknown;
+}
+
+/** A thread at the center as the person reads it: its last messages, the names they need. */
+export interface CenterThread {
+  thread: { id: string; title: string; kind: string; state: 'open' | 'closed' };
+  messages: CenterThreadMessage[];
+  names: Record<string, string>;
+  /** The first message she had not read. */
+  unreadFrom: string | null;
+  /** There are older messages than these. */
+  older: boolean;
+}
+
 export interface AppObjectThread {
   /** What it is in the app: `ticket`, `invoice`, `quote`, `contract`, `leave`. */
   kind: string;
@@ -369,6 +403,20 @@ export interface Center {
     token: string | null | undefined,
     object: AppObjectThread,
   ): Promise<{ threadId: string; href: string } | null>;
+  /**
+   * A thread at the center, as the person reads it (kete-core spec 141): its last messages and
+   * their names. Never throws: without a center, a token or the right to read it, null.
+   */
+  thread(token: string | null | undefined, threadId: string): Promise<CenterThread | null>;
+  /**
+   * Says something in a thread at the center, as the person: internal, for information. Without a
+   * center, a token or the right to write there, an error the app shows.
+   */
+  sayInThread(
+    token: string | null | undefined,
+    threadId: string,
+    said: { text: string; mentions?: { kind: 'person' | 'agent'; id: string }[] },
+  ): Promise<{ ok: boolean; error: string | null }>;
   /** Sends an indicator's reading for her quarter's review. */
   sendReading(
     token: string | null | undefined,
@@ -628,6 +676,63 @@ export function createCenter(options: CenterOptions): Center {
       return typeof answer.threadId === 'string' && typeof answer.href === 'string'
         ? { threadId: answer.threadId, href: answer.href }
         : null;
+    },
+
+    async thread(token, threadId) {
+      if (!/^thr_[0-9A-Za-z_-]{8,70}$/.test(threadId)) return null;
+      const found = await read<{
+        thread?: { id?: unknown; title?: unknown; kind?: unknown; state?: unknown };
+        messages?: unknown;
+        names?: unknown;
+        unreadFrom?: unknown;
+        older?: unknown;
+      }>(token, `/v1/threads/${threadId}`);
+      const thread = found?.thread;
+      if (
+        !found ||
+        !thread ||
+        typeof thread.id !== 'string' ||
+        typeof thread.title !== 'string' ||
+        !Array.isArray(found.messages)
+      ) {
+        return null;
+      }
+      return {
+        thread: {
+          id: thread.id,
+          title: thread.title,
+          kind: typeof thread.kind === 'string' ? thread.kind : 'object',
+          state: thread.state === 'closed' ? 'closed' : 'open',
+        },
+        messages: (found.messages as CenterThreadMessage[]).filter(
+          (m) => typeof m?.id === 'string' && typeof m.text === 'string',
+        ),
+        names:
+          found.names && typeof found.names === 'object'
+            ? (found.names as Record<string, string>)
+            : {},
+        unreadFrom: typeof found.unreadFrom === 'string' ? found.unreadFrom : null,
+        older: found.older === true,
+      };
+    },
+
+    async sayInThread(token, threadId, said) {
+      if (!base) return { ok: false, error: 'not_connected' };
+      if (!token) return { ok: false, error: 'signed_out' };
+      if (!/^thr_[0-9A-Za-z_-]{8,70}$/.test(threadId)) return { ok: false, error: 'not_found' };
+      const text = said.text.trim().slice(0, 20000);
+      if (!text) return { ok: false, error: 'invalid_input' };
+      const response = await post(token, `/v1/threads/${threadId}/messages`, {
+        text,
+        mentions: said.mentions ?? [],
+      });
+      if (!response) return { ok: false, error: 'unreachable' };
+      if (response.ok) return { ok: true, error: null };
+      const answer = (await response.json().catch(() => ({}))) as { error?: unknown };
+      return {
+        ok: false,
+        error: typeof answer.error === 'string' ? answer.error : `http_${response.status}`,
+      };
     },
 
     async sendReading(token, reading) {
