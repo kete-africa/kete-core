@@ -243,12 +243,12 @@ describe('citations (FR-005)', () => {
 });
 
 describe('pages (FR-006)', () => {
-  it('gives fifty at a time, the latest first, and the page around a message found', async () => {
+  it('gives a page at a time, the latest first, and the page around a message found', async () => {
     const org = fresh();
     const thread = await colombe(org);
     await inOrg(org, async (tx) => {
       const ids: string[] = [];
-      for (let i = 0; i < 120; i += 1) {
+      for (let i = 0; i < 30; i += 1) {
         const { message } = await postMessage(
           tx,
           org,
@@ -257,25 +257,21 @@ describe('pages (FR-006)', () => {
         );
         ids.push(message.id);
       }
-      const last = await messagesPage(tx, thread.id);
-      expect(last.messages).toHaveLength(50);
-      expect(last.messages.at(-1)?.text).toBe('message 119');
+      // Fifty by default: the whole thread fits.
+      expect((await messagesPage(tx, thread.id)).messages).toHaveLength(30);
+      const last = await messagesPage(tx, thread.id, { limit: 10 });
+      expect(last.messages).toHaveLength(10);
+      expect(last.messages.at(-1)?.text).toBe('message 29');
       expect(last.older).toBe(true);
-      const before = await messagesPage(tx, thread.id, { before: last.messages[0]?.id as string });
-      expect(before.messages.at(-1)?.text).toBe('message 69');
+      const before = await messagesPage(tx, thread.id, {
+        before: last.messages[0]?.id as string,
+        limit: 10,
+      });
+      expect(before.messages.at(-1)?.text).toBe('message 19');
       const around = await messagesPage(tx, thread.id, { around: ids[10] as string, limit: 10 });
-      expect(around.messages.map((m) => m.text)).toEqual([
-        'message 6',
-        'message 7',
-        'message 8',
-        'message 9',
-        'message 10',
-        'message 11',
-        'message 12',
-        'message 13',
-        'message 14',
-        'message 15',
-      ]);
+      expect(around.messages.map((m) => m.text)).toEqual(
+        [6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((n) => `message ${n}`),
+      );
       expect(around).toMatchObject({ older: true, newer: true });
     });
   });
