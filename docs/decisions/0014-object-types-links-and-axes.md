@@ -1,7 +1,7 @@
 ---
-status: proposed
+status: accepted
 date: 2026-10-23
-decision-makers: proposed by the agent for the author, after doctrine D-062 (« Vas y en actualisant d'abord les principes et décisions. Après tu proposes toutes les architectures »)
+decision-makers: the author (« Il faut qu'on passe à de vraies implémentations, quel est le plan ? », then « Fais »), on the agent's proposal after doctrine D-062
 ---
 
 # 0014 — Object types, named links and inherited axes

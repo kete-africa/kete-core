@@ -1,7 +1,7 @@
 ---
-status: proposed
+status: accepted
 date: 2026-10-23
-decision-makers: proposed by the agent for the author, after doctrine D-062 (« on doit avoir des composants génériques comme tableau, et tout poussé à certains endroits pour les configurer en fonction de l'utilisation »)
+decision-makers: the author (« Il faut qu'on passe à de vraies implémentations, quel est le plan ? », then « Fais »), on the agent's proposal after doctrine D-062
 ---
 
 # 0016 — Generic components, configured where they are used
