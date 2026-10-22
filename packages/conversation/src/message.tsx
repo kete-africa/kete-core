@@ -29,6 +29,8 @@ export interface MessageProps {
   fileHref: (fileId: string) => string;
   /** A « # » citation in its state of now (the product reads it with her rights). */
   renderReference?: (reference: { kind: string; id: string; app?: string }) => ReactNode;
+  /** How a citation reads in the words, after « # »: its label (default its id). */
+  referenceLabel?: (reference: { kind: string; id: string; app?: string }) => string;
   /** The turn of Kete or an agent that wrote it. */
   run?: RunView | null;
   /** The product's blocks: an action and its holder, a message waiting for approval… */
@@ -72,15 +74,17 @@ function Words({
   names,
   references,
   renderReference,
+  labelOf,
 }: {
   text: string;
   names: string[];
   references: { kind: string; id: string; app?: string }[];
   renderReference: MessageProps['renderReference'];
+  labelOf: (reference: { kind: string; id: string; app?: string }) => string;
 }) {
   const marks = [
     ...names.map((name) => `@${name}`),
-    ...references.map((reference) => `#${reference.id}`),
+    ...references.map((reference) => `#${labelOf(reference)}`),
   ].sort((a, b) => b.length - a.length);
   if (marks.length === 0) return <>{text}</>;
   const pattern = new RegExp(
@@ -97,7 +101,7 @@ function Words({
             </b>
           );
         }
-        const cited = references.find((reference) => `#${reference.id}` === part);
+        const cited = references.find((reference) => `#${labelOf(reference)}` === part);
         if (cited && renderReference) return <span key={i}>{renderReference(cited)}</span>;
         return <span key={i}>{part}</span>;
       })}
@@ -187,6 +191,7 @@ export function MessageItem({
   quoted,
   fileHref,
   renderReference,
+  referenceLabel = (reference) => reference.id,
   run,
   extras,
   original: before,
@@ -379,6 +384,7 @@ export function MessageItem({
                     names={(message.mentions ?? []).map((who) => nameOf(who)).filter(Boolean)}
                     references={message.references ?? []}
                     renderReference={renderReference}
+                    labelOf={referenceLabel}
                   />
                 )}
               </div>
