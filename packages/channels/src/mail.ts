@@ -15,9 +15,10 @@ export interface MailAccount {
   password: string;
 }
 
-/** What a mailbox gives: the raw mails after a point, and that point to start from next time. */
+/** What a mailbox gives: the raw mails of a folder after a point, and that point to start from. */
 export interface Mailbox {
-  fetchSince(lastUid: number): Promise<{ uid: number; source: Uint8Array }[]>;
+  /** The INBOX, unless a folder is named (`Sent`, `Kete`). */
+  fetchSince(lastUid: number, folder?: string): Promise<{ uid: number; source: Uint8Array }[]>;
   appendSent(source: Uint8Array): Promise<void>;
 }
 
@@ -35,10 +36,10 @@ export function imapMailbox(account: MailAccount, options: { sent?: string } = {
     return client;
   };
   return {
-    async fetchSince(lastUid) {
+    async fetchSince(lastUid, folder = 'INBOX') {
       const client = await connect();
       try {
-        const lock = await client.getMailboxLock('INBOX');
+        const lock = await client.getMailboxLock(folder);
         try {
           const found: { uid: number; source: Uint8Array }[] = [];
           for await (const mail of client.fetch(
@@ -71,22 +72,30 @@ export function imapMailbox(account: MailAccount, options: { sent?: string } = {
 
 /** A mailbox in memory: what the tests and the demo read and write. */
 export function memoryMailbox(initial: string[] = []): Mailbox & {
-  deliver(source: string): number;
+  deliver(source: string, folder?: string): number;
   sent: Uint8Array[];
 } {
-  const inbox = initial.map((source, index) => ({
-    uid: index + 1,
-    source: new TextEncoder().encode(source),
-  }));
+  const folders = new Map<string, { uid: number; source: Uint8Array }[]>([
+    [
+      'INBOX',
+      initial.map((source, index) => ({
+        uid: index + 1,
+        source: new TextEncoder().encode(source),
+      })),
+    ],
+  ]);
   const sent: Uint8Array[] = [];
   return {
     sent,
-    deliver(source) {
-      const uid = (inbox.at(-1)?.uid ?? 0) + 1;
-      inbox.push({ uid, source: new TextEncoder().encode(source) });
+    deliver(source, folder = 'INBOX') {
+      const mails = folders.get(folder) ?? [];
+      const uid = (mails.at(-1)?.uid ?? 0) + 1;
+      mails.push({ uid, source: new TextEncoder().encode(source) });
+      folders.set(folder, mails);
       return uid;
     },
-    fetchSince: async (lastUid) => inbox.filter((mail) => mail.uid > lastUid),
+    fetchSince: async (lastUid, folder = 'INBOX') =>
+      (folders.get(folder) ?? []).filter((mail) => mail.uid > lastUid),
     appendSent: async (source) => {
       sent.push(source);
     },

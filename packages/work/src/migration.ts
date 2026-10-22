@@ -128,3 +128,31 @@ alter table ${schema}.kete_holdings
   add column href text check (href is null or length(href) between 1 and 500);
 `;
 }
+
+/**
+ * A person holds, an agent is delegated, the result returns to someone (spec 140; doctrine D-061).
+ * Run after `workPrioritiesMigrationSql`.
+ */
+export function workDelegatesMigrationSql(
+  options: Pick<WorkMigrationOptions, 'schema'> = {},
+): string {
+  const schema = checkIdentifier(options.schema ?? 'public');
+  const holdings = `${schema}.kete_holdings`;
+  const events = `${schema}.kete_holding_events`;
+  return `
+alter table ${holdings}
+  add column delegate_id text check (delegate_id is null or length(delegate_id) > 0),
+  add column return_to_kind text check (return_to_kind in ('person', 'agent')),
+  add column return_to_id text,
+  add constraint kete_holdings_return_to_pair
+    check ((return_to_kind is null) = (return_to_id is null));
+create index kete_holdings_by_delegate on ${holdings} (organization_id, delegate_id)
+  where delegate_id is not null and state <> 'done';
+alter table ${events}
+  drop constraint kete_holding_events_type_check,
+  add constraint kete_holding_events_type_check check (type in ('holding.created',
+    'holding.waiting', 'holding.nudged', 'holding.taken_over', 'holding.handed_back',
+    'holding.prioritized', 'holding.snoozed', 'holding.resumed', 'holding.delegated',
+    'holding.undelegated', 'holding.returned', 'holding.done'));
+`;
+}

@@ -37,6 +37,7 @@ import { ClosurePage } from './closure';
 import { PhonePage } from './phone';
 import { PlanPage } from './plan';
 import { SettingsPage } from './settings';
+import { ThreadsPage } from './threads';
 import { ChatPage, SlotsPage } from './slots';
 
 // The workspace page of copilot-demo, rebuilt with @kete/design: same structure and behavior,
@@ -506,6 +507,16 @@ const frames: Record<
     label: 'téléphone · clair',
     attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
     page: <PhonePage />,
+  },
+  'threads-light': {
+    label: 'fils · clair',
+    attributes: { 'data-design': 'workspace', 'data-theme': 'light' },
+    page: <ThreadsPage />,
+  },
+  'threads-dark': {
+    label: 'fils · sombre',
+    attributes: { 'data-design': 'workspace' },
+    page: <ThreadsPage />,
   },
   'kete-light': { label: 'kete · clair', attributes: {}, page: <KetePage /> },
   'kete-dark': {

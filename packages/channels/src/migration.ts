@@ -80,3 +80,28 @@ grant select, insert on ${rules}, ${routings} to ${app};
 grant select, insert, update on ${cursors} to ${app};
 `;
 }
+
+/**
+ * The mails a thread sent or received, by their Message-ID (spec 140, FR-014): a reply finds its
+ * thread by what it answers, whatever the address it comes from. Its RLS is in this migration.
+ */
+export function channelsMailRefsMigrationSql(options: ChannelsMigrationOptions): string {
+  const schema = checkIdentifier(options.schema ?? 'public');
+  const app = checkIdentifier(options.appRole);
+  const refs = `${schema}.kete_mail_refs`;
+  return `
+create table ${refs} (
+  organization_id text not null,
+  ref text not null check (length(ref) between 1 and 300),
+  thread_id text not null,
+  direction text not null check (direction in ('in', 'out')),
+  at timestamptz not null default now(),
+  primary key (organization_id, ref)
+);
+alter table ${refs} enable row level security;
+create policy kete_mail_refs_isolation on ${refs} as permissive for all to ${app}
+  using (organization_id = ${ACTIVE_ORGANIZATION_SQL})
+  with check (organization_id = ${ACTIVE_ORGANIZATION_SQL});
+grant select, insert on ${refs} to ${app};
+`;
+}

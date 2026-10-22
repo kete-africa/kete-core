@@ -3,12 +3,25 @@
 // connection (a transaction pooler cannot listen), and streams each change to the screens of the
 // thread's members; without such a connection it asks `changesSince` instead.
 
-export type ThreadChangeKind = 'message' | 'read' | 'member' | 'file' | 'move' | 'thread';
+export type ThreadChangeKind =
+  | 'message'
+  | 'read'
+  | 'member'
+  | 'file'
+  | 'move'
+  | 'thread'
+  | 'reaction'
+  | 'pin'
+  | 'delete'
+  | 'transcript'
+  | 'typing';
 
 export interface ThreadChange {
   organizationId: string;
   threadId: string;
   kind: ThreadChangeKind;
+  /** Who is writing, for `typing` (spec 140, FR-007). */
+  who?: { kind: string; id: string };
 }
 
 /** What `listenThreads` needs of a Postgres client: `pg`'s `Client` has it. */
@@ -24,15 +37,41 @@ export interface ListeningClient {
   ): unknown;
 }
 
-const kinds = new Set<ThreadChangeKind>(['message', 'read', 'member', 'file', 'move', 'thread']);
+const kinds = new Set<ThreadChangeKind>([
+  'message',
+  'read',
+  'member',
+  'file',
+  'move',
+  'thread',
+  'reaction',
+  'pin',
+  'delete',
+  'transcript',
+  'typing',
+]);
 
 /** Reads one announcement; anything else on the channel is ignored. */
 export function threadChangeOf(payload: string | undefined): ThreadChange | null {
   try {
-    const value = JSON.parse(payload ?? '') as { o?: unknown; t?: unknown; k?: unknown };
+    const value = JSON.parse(payload ?? '') as {
+      o?: unknown;
+      t?: unknown;
+      k?: unknown;
+      w?: unknown;
+    };
     if (typeof value.o !== 'string' || typeof value.t !== 'string') return null;
     if (!kinds.has(value.k as ThreadChangeKind)) return null;
-    return { organizationId: value.o, threadId: value.t, kind: value.k as ThreadChangeKind };
+    const who =
+      typeof value.w === 'string' && /^(person|agent|contact):.+/.test(value.w)
+        ? { kind: value.w.split(':')[0] as string, id: value.w.slice(value.w.indexOf(':') + 1) }
+        : null;
+    return {
+      organizationId: value.o,
+      threadId: value.t,
+      kind: value.k as ThreadChangeKind,
+      ...(who ? { who } : {}),
+    };
   } catch {
     return null;
   }

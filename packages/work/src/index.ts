@@ -3,6 +3,8 @@
 export { byUrgency, forMe, type ForMe } from './for-me.js';
 export { fluidity, type Fluidity } from './fluidity.js';
 export {
+  delegatedTo,
+  delegateHolding,
   finishHolding,
   getHolding,
   handBack,
@@ -11,17 +13,23 @@ export {
   openHoldings,
   prioritize,
   priorities,
+  returnToOf,
   sayHolding,
+  setReturnTo,
   snoozeHolding,
+  undelegate,
+  type Delegate,
   type Holder,
   type Holding,
   type HoldingEvent,
   type HoldingEventType,
   type HoldingState,
   type Priority,
+  type SayOptions,
   type WaitingOn,
 } from './holdings.js';
 export {
+  workDelegatesMigrationSql,
   workLinksMigrationSql,
   workMigrationSql,
   workPrioritiesMigrationSql,

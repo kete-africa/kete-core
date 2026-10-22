@@ -1,7 +1,7 @@
 import { newId } from '@kete/records';
 import { validateRouting, type Routing } from '@kete/sdk';
 import type { SqlExecutor } from '@kete/tenancy';
-import { openThread, postMessage, threadAt, threadOf, type Holder } from '@kete/threads';
+import { getThread, openThread, postMessage, threadAt, threadOf, type Holder } from '@kete/threads';
 import { finishHolding, sayHolding } from '@kete/work';
 import type { Received } from './received.js';
 
@@ -43,6 +43,11 @@ export interface RouterOptions {
   objectFor?: (received: Received, reading: Reading) => Promise<ObjectRef | null>;
   /** The thread born for an object: its title and holder (default: its kind and id, the triage). */
   threadFor?: (object: ObjectRef) => Promise<{ title: string; holder: Holder }>;
+  /**
+   * The organization's person who wrote a mail read from her Sent folder (spec 140, FR-015): it is
+   * shown as hers, said to the outside. Without it, its sender's key speaks.
+   */
+  authorOf?: (received: Received) => Promise<{ kind: 'person'; id: string } | null>;
   locale?: 'fr' | 'en';
 }
 
@@ -173,23 +178,76 @@ async function place(
       : { title: received.subject ?? `${object.kind} ${object.id}`, holder: options.triage };
     thread = await openThread(db, organizationId, { kind: 'object', object, ...born }, now);
   }
+  return say(db, organizationId, received, thread.id, options, now);
+}
+
+/**
+ * Says it in a thread: a contact's words for action; a mail from her own Sent folder as hers, for
+ * information, said to the outside. A mail placed is remembered by its Message-ID.
+ */
+async function say(
+  db: SqlExecutor,
+  organizationId: string,
+  received: Received,
+  threadId: string,
+  options: RouterOptions,
+  now: Date,
+): Promise<{ thread: string; holding: string | null }> {
   const text =
     received.via === 'mail' && received.subject
       ? `${received.subject}\n\n${received.text}`
       : received.text;
+  const out = received.direction === 'out';
+  const author = out && options.authorOf ? await options.authorOf(received) : null;
   const posted = await postMessage(
     db,
     organizationId,
     {
-      thread: thread.id,
-      author: { kind: 'contact', id: received.from.key },
+      thread: threadId,
+      author: author ?? { kind: 'contact', id: received.from.key },
       text: text.slice(0, 20000),
-      for: 'action',
+      for: author ? 'information' : 'action',
       via: received.via,
+      ...(author ? { visibility: 'outside' as const } : {}),
     },
     now,
   );
-  return { thread: thread.id, holding: posted.holdingId };
+  if (received.via === 'mail') {
+    await rememberMail(db, organizationId, {
+      ref: received.ref,
+      threadId,
+      direction: out ? 'out' : 'in',
+    });
+  }
+  return { thread: threadId, holding: posted.holdingId };
+}
+
+/** Keeps which thread a mail belongs to, by its Message-ID (spec 140, FR-014). */
+export async function rememberMail(
+  db: SqlExecutor,
+  organizationId: string,
+  input: { ref: string; threadId: string; direction: 'in' | 'out' },
+  now = new Date(),
+): Promise<void> {
+  await db.query(
+    `insert into kete_mail_refs (organization_id, ref, thread_id, direction, at)
+     values ($1, $2, $3, $4, $5)
+     on conflict do nothing`,
+    [organizationId, input.ref.slice(0, 300), input.threadId, input.direction, now],
+  );
+}
+
+/** The thread a mail answers, from the mails it names (In-Reply-To, References), the newest known. */
+async function threadAnswered(db: SqlExecutor, received: Received): Promise<string | null> {
+  const named = [received.inReplyTo, ...(received.references ?? [])].filter(
+    (ref): ref is string => typeof ref === 'string' && ref.length > 0,
+  );
+  if (named.length === 0) return null;
+  const { rows } = await db.query<{ thread_id: string }>(
+    `select thread_id from kete_mail_refs where ref = any($1) order by at desc limit 1`,
+    [named],
+  );
+  return rows[0]?.thread_id ?? null;
 }
 
 /** Routes something received: once; by a rule, by the model, or to a person (FR-005). */
@@ -203,6 +261,28 @@ export async function route(
   const before = await latest(db, received.via, received.ref);
   if (before) return toRouting(before);
   const base = { received: { via: received.via, ref: received.ref } };
+
+  // A mail answering one a thread sent or received goes back into it, whatever its address.
+  const answered = received.via === 'mail' ? await threadAnswered(db, received) : null;
+  const into = answered ? await getThread(db, answered) : null;
+  if (into && into.state === 'open') {
+    const placed = await say(db, organizationId, received, into.id, options, now);
+    return journal(
+      db,
+      organizationId,
+      received,
+      {
+        ...base,
+        ...(into.object ? { object: into.object } : {}),
+        thread: placed.thread,
+        ...(placed.holding ? { holding: placed.holding } : {}),
+        intent: 'reply',
+        confidence: 1,
+        by: 'rule',
+      },
+      now,
+    );
+  }
 
   // A reply to a thread's own address goes back into it.
   for (const address of received.to) {

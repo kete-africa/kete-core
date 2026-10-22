@@ -12,17 +12,24 @@ export {
 } from './mail.js';
 export { answerByMail, readMailbox } from './mailboxes.js';
 export { answerByChat, WHATSAPP_WINDOW_HOURS, type ChatAnswer } from './chat-answers.js';
-export { channelsMigrationSql, type ChannelsMigrationOptions } from './migration.js';
 export {
+  channelsMailRefsMigrationSql,
+  channelsMigrationSql,
+  type ChannelsMigrationOptions,
+} from './migration.js';
+export {
+  cleanMail,
   fromChat,
   fromForm,
   fromMail,
+  fromMail as fromEml,
   type Received,
   type ReceivedAttachment,
   type Via,
 } from './received.js';
 export {
   addRoutingRule,
+  rememberMail,
   route,
   RouterError,
   settle,

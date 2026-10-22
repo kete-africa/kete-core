@@ -69,6 +69,26 @@ flowchart LR
   PH -->|main action| DR[Drawer]
 ```
 
+## The one composer (spec 140)
+
+`MessageField` is the composer of the canvas v6.2 (doctrine D-061), the same in a thread and in
+Kete Intelligence.
+
+- One line grows up to eight. 🎤 records a voice note in place and becomes ➤ as soon as she
+  writes.
+- ＋ opens a file or the product's gestures. « @ » names someone, « # » cites something, « / »
+  asks a gesture, each from the product's `search`.
+- Files can be picked, dropped or pasted. The message she answers is quoted above.
+- The draft is kept for each thread on the device (`draftKey`). ↑ edits her last message.
+  `onTyping` says she is writing, at most every three seconds.
+- `toggles` (made of `FieldToggle`: « Interne / Au client », « Pour info / Pour action ») sit
+  beside « send ». `below` holds what they unfold. `tone="alert"` frames a message that leaves the
+  organization.
+- Enter sends on a computer and breaks the line on a phone, where the toolbar stays on one line.
+
+The canvas v6.2's icons (`hash`, `smile`, `image`, `reply`, `trash`, `whatsapp`, `merge`, `import`,
+`route`, `hand`, `eye`) join the canvas's set.
+
 ## Forms and modes (spec 044)
 
 **A form never shares its page with a list.** A short form (six fields at most) opens in a

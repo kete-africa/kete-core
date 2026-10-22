@@ -374,7 +374,7 @@ export interface HealthReport {
 }
 
 /**
- * A thing in progress and who holds it (doctrine D-056, spec 111): a request, a step of a circuit, a draft to check, an action from a meeting, an agent's task. It always has a holder — a person or an agent — and may wait on someone. An app says it under its source; said again under the same source, it replaces what was said. The center gives it its id.
+ * A thing in progress and who holds it (doctrine D-056, spec 111): a request, a step of a circuit, a draft to check, an action from a meeting, an agent's task. It always has a holder — a person, who answers for it (D-061); an agent works it as its delegate — and may wait on someone. An app says it under its source; said again under the same source, it replaces what was said. The center gives it its id.
  */
 export interface Holding {
   /**
@@ -404,9 +404,23 @@ export interface Holding {
    */
   what: string;
   /**
-   * Who holds it now. Never nobody.
+   * Who holds it now, and answers for it. Never nobody. A person (D-061): an agent is its delegate. The kind `agent` is still read, deprecated: the center makes the agent's person the holder and the agent its delegate.
    */
   holder: {
+    kind: 'person' | 'agent';
+    id: string;
+  };
+  /**
+   * The agent working it for its holder (D-061, spec 140): the holder still answers for it.
+   */
+  delegate?: {
+    kind: 'agent';
+    id: string;
+  };
+  /**
+   * Whom the result goes to when it is done: the next step's person by the policy or the circuit, else whoever entrusted it (D-061, spec 140).
+   */
+  return_to?: {
     kind: 'person' | 'agent';
     id: string;
   };
@@ -949,6 +963,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
       ]
     | [
@@ -960,6 +982,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -969,35 +999,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
-        },
-      ]
-    | [
-        {
           /**
-           * The file kept in the product's storage.
+           * A voice note's or a video's length (spec 140).
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
+          duration_ms?: number;
           /**
-           * The file kept in the product's storage.
+           * A voice note's words, once transcribed (spec 140); searched like text.
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
+          transcript?: string;
         },
       ]
     | [
@@ -1009,6 +1018,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1018,6 +1035,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1027,62 +1052,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
-        },
-        {
           /**
-           * The file kept in the product's storage.
+           * A voice note's or a video's length (spec 140).
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-      ]
-    | [
-        {
+          duration_ms?: number;
           /**
-           * The file kept in the product's storage.
+           * A voice note's words, once transcribed (spec 140); searched like text.
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
+          transcript?: string;
         },
       ]
     | [
@@ -1094,6 +1071,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1103,6 +1088,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1112,6 +1105,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1121,89 +1122,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
-        },
-        {
           /**
-           * The file kept in the product's storage.
+           * A voice note's or a video's length (spec 140).
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
+          duration_ms?: number;
           /**
-           * The file kept in the product's storage.
+           * A voice note's words, once transcribed (spec 140); searched like text.
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-      ]
-    | [
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
+          transcript?: string;
         },
       ]
     | [
@@ -1215,6 +1141,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1224,6 +1158,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1233,6 +1175,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1242,6 +1192,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1251,116 +1209,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
-        },
-        {
           /**
-           * The file kept in the product's storage.
+           * A voice note's or a video's length (spec 140).
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
+          duration_ms?: number;
           /**
-           * The file kept in the product's storage.
+           * A voice note's words, once transcribed (spec 140); searched like text.
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-      ]
-    | [
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
+          transcript?: string;
         },
       ]
     | [
@@ -1372,6 +1228,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1381,6 +1245,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1390,6 +1262,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1399,6 +1279,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1408,6 +1296,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1417,143 +1313,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
-        },
-        {
           /**
-           * The file kept in the product's storage.
+           * A voice note's or a video's length (spec 140).
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
+          duration_ms?: number;
           /**
-           * The file kept in the product's storage.
+           * A voice note's words, once transcribed (spec 140); searched like text.
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-      ]
-    | [
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
+          transcript?: string;
         },
       ]
     | [
@@ -1565,6 +1332,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1574,6 +1349,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1583,6 +1366,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1592,6 +1383,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1601,6 +1400,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1610,6 +1417,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1619,170 +1434,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
-        },
-        {
           /**
-           * The file kept in the product's storage.
+           * A voice note's or a video's length (spec 140).
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
+          duration_ms?: number;
           /**
-           * The file kept in the product's storage.
+           * A voice note's words, once transcribed (spec 140); searched like text.
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-      ]
-    | [
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
+          transcript?: string;
         },
       ]
     | [
@@ -1794,6 +1453,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1803,6 +1470,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1812,6 +1487,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1821,6 +1504,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1830,6 +1521,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1839,6 +1538,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1848,6 +1555,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -1857,197 +1572,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
-        },
-        {
           /**
-           * The file kept in the product's storage.
+           * A voice note's or a video's length (spec 140).
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
+          duration_ms?: number;
           /**
-           * The file kept in the product's storage.
+           * A voice note's words, once transcribed (spec 140); searched like text.
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-      ]
-    | [
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
+          transcript?: string;
         },
       ]
     | [
@@ -2059,6 +1591,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2068,6 +1608,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2077,6 +1625,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2086,6 +1642,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2095,6 +1659,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2104,6 +1676,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2113,6 +1693,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2122,6 +1710,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2131,224 +1727,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
-        },
-        {
           /**
-           * The file kept in the product's storage.
+           * A voice note's or a video's length (spec 140).
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
+          duration_ms?: number;
           /**
-           * The file kept in the product's storage.
+           * A voice note's words, once transcribed (spec 140); searched like text.
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-      ]
-    | [
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
+          transcript?: string;
         },
       ]
     | [
@@ -2360,6 +1746,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2369,6 +1763,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2378,6 +1780,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2387,6 +1797,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2396,6 +1814,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2405,6 +1831,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2414,6 +1848,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2423,6 +1865,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2432,6 +1882,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2441,251 +1899,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
-        },
-        {
           /**
-           * The file kept in the product's storage.
+           * A voice note's or a video's length (spec 140).
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
+          duration_ms?: number;
           /**
-           * The file kept in the product's storage.
+           * A voice note's words, once transcribed (spec 140); searched like text.
            */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-      ]
-    | [
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
-        },
-        {
-          /**
-           * The file kept in the product's storage.
-           */
-          id: string;
-          name: string;
-          media_type?: string;
-          bytes?: number;
+          transcript?: string;
         },
       ]
     | [
@@ -2697,6 +1918,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2706,6 +1935,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2715,6 +1952,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2724,6 +1969,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2733,6 +1986,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2742,6 +2003,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2751,6 +2020,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2760,6 +2037,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2769,6 +2054,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2778,6 +2071,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2787,6 +2088,33 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2796,6 +2124,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2805,6 +2141,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2814,6 +2158,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2823,6 +2175,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2832,6 +2192,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2841,6 +2209,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2850,6 +2226,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2859,6 +2243,14 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
         {
           /**
@@ -2868,6 +2260,2308 @@ export interface Message {
           name: string;
           media_type?: string;
           bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+      ]
+    | [
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
+        },
+        {
+          /**
+           * The file kept in the product's storage.
+           */
+          id: string;
+          name: string;
+          media_type?: string;
+          bytes?: number;
+          /**
+           * A voice note's or a video's length (spec 140).
+           */
+          duration_ms?: number;
+          /**
+           * A voice note's words, once transcribed (spec 140); searched like text.
+           */
+          transcript?: string;
         },
       ];
   for: 'action' | 'information';
@@ -2899,6 +4593,1740 @@ export interface Message {
     kind: 'person' | 'agent';
     id: string;
   }[];
+  /**
+   * The objects it cites with « # » (spec 140): a project, a third party, a ticket, an invoice… each shown in its state of now, to who may read it.
+   *
+   * @maxItems 20
+   */
+  references?:
+    | []
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ]
+    | [
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+        {
+          kind: string;
+          id: string;
+          /**
+           * The app the object lives in; absent: the center.
+           */
+          app?: string;
+        },
+      ];
+  /**
+   * The one person who reads it (spec 140): Kete's answer that uses what not every member may read. Absent: every member.
+   */
+  only_for?: {
+    kind: 'person';
+    id: string;
+  };
   at: string;
 }
 

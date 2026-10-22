@@ -5,6 +5,7 @@ import {
   getHolding,
   workLinksMigrationSql,
   workMigrationSql,
+  workDelegatesMigrationSql,
   workPrioritiesMigrationSql,
 } from '@kete/work';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -21,6 +22,7 @@ import {
   ThreadError,
   threadAt,
   threadOf,
+  threadsComfortMigrationSql,
   threadsLiveMigrationSql,
   threadsMigrationSql,
   threadsOf,
@@ -40,6 +42,8 @@ beforeAll(async () => {
       await owner.query(workPrioritiesMigrationSql({ schema }));
       await owner.query(threadsMigrationSql({ schema, appRole }));
       await owner.query(threadsLiveMigrationSql({ schema, appRole }));
+      await owner.query(workDelegatesMigrationSql({ schema }));
+      await owner.query(threadsComfortMigrationSql({ schema, appRole }));
     },
   });
 });

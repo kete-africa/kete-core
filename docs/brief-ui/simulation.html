@@ -1,0 +1,984 @@
+<meta charset="utf-8">
+<title>Simulateur Kete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a working simulator in Kete's tokens &#x2014; the story bar on top, the app of the person you play, the two WhatsApp phones, and the engines behind the scenes. */
+:root{
+  --outer:#E4E4E0;--bg:#F7F7F6;--surface:#FFFFFF;--raised:#FFFFFF;--control:#FFFFFF;--hover:#ECECEA;--selected:#E2E2DF;
+  --line:#DCDCD8;--line-strong:#8A8A85;--line-control:#C9C9C4;
+  --fg:#1F1F1F;--fg-soft:#4A4A48;--fg-muted:#5F5F5B;
+  --accent:#15897A;--accent-soft:#E1F1ED;--action:#177969;--action-strong:#125F52;--on-action:#FFFFFF;
+  --focus:#B35F00;--agent:#1F1F1F;--on-agent:#FFFFFF;
+  --ok:#2F7D4F;--ok-ink:#1F5C38;--ok-surface:#E3F1E8;
+  --verify:#C98A2B;--verify-ink:#7A4A0B;--verify-surface:#FBEBD0;
+  --err:#9B1C3C;--err-ink:#7D1330;--err-surface:#F7E1E7;
+  --info:#2B5C8A;--info-ink:#1E4466;--info-surface:#E2ECF5;
+  --wa-bg:#E9EFEB;--wa-in:#FFFFFF;--wa-out:#D6EFE2;--wa-bar:#1C6B4A;--on-wa-bar:#FFFFFF;
+  --e-ch:#2B5C8A;--e-rt:#7A4A0B;--e-wk:#15897A;--e-po:#9B1C3C;--e-ag:#4A4A48;--e-jr:#5F5F5B;--e-ke:#125F52;
+  --font-ui:"Segoe UI",Inter,system-ui,-apple-system,Roboto,"Helvetica Neue",sans-serif;
+  --font-num:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --outer:#1a1a1a;--bg:#282828;--surface:#242424;--raised:#303030;--control:#282828;--hover:#343434;--selected:#424242;
+  --line:#494949;--line-strong:#555555;--line-control:#424242;
+  --fg:#DEDEDE;--fg-soft:#BBBBBB;--fg-muted:#999999;
+  --accent:#1CA18C;--accent-soft:rgba(28,161,140,.13);--action:#177969;--action-strong:#125F52;--on-action:#FFFFFF;
+  --focus:#F99D32;--agent:#DEDEDE;--on-agent:#242424;
+  --ok:#4FA873;--ok-ink:#A6DDBA;--ok-surface:#1C3025;
+  --verify:#D9A04A;--verify-ink:#F2CC8A;--verify-surface:#3A2A12;
+  --err:#D0546F;--err-ink:#F4B0BF;--err-surface:#3E1620;
+  --info:#5C8FC2;--info-ink:#AFCDEB;--info-surface:#172A3D;
+  --wa-bg:#1d2421;--wa-in:#2b3330;--wa-out:#1d4a3f;--wa-bar:#1d4a3f;--on-wa-bar:#E6EFEA;
+  --e-ch:#AFCDEB;--e-rt:#F2CC8A;--e-wk:#1CA18C;--e-po:#F4B0BF;--e-ag:#BBBBBB;--e-jr:#999999;--e-ke:#A6DDBA;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --outer:#1a1a1a;--bg:#282828;--surface:#242424;--raised:#303030;--control:#282828;--hover:#343434;--selected:#424242;
+  --line:#494949;--line-strong:#555555;--line-control:#424242;
+  --fg:#DEDEDE;--fg-soft:#BBBBBB;--fg-muted:#999999;
+  --accent:#1CA18C;--accent-soft:rgba(28,161,140,.13);--action:#177969;--action-strong:#125F52;--on-action:#FFFFFF;
+  --focus:#F99D32;--agent:#DEDEDE;--on-agent:#242424;
+  --ok:#4FA873;--ok-ink:#A6DDBA;--ok-surface:#1C3025;
+  --verify:#D9A04A;--verify-ink:#F2CC8A;--verify-surface:#3A2A12;
+  --err:#D0546F;--err-ink:#F4B0BF;--err-surface:#3E1620;
+  --info:#5C8FC2;--info-ink:#AFCDEB;--info-surface:#172A3D;
+  --wa-bg:#1d2421;--wa-in:#2b3330;--wa-out:#1d4a3f;--wa-bar:#1d4a3f;--on-wa-bar:#E6EFEA;
+  --e-ch:#AFCDEB;--e-rt:#F2CC8A;--e-wk:#1CA18C;--e-po:#F4B0BF;--e-ag:#BBBBBB;--e-jr:#999999;--e-ke:#A6DDBA;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--outer);color:var(--fg);font:14px/1.45 var(--font-ui);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums;font-weight:500}
+.muted{color:var(--fg-muted)}
+.wrap{max-width:1600px;margin:0 auto;padding-inline:16px;padding-block:14px 40px;display:grid;gap:12px}
+
+/* the story bar */
+.story{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:10px}
+.story-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.story h1{margin:0;font-size:17px;font-weight:650;display:flex;align-items:center;gap:8px}
+.mark{width:24px;height:24px;border-radius:6px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+.clock{font:600 13px var(--font-num);border:1px solid var(--line-control);border-radius:6px;padding:4px 9px;background:var(--control)}
+.grow{flex:1}
+.btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:5px;border:1px solid var(--line-control);background:var(--control);color:var(--fg);font-weight:600;font-size:13px;white-space:nowrap}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--action);border-color:var(--action);color:var(--on-action)}
+.btn.primary:hover{background:var(--action-strong)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{height:26px;padding:0 9px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.narr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:start;font-size:14px;background:var(--accent-soft);border-radius:6px;padding:9px 12px}
+.narr b{font-weight:650}
+.steps{display:flex;gap:4px;flex-wrap:wrap}
+.steps span{width:22px;height:6px;border-radius:3px;background:var(--line)}
+.steps span.done{background:var(--accent)}
+.steps span.cur{background:var(--fg-soft)}
+.kpis{display:flex;flex-wrap:wrap;gap:6px}
+.kpi{border:1px solid var(--line);border-radius:5px;padding:3px 9px;font-size:12px;color:var(--fg-soft);background:var(--bg)}
+.kpi b{color:var(--fg);font-family:var(--font-num);font-weight:600}
+.kpi.bad{border-color:var(--err);color:var(--err-ink);background:var(--err-surface)}
+
+/* the three columns */
+.cols{display:grid;grid-template-columns:minmax(0,1.5fr) 320px minmax(0,1fr);gap:12px;align-items:start}
+@media (max-width:1250px){.cols{grid-template-columns:minmax(0,1fr) 320px}.backstage{grid-column:1/-1}}
+@media (max-width:780px){.cols{grid-template-columns:minmax(0,1fr)}}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:0;display:flex;flex-direction:column;height:760px;overflow:hidden}
+.pane-h{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.pane-h h2{margin:0;font-size:13px;font-weight:650;letter-spacing:.03em;text-transform:uppercase;color:var(--fg-muted)}
+
+/* the app */
+.who{display:inline-flex;border:1px solid var(--line-control);border-radius:6px;background:var(--control);padding:2px;gap:2px;flex-wrap:wrap}
+.who button{border:0;background:transparent;height:30px;padding:0 8px 0 4px;border-radius:4px;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--fg-muted)}
+.who button[aria-pressed="true"]{background:var(--selected);color:var(--fg)}
+.av{width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;font-size:10px;font-weight:700;color:#fff;flex:none}
+.av.agent{border-radius:6px;background:var(--agent);color:var(--on-agent)}
+.av.party{background:#1C8A4E}
+.cnt{min-width:18px;height:18px;border-radius:9px;background:var(--action);color:var(--on-action);font-size:11px;font-weight:700;display:inline-grid;place-items:center;padding:0 5px}
+.tabs{display:flex;gap:2px;padding:6px 10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tabs button{border:0;background:transparent;padding:7px 10px;border-radius:5px 5px 0 0;font-weight:600;font-size:13px;color:var(--fg-muted);display:inline-flex;gap:6px;align-items:center;border-bottom:2px solid transparent}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.view{flex:1;overflow:auto;min-height:0}
+.sec{padding:12px 14px;display:grid;gap:8px}
+.sec-h{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-muted);display:flex;gap:8px;align-items:center}
+.empty{color:var(--fg-muted);font-size:13px;padding:2px 0}
+.card{border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);overflow:hidden}
+.card-h{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--raised);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.card-h .t{font-weight:600}
+.card-h .amt{margin-left:auto}
+.card-b{padding:9px 12px;font-size:13px;color:var(--fg-soft);display:grid;gap:6px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 7px;border-radius:4px;border:1px solid var(--line-control);font-size:12px;color:var(--fg-soft);background:var(--control);white-space:nowrap}
+.card-f{display:flex;gap:6px;padding:9px 12px;border-top:1px solid var(--line);background:var(--bg);flex-wrap:wrap;align-items:center}
+.card-f .note{margin-left:auto;font-size:12px;color:var(--fg-muted)}
+.tag{display:inline-flex;align-items:center;height:20px;padding:0 6px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap;background:var(--selected);color:var(--fg-soft)}
+.tag.ok{background:var(--ok-surface);color:var(--ok-ink)}
+.tag.verify{background:var(--verify-surface);color:var(--verify-ink)}
+.tag.err{background:var(--err-surface);color:var(--err-ink)}
+.tag.info{background:var(--info-surface);color:var(--info-ink)}
+.tag.agent{background:var(--agent);color:var(--on-agent)}
+.rowl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);font-size:13px}
+.rowl small{grid-column:1/-1;color:var(--fg-muted);font-size:12px}
+.age{font:12px var(--font-num);color:var(--verify-ink)}
+.fils{display:grid;grid-template-columns:200px minmax(0,1fr) 220px;height:100%;min-height:0}
+@media (max-width:1000px){.fils{grid-template-columns:150px minmax(0,1fr)}.fils .state{display:none}}
+.fil-list{border-right:1px solid var(--line);overflow:auto;padding:8px}
+.fil-list button{width:100%;text-align:left;border:0;background:transparent;border-radius:5px;padding:7px 8px;display:flex;gap:8px;align-items:center;font-size:13px}
+.fil-list button:hover{background:var(--hover)}
+.fil-list button[aria-current="true"]{background:var(--selected);font-weight:600}
+.dot{width:9px;height:9px;border-radius:2px;background:var(--fg-muted);flex:none}
+.thread{display:flex;flex-direction:column;min-height:0;min-width:0}
+.thread-h{padding:9px 12px;border-bottom:1px solid var(--line)}
+.thread-h b{font-size:15px}
+.thread-h div{font-size:12px;color:var(--fg-muted)}
+.msgs{flex:1;overflow:auto;padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.m{display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px}
+.m .w{font-size:12px;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.m .w b{font-weight:650;font-size:13px}
+.m .w time{color:var(--fg-muted)}
+.m .tx{font-size:13.5px;line-height:1.5;white-space:pre-wrap}
+.via{font-size:11px;color:#1C8A4E;background:var(--ok-surface);border-radius:4px;padding:0 5px}
+.ev{font-size:12.5px;color:var(--fg-soft);border-left:2px solid var(--line-strong);padding:3px 9px;margin-left:32px}
+.ev.ok{border-left-color:var(--ok)}.ev.relay{border-left-color:var(--info)}.ev.err{border-left-color:var(--err)}.ev.policy{border-left-color:var(--verify)}
+.composer{display:flex;gap:6px;padding:8px 12px;border-top:1px solid var(--line)}
+.composer input{flex:1;min-width:0;height:32px;border:1px solid var(--line-strong);border-radius:6px;background:var(--control);padding:0 10px}
+.state{border-left:1px solid var(--line);overflow:auto;padding:10px;display:grid;gap:12px;align-content:start;background:var(--bg)}
+.state h4{margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-muted)}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 8px;font-size:12.5px}
+.kv span:nth-child(odd){color:var(--fg-soft)}
+.pol{border:1px solid var(--line);border-radius:6px;padding:9px 11px;display:grid;gap:5px;background:var(--surface)}
+.pol-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pol-h b{font-size:13px}
+.pol select,.mand select{height:26px;border:1px solid var(--line-control);border-radius:5px;background:var(--control);font-size:12px}
+.pol p{margin:0;font-size:13px;color:var(--fg-soft)}
+.mand{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;font-size:13px;align-items:center}
+
+/* phones */
+.phones{display:grid;gap:12px}
+.phone{background:var(--wa-bg);border:6px solid #0b0b0b;border-radius:22px;height:374px;display:flex;flex-direction:column;overflow:hidden}
+.phone-h{background:var(--wa-bar);color:var(--on-wa-bar);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:13px}
+.phone-h b{font-weight:650}
+.phone-h small{opacity:.8;font-size:11px;display:block}
+.wa{flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:6px}
+.bub{max-width:88%;border-radius:8px;padding:6px 9px;font-size:12.5px;line-height:1.45;white-space:pre-wrap;background:var(--wa-in);color:var(--fg)}
+.bub.out{align-self:flex-end;background:var(--wa-out)}
+.bub time{display:block;text-align:right;font-size:10px;color:var(--fg-muted);margin-top:2px}
+.bub .wa-btns{display:grid;gap:4px;margin-top:6px}
+.bub .wa-btns button{border:0;border-top:1px solid var(--line);background:transparent;color:var(--info-ink);font-weight:600;padding:5px 0 1px;font-size:12.5px}
+.wa-in{display:flex;gap:5px;padding:6px;background:var(--wa-bg);border-top:1px solid var(--line)}
+.wa-in input{flex:1;min-width:0;height:30px;border-radius:15px;border:1px solid var(--line-control);background:var(--wa-in);padding:0 10px;font-size:12.5px}
+.wa-in button{height:30px;border-radius:15px;border:0;background:var(--wa-bar);color:var(--on-wa-bar);padding:0 10px;font-size:12px;font-weight:600}
+
+/* backstage */
+.filters{display:flex;gap:4px;flex-wrap:wrap}
+.filters button{border:1px solid var(--line-control);background:var(--control);border-radius:12px;height:24px;padding:0 9px;font-size:11.5px;font-weight:600;color:var(--fg-muted)}
+.filters button[aria-pressed="true"]{color:var(--fg);border-color:var(--fg-soft)}
+.trace{flex:1;overflow:auto;padding:6px 10px;display:flex;flex-direction:column;gap:4px}
+.tr{display:grid;grid-template-columns:56px 80px minmax(0,1fr);gap:8px;font-size:12px;padding:5px 0;border-bottom:1px solid var(--line);align-items:start}
+.tr time{font-family:var(--font-num);color:var(--fg-muted)}
+.eng{font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+.e-ch{color:var(--e-ch)}.e-rt{color:var(--e-rt)}.e-wk{color:var(--e-wk)}.e-po{color:var(--e-po)}.e-ag{color:var(--e-ag)}.e-jr{color:var(--e-jr)}.e-ke{color:var(--e-ke)}
+.tr.new{animation:flash 1.2s ease-out}
+@keyframes flash{from{background:var(--accent-soft)}to{background:transparent}}
+@media (prefers-reduced-motion:reduce){.tr.new{animation:none}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+
+<div class="wrap">
+  <section class="story" aria-label="Le sc&#xe9;nario">
+    <div class="story-top">
+      <h1><span class="mark">K</span>Simulateur Kete</h1>
+      <span class="clock" id="clock" aria-live="polite"></span>
+      <button class="btn sm" type="button" data-act="hour">+1 h</button>
+      <button class="btn sm" type="button" data-act="day">+1 jour</button>
+      <span class="grow"></span>
+      <div class="steps" id="steps" aria-hidden="true"></div>
+      <button class="btn" type="button" data-act="reset">Recommencer</button>
+      <button class="btn primary" type="button" data-act="next" id="nextBtn">&#xc9;tape suivante</button>
+    </div>
+    <div class="narr" id="narr"></div>
+    <div class="kpis" id="kpis" aria-label="Les chiffres de fluidit&#xe9;, calcul&#xe9;s &#xe0; chaque instant"></div>
+  </section>
+
+  <div class="cols">
+    <section class="pane" aria-label="Kete, vu par la personne que vous jouez">
+      <div class="pane-h"><h2>Kete &#xb7; je suis</h2><div class="who" id="who" role="group" aria-label="Jouer"></div></div>
+      <div class="tabs" id="tabs" role="tablist"></div>
+      <div class="view" id="view"></div>
+    </section>
+
+    <div class="phones">
+      <section class="phone" aria-label="Le WhatsApp du client">
+        <div class="phone-h"><span class="av party">LC</span><div><b>Soleil d'Afrique</b><small>WhatsApp de l'&#xc9;cole La Colombe (le client)</small></div></div>
+        <div class="wa" id="waClient"></div>
+        <form class="wa-in" data-form="client"><label class="sr" for="clientText">&#xc9;crire comme le client</label><input id="clientText" placeholder="&#xc9;crire comme le client&#x2026;" autocomplete="off"><button type="submit">Envoyer</button></form>
+      </section>
+      <section class="phone" aria-label="Le WhatsApp de la personne jou&#xe9;e">
+        <div class="phone-h"><span class="mark" style="width:24px;height:24px">K</span><div><b>Kete</b><small id="waMeLabel">WhatsApp de &#x2026;</small></div></div>
+        <div class="wa" id="waMe"></div>
+        <form class="wa-in" data-form="me"><label class="sr" for="meText">R&#xe9;pondre &#xe0; Kete</label><input id="meText" placeholder="R&#xe9;pondre &#xe0; Kete, ou dicter&#x2026;" autocomplete="off"><button type="submit">Envoyer</button></form>
+      </section>
+    </div>
+
+    <section class="pane backstage" aria-label="Les coulisses : ce que d&#xe9;cide chaque moteur">
+      <div class="pane-h"><h2>Coulisses</h2><div class="filters" id="filters"></div></div>
+      <div class="trace" id="trace" aria-live="polite"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s) => document.querySelector(s);
+const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const F = (n) => new Intl.NumberFormat('fr-FR').format(n).replace(/\u202f|\u00a0/g, ' ') + ' F';
+const T0 = new Date(2026, 9, 13, 7, 0);
+const DAY = 1440;
+const days = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+const dateOf = (m) => new Date(T0.getTime() + m * 60000);
+const hm = (m) => { const d = dateOf(m); return d.getHours() + ' h ' + String(d.getMinutes()).padStart(2, '0'); };
+const when = (m) => { const d = dateOf(m); return days[d.getDay()] + ' ' + d.getDate() + ' \u00b7 ' + hm(m); };
+const dayIndex = (m) => Math.floor((m + 7 * 60) / DAY); // day 0 = mardi 13
+const ageText = (min) => min < 60 ? Math.max(1, Math.round(min)) + ' min' : min < DAY ? Math.round(min / 60) + ' h' : Math.round(min / DAY) + ' j';
+const hourOf = (m) => dateOf(m).getHours();
+
+const ENGINES = {
+  ch: ['Canaux', 'e-ch'], rt: ['Routeur', 'e-rt'], wk: ['Tenues', 'e-wk'], po: ['Politiques', 'e-po'],
+  ag: ['Agents', 'e-ag'], jr: ['Journal', 'e-jr'], ke: ['Kete', 'e-ke'],
+};
+
+/* ---------- the world ---------- */
+function world() {
+  return {
+    now: 0,
+    seq: 0,
+    me: 'afi',
+    tab: 'pourmoi',
+    fil: 'colombe',
+    filter: Object.fromEntries(Object.keys(ENGINES).map((k) => [k, true])),
+    step: 0,
+    people: {
+      afi: { name: 'Afi Mensah', short: 'Afi', role: 'Directrice', ini: 'AM', color: '#2B5C8A', deputy: 'essi', manager: null },
+      kossi: { name: 'Kossi Adjo', short: 'Kossi', role: 'Chef de projet', ini: 'KA', color: '#875028', deputy: 'yao', manager: 'afi' },
+      yao: { name: 'Yao Amegah', short: 'Yao', role: 'Technicien', ini: 'YA', color: '#5F5F5B', deputy: 'kossi', manager: 'kossi' },
+      essi: { name: 'Essi Dogbe', short: 'Essi', role: 'Comptable', ini: 'ED', color: '#6B4E9B', deputy: 'afi', manager: 'afi' },
+      phebe: { name: 'Ph\u00e9b\u00e9 Akakpo', short: 'Ph\u00e9b\u00e9', role: 'Assistante administrative', ini: 'PA', color: '#9B1C3C', deputy: 'essi', manager: 'afi' },
+      mawuli: { name: 'Mawuli Tsogbe', short: 'Mawuli', role: 'Responsable SI et qualit\u00e9', ini: 'MT', color: '#125F52', deputy: 'kossi', manager: 'afi' },
+    },
+    agents: {
+      fact: { name: 'Agent Facturation', owner: 'essi', mandate: { 'facture.preparer': 3, 'facture.valider': 2, 'message.client': 2 }, done: 0 },
+      achats: { name: 'Agent Achats', owner: 'kossi', mandate: { 'achat.comparer': 1, 'achat.engager': 2 }, done: 0 },
+      relances: { name: 'Agent Relances', owner: 'essi', mandate: { 'message.client': 3 }, done: 0 },
+      qualite: { name: 'Agent Qualit\u00e9', owner: 'mawuli', mandate: { 'anomalie.rediger': 3, 'anomalie.valider': 2 }, done: 0 },
+      dim: { name: 'Agent Dimensionnement', owner: 'kossi', mandate: { 'dimensionnement.calculer': 1, 'devis.verifier': 2, 'message.client': 2 }, done: 0 },
+    },
+    parties: {
+      colombe: { name: '\u00c9cole La Colombe', contact: 'M. Agbeko', phone: '+228 90 12 34 56', object: 'colombe', optedOut: false },
+      pharma: { name: 'Pharmacie du Port', contact: 'M. Ahouansou', phone: '+228 91 00 00 01', object: 'pharma', optedOut: false },
+      fonds: { name: 'Fonds \u00c9nergie Rurale', contact: 'Mme Mensah', phone: 'rapport@fer.tg', email: true, object: 'fonds', optedOut: false },
+    },
+    objects: {
+      colombe: { kind: 'Projet', name: '\u00c9clairage \u2014 La Colombe', holder: 'kossi', party: 'colombe', team: ['afi', 'kossi', 'yao', 'essi'], sold: 660000, paid: 0, committed: 0, margin: 240000 },
+      pharma: { kind: 'Client', name: 'Pharmacie du Port', holder: 'kossi', party: 'pharma', team: ['afi', 'kossi'], sold: 412000, paid: 0, committed: 0, margin: null },
+      fonc: { kind: 'Fonctionnement', name: 'Fonctionnement', holder: 'afi', party: null, team: ['afi', 'essi', 'mawuli'], sold: null, paid: null, committed: 25000, margin: null },
+      direction: { kind: 'Groupe', name: 'Direction', holder: 'afi', party: null, team: ['afi', 'essi', 'kossi', 'mawuli'], sold: null, paid: null, committed: null, margin: null },
+      fonds: { kind: 'Bailleur', name: 'Fonds \u00c9nergie Rurale', holder: 'afi', party: 'fonds', address: 'fonds-energie-rurale@fils.soleil.tg', team: ['afi', 'essi'], sold: null, paid: null, committed: null, margin: null },
+    },
+    assets: { pc014: { name: 'PC-014 \u00b7 portable de Ph\u00e9b\u00e9', user: 'phebe', warranty: 'mars 2027', supplier: 'Info Plus Lom\u00e9', history: ['mai 2026 : clavier remplac\u00e9'] } },
+    fils: { colombe: [], pharma: [], fonc: [], direction: [], fonds: [] },
+    kete: { afi: [], kossi: [], yao: [], essi: [], phebe: [], mawuli: [] },
+    asked: null,
+    proof: null,
+    tenues: [],
+    gestes: [],
+    invoices: [],
+    absences: [],
+    policies: [
+      { id: 'P1', name: 'D\u00e9penses hors budget', text: 'Une d\u00e9pense hors budget d\u2019un projet au-del\u00e0 de 100 000 F demande l\u2019accord de la direction.', owner: 'afi', status: 'actif', v: 2 },
+      { id: 'P2', name: 'Qui parle au client', text: 'Un agent \u00e9crit \u00e0 un client avec un mod\u00e8le approuv\u00e9, entre 8 h et 19 h. Une personne \u00e9crit librement, depuis sa bo\u00eete.', owner: 'afi', status: 'actif', v: 1 },
+      { id: 'P3', name: 'Qui engage l\u2019entreprise', text: 'Au-del\u00e0 de 500 000 F, seule la direction engage l\u2019entreprise.', owner: 'afi', status: 'actif', v: 1 },
+      { id: 'P4', name: 'Suppl\u00e9ance', text: 'Kossi \u2192 Yao \u00b7 Yao \u2192 Kossi \u00b7 Essi \u2192 Afi \u00b7 sinon le responsable hi\u00e9rarchique. Appliqu\u00e9e par le relais.', owner: 'afi', status: 'actif', v: 1 },
+      { id: 'P5', name: 'Factures pr\u00e9par\u00e9es par un agent', text: 'Une facture pr\u00e9par\u00e9e par un agent est valid\u00e9e par la comptabilit\u00e9.', owner: 'essi', status: 'actif', v: 1 },
+      { id: 'P6', name: 'Consentement', text: 'On n\u2019\u00e9crit plus \u00e0 un contact qui s\u2019est d\u00e9sinscrit.', owner: 'afi', status: 'actif', v: 1 },
+      { id: 'P7', name: 'Incidents informatiques', text: 'Un incident informatique va au responsable SI ; la remont\u00e9e d\u2019anomalie suit la proc\u00e9dure qualit\u00e9. Appliqu\u00e9e par le routeur.', owner: 'mawuli', status: 'actif', v: 1 },
+      { id: 'P8', name: 'Conservation des fils', text: 'Un fil est gard\u00e9 dix ans, exportable en preuve horodat\u00e9e ; un message modifi\u00e9 garde son original.', owner: 'afi', status: 'actif', v: 1 },
+    ],
+    waClient: [],
+    waMe: { afi: [], kossi: [], yao: [], essi: [], phebe: [], mawuli: [] },
+    trace: [],
+    journal: [],
+    lastSeen: 0,
+  };
+}
+let S = world();
+const id = (p) => p + '-' + ++S.seq;
+const P = (k) => S.people[k];
+const nameOf = (actor) => !actor ? 'Kete' : S.people[actor] ? S.people[actor].short : S.agents[actor] ? S.agents[actor].name : S.parties[actor] ? S.parties[actor].name : actor;
+
+function trace(engine, text) { S.trace.push({ t: S.now, engine, text, n: ++S.seq }); }
+function journal(type, actor, text) { S.journal.push({ t: S.now, type, actor, text }); trace('jr', '\u00ab ' + type + ' \u00bb \u00b7 ' + nameOf(actor) + ' \u00b7 ' + text); }
+function fil(obj, item) { S.fils[obj].push({ t: S.now, readBy: {}, ...item }); }
+function waToMe(person, item) { S.waMe[person].push({ t: S.now, ...item }); }
+
+/* ---------- absences and the relay's cover ---------- */
+const isAbsent = (person, day) => S.absences.some((a) => a.person === person && a.day === day);
+function cover(person, day, seen = []) {
+  if (!isAbsent(person, day)) return person;
+  const next = [P(person).deputy, P(person).manager, 'afi'].find((p) => p && !seen.includes(p) && p !== person);
+  return next ? cover(next, day, [...seen, person]) : 'afi';
+}
+
+/* ---------- the policy engine (one, at the gesture) ---------- */
+function rules(g) {
+  const out = [];
+  if (g.kind === 'achat.engager' && g.outOfBudget && g.amount > 100000) out.push(['P1', 'approve', 'afi', 'hors budget et au-del\u00e0 de 100 000 F']);
+  if (g.kind === 'message.client') {
+    if (!g.template) out.push(['P2', 'refuse', null, 'pas de mod\u00e8le approuv\u00e9']);
+    else if (hourOf(S.now) < 8 || hourOf(S.now) >= 19) out.push(['P2', 'refuse', null, 'hors des heures (8 h \u2013 19 h)']);
+    else out.push(['P2', 'allow', null, 'mod\u00e8le \u00ab ' + g.template + ' \u00bb approuv\u00e9, dans les heures']);
+    const party = S.parties[g.party];
+    if (party && party.optedOut) out.push(['P6', 'refuse', null, party.name + ' s\u2019est d\u00e9sinscrit']);
+  }
+  if (['message.client', 'achat.engager'].includes(g.kind) && (g.amount || 0) > 500000) out.push(['P3', 'approve', 'afi', 'au-del\u00e0 de 500 000 F']);
+  if (g.kind === 'facture.valider') out.push(['P5', 'approve', 'essi', 'facture pr\u00e9par\u00e9e par un agent']);
+  return out;
+}
+function evaluate(g) {
+  let effect = 'allow', approver = null, by = null;
+  for (const [pid, eff, who, why] of rules(g)) {
+    const pol = S.policies.find((p) => p.id === pid);
+    if (pol.status === 'off') { trace('po', pid + ' \u00ab ' + pol.name + ' \u00bb d\u00e9sactiv\u00e9e : ignor\u00e9e'); continue; }
+    if (pol.status === 'essai') { trace('po', pid + ' \u00e0 l\u2019essai : aurait dit \u00ab ' + eff + ' \u00bb (' + why + '), sans bloquer'); continue; }
+    trace('po', pid + ' \u00ab ' + pol.name + ' \u00bb \u2192 ' + (eff === 'allow' ? 'autoris\u00e9' : eff === 'approve' ? 'accord de ' + P(who).short : 'refus\u00e9') + ' \u00b7 ' + why);
+    if (eff === 'refuse') { effect = 'refuse'; by = pid; }
+    else if (eff === 'approve' && effect !== 'refuse') { effect = 'approve'; approver = who; by = pid; }
+  }
+  if (!rules(g).length) trace('po', 'aucune politique ne s\u2019applique : autoris\u00e9');
+  return { effect, approver, by };
+}
+
+/* ---------- gestures ---------- */
+function propose(g) {
+  g.id = id('G'); g.t = S.now; g.status = 'propos\u00e9'; S.gestes.push(g);
+  trace('ag', nameOf(g.by) + ' propose : ' + g.label);
+  const pol = evaluate(g);
+  if (pol.effect === 'refuse') {
+    g.status = 'refus\u00e9'; g.policy = pol.by;
+    if (g.object) fil(g.object, { kind: 'event', tone: 'err', text: 'Politique ' + pol.by + ' : \u00ab ' + g.label + ' \u00bb est refus\u00e9, rien n\u2019est parti.' });
+    journal('geste.refus\u00e9', g.by, g.label + ' (' + pol.by + ')');
+    if (g.onRefused) g.onRefused();
+    return g;
+  }
+  let decider = pol.effect === 'approve' ? pol.approver : null;
+  const level = S.agents[g.by] ? (S.agents[g.by].mandate[g.kind] || 0) : 3;
+  // A person asked by name (the router when it is unsure) always decides; else below level 3 the holder does.
+  if (!decider && (g.mustAsk || level < 3)) decider = g.decider || S.objects[g.object].holder;
+  if (!decider) {
+    trace('ag', 'dans son mandat (niveau ' + level + ') : ' + nameOf(g.by) + ' agit seul');
+    g.status = 'fait'; g.choice = g.options[0];
+    if (S.agents[g.by]) S.agents[g.by].done++;
+    journal('geste.fait', g.by, g.label);
+    execute(g, g.options[0]);
+    return g;
+  }
+  const real = cover(decider, dayIndex(S.now));
+  if (real !== decider) trace('wk', P(decider).short + ' est absent aujourd\u2019hui : la carte va \u00e0 ' + P(real).short + ' (P4)');
+  g.decider = real; g.status = '\u00e0 d\u00e9cider'; g.policy = pol.by || null;
+  if (g.object) fil(g.object, { kind: 'card', gid: g.id });
+  waToMe(real, { kind: 'card', gid: g.id });
+  trace('wk', 'carte \u00e0 d\u00e9cider pour ' + P(real).short + ' : dans \u00ab Pour moi \u00bb, dans le fil, et sur son WhatsApp');
+  return g;
+}
+function decide(gid, option, via) {
+  const g = S.gestes.find((x) => x.id === gid);
+  if (!g || g.status !== '\u00e0 d\u00e9cider') return;
+  g.status = option === 'Refuser' || option === 'Ignorer' ? 'refus\u00e9' : 'd\u00e9cid\u00e9';
+  g.choice = option; g.via = via; g.decidedAt = S.now;
+  trace('wk', P(g.decider).short + ' r\u00e8gle la carte depuis ' + via + ' : \u00ab ' + option + ' \u00bb \u2014 r\u00e9gl\u00e9e partout');
+  journal('geste.d\u00e9cid\u00e9', g.decider, g.label + ' \u2192 ' + option + ' (via ' + via + ')');
+  if (S.agents[g.by] && g.status === 'd\u00e9cid\u00e9') S.agents[g.by].done++;
+  execute(g, option);
+}
+
+/* ---------- the commands behind gestures ---------- */
+function execute(g, option) {
+  const o = g.object ? S.objects[g.object] : null;
+  switch (g.kind) {
+    case 'facture.valider': {
+      const inv = S.invoices.find((x) => x.id === g.invoice);
+      if (option === 'Refuser') { inv.status = 'refus\u00e9e'; fil(g.object, { kind: 'event', tone: 'err', text: 'Facture ' + inv.id + ' refus\u00e9e par ' + P(g.decider).short + ' : rien n\u2019est parti.' }); return; }
+      inv.status = 'valid\u00e9e';
+      fil(g.object, { kind: 'event', tone: 'ok', text: 'Facture ' + inv.id + ' valid\u00e9e par ' + P(g.decider).short + ' (' + g.via + ').' });
+      propose({
+        kind: 'message.client', by: 'fact', decider: 'essi', object: g.object, party: o.party, template: 'facture', label: 'Envoyer la facture ' + inv.id + ' au client, avec le lien de paiement',
+        options: ['Envoyer', 'Refuser'], amount: 0,
+        text: 'Bonjour ' + S.parties[o.party].contact + ', voici la facture d\u2019acompte ' + inv.id + ' de ' + F(inv.amount) + ', \u00e9ch\u00e9ance vendredi.\nPayer par mobile money : kete.pay/' + inv.id,
+        after: () => { inv.status = 'envoy\u00e9e'; const t = S.tenues.find((x) => x.invoice === inv.id); if (t) { t.state = 'attend'; t.waitingOn = o.party; t.what = 'Paiement de l\u2019acompte ' + inv.id; t.since = S.now; trace('wk', 'tenue \u00ab ' + t.what + ' \u00bb : attend ' + S.parties[o.party].name); } },
+      });
+      return;
+    }
+    case 'message.client': {
+      if (option === 'Refuser') { fil(g.object, { kind: 'event', tone: 'err', text: 'Message au client refus\u00e9 : rien n\u2019est parti.' }); return; }
+      const byMail = g.channel === 'mail';
+      if (!byMail && g.party === 'colombe') S.waClient.push({ t: S.now, out: false, text: g.text, inv: g.invoiceLink || null });
+      fil(g.object, { kind: 'msg', who: g.by, text: g.text, via: byMail ? 'envoy\u00e9 par mail' : 'envoy\u00e9 par WhatsApp' });
+      trace('ch', (byMail ? 'Mail (SMTP) \u2192 ' : 'WhatsApp \u2192 ') + S.parties[g.party].name + ' (mod\u00e8le \u00ab ' + g.template + ' \u00bb)');
+      journal('message.envoy\u00e9', g.by, '\u00e0 ' + S.parties[g.party].name);
+      if (g.after) g.after();
+      return;
+    }
+    case 'achat.engager': {
+      const t = S.tenues.find((x) => x.gid === g.id);
+      if (option === 'Refuser') { fil(g.object, { kind: 'event', tone: 'err', text: 'Achat refus\u00e9 par ' + P(g.decider).short + ' ; rien n\u2019est engag\u00e9.' }); }
+      else if (option.startsWith('Louer')) {
+        o.committed += 40000; o.margin = 200000;
+        fil(g.object, { kind: 'msg', who: 'achats', text: 'Location r\u00e9serv\u00e9e du lun. 19 au ven. 23 : 40 000 F. Kossi r\u00e9cup\u00e8re l\u2019outillage jeudi.' });
+        journal('achat.engag\u00e9', 'achats', 'location 40 000 F');
+      } else {
+        o.committed += 145000; o.margin = 95000;
+        fil(g.object, { kind: 'msg', who: 'achats', text: 'Bon de commande pr\u00e9par\u00e9 pour Solartech : 145 000 F.' });
+        journal('achat.engag\u00e9', 'achats', 'achat 145 000 F');
+      }
+      if (t) { t.state = 'fait'; trace('wk', 'tenue \u00ab ' + t.what + ' \u00bb : faite'); }
+      return;
+    }
+    case 'anomalie.valider': {
+      const t = S.tenues.find((x) => x.gid === g.id);
+      if (option === 'Refuser') { fil(g.object, { kind: 'event', tone: 'err', text: 'Remont\u00e9e refus\u00e9e par ' + P(g.decider).short + '.' }); if (t) t.state = 'fait'; return; }
+      fil(g.object, { kind: 'event', tone: 'ok', text: 'Remont\u00e9e d\u2019anomalie RA-2026-031 enregistr\u00e9e (proc\u00e9dure qualit\u00e9) : un constat ouvert, une action corrective \u00ab pr\u00eater le PC-021 \u00e0 Ph\u00e9b\u00e9 \u00bb.' });
+      fil(g.object, { kind: 'msg', who: 'qualite', text: 'Demande de garantie envoy\u00e9e \u00e0 ' + S.assets.pc014.supplier + ' (sous garantie jusqu\u2019en ' + S.assets.pc014.warranty + '). Le PC-021 est pr\u00eat\u00e9 \u00e0 Ph\u00e9b\u00e9 ce matin.', via: 'envoy\u00e9 par mail' });
+      waToMe('phebe', { kind: 'note', text: 'Votre ordinateur part en garantie. Le PC-021 vous est pr\u00eat\u00e9 : Mawuli vous l\u2019apporte ce matin.' });
+      journal('anomalie.enregistr\u00e9e', g.decider, 'RA-2026-031 \u00b7 PC-014');
+      if (t) { t.what = 'Retour du PC-014 par ' + S.assets.pc014.supplier; t.state = 'attend'; t.since = S.now; trace('wk', 'tenue : attend le fournisseur, tenue par ' + P(t.holder).short); }
+      return;
+    }
+    case 'devis.verifier': {
+      if (option === 'Refuser') { fil(g.object, { kind: 'event', tone: 'err', text: 'Dimensionnement refus\u00e9 par ' + P(g.decider).short + '.' }); return; }
+      fil(g.object, { kind: 'event', tone: 'ok', text: 'Dimensionnement et devis D-2026-0011 v\u00e9rifi\u00e9s par ' + P(g.decider).short + ' (' + g.via + ').' });
+      const party = S.parties[o.party];
+      propose({
+        kind: 'message.client', by: 'dim', object: g.object, party: o.party, channel: 'mail', template: 'devis', amount: g.amount,
+        label: 'Envoyer le devis D-2026-0011 \u00e0 ' + party.name, detail: party.name + ' \u00b7 ' + F(g.amount) + ' \u00b7 par mail',
+        evidence: ['V\u00e9rifi\u00e9 par ' + P(g.decider).short, 'Mod\u00e8le \u00ab devis \u00bb approuv\u00e9', 'Engage l\u2019entreprise : ' + F(g.amount)],
+        options: ['Envoyer', 'Refuser'],
+        text: 'Bonjour ' + party.contact + ', voici notre proposition pour votre syst\u00e8me solaire : 3,2 kWc, 15 kWh de stockage, onduleur hybride 5 kVA, pos\u00e9, pour ' + F(g.amount) + '. Note de dimensionnement jointe.',
+        after: () => { const t = S.tenues.find((x) => x.object === g.object && x.state !== 'fait'); if (t) { t.what = 'R\u00e9ponse au devis D-2026-0011'; t.state = 'attend'; t.waitingOn = o.party; t.since = S.now; trace('wk', 'tenue \u00ab ' + t.what + ' \u00bb : attend ' + party.name); } },
+      });
+      return;
+    }
+    case 'classer': {
+      const t = S.tenues.find((x) => x.gid === g.id);
+      if (option.startsWith('Nouveau')) {
+        S.parties.mono = { name: 'H\u00f4tel Mono', contact: 'Mme Lawson', phone: 'contact@hotel-mono.tg', object: 'mono', optedOut: false };
+        S.objects.mono = { kind: 'Client', name: 'H\u00f4tel Mono', holder: 'kossi', party: 'mono', team: ['afi', 'kossi'], sold: null, paid: null, committed: 0, margin: null };
+        S.fils.mono = [{ t: S.now, kind: 'msg', who: 'mono', text: g.mail, via: 'mail' }];
+        S.fils.mono.push({ t: S.now, kind: 'event', tone: 'relay', text: 'Nouveau tiers et nouveau fil, cr\u00e9\u00e9s par Afi. Responsable : Kossi (le commercial).' });
+        S.tenues.push({ id: id('T'), object: 'mono', what: 'R\u00e9pondre \u00e0 la demande de devis (40 lampadaires)', holder: 'kossi', waitingOn: null, since: S.now, due: S.now + DAY, state: 'tenu' });
+        trace('rt', 'appris : contact@hotel-mono.tg \u2192 H\u00f4tel Mono (la prochaine fois, sans carte)');
+        trace('wk', 'nouvelle tenue tenue par Kossi : r\u00e9pondre \u00e0 la demande de devis');
+        journal('tiers.cr\u00e9\u00e9', 'afi', 'H\u00f4tel Mono, depuis un mail');
+      } else if (option.startsWith('Rattacher')) {
+        fil('pharma', { kind: 'msg', who: 'pharma', text: g.mail, via: 'mail, rattach\u00e9 par Afi' });
+      } else {
+        trace('rt', 'mail ignor\u00e9 par Afi ; gard\u00e9 au journal');
+      }
+      if (t) t.state = 'fait';
+      return;
+    }
+  }
+}
+
+/* ---------- the agents ---------- */
+const agents = {
+  facturer(obj) {
+    const o = S.objects[obj];
+    trace('ag', 'Agent Facturation : une demande de facture sur \u00ab ' + o.name + ' \u00bb');
+    const inv = { id: 'F-2026-0007', amount: 198000, object: obj, status: 'brouillon' };
+    S.invoices.push(inv);
+    trace('ag', 'pr\u00e9parer la facture : niveau 3 dans son mandat \u2192 fait seul (30 % de 660 000 F = 198 000 F)');
+    journal('facture.pr\u00e9par\u00e9e', 'fact', inv.id + ' \u00b7 ' + F(inv.amount));
+    S.tenues.push({ id: id('T'), object: obj, what: 'Envoyer la facture d\u2019acompte ' + inv.id, holder: 'essi', waitingOn: null, since: S.now, state: 'tenu', invoice: inv.id });
+    trace('wk', 'nouvelle tenue tenue par Essi : envoyer la facture d\u2019acompte');
+    fil(obj, { kind: 'msg', who: 'fact', text: 'J\u2019ai pr\u00e9par\u00e9 la facture d\u2019acompte : 30 % du devis D-2026-0004.' });
+    propose({
+      kind: 'facture.valider', by: 'fact', object: obj, invoice: inv.id, amount: inv.amount, label: 'Valider la facture d\u2019acompte ' + inv.id,
+      detail: '\u00c9cole La Colombe \u00b7 30 % de 660 000 F \u00b7 \u00e9ch\u00e9ance vendredi (leur message dit \u00ab le conseil paie vendredi \u00bb)',
+      evidence: ['Devis D-2026-0004 \u00b7 660 000 F', 'Acompte 30 %', '\u00c9ch\u00e9ance : vendredi'], options: ['Valider', 'Refuser'],
+    });
+  },
+  achats(obj) {
+    const o = S.objects[obj];
+    trace('ag', 'Agent Achats, cit\u00e9 dans le fil : comparer (niveau 1, lecture) \u2192 fait seul');
+    fil(obj, { kind: 'msg', who: 'achats', text: 'Acheter : 145 000 F (dernier prix 152 000 F), hors budget du projet.\nLouer : 40 000 F pour la semaine de pose.\nAchet\u00e9, la marge pr\u00e9vue passe de 240 000 \u00e0 95 000 F ; lou\u00e9, \u00e0 200 000 F.' });
+    const g = propose({
+      kind: 'achat.engager', by: 'achats', object: obj, amount: 145000, outOfBudget: true, label: 'Achat \u00ab Outillage de pose \u00bb',
+      detail: '\u00c9clairage \u2014 La Colombe \u00b7 hors budget \u00b7 louer co\u00fbterait 40 000 F',
+      evidence: ['Budget : hors poste', 'Dernier prix : 152 000 F', 'Location : 40 000 F'], options: ['Louer \u00e0 la place', 'Acheter', 'Refuser'],
+    });
+    if (g.status === '\u00e0 d\u00e9cider') {
+      S.tenues.push({ id: id('T'), object: obj, what: 'D\u00e9cider l\u2019outillage de pose', holder: g.decider, waitingOn: null, since: S.now, state: 'tenu', gid: g.id });
+      trace('wk', 'nouvelle tenue tenue par ' + P(g.decider).short + ' : d\u00e9cider l\u2019outillage');
+    }
+  },
+  incident(text, from) {
+    trace('rt', 'intention reconnue : incident informatique \u00b7 \u00ab ' + text.slice(0, 40) + '\u2026 \u00bb \u00b7 Ph\u00e9b\u00e9 (personne) \u00b7 son ordinateur \u2192 actif PC-014 (confiance 0,93)');
+    const a = S.assets.pc014;
+    if (!S.objects.pc014) {
+      S.objects.pc014 = { kind: 'Actif', name: 'PC-014 \u00b7 ordinateur de Ph\u00e9b\u00e9', holder: 'mawuli', party: null, team: ['mawuli', 'phebe', 'afi', 'essi'], sold: null, paid: null, committed: null, margin: null };
+      S.fils.pc014 = [];
+    }
+    trace('po', 'P7 \u00ab Incidents informatiques \u00bb \u2192 le responsable SI, Mawuli');
+    const holder = cover('mawuli', dayIndex(S.now));
+    S.tenues.push({ id: id('T'), object: 'pc014', what: 'R\u00e9tablir l\u2019ordinateur de Ph\u00e9b\u00e9', holder, waitingOn: null, since: S.now, state: 'tenu', incident: true });
+    trace('wk', 'nouvelle tenue tenue par ' + P(holder).short + ' : r\u00e9tablir l\u2019ordinateur de Ph\u00e9b\u00e9');
+    fil('pc014', { kind: 'event', tone: 'relay', text: 'N\u00e9 d\u2019un message de ' + P(from).short + ' dans le groupe Direction. Garantie jusqu\u2019en ' + a.warranty + ' \u00b7 historique : ' + a.history.join(' ; ') + '.' });
+    fil('pc014', { kind: 'msg', who: 'qualite', text: 'Je pr\u00e9pare la remont\u00e9e d\u2019anomalie selon la proc\u00e9dure qualit\u00e9. Il me manque le sympt\u00f4me : je le demande \u00e0 Ph\u00e9b\u00e9 plut\u00f4t que de le deviner.' });
+    fil('direction', { kind: 'event', tone: 'relay', text: 'Kete a ouvert \u00ab R\u00e9tablir l\u2019ordinateur de Ph\u00e9b\u00e9 \u00bb, tenue par ' + P(holder).short + '.' });
+    S.asked = { person: 'phebe', about: 'pc014' };
+    waToMe('phebe', { kind: 'note', text: 'Bonjour Ph\u00e9b\u00e9, on m\u2019a dit que votre ordinateur a un souci. Que se passe-t-il : il ne d\u00e9marre plus, il est lent, l\u2019\u00e9cran ?' });
+    trace('ag', 'Agent Qualit\u00e9 demande le sympt\u00f4me \u00e0 Ph\u00e9b\u00e9 sur son WhatsApp');
+  },
+  anomalie(symptom) {
+    S.asked = null;
+    fil('pc014', { kind: 'msg', who: 'phebe', text: symptom, via: 'via WhatsApp' });
+    trace('ag', 'Agent Qualit\u00e9 : r\u00e9diger la remont\u00e9e (niveau 3) \u2192 fait seul ; la valider (niveau 2) \u2192 une carte pour le responsable');
+    journal('anomalie.r\u00e9dig\u00e9e', 'qualite', 'RA-2026-031');
+    const t = S.tenues.find((x) => x.incident && x.state !== 'fait');
+    const g = propose({
+      kind: 'anomalie.valider', by: 'qualite', object: 'pc014', decider: t ? t.holder : 'mawuli', label: 'Valider la remont\u00e9e d\u2019anomalie RA-2026-031',
+      detail: 'PC-014 de Ph\u00e9b\u00e9 \u00b7 \u00ab ' + symptom + ' \u00bb \u00b7 Ph\u00e9b\u00e9 ne peut plus saisir les factures',
+      evidence: ['Sous garantie jusqu\u2019en ' + S.assets.pc014.warranty, 'Historique : clavier en mai', 'Action : pr\u00eater le PC-021'],
+      options: ['Valider et demander la garantie', 'Refuser'], amount: 0,
+    });
+    if (t) t.gid = g.id;
+  },
+  dimensionner(obj, form) {
+    const H = 5.4, PR = 0.75, E = form.kwh;
+    const panels = Math.ceil(E / (H * PR) / 0.4);
+    const kwc = (panels * 0.4).toFixed(1).replace('.', ',');
+    const modules = Math.ceil(E / 0.8 / 5);
+    const total = panels * 95000 + modules * 1350000 + 780000 + 350000 + 400000;
+    trace('ag', 'Agent Dimensionnement : calcul\u00e9 par le code, jamais par le mod\u00e8le \u00b7 E = ' + E + ' kWh/j, ensoleillement ' + H + ' kWh/m\u00b2/j (PVGIS, Agbodrafo), PR ' + PR);
+    fil(obj, { kind: 'msg', who: 'dim', text: 'Pr\u00e9-dimensionnement (savoir-faire \u00ab Dimensionnement PV \u00bb v1.2) :\n\u2022 ' + panels + ' panneaux de 400 W = ' + kwc + ' kWc (' + E + ' kWh/j \u00f7 (' + H + ' \u00d7 ' + PR + '))\n\u2022 ' + modules + ' modules de batterie de 5 kWh = ' + modules * 5 + ' kWh (1 jour d\u2019autonomie, d\u00e9charge 80 %)\n\u2022 onduleur hybride 5 kVA (pointe d\u00e9clar\u00e9e ' + form.peak + ' kW)\nDevis D-2026-0011 tir\u00e9 du catalogue : ' + F(total) + ', pose comprise.' });
+    journal('devis.pr\u00e9par\u00e9', 'dim', 'D-2026-0011 \u00b7 ' + F(total));
+    propose({
+      kind: 'devis.verifier', by: 'dim', object: obj, amount: total, label: 'V\u00e9rifier le dimensionnement et le devis D-2026-0011',
+      detail: S.parties[obj].name + ' \u00b7 ' + kwc + ' kWc \u00b7 ' + modules * 5 + ' kWh \u00b7 onduleur 5 kVA',
+      evidence: ['Ensoleillement : PVGIS', 'Calcul : code, v1.2', 'Prix : catalogue'], options: ['Valider le dimensionnement', 'Refuser'],
+    });
+  },
+  relancer(t) {
+    const party = S.parties[t.waitingOn];
+    trace('ag', 'Agent Relances : \u00ab ' + t.what + ' \u00bb attend ' + party.name + ' depuis ' + ageText(S.now - t.since));
+    propose({
+      kind: 'message.client', by: 'relances', object: t.object, party: t.waitingOn, template: 'relance polie', label: 'Relancer ' + party.name + ' : ' + t.what,
+      text: 'Bonjour ' + party.contact + ', petit rappel amical : ' + t.what.toLowerCase() + '. Pouvons-nous convenir d\u2019une date cette semaine ?',
+      options: ['Envoyer', 'Refuser'], amount: 0,
+      after: () => { t.nudges = (t.nudges || 0) + 1; t.lastNudge = S.now; trace('wk', 'tenue \u00ab ' + t.what + ' \u00bb : relanc\u00e9e (' + t.nudges + ')'); },
+    });
+    t.lastNudge = S.now;
+  },
+};
+
+/* ---------- the router ---------- */
+function route(ev) {
+  if (ev.type === 'whatsapp' || ev.type === 'mail') {
+    const party = Object.entries(S.parties).find(([, p]) => p.phone === ev.from);
+    trace('ch', (ev.type === 'whatsapp' ? 'WhatsApp' : 'Mail IMAP') + ' re\u00e7u de ' + ev.from + ' \u2192 \u00e9v\u00e9nement au journal');
+    journal(ev.type + '.re\u00e7u', party ? party[0] : null, '\u00ab ' + ev.text.slice(0, 60) + (ev.text.length > 60 ? '\u2026' : '') + ' \u00bb');
+    if (!party) {
+      trace('rt', 'exp\u00e9diteur inconnu, aucun tiers ni projet s\u00fbr (confiance 0,31) \u2192 carte \u00ab \u00e0 classer \u00bb, sans deviner');
+      const g = propose({
+        kind: 'classer', by: null, mustAsk: true, object: 'fonc', decider: 'afi', label: '\u00c0 classer : mail de ' + ev.from, mail: ev.text,
+        detail: '\u00ab ' + ev.text + ' \u00bb', evidence: ['Exp\u00e9diteur inconnu', 'Parle d\u2019un devis', 'Proposition : nouveau tiers'],
+        options: ['Nouveau tiers et nouveau fil', 'Rattacher \u00e0 Pharmacie du Port', 'Ignorer'], amount: 0,
+      });
+      S.tenues.push({ id: id('T'), object: 'fonc', what: 'Classer un mail inconnu', holder: g.decider, waitingOn: null, since: S.now, state: 'tenu', gid: g.id });
+      return;
+    }
+    const [pid, p] = party; const obj = p.object;
+    trace('rt', ev.from + ' \u2192 ' + p.name + ' \u2192 fil \u00ab ' + S.objects[obj].name + ' \u00bb (confiance 0,96)');
+    fil(obj, { kind: 'msg', who: pid, text: ev.text, via: 'via ' + (ev.type === 'whatsapp' ? 'WhatsApp' : 'mail') });
+    if (/factur/i.test(ev.text) && !S.invoices.some((i) => i.object === obj)) {
+      trace('rt', 'intention reconnue : demande de facture \u2192 Agent Facturation, abonn\u00e9 \u00e0 ces demandes');
+      agents.facturer(obj);
+    } else if (/stop|d\u00e9sinscri/i.test(ev.text)) {
+      p.optedOut = true; trace('rt', p.name + ' demande \u00e0 ne plus recevoir de messages \u2192 consentement retir\u00e9 (P6)');
+      journal('consentement.retir\u00e9', pid, p.name);
+    } else {
+      const holder = cover(S.objects[obj].holder, dayIndex(S.now));
+      S.tenues.push({ id: id('T'), object: obj, what: 'R\u00e9pondre \u00e0 ' + p.name, holder, waitingOn: null, since: S.now, state: 'tenu', reply: true });
+      trace('wk', 'nouvelle tenue tenue par ' + P(holder).short + ' : r\u00e9pondre \u00e0 ' + p.name);
+    }
+    return;
+  }
+  if (ev.type === 'form') {
+    const f = ev.form;
+    trace('ch', 'Formulaire \u00ab Dimensionnement d\u2019un syst\u00e8me solaire \u00bb soumis par ' + f.name + ' \u2192 \u00e9v\u00e9nement au journal');
+    journal('formulaire.re\u00e7u', null, f.name + ' \u00b7 ' + f.kwh + ' kWh/j \u00b7 ' + f.place);
+    trace('rt', 'un formulaire porte son identit\u00e9 : nouveau tiers \u00ab ' + f.name + ' \u00bb, un lieu \u00ab ' + f.place + ' \u00bb, un fil (confiance 0,99)');
+    S.parties.agbodrafo = { name: f.name, contact: f.contact, phone: f.email, email: true, object: 'agbodrafo', optedOut: false };
+    S.objects.agbodrafo = { kind: 'Client', name: f.name, holder: 'kossi', party: 'agbodrafo', team: ['afi', 'kossi'], sold: null, paid: null, committed: null, margin: null };
+    S.fils.agbodrafo = [];
+    fil('agbodrafo', { kind: 'msg', who: 'agbodrafo', text: 'Lieu : ' + f.place + ' \u00b7 consommation ' + f.kwh + ' kWh par jour \u00b7 pointe ' + f.peak + ' kW \u00b7 budget ' + f.budget, via: 'via le formulaire' });
+    const holder = cover('kossi', dayIndex(S.now));
+    S.tenues.push({ id: id('T'), object: 'agbodrafo', what: 'Dimensionner et chiffrer', holder, waitingOn: null, since: S.now, due: S.now + 2 * DAY, state: 'tenu' });
+    trace('wk', 'nouvelle tenue tenue par ' + P(holder).short + ' : dimensionner et chiffrer, sous 48 h');
+    agents.dimensionner('agbodrafo', f);
+    return;
+  }
+  if (ev.type === 'paiement') {
+    trace('ch', 'Mobile money : ' + F(ev.amount) + ' re\u00e7us, relus chez le prestataire (r\u00e9f\u00e9rence ' + ev.ref + ')');
+    journal('paiement.re\u00e7u', ev.party, F(ev.amount));
+    const inv = S.invoices.find((i) => i.amount === ev.amount && i.status === 'envoy\u00e9e');
+    if (!inv) { trace('rt', 'aucune facture de ce montant en attente \u2192 carte \u00ab \u00e0 classer \u00bb pour Essi'); return; }
+    inv.status = 'pay\u00e9e';
+    const o = S.objects[inv.object]; o.paid += ev.amount;
+    trace('rt', 'rapproch\u00e9 de la facture ' + inv.id + ' (montant et tiers identiques)');
+    fil(inv.object, { kind: 'event', tone: 'ok', text: 'Paiement re\u00e7u : ' + F(ev.amount) + ' par mobile money, rapproch\u00e9 de ' + inv.id + '.' });
+    const t = S.tenues.find((x) => x.invoice === inv.id);
+    if (t) { t.state = 'fait'; trace('wk', 'tenue \u00ab ' + t.what + ' \u00bb : faite'); }
+    S.waClient.push({ t: S.now, out: false, text: 'Paiement de ' + F(ev.amount) + ' bien re\u00e7u. Merci !' });
+  }
+}
+
+/* ---------- the relay, at each hour ---------- */
+function relay(verbose) {
+  const day = dayIndex(S.now);
+  for (const t of S.tenues) {
+    if (t.state === 'fait') continue;
+    const due = t.due != null ? dayIndex(t.due) : day;
+    if (isAbsent(t.holder, due)) {
+      const to = cover(t.holder, due);
+      if (to !== t.holder) {
+        const from = t.holder; t.holder = to;
+        trace('wk', 'relais : ' + P(from).short + ' absent ' + days[dateOf(t.due ?? S.now).getDay()] + ' \u2192 \u00ab ' + t.what + ' \u00bb passe \u00e0 ' + P(to).short + ' (P4)');
+        fil(t.object, { kind: 'event', tone: 'relay', text: 'Relais : ' + P(from).short + ' est absent ; \u00ab ' + t.what + ' \u00bb passe \u00e0 ' + P(to).short + ', qui est pr\u00e9venu.' });
+        waToMe(to, { kind: 'note', text: 'Vous reprenez \u00ab ' + t.what + ' \u00bb (' + S.objects[t.object].name + ') : ' + P(from).short + ' est absent. [Accepter] ou [Rendre avec une raison].' });
+        journal('tenue.reprise', to, t.what);
+      }
+    }
+    if (t.state === 'attend' && t.waitingOn && S.parties[t.waitingOn] && hourOf(S.now) >= 8 && hourOf(S.now) < 19 && S.now - t.since >= 2 * DAY && (!t.lastNudge || S.now - t.lastNudge >= 2 * DAY)) {
+      agents.relancer(t);
+    }
+  }
+  for (const g of S.gestes) {
+    if (g.status === '\u00e0 d\u00e9cider' && isAbsent(g.decider, day)) {
+      const to = cover(g.decider, day);
+      trace('wk', 'carte \u00ab ' + g.label + ' \u00bb : ' + P(g.decider).short + ' absent aujourd\u2019hui \u2192 ' + P(to).short);
+      g.decider = to; waToMe(to, { kind: 'card', gid: g.id });
+    }
+  }
+  const open = S.tenues.filter((t) => t.state !== 'fait');
+  const orphan = open.filter((t) => !t.holder).length;
+  if (verbose || hourOf(S.now) === 12) trace('wk', 'v\u00e9rification : ' + open.length + ' tenues ouvertes, ' + orphan + ' sans responsable');
+}
+
+/* ---------- time ---------- */
+function advance(minutes) {
+  const target = S.now + minutes;
+  while (S.now < target) {
+    const step = Math.min(60, target - S.now);
+    S.now += step;
+    if (step === 60 || S.now === target) relay();
+  }
+}
+function goTo(minute) { if (minute > S.now) advance(minute - S.now); }
+const at = (day, h, m = 0) => day * DAY + (h - 7) * 60 + m;
+
+/* ---------- Kete Intelligence, computed from the state ---------- */
+function ask(person, q) {
+  S.kete[person].push({ t: S.now, me: true, text: q });
+  trace('ke', 'question de ' + P(person).short + ' : \u00ab ' + q + ' \u00bb');
+  let a;
+  const mine = S.gestes.filter((g) => g.status === '\u00e0 d\u00e9cider' && g.decider === person);
+  const held = S.tenues.filter((t) => t.state !== 'fait' && t.holder === person);
+  if (/besoin|moi|attend/i.test(q)) {
+    a = mine.length || held.length
+      ? '\u00c0 d\u00e9cider : ' + (mine.map((g) => g.label).join(' ; ') || 'rien') + '.\nCe que vous tenez : ' + (held.map((t) => t.what + ' (' + ageText(S.now - t.since) + ')').join(' ; ') || 'rien') + '.'
+      : 'Rien n\u2019a besoin de vous pour l\u2019instant.';
+  } else if (/colombe|projet|o\u00f9 en/i.test(q)) {
+    const o = S.objects.colombe;
+    const open = S.tenues.filter((t) => t.object === 'colombe' && t.state !== 'fait');
+    a = '\u00c9clairage \u2014 La Colombe : vendu ' + F(o.sold) + ', encaiss\u00e9 ' + F(o.paid) + ', engag\u00e9 ' + F(o.committed) + ', marge pr\u00e9vue ' + F(o.margin) + '.\nEn cours : ' + (open.map((t) => t.what + ' \u2192 ' + P(t.holder).short).join(' ; ') || 'rien') + '.';
+  } else if (/qui tient|tient quoi/i.test(q)) {
+    const open = S.tenues.filter((t) => t.state !== 'fait');
+    a = open.map((t) => '\u2022 ' + t.what + ' \u2014 ' + P(t.holder).short + (t.waitingOn ? ', attend ' + S.parties[t.waitingOn].name : '') + ' \u00b7 ' + ageText(S.now - t.since)).join('\n') + '\nAucune tenue sans responsable.';
+  } else if (/r\u00e9sum|journ\u00e9e|jour/i.test(q)) {
+    const today = S.journal.filter((e) => dayIndex(e.t) === dayIndex(S.now));
+    a = 'Aujourd\u2019hui, ' + today.length + ' \u00e9v\u00e9nements. ' + S.gestes.filter((g) => g.status === 'd\u00e9cid\u00e9' && dayIndex(g.decidedAt) === dayIndex(S.now)).length + ' gestes d\u00e9cid\u00e9s, ' + S.gestes.filter((g) => g.status === 'fait' && dayIndex(g.t) === dayIndex(S.now)).length + ' faits seuls par les agents, ' + S.gestes.filter((g) => g.status === 'refus\u00e9').length + ' refus\u00e9s.\nEncaiss\u00e9 sur La Colombe : ' + F(S.objects.colombe.paid) + '. Plus vieille attente : ' + kpis().oldest + '.';
+  } else {
+    a = 'Dans cette simulation, je r\u00e9ponds \u00e0 quatre questions : ce qui a besoin de vous, o\u00f9 en est La Colombe, qui tient quoi, le r\u00e9sum\u00e9 de la journ\u00e9e.';
+  }
+  S.kete[person].push({ t: S.now, me: false, text: a, n: S.journal.length });
+  trace('ke', 'r\u00e9ponse calcul\u00e9e \u00e0 partir de ' + S.journal.length + ' \u00e9v\u00e9nements et ' + S.tenues.length + ' tenues, sans rien inventer');
+}
+
+/* ---------- the fluidity figures ---------- */
+function kpis() {
+  const open = S.tenues.filter((t) => t.state !== 'fait');
+  const waiting = open.filter((t) => t.state === 'attend' || t.reply);
+  const oldestT = waiting.reduce((m, t) => Math.max(m, S.now - t.since), 0);
+  const blocked = waiting.filter((t) => S.now - t.since > 2 * DAY).length;
+  const cards = S.gestes.filter((g) => g.status === '\u00e0 d\u00e9cider').length;
+  const human = S.gestes.filter((g) => g.status === 'd\u00e9cid\u00e9').length;
+  const alone = S.gestes.filter((g) => g.status === 'fait').length;
+  return { open: open.length, orphan: open.filter((t) => !t.holder).length, oldest: oldestT ? ageText(oldestT) : '\u2014', blocked, cards, human, alone, refused: S.gestes.filter((g) => g.status === 'refus\u00e9').length };
+}
+
+/* ---------- the story ---------- */
+const STORY = [
+  { at: at(0, 7, 0), title: 'Le d\u00e9cor', text: 'Mardi 13 octobre, 7 h. Soleil d\u2019Afrique pose des lampadaires solaires. Le projet \u00ab \u00c9clairage \u2014 La Colombe \u00bb (660 000 F) est tenu par Kossi. Trois tenues sont d\u00e9j\u00e0 ouvertes, chacune avec son responsable. Vous jouez Afi, la directrice : regardez \u00ab Pour moi \u00bb, puis les fils. Les Coulisses, \u00e0 droite, montrent ce que d\u00e9cide chaque moteur.', run() {} },
+  { at: at(0, 8, 12), title: 'Un client \u00e9crit sur WhatsApp', text: 'L\u2019\u00c9cole La Colombe demande la facture d\u2019acompte. Le canal cr\u00e9e un \u00e9v\u00e9nement ; le routeur reconna\u00eet le num\u00e9ro, le tiers, le projet, et range le message dans son fil ; l\u2019Agent Facturation pr\u00e9pare la facture seul (c\u2019est dans son mandat), mais la politique P5 demande qu\u2019Essi la valide : une carte part chez elle.', run() { S.me = 'essi'; S.tab = 'pourmoi'; ev('whatsapp', S.parties.colombe.phone, 'Bonjour, pouvez-vous nous envoyer la facture d\u2019acompte ? Le conseil paie vendredi.'); } },
+  { at: at(0, 8, 20), title: 'Essi valide depuis son WhatsApp', text: 'Essi n\u2019ouvre pas Kete : elle r\u00e8gle la carte sur WhatsApp. Elle est r\u00e9gl\u00e9e partout (Pour moi, le fil). La facture valid\u00e9e, l\u2019agent veut l\u2019envoyer au client : P2 v\u00e9rifie le mod\u00e8le et l\u2019heure, P6 le consentement. Le client re\u00e7oit sa facture ; la tenue attend maintenant son paiement.', run() { const g = pending('facture.valider'); if (g) decide(g.id, 'Valider', 'WhatsApp'); const g2 = pending('message.client'); if (g2) decide(g2.id, 'Envoyer', 'WhatsApp'); } },
+  { at: at(0, 9, 2), title: 'Kossi demande \u00e0 l\u2019agent dans le fil', text: 'Kossi \u00e9crit dans le fil du projet et cite @Achats. L\u2019agent compare seul (lecture, niveau 1), puis propose l\u2019achat : hors budget et au-del\u00e0 de 100 000 F, la politique P1 demande l\u2019accord d\u2019Afi. La carte arrive chez Afi, avec ses preuves et la location en option.', run() { S.me = 'kossi'; S.tab = 'fils'; S.fil = 'colombe'; say('kossi', 'colombe', 'Pour l\u2019outillage de pose, on ach\u00e8te ou on loue ? La pose commence lundi. @Achats'); } },
+  { at: at(0, 9, 30), title: 'Afi d\u00e9cide : louer', text: 'Afi r\u00e8gle la carte depuis \u00ab Pour moi \u00bb. L\u2019agent r\u00e9serve la location ; les chiffres du projet bougent tout de suite dans l\u2019\u00e9tat du fil (engag\u00e9, marge). La tenue \u00ab d\u00e9cider l\u2019outillage \u00bb est faite.', run() { S.me = 'afi'; S.tab = 'pourmoi'; const g = pending('achat.engager'); if (g) decide(g.id, 'Louer \u00e0 la place', 'Pour moi'); } },
+  { at: at(0, 10, 30), title: 'Kossi sera absent vendredi', text: 'Kossi d\u00e9clare une absence vendredi (dans Kete Team). Le relais regarde ce qu\u2019il tient ce jour-l\u00e0 : la r\u00e9ception du mat\u00e9riel, vendredi 10 h, passe \u00e0 son suppl\u00e9ant Yao (politique P4). Yao est pr\u00e9venu sur son WhatsApp. Aucune tenue ne reste sans personne.', run() { S.me = 'yao'; S.tab = 'pourmoi'; S.absences.push({ person: 'kossi', day: 3 }); trace('ch', 'Kete Team : absence de Kossi, vendredi 16'); journal('absence.d\u00e9clar\u00e9e', 'kossi', 'vendredi 16'); relay(true); } },
+  { at: at(0, 11, 0), title: 'Un mail inconnu arrive', text: 'Un h\u00f4tel \u00e9crit \u00e0 la bo\u00eete de l\u2019entreprise (IMAP). Le routeur ne reconna\u00eet ni l\u2019exp\u00e9diteur ni un projet : au lieu de deviner, il cr\u00e9e une carte \u00ab \u00e0 classer \u00bb pour Afi.', run() { S.me = 'afi'; S.tab = 'pourmoi'; ev('mail', 'contact@hotel-mono.tg', 'Bonjour, nous souhaitons un devis pour 40 lampadaires solaires pour le parking de l\u2019h\u00f4tel. Cordialement, Mme Lawson, H\u00f4tel Mono.'); } },
+  { at: at(0, 11, 10), title: 'Afi classe le mail', text: 'Afi choisit \u00ab Nouveau tiers \u00bb : le tiers, son fil et une tenue \u00ab r\u00e9pondre \u00e0 la demande \u00bb naissent, tenue par Kossi. Le routeur apprend l\u2019adresse : la prochaine fois, il rangera seul.', run() { const g = pending('classer'); if (g) decide(g.id, 'Nouveau tiers et nouveau fil', 'Pour moi'); } },
+  { at: at(1, 9, 0), title: 'Le lendemain : ce qui vieillit est relanc\u00e9', text: 'Mercredi 9 h. Le relais v\u00e9rifie chaque heure l\u2019\u00e2ge des tenues. \u00ab Bon de commande sign\u00e9 \u00bb attend l\u2019\u00c9cole depuis plus de deux jours : l\u2019Agent Relances relance seul, avec un mod\u00e8le approuv\u00e9 (son autonomie est gagn\u00e9e, niveau 3) \u2014 P2 l\u2019autorise. M\u00eame chose pour la Pharmacie du Port.', run() { S.me = 'afi'; S.tab = 'fils'; S.fil = 'colombe'; } },
+  { at: at(1, 15, 40), title: 'Le client paie par mobile money', text: 'L\u2019\u00c9cole paie 198 000 F. Le paiement est relu chez le prestataire, rapproch\u00e9 de la facture (m\u00eame montant, m\u00eame tiers) ; la tenue est faite, l\u2019encaiss\u00e9 du projet se met \u00e0 jour, le client re\u00e7oit un accus\u00e9.', run() { pay(); } },
+  { at: at(1, 18, 0), title: 'Le soir : le r\u00e9sum\u00e9 calcul\u00e9', text: 'Afi demande son r\u00e9sum\u00e9 au fil \u00ab Kete \u00bb. La r\u00e9ponse est calcul\u00e9e \u00e0 partir du journal et des tenues, jamais invent\u00e9e. ', run() { S.me = 'afi'; S.tab = 'kete'; ask('afi', 'R\u00e9sume ma journ\u00e9e'); } },
+  { at: at(2, 8, 30), title: 'Dans le groupe Direction', text: 'Jeudi 8 h 30. Essi \u00e9crit dans le groupe Direction, comme elle l\u2019aurait fait par mail : \u00ab L\u2019ordinateur de Ph\u00e9b\u00e9 a un souci \u00bb. Personne n\u2019a cr\u00e9\u00e9 de ticket. Le routeur comprend : une personne, son ordinateur (l\u2019actif PC-014), un incident. La politique P7 le confie au responsable SI ; l\u2019Agent Qualit\u00e9 pr\u00e9pare la remont\u00e9e d\u2019anomalie, mais il lui manque le sympt\u00f4me : il le demande \u00e0 Ph\u00e9b\u00e9 plut\u00f4t que de deviner.', run() { S.me = 'essi'; S.tab = 'fils'; S.fil = 'direction'; say('essi', 'direction', 'L\u2019ordinateur de Ph\u00e9b\u00e9 a un souci, elle ne peut plus saisir les factures.'); } },
+  { at: at(2, 8, 40), title: 'Ph\u00e9b\u00e9 r\u00e9pond sur WhatsApp', text: 'Ph\u00e9b\u00e9 r\u00e9pond en une ligne. L\u2019agent r\u00e9dige la remont\u00e9e selon la proc\u00e9dure qualit\u00e9 (c\u2019est dans son mandat) ; la valider revient \u00e0 Mawuli : une carte, avec la garantie et l\u2019historique de l\u2019appareil.', run() { S.me = 'phebe'; S.tab = 'pourmoi'; S.waMe.phebe.push({ t: S.now, kind: 'me', text: 'Il s\u2019\u00e9teint tout seul apr\u00e8s dix minutes.' }); agents.anomalie('Il s\u2019\u00e9teint tout seul apr\u00e8s dix minutes.'); } },
+  { at: at(2, 9, 0), title: 'Mawuli valide depuis son WhatsApp', text: 'La remont\u00e9e est enregistr\u00e9e : un constat qualit\u00e9, une action corrective, la demande de garantie au fournisseur, et un poste pr\u00eat\u00e9 \u00e0 Ph\u00e9b\u00e9. La tenue attend maintenant le fournisseur.', run() { S.me = 'mawuli'; S.tab = 'fils'; S.fil = 'pc014'; const g = pending('anomalie.valider'); if (g) decide(g.id, 'Valider et demander la garantie', 'WhatsApp'); } },
+  { at: at(2, 10, 0), title: 'Un formulaire de dimensionnement solaire', text: 'Une ferme remplit le formulaire du site : 12 kWh par jour \u00e0 Agbodrafo. Le routeur cr\u00e9e le tiers, le lieu, le fil, et une tenue \u00ab dimensionner et chiffrer \u00bb pour Kossi, sous 48 h. L\u2019Agent Dimensionnement calcule \u2014 par le code, avec l\u2019ensoleillement PVGIS du lieu, jamais par le mod\u00e8le \u2014 et tire le devis du catalogue. Kossi doit le v\u00e9rifier.', run() { S.me = 'kossi'; S.tab = 'fils'; S.fil = 'agbodrafo'; route({ type: 'form', form: { name: 'Ferme Agbodrafo', contact: 'M. Kodjo', email: 'contact@ferme-agbodrafo.tg', place: 'Agbodrafo', kwh: 12, peak: 3, budget: '7 000 000 F' } }); } },
+  { at: at(2, 10, 20), title: 'Kossi v\u00e9rifie ; Afi engage', text: 'Kossi valide le dimensionnement. Le devis d\u00e9passe 500 000 F : envoyer, c\u2019est engager l\u2019entreprise, et la politique P3 demande l\u2019accord d\u2019Afi. Deux politiques, deux personnes, une seule carte \u00e0 chaque fois.', run() { const g = pending('devis.verifier'); if (g) decide(g.id, 'Valider le dimensionnement', 'Pour moi'); S.me = 'afi'; S.tab = 'pourmoi'; } },
+  { at: at(2, 10, 30), title: 'Afi approuve : le devis part par mail', text: 'Afi approuve depuis \u00ab Pour moi \u00bb. Le devis part par mail ; la tenue attend la r\u00e9ponse du client, et sera relanc\u00e9e si elle vieillit.', run() { const g = pending('message.client'); if (g) decide(g.id, 'Envoyer', 'Pour moi'); S.tab = 'fils'; S.fil = 'agbodrafo'; } },
+  { at: at(2, 11, 0), title: 'Le Fonds \u00e9crit par mail', text: 'Le Fonds \u00c9nergie Rurale \u00e9crit \u00e0 Afi par mail. Le mail entre dans le fil du Fonds (le routeur conna\u00eet l\u2019adresse), avec une tenue \u00ab r\u00e9pondre \u00bb. Afi r\u00e9pond dans le fil : sa r\u00e9ponse part par mail, depuis sa propre bo\u00eete. Le Fonds reste sur le mail ; la trace est dans Kete.', run() { S.me = 'afi'; S.tab = 'fils'; S.fil = 'fonds'; ev('mail', 'rapport@fer.tg', 'Bonjour, pouvez-vous nous confirmer la date d\u2019envoi du rapport trimestriel ? Cordialement, Mme Mensah.'); goTo(at(2, 11, 15)); say('afi', 'fonds', 'Bonjour Madame, le rapport partira le 28, deux jours avant l\u2019\u00e9ch\u00e9ance. Bien \u00e0 vous, Afi Mensah.'); } },
+  { at: at(2, 11, 20), title: 'La preuve, comme un mail', text: 'Ce qu\u2019on attend du mail, le fil le garde : chaque message dat\u00e9 et jamais r\u00e9\u00e9crit, qui l\u2019a lu et quand, la conservation fix\u00e9e par la politique P8. Afi exporte le fil du Fonds en preuve horodat\u00e9e, avec son empreinte. Fin du sc\u00e9nario : rejouez-le en changeant une politique ou le mandat d\u2019un agent, ou jouez librement \u2014 \u00e9crivez comme le client, avancez le temps, prenez un autre r\u00f4le.', run() { S.proof = 'fonds'; trace('jr', 'export de preuve du fil \u00ab Fonds \u00c9nergie Rurale \u00bb, avec son empreinte'); } },
+];
+function pending(kind) { return S.gestes.find((g) => g.kind === kind && g.status === '\u00e0 d\u00e9cider'); }
+function ev(type, from, text) { if (type === 'whatsapp') S.waClient.push({ t: S.now, out: true, text }); route({ type, from, text }); }
+function say(person, obj, text) {
+  fil(obj, { kind: 'msg', who: person, text });
+  journal('message.fil', person, '\u00ab ' + text.slice(0, 50) + '\u2026 \u00bb');
+  const t = S.tenues.find((x) => x.object === obj && x.reply && x.state !== 'fait' && x.holder === person);
+  if (t) { t.state = 'fait'; trace('wk', 'tenue \u00ab ' + t.what + ' \u00bb : faite (r\u00e9ponse dans le fil)'); }
+  if (/ordinateur|imprimante|\bpc\b/i.test(text) && /souci|panne|marche|bloqu/i.test(text)) agents.incident(text, person);
+  const o = S.objects[obj];
+  if (o.party && S.parties[o.party].email && !/@/.test(text)) {
+    trace('ch', 'r\u00e9ponse de ' + P(person).short + ' dans le fil \u2192 part par mail depuis sa bo\u00eete vers ' + S.parties[o.party].phone + ' (P2 vise les agents : une personne \u00e9crit librement)');
+    S.fils[obj][S.fils[obj].length - 1].via = 'parti par mail depuis la bo\u00eete de ' + P(person).short;
+  }
+  if (/@achats/i.test(text)) agents.achats(obj);
+  if (/@facturation/i.test(text)) agents.facturer(obj);
+}
+function pay() {
+  const inv = S.invoices.find((i) => i.status === 'envoy\u00e9e');
+  if (!inv) { trace('ch', 'aucune facture envoy\u00e9e \u00e0 payer pour l\u2019instant'); return; }
+  S.waClient.push({ t: S.now, out: true, text: 'Paiement mobile money : ' + F(inv.amount) + ' (r\u00e9f. MM-48213)' });
+  route({ type: 'paiement', amount: inv.amount, party: 'colombe', ref: 'MM-48213' });
+}
+
+/* ---------- the initial state ---------- */
+function seed() {
+  S = world();
+  const s = S;
+  s.fils.colombe.push({ t: -2 * DAY, kind: 'event', tone: 'ok', text: 'Devis D-2026-0004 gagn\u00e9 : 660 000 F. Le projet na\u00eet ; ses lignes deviennent son budget.' });
+  s.fils.colombe.push({ t: -1320, kind: 'msg', who: 'kossi', text: 'Bon de commande envoy\u00e9 \u00e0 l\u2019\u00e9cole pour signature.' });
+  s.fils.pharma.push({ t: -3 * DAY, kind: 'msg', who: 'kossi', text: 'Devis D-2026-0003 envoy\u00e9 : 412 000 F.', via: 'envoy\u00e9 par WhatsApp' });
+  s.fils.fonc.push({ t: -5 * DAY, kind: 'msg', who: 'afi', text: 'Budget de fonctionnement d\u2019octobre valid\u00e9.', readBy: { essi: -5 * DAY + 30 } });
+  s.fils.direction.push({ t: -DAY, kind: 'msg', who: 'afi', text: 'R\u00e9union de direction jeudi 9 h : l\u2019ordre du jour est dans ce fil.', readBy: { essi: -DAY + 20, kossi: -DAY + 90 } });
+  s.fils.fonds.push({ t: -5 * DAY, kind: 'msg', who: 'afi', text: 'Rapport trimestriel au Fonds \u00c9nergie Rurale : \u00e0 rendre le 30.', readBy: { essi: -5 * DAY + 60 } });
+  s.tenues.push({ id: id('T'), object: 'colombe', what: 'Bon de commande sign\u00e9', holder: 'kossi', waitingOn: 'colombe', since: -1320, state: 'attend' });
+  s.tenues.push({ id: id('T'), object: 'colombe', what: 'R\u00e9ception du mat\u00e9riel, vendredi 10 h', holder: 'kossi', waitingOn: null, since: -DAY, due: at(3, 10), state: 'tenu' });
+  s.tenues.push({ id: id('T'), object: 'pharma', what: 'R\u00e9ponse au devis D-2026-0003', holder: 'kossi', waitingOn: 'pharma', since: -3 * DAY, state: 'attend', lastNudge: -1320 });
+  s.tenues.push({ id: id('T'), object: 'fonds', what: 'Rapport au Fonds \u00c9nergie Rurale', holder: 'afi', waitingOn: null, since: -5 * DAY, due: at(17, 17), state: 'tenu' });
+  s.waClient.push({ t: -1320, out: false, text: 'Bonjour M. Agbeko, voici le bon de commande \u00e0 signer pour l\u2019\u00e9clairage de l\u2019\u00e9cole. Kossi, Soleil d\u2019Afrique.' });
+  trace('jr', '\u00e9tat de d\u00e9part : 5 fils (dont un groupe), 4 tenues ouvertes, 8 politiques actives, 5 agents, 6 personnes');
+  STORY[0].run();
+}
+
+/* ---------- render ---------- */
+function avatar(who) {
+  if (S.people[who]) return '<span class="av" style="background:' + P(who).color + '">' + P(who).ini + '</span>';
+  if (S.agents[who]) return '<span class="av agent">\u2726</span>';
+  return '<span class="av party">' + esc(nameOf(who).split(' ').map((w) => w[0]).join('').slice(0, 2)) + '</span>';
+}
+function cardHtml(g, place) {
+  const options = g.status === '\u00e0 d\u00e9cider' && g.decider === S.me
+    ? g.options.map((o, i) => '<button class="btn sm' + (i === 0 ? ' primary' : o === 'Refuser' || o === 'Ignorer' ? ' ghost' : '') + '" type="button" data-act="decide" data-g="' + g.id + '" data-o="' + esc(o) + '" data-via="' + place + '">' + esc(o) + '</button>').join('')
+    : '';
+  const state = g.status === '\u00e0 d\u00e9cider'
+    ? '<span class="tag verify">attend ' + esc(P(g.decider).short) + (g.policy ? ' \u00b7 ' + g.policy : '') + '</span>'
+    : g.status === 'refus\u00e9'
+      ? '<span class="tag err">' + (g.choice ? esc(g.choice) + ' \u00b7 ' + esc(P(g.decider).short) : 'refus\u00e9 \u00b7 ' + esc(g.policy || '')) + '</span>'
+      : '<span class="tag ok">' + esc(g.choice) + (g.decider ? ' \u00b7 ' + esc(P(g.decider).short) + ' via ' + esc(g.via) : ' \u00b7 fait seul') + '</span>';
+  return '<div class="card"><div class="card-h"><span class="tag agent">\u2726 ' + esc(nameOf(g.by)) + '</span><span class="t">' + esc(g.label) + '</span>' + (g.amount ? '<span class="amt num">' + F(g.amount) + '</span>' : '') + '</div>'
+    + '<div class="card-b">' + (g.detail ? '<div>' + esc(g.detail) + '</div>' : '') + (g.evidence ? '<div class="chips">' + g.evidence.map((e) => '<span class="chip">' + esc(e) + '</span>').join('') + '</div>' : '') + '</div>'
+    + '<div class="card-f">' + options + state + (g.object ? '<span class="note">fil \u00ab ' + esc(S.objects[g.object].name) + ' \u00bb</span>' : '') + '</div></div>';
+}
+function renderWho() {
+  $('#who').innerHTML = Object.entries(S.people).map(([k, p]) => {
+    const n = S.gestes.filter((g) => g.status === '\u00e0 d\u00e9cider' && g.decider === k).length;
+    return '<button type="button" data-act="me" data-p="' + k + '" aria-pressed="' + (S.me === k) + '">' + avatar(k) + esc(p.short) + (n ? '<span class="cnt">' + n + '</span>' : '') + '</button>';
+  }).join('');
+  const n = S.gestes.filter((g) => g.status === '\u00e0 d\u00e9cider' && g.decider === S.me).length;
+  const tabs = [['pourmoi', 'Pour moi', n], ['fils', 'Fils', 0], ['kete', '\u2726 Kete', 0], ['gouv', 'Gouvernance', 0], ['agents', 'Agents', 0]];
+  $('#tabs').innerHTML = tabs.map(([k, l, c]) => '<button type="button" role="tab" data-act="tab" data-t="' + k + '" aria-selected="' + (S.tab === k) + '">' + esc(l) + (c ? '<span class="cnt">' + c + '</span>' : '') + '</button>').join('');
+}
+function renderPourMoi() {
+  const me = S.me;
+  const cards = S.gestes.filter((g) => g.status === '\u00e0 d\u00e9cider' && g.decider === me);
+  const toClass = cards.filter((g) => g.kind === 'classer');
+  const toDecide = cards.filter((g) => g.kind !== 'classer');
+  const held = S.tenues.filter((t) => t.state !== 'fait' && t.holder === me);
+  const reply = held.filter((t) => t.reply);
+  const rest = held.filter((t) => !t.reply);
+  const sec = (title, n, body) => '<div class="sec"><div class="sec-h">' + title + (n ? ' <span class="cnt">' + n + '</span>' : '') + '</div>' + body + '</div>';
+  const tenue = (t) => '<div class="rowl"><span>' + esc(t.what) + '</span><span class="age">' + ageText(S.now - t.since) + '</span><small>' + esc(S.objects[t.object].name) + (t.waitingOn ? ' \u00b7 attend ' + esc(S.parties[t.waitingOn].name) + (t.nudges ? ' \u00b7 relanc\u00e9 ' + t.nudges + ' fois' : '') : '') + (t.due != null ? ' \u00b7 \u00e9ch\u00e9ance ' + when(t.due) : '') + '</small></div>';
+  return '<div class="sec" style="padding-bottom:0"><div style="font-size:18px;font-weight:650">Pour ' + esc(P(me).short) + '</div><div class="muted" style="font-size:13px">' + esc(P(me).role) + ' \u00b7 ' + when(S.now) + (isAbsent(me, dayIndex(S.now)) ? ' \u00b7 absent aujourd\u2019hui' : '') + '</div></div>'
+    + sec('\u00c0 d\u00e9cider', toDecide.length, toDecide.map((g) => cardHtml(g, 'Pour moi')).join('') || '<div class="empty">Rien \u00e0 d\u00e9cider.</div>')
+    + sec('\u00c0 r\u00e9pondre', reply.length, reply.map(tenue).join('') || '<div class="empty">Personne n\u2019attend votre r\u00e9ponse.</div>')
+    + sec('Ce que je tiens', rest.length, rest.map(tenue).join('') || '<div class="empty">Vous ne tenez rien d\u2019autre.</div>')
+    + (toClass.length ? sec('\u00c0 classer', toClass.length, toClass.map((g) => cardHtml(g, 'Pour moi')).join('')) : '');
+}
+function renderFils() {
+  const keys = Object.keys(S.fils).filter((k) => S.objects[k].team.includes(S.me));
+  if (!keys.includes(S.fil)) S.fil = keys[0];
+  const o = S.objects[S.fil];
+  const list = keys.map((k) => '<button type="button" data-act="fil" data-f="' + k + '" aria-current="' + (S.fil === k) + '"><span class="dot" style="background:' + (S.objects[k].kind === 'Groupe' ? 'var(--info)' : k === 'colombe' ? 'var(--accent)' : 'var(--fg-muted)') + ';border-radius:' + (S.objects[k].kind === 'Groupe' ? '50%' : '2px') + '"></span><span>' + esc(S.objects[k].name) + '</span></button>').join('');
+  const proof = S.proof === S.fil ? proofHtml(S.fil) : '';
+  for (const m of S.fils[S.fil]) if (m.kind === 'msg' && m.who !== S.me && m.readBy && m.readBy[S.me] === undefined) m.readBy[S.me] = S.now;
+  const readLine = (m) => { const r = Object.entries(m.readBy || {}).filter(([k]) => S.people[k] && k !== m.who); return r.length ? '<div class="muted" style="font-size:11px;margin-top:2px">lu par ' + r.map(([k, t]) => esc(P(k).short) + ' (' + (t < 0 ? when(t) : hm(t)) + ')').join(', ') + '</div>' : ''; };
+  const msgs = S.fils[S.fil].map((m) => {
+    if (m.kind === 'event') return '<div class="ev ' + (m.tone || '') + '">' + esc(m.text) + ' <span class="muted">\u00b7 ' + hm(m.t) + '</span></div>';
+    if (m.kind === 'card') { const g = S.gestes.find((x) => x.id === m.gid); return '<div class="m"><span></span>' + cardHtml(g, 'le fil') + '</div>'; }
+    return '<div class="m">' + avatar(m.who) + '<div><div class="w"><b>' + esc(nameOf(m.who)) + '</b>' + (m.via ? '<span class="via">' + esc(m.via) + '</span>' : '') + '<time>' + (m.t < 0 ? when(m.t) : hm(m.t)) + '</time></div><div class="tx">' + esc(m.text) + '</div>' + readLine(m) + '</div></div>';
+  }).join('');
+  const open = S.tenues.filter((t) => t.object === S.fil && t.state !== 'fait');
+  const state = '<h4>Qui tient quoi</h4>' + (open.map((t) => '<div class="rowl" style="padding:6px 8px"><span>' + esc(t.what) + '</span><span class="age">' + ageText(S.now - t.since) + '</span><small>' + esc(P(t.holder).short) + (t.waitingOn ? ' \u00b7 attend ' + esc(S.parties[t.waitingOn].name) : '') + '</small></div>').join('') || '<div class="empty">Rien en cours.</div>')
+    + (o.sold != null ? '<div><h4>Les chiffres</h4><div class="kv"><span>Vendu</span><span class="num">' + F(o.sold) + '</span><span>Encaiss\u00e9</span><span class="num">' + F(o.paid) + '</span><span>Engag\u00e9</span><span class="num">' + F(o.committed) + '</span>' + (o.margin != null ? '<span>Marge pr\u00e9vue</span><span class="num">' + F(o.margin) + '</span>' : '') + '</div></div>' : '')
+    + '<div><h4>Membres</h4><div class="chips">' + o.team.map((p) => '<span class="chip">' + esc(P(p).short) + '</span>').join('') + (o.party ? '<span class="chip">' + esc(S.parties[o.party].name) + ' \u00b7 WhatsApp</span>' : '') + '<span class="chip">\u2726 agents</span></div></div>';
+  return '<div class="fils"><div class="fil-list">' + list + '</div><div class="thread"><div class="thread-h"><b>' + esc(o.name) + '</b><div>' + esc(o.kind) + ' \u00b7 tenu par ' + esc(P(o.holder).short) + (o.party ? (S.parties[o.party].email ? ' \u00b7 \u00e9change par mail' + (o.address ? ' \u00b7 adresse du fil : ' + esc(o.address) : '') : ' \u00b7 le client \u00e9crit par WhatsApp') : '') + ' \u00b7 <button class="btn sm ghost" type="button" data-act="proof">Exporter la preuve</button></div></div>' + proof + '<div class="msgs" id="msgs">' + msgs + '</div>'
+    + '<form class="composer" data-form="fil"><label class="sr" for="filText">\u00c9crire dans le fil</label><input id="filText" placeholder="\u00c9crire comme ' + esc(P(S.me).short) + '\u2026 @Achats ou @Facturation pour un agent" autocomplete="off"><button class="btn primary" type="submit">Envoyer</button></form></div>'
+    + '<aside class="state">' + state + '</aside></div>';
+}
+function proofHtml(f) {
+  const items = S.fils[f].filter((m) => m.kind === 'msg' || m.kind === 'event');
+  const body = items.map((m) => when(m.t) + ' \u00b7 ' + (m.kind === 'msg' ? nameOf(m.who) + (m.via ? ' (' + m.via + ')' : '') + ' : ' + m.text : '\u00e9v\u00e9nement : ' + m.text)).join('\n');
+  if (S.proofHash === undefined || S.proofFor !== body) {
+    S.proofFor = body; S.proofHash = null;
+    const done = (h) => { S.proofHash = h; render(); };
+    if (window.crypto && crypto.subtle) crypto.subtle.digest('SHA-256', new TextEncoder().encode(body)).then((b) => done(Array.from(new Uint8Array(b)).map((x) => x.toString(16).padStart(2, '0')).join(''))).catch(() => done('indisponible ici'));
+    else done('indisponible ici');
+  }
+  return '<div class="card" style="margin:8px 12px"><div class="card-h"><span class="tag info">Preuve</span><span class="t">Fil \u00ab ' + esc(S.objects[f].name) + ' \u00bb \u00b7 ' + items.length + ' \u00e9l\u00e9ments \u00b7 export\u00e9 ' + when(S.now) + '</span></div><div class="card-b"><div>Chaque \u00e9l\u00e9ment est dat\u00e9 et vient du journal ; un message modifi\u00e9 garderait son original (P8). Empreinte SHA-256 : <span class="num" style="font-size:11px;word-break:break-all">' + esc(S.proofHash || 'calcul\u2026') + '</span></div><pre style="margin:0;white-space:pre-wrap;font:11.5px/1.5 var(--font-num);max-height:160px;overflow:auto">' + esc(body) + '</pre></div></div>';
+}
+function renderKete() {
+  const msgs = S.kete[S.me].map((m) => m.me
+    ? '<div class="m">' + avatar(S.me) + '<div><div class="w"><b>' + esc(P(S.me).short) + '</b><time>' + hm(m.t) + '</time></div><div class="tx">' + esc(m.text) + '</div></div></div>'
+    : '<div class="m"><span class="av agent">\u2726</span><div><div class="w"><b>Kete</b><time>' + hm(m.t) + '</time><span class="tag">calcul\u00e9 \u00b7 ' + m.n + ' \u00e9v\u00e9nements</span></div><div class="tx">' + esc(m.text) + '</div></div></div>').join('');
+  const qs = ['Qu\u2019est-ce qui a besoin de moi ?', 'O\u00f9 en est La Colombe ?', 'Qui tient quoi ?', 'R\u00e9sume ma journ\u00e9e'];
+  return '<div class="thread" style="height:100%"><div class="thread-h"><b>\u2726 Kete \u00b7 le fil de ' + esc(P(S.me).short) + '</b><div>Ses questions, le point du matin, ses rappels. Les r\u00e9ponses viennent du journal et des tenues.</div></div><div class="msgs">'
+    + (msgs || '<div class="empty">Posez une question : les r\u00e9ponses sont calcul\u00e9es \u00e0 partir de l\u2019\u00e9tat de l\u2019entreprise.</div>') + '</div>'
+    + '<div class="sec" style="padding:8px 12px 0"><div class="chips">' + qs.map((q) => '<button class="btn sm" type="button" data-act="ask" data-q="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div></div>'
+    + '<form class="composer" data-form="kete"><label class="sr" for="keteText">Demander \u00e0 Kete</label><input id="keteText" placeholder="Demander \u00e0 Kete\u2026" autocomplete="off"><button class="btn primary" type="submit">Demander</button></form></div>';
+}
+function renderGouv() {
+  const evals = S.trace.filter((t) => t.engine === 'po').slice(-8).reverse();
+  return '<div class="sec"><div class="sec-h">Les politiques \u00b7 un seul moteur, appliqu\u00e9 au geste</div><div class="muted" style="font-size:13px">Changez un \u00e9tat, puis rejouez le sc\u00e9nario : \u00ab \u00e0 l\u2019essai \u00bb observe sans bloquer, \u00ab d\u00e9sactiv\u00e9e \u00bb ignore.</div>'
+    + S.policies.map((p) => '<div class="pol"><div class="pol-h"><span class="tag info">' + p.id + '</span><b>' + esc(p.name) + '</b><span class="muted" style="font-size:12px">v' + p.v + ' \u00b7 responsable ' + esc(P(p.owner).short) + '</span><span class="grow"></span><label class="sr" for="pol-' + p.id + '">\u00c9tat</label><select id="pol-' + p.id + '" data-act="pol" data-p="' + p.id + '">' + ['actif', 'essai', 'off'].map((s) => '<option value="' + s + '"' + (p.status === s ? ' selected' : '') + '>' + ({ actif: 'active', essai: '\u00e0 l\u2019essai', off: 'd\u00e9sactiv\u00e9e' })[s] + '</option>').join('') + '</select></div><p>' + esc(p.text) + '</p></div>').join('')
+    + '<div class="sec-h" style="margin-top:6px">Les derni\u00e8res \u00e9valuations</div>' + (evals.map((t) => '<div class="rowl"><span>' + esc(t.text) + '</span><span class="age">' + hm(t.t) + '</span></div>').join('') || '<div class="empty">Aucune pour l\u2019instant.</div>') + '</div>';
+}
+function renderAgents() {
+  const lv = { 1: '1 \u00b7 lire', 2: '2 \u00b7 pr\u00e9parer', 3: '3 \u00b7 seul' };
+  const kinds = { 'facture.preparer': 'Pr\u00e9parer une facture', 'facture.valider': 'Valider une facture', 'message.client': '\u00c9crire \u00e0 un client', 'achat.comparer': 'Comparer des offres', 'achat.engager': 'Engager un achat' };
+  return '<div class="sec"><div class="sec-h">Les agents \u00b7 un mandat, un responsable, une autonomie gagn\u00e9e</div><div class="muted" style="font-size:13px">Niveau 3 : l\u2019agent agit seul, si les politiques l\u2019autorisent. Niveau 2 : il pr\u00e9pare, une personne d\u00e9cide. Changez un niveau, puis rejouez.</div>'
+    + Object.entries(S.agents).map(([k, a]) => '<div class="pol"><div class="pol-h"><span class="av agent">\u2726</span><b>' + esc(a.name) + '</b><span class="muted" style="font-size:12px">responsable ' + esc(P(a.owner).short) + ' \u00b7 ' + a.done + ' gestes aboutis</span></div><div class="mand">'
+      + Object.entries(a.mandate).map(([g, l]) => '<span>' + esc(kinds[g] || g) + '</span><span><label class="sr" for="m-' + k + g + '">Niveau</label><select id="m-' + k + g + '" data-act="mandate" data-a="' + k + '" data-g="' + g + '">' + [1, 2, 3].map((n) => '<option value="' + n + '"' + (l === n ? ' selected' : '') + '>' + lv[n] + '</option>').join('') + '</select></span>').join('') + '</div></div>').join('') + '</div>';
+}
+function renderPhones() {
+  $('#waClient').innerHTML = S.waClient.map((m) => '<div class="bub' + (m.out ? ' out' : '') + '">' + esc(m.text) + (!m.out && /kete\.pay/.test(m.text) && S.invoices.some((i) => i.status === 'envoy\u00e9e') ? '<div class="wa-btns"><button type="button" data-act="pay">Payer par mobile money</button></div>' : '') + '<time>' + (m.t < 0 ? when(m.t) : hm(m.t)) + '</time></div>').join('');
+  $('#waMeLabel').textContent = 'WhatsApp de ' + P(S.me).name + ' \u00b7 ' + P(S.me).role;
+  $('#waMe').innerHTML = S.waMe[S.me].map((m) => {
+    if (m.kind === 'note') return '<div class="bub">' + esc(m.text) + '<time>' + hm(m.t) + '</time></div>';
+    if (m.kind === 'me') return '<div class="bub out">' + esc(m.text) + '<time>' + hm(m.t) + '</time></div>';
+    const g = S.gestes.find((x) => x.id === m.gid);
+    const open = g.status === '\u00e0 d\u00e9cider' && g.decider === S.me;
+    return '<div class="bub"><b>' + esc(g.label) + '</b>' + (g.amount ? ' \u00b7 ' + F(g.amount) : '') + (g.detail ? '\n' + esc(g.detail) : '')
+      + (open ? '<div class="wa-btns">' + g.options.map((o) => '<button type="button" data-act="decide" data-g="' + g.id + '" data-o="' + esc(o) + '" data-via="WhatsApp">' + esc(o) + '</button>').join('') + '</div>' : '\n<i>' + (g.status === '\u00e0 d\u00e9cider' ? 'Pass\u00e9e \u00e0 ' + esc(P(g.decider).short) : 'R\u00e9gl\u00e9e : ' + esc(g.choice || g.status) + (g.via ? ' (' + esc(g.via) + ')' : '')) + '</i>')
+      + '<time>' + hm(m.t) + '</time></div>';
+  }).join('') || '<div class="bub">Kete vous \u00e9crit ici seulement quand quelque chose a besoin de vous.</div>';
+  for (const el of [$('#waClient'), $('#waMe')]) el.scrollTop = el.scrollHeight;
+}
+function renderBackstage() {
+  $('#filters').innerHTML = Object.entries(ENGINES).map(([k, [l, c]]) => '<button type="button" data-act="filter" data-e="' + k + '" aria-pressed="' + S.filter[k] + '"><span class="' + c + '">' + l + '</span></button>').join('');
+  const last = S.trace.length;
+  $('#trace').innerHTML = S.trace.filter((t) => S.filter[t.engine]).slice(-140).reverse().map((t, i) => '<div class="tr' + (t.n > S.lastSeen ? ' new' : '') + '"><time>' + (t.t < 0 ? '\u2014' : hm(t.t)) + '</time><span class="eng ' + ENGINES[t.engine][1] + '">' + ENGINES[t.engine][0] + '</span><span>' + esc(t.text) + '</span></div>').join('');
+  S.lastSeen = S.trace.length ? S.trace[last - 1].n : 0;
+}
+function renderStory() {
+  $('#clock').textContent = when(S.now);
+  const cur = STORY[S.step];
+  $('#narr').innerHTML = '<b>' + (S.step + 1) + ' / ' + STORY.length + '</b><span><b>' + esc(cur.title) + '.</b> ' + esc(cur.text) + '</span>';
+  $('#steps').innerHTML = STORY.map((_, i) => '<span class="' + (i < S.step ? 'done' : i === S.step ? 'cur' : '') + '"></span>').join('');
+  $('#nextBtn').disabled = S.step >= STORY.length - 1;
+  $('#nextBtn').textContent = S.step >= STORY.length - 1 ? 'Fin du sc\u00e9nario' : '\u00c9tape suivante : ' + STORY[S.step + 1].title;
+  const k = kpis();
+  $('#kpis').innerHTML = [
+    ['Tenues ouvertes', k.open], ['Sans responsable', k.orphan, k.orphan > 0], ['Plus vieille attente', k.oldest], ['Attentes de plus de 48 h', k.blocked],
+    ['Cartes \u00e0 d\u00e9cider', k.cards], ['Gestes d\u00e9cid\u00e9s par une personne', k.human], ['Faits seuls par les agents', k.alone], ['Refus\u00e9s par une politique', k.refused],
+  ].map(([l, v, bad]) => '<span class="kpi' + (bad ? ' bad' : '') + '">' + l + ' <b>' + v + '</b></span>').join('');
+}
+function render() {
+  renderStory(); renderWho();
+  const v = { pourmoi: renderPourMoi, fils: renderFils, kete: renderKete, gouv: renderGouv, agents: renderAgents }[S.tab]();
+  $('#view').innerHTML = v;
+  const msgs = $('#msgs'); if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  renderPhones(); renderBackstage();
+}
+
+/* ---------- interactions ---------- */
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-act]'); if (!b || b.tagName === 'SELECT') return;
+  const a = b.dataset.act;
+  if (a === 'next') { if (S.step < STORY.length - 1) { S.step++; goTo(STORY[S.step].at); STORY[S.step].run(); } }
+  else if (a === 'reset') { seed(); }
+  else if (a === 'hour') advance(60);
+  else if (a === 'day') advance(DAY);
+  else if (a === 'me') { S.me = b.dataset.p; }
+  else if (a === 'tab') { S.tab = b.dataset.t; }
+  else if (a === 'fil') { S.fil = b.dataset.f; }
+  else if (a === 'decide') decide(b.dataset.g, b.dataset.o, b.dataset.via);
+  else if (a === 'ask') ask(S.me, b.dataset.q);
+  else if (a === 'pay') pay();
+  else if (a === 'filter') { S.filter[b.dataset.e] = !S.filter[b.dataset.e]; }
+  else if (a === 'proof') { S.proof = S.proof === S.fil ? null : S.fil; if (S.proof) trace('jr', 'export de preuve du fil \u00ab ' + S.objects[S.fil].name + ' \u00bb'); }
+  render();
+});
+document.addEventListener('change', (e) => {
+  const s = e.target; if (!s.dataset || !s.dataset.act) return;
+  if (s.dataset.act === 'pol') { const p = S.policies.find((x) => x.id === s.dataset.p); p.status = s.value; p.v++; trace('po', p.id + ' \u00ab ' + p.name + ' \u00bb passe \u00e0 \u00ab ' + s.options[s.selectedIndex].text + ' \u00bb (v' + p.v + ')'); journal('politique.chang\u00e9e', S.me, p.id + ' \u2192 ' + s.value); }
+  if (s.dataset.act === 'mandate') { S.agents[s.dataset.a].mandate[s.dataset.g] = Number(s.value); trace('ag', S.agents[s.dataset.a].name + ' : \u00ab ' + s.dataset.g + ' \u00bb au niveau ' + s.value + ' (autonomie chang\u00e9e d\u2019un geste)'); journal('mandat.chang\u00e9', S.me, S.agents[s.dataset.a].name); }
+  render();
+});
+document.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const f = e.target.dataset.form; const input = e.target.querySelector('input'); const text = input.value.trim();
+  if (!text) { input.focus(); return; }
+  if (f === 'client') ev('whatsapp', S.parties.colombe.phone, text);
+  else if (f === 'fil') say(S.me, S.fil, text);
+  else if (f === 'kete') ask(S.me, text);
+  else if (f === 'me') {
+    S.waMe[S.me].push({ t: S.now, kind: 'me', text });
+    trace('ch', 'WhatsApp de ' + P(S.me).short + ' \u2192 Kete : \u00ab ' + text + ' \u00bb');
+    if (S.asked && S.asked.person === S.me) { agents.anomalie(text); input.value = ''; render(); return; }
+    const open = S.gestes.filter((g) => g.status === '\u00e0 d\u00e9cider' && g.decider === S.me);
+    const hit = open.find((g) => g.options.some((o) => text.toLowerCase().includes(o.split(' ')[0].toLowerCase())));
+    if (hit) { const o = hit.options.find((x) => text.toLowerCase().includes(x.split(' ')[0].toLowerCase())); trace('ke', 'compris comme le geste \u00ab ' + o + ' \u00bb sur \u00ab ' + hit.label + ' \u00bb'); decide(hit.id, o, 'WhatsApp (dict\u00e9)'); }
+    else { ask(S.me, text); waToMe(S.me, { kind: 'note', text: S.kete[S.me][S.kete[S.me].length - 1].text }); }
+  }
+  input.value = '';
+  render();
+});
+seed();
+render();
+})();
+</script>

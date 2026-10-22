@@ -30,7 +30,10 @@ try {
 const url = await storage.presignDownload(`organizations/${org}/files/${id}.webp`);
 ```
 
-`memoryStorage()` implements the same port for tests.
+`memoryStorage()` implements the same port for tests. `diskStorage(root)` keeps files on a disk —
+a single server, or development when no bucket is set (spec 140): every key stays under its root,
+its type is kept beside it, and it signs no link (`DiskLinkError`) — the product serves the file
+through its own route, with the reader's rights.
 
 ## The flow
 

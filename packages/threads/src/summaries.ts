@@ -34,6 +34,8 @@ const SUMMARY = `
     (select count(*) from kete_messages m
       where m.thread_id = t.thread_id and m.edited_from is null
         and not (m.author_kind = $1 and m.author_id = $2)
+        and (m.only_for_id is null or (m.only_for_kind = $1 and m.only_for_id = $2))
+        and not exists (select 1 from kete_message_deletions d where d.message_id = m.message_id)
         and (not exists (select 1 from kete_message_reads r
                           where r.message_id = m.message_id
                             and r.reader_kind = $1 and r.reader_id = $2)
@@ -49,8 +51,15 @@ const SUMMARY = `
     l.at as last_message_at,
     greatest(t.opened_at, coalesce(l.at, t.opened_at)) as last_at
   from kete_threads t
-  left join lateral (select author_kind, author_id, text, at from kete_messages m3
-                      where m3.thread_id = t.thread_id order by at desc, message_id desc limit 1) l
+  left join lateral (select author_kind, author_id,
+                             case when exists (select 1 from kete_message_deletions d
+                                                where d.message_id = m3.message_id)
+                                  then '' else text end as text, at
+                        from kete_messages m3
+                      where m3.thread_id = t.thread_id
+                        and (m3.only_for_id is null
+                             or (m3.only_for_kind = $1 and m3.only_for_id = $2))
+                      order by at desc, message_id desc limit 1) l
     on true`;
 
 async function summarize(db: SqlExecutor, rows: SummaryRow[]): Promise<ThreadSummary[]> {

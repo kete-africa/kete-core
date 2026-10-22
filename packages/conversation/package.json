@@ -1,0 +1,43 @@
+{
+  "name": "@kete-africa/conversation",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Kete conversation (spec 140; doctrine D-061): the threads' screen any product shows — its list with agents' states, the conversation with photos, voice notes, citations, reactions and an agent's work in folded steps, « Infos du fil » — built against the canvas v6.2, every word given by the product.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kete-africa/kete-core.git",
+    "directory": "packages/conversation"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "files": [
+    "dist/src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "exports": {
+      ".": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    }
+  },
+  "dependencies": {
+    "@kete/design": "workspace:@kete-africa/design@*",
+    "@kete/sdk": "workspace:@kete-africa/sdk@*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0"
+  }
+}

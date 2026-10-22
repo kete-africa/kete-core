@@ -7,11 +7,13 @@ import {
   openThread,
   postMessage,
   threadOf,
+  threadsComfortMigrationSql,
   threadsLiveMigrationSql,
   threadsMigrationSql,
 } from '@kete/threads';
 import {
   getHolding,
+  workDelegatesMigrationSql,
   workLinksMigrationSql,
   workMigrationSql,
   workPrioritiesMigrationSql,
@@ -21,7 +23,10 @@ import {
   addRoutingRule,
   answerByChat,
   answerByMail,
+  channelsMailRefsMigrationSql,
   channelsMigrationSql,
+  cleanMail,
+  fromEml,
   fromChat,
   fromForm,
   fromMail,
@@ -46,7 +51,10 @@ beforeAll(async () => {
       await owner.query(workPrioritiesMigrationSql({ schema }));
       await owner.query(threadsMigrationSql({ schema, appRole }));
       await owner.query(threadsLiveMigrationSql({ schema, appRole }));
+      await owner.query(workDelegatesMigrationSql({ schema }));
+      await owner.query(threadsComfortMigrationSql({ schema, appRole }));
       await owner.query(channelsMigrationSql({ schema, appRole }));
+      await owner.query(channelsMailRefsMigrationSql({ schema, appRole }));
     },
   });
 });
@@ -76,12 +84,22 @@ const whatsapp = (id: string, phone: string, text: string): ChatInbound => ({
   text,
 });
 
-const mail = (input: { id: string; from: string; to: string; subject: string; text: string }) =>
+const mail = (input: {
+  id: string;
+  from: string;
+  to: string;
+  subject: string;
+  text: string;
+  inReplyTo?: string;
+}) =>
   [
     `From: ${input.from}`,
     `To: ${input.to}`,
     `Subject: ${input.subject}`,
     `Message-ID: <${input.id}>`,
+    ...(input.inReplyTo
+      ? [`In-Reply-To: <${input.inReplyTo}>`, `References: <${input.inReplyTo}>`]
+      : []),
     'Date: Fri, 16 Oct 2026 09:00:00 +0000',
     'Content-Type: text/plain; charset=utf-8',
     '',
@@ -378,6 +396,127 @@ describe('answers on WhatsApp and Telegram (spec 139)', () => {
         { byTemplate: ['whatsapp:+22890112233'], refused: [] },
       );
       expect(whatsappChannel.sent.map((s) => s.kind)).toEqual(['text', 'template']);
+    });
+  });
+});
+
+describe('mail as decided (spec 140, FR-014, FR-015)', () => {
+  it('cleans a mail of what it quotes and its signature, and keeps it whole beside', async () => {
+    const received = await fromEml(
+      mail({
+        id: 'dossou-1@ecole.tg',
+        from: 'Mme Dossou <direction@ecole-lacolombe.tg>',
+        to: 'kossi@soleil.tg',
+        subject: 'RE: Éclairage',
+        text: [
+          'Voici le plan à jour : deux prises de plus en salle 3.',
+          '',
+          'Le 10 oct. 2026 à 16:02, Kossi Adjo a écrit :',
+          '> Pouvez-vous nous envoyer le plan ?',
+        ].join('\n'),
+      }),
+    );
+    expect(received.text).toBe('Voici le plan à jour : deux prises de plus en salle 3.');
+    expect(received.original).toContain('> Pouvez-vous nous envoyer le plan ?');
+    expect(cleanMail('Merci\n\n-- \nKossi Adjo\nSoleil d’Afrique')).toBe('Merci');
+  });
+
+  it('places a reply by what it answers, even from another address, and a sent mail as hers', async () => {
+    const org = fresh();
+    const sender = memorySender();
+    await inOrg(org, async (tx) => {
+      await addRoutingRule(tx, org, {
+        match: 'mail:direction@ecole-lacolombe.tg',
+        object: colombe,
+        intent: 'client_message',
+        by: 'usr_abla',
+      });
+      const first = await route(
+        tx,
+        org,
+        await fromMail(
+          mail({
+            id: 'dossou-2@ecole.tg',
+            from: 'direction@ecole-lacolombe.tg',
+            to: 'kossi@soleil.tg',
+            subject: 'Plan',
+            text: 'Le plan est joint.',
+          }),
+        ),
+        options,
+      );
+      const answer = await answerByMail(tx, {
+        message: { thread: first.thread as string, text: 'Bien reçu, merci.' },
+        from: { address: 'kossi@soleil.tg' },
+        sender,
+        organizationId: org,
+      });
+      // The accountant answers from her own address, unknown to the router: the reply finds it.
+      const reply = await route(
+        tx,
+        org,
+        await fromMail(
+          mail({
+            id: 'compta-3@ecole.tg',
+            from: 'compta@ecole-lacolombe.tg',
+            to: 'kossi@soleil.tg',
+            subject: 'RE: Plan',
+            text: 'La facture suivra.',
+            inReplyTo: answer.messageId.replace(/[<>]/g, ''),
+          }),
+        ),
+        options,
+      );
+      expect(reply).toMatchObject({ thread: first.thread, intent: 'reply', by: 'rule' });
+
+      // Read from Kossi's Sent folder: his own words, said outside, for information.
+      const box = memoryMailbox();
+      box.deliver(
+        mail({
+          id: 'kossi-4@soleil.tg',
+          from: 'kossi@soleil.tg',
+          to: 'direction@ecole-lacolombe.tg',
+          subject: 'RE: Plan',
+          text: 'La pose commence lundi.',
+          inReplyTo: 'dossou-2@ecole.tg',
+        }),
+        'Sent',
+      );
+      box.deliver(
+        mail({
+          id: 'perso-5@soleil.tg',
+          from: 'kossi@soleil.tg',
+          to: 'maman@exemple.tg',
+          subject: 'Dimanche',
+          text: 'À dimanche.',
+        }),
+        'Sent',
+      );
+      const routed = await readMailbox(
+        tx,
+        org,
+        {
+          key: 'kossi',
+          mailbox: box,
+          folder: 'Sent',
+          direction: 'out',
+          accept: async (received) => received.to.some((to) => to.endsWith('@ecole-lacolombe.tg')),
+        },
+        { ...options, authorOf: async () => ({ kind: 'person', id: 'usr_kossi' }) },
+      );
+      expect(routed).toHaveLength(1);
+      expect(routed[0]).toMatchObject({ thread: first.thread, intent: 'reply' });
+      const said = (await messagesOf(tx, first.thread as string)).at(-1);
+      expect(said).toMatchObject({
+        author: { kind: 'person', id: 'usr_kossi' },
+        for: 'information',
+        visibility: 'outside',
+        via: 'mail',
+      });
+      // Read again from where it stopped: nothing twice.
+      expect(
+        await readMailbox(tx, org, { key: 'kossi', mailbox: box, folder: 'Sent' }, options),
+      ).toEqual([]);
     });
   });
 });

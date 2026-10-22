@@ -78,9 +78,65 @@ flowchart LR
 Run `threadsLiveMigrationSql` after `threadsMigrationSql`. `threadSummariesOf` lists a member's
 threads by last activity with their unread count, last message and open actions (a thread with none
 is resolved); `markUnread` marks from a message on. A mentioned person joins. A file is kept with its
-fingerprint, 10 MB at most; the same name again is its next version (`filesOf`, `threadFile`). A
+fingerprint (10 MB at most in the database, 100 MB in the product’s storage — spec 140); the same name again is its next version (`filesOf`, `threadFile`; `threadFileInfo` without its bytes). A
 message moves once, by its author or the thread's holder: the target names where it came from
 (`moved_from`), the source keeps the original and where it went (`movedTo`). A message is
 `internal` unless said `outside`; a contact's words are outside. Every change is announced on the
 channel `kete_threads` once it commits: `listenThreads(client, onChange)` on a direct connection,
 `changesSince(db, member, since)` without one.
+
+## Threads for everyone (spec 140)
+
+```mermaid
+flowchart LR
+  M[a message] -->|react · unreact| RE[(reactions · hers, not the trace)]
+  M -->|pinMessage · unpinMessage| PI[(pins · who and when kept)]
+  M -->|deleteMessage · its author| DE[(deletions · « Message supprimé », the proof keeps it)]
+  M -->|a voice note · setTranscript| TR[(transcripts · searched)]
+  M -->|references · #| CI[(citations)] --> O[citedIn · « Cité dans »]
+  T[a thread] -->|attachThread| LI[(links)] --> O2[threadsOfObject]
+  M -->|only_for| ONE[one reader · shareMessage]
+  M --> W[whoToTell · her level: all, mentions, none]
+  X[a WhatsApp or Telegram export] -->|parse · importMessages · once| T
+  T -->|mergeThreads| T2[another thread]
+  F[saveThreadFile · up to 100 MB] -->|ThreadFileStore| S[(the product's storage)]
+```
+
+Run `threadsComfortMigrationSql` after `threadsLiveMigrationSql` (and `workDelegatesMigrationSql`).
+
+- **Reactions** belong to the person who gives them, kept apart from the trace (`react`,
+  `unreact`).
+- **Pins** keep who pinned and when, and who unpinned; `pinsOf` lists the pins standing now.
+- **A message taken back** by its author shows « Message supprimé » with who and when. Its words,
+  files and citations stay in the trace and the export, and it is never found by search.
+- **A voice note** is an audio attachment with its `duration_ms`. `setTranscript` keeps its words
+  once, and `searchMessages` finds them.
+- **Citations.** `references` names the objects a message cites. `citedIn` says where an object
+  was cited, the latest first. `attachThread` attaches a thread to more objects, and
+  `threadsOfObject` finds them all.
+- **Pages.** `messagesPage` gives fifty messages before a message, or around one a search found,
+  and says whether there are older or newer ones.
+- **Only for one.** A message `only_for` a person — Kete's answer using what not every member may
+  read — is given only to that viewer (`messagesOf`, `messagesPage`, `searchMessages`,
+  `threadSummariesOf`). `shareMessage` gives it to everyone, once.
+- **Telling.** `setNotifyLevel` sets her level. `whoToTell` names the present members to tell:
+  - by their level: all, only when mentioned, or never;
+  - always whoever must act;
+  - never the author, nor anyone who has read it.
+
+  `announceTyping` announces who is writing, and keeps nothing.
+
+- **What a thread holds.** `mediaOf` gives photos and videos, documents with their version, links,
+  voice notes and pins, each naming the message it was posted in.
+- **Files** go to the product's `ThreadFileStore` (a bucket or a disk, through
+  `@kete-africa/files`), up to 100 MB each. Without a store, they stay in the database, up to
+  10 MB, as before.
+- **Imports.** `parseWhatsAppExport` reads Android and iPhone exports, in French or English,
+  including multi-line messages and attachments. `parseTelegramExport` reads Telegram's
+  `result.json`. `importMessages` keeps the messages:
+  - dated as they were said;
+  - by the members the product recognizes, else as the export names them;
+  - marked imported;
+  - once: importing again adds nothing.
+- **Merging.** `mergeThreads`, by the holder of the thread to merge, moves its messages with their
+  dates and authors, then puts it away with `merged_into`.
