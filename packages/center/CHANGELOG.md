@@ -1,5 +1,12 @@
 # @kete-africa/center
 
+## 0.9.0
+
+### Minor Changes
+
+- 596b838: A thread at the center, read and written from the app (spec 141): `thread(token, threadId)` and
+  `sayInThread(token, threadId, { text, mentions? })`, never throwing.
+
 ## 0.8.0
 
 ### Minor Changes
