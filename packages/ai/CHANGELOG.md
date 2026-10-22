@@ -1,5 +1,11 @@
 # @kete-africa/ai
 
+## 0.6.2
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.6.1
 
 ### Patch Changes
