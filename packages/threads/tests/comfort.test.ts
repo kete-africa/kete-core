@@ -7,6 +7,7 @@ import {
   workPrioritiesMigrationSql,
 } from '@kete/work';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { insert } from '../src/messages.js';
 import {
   attachThread,
   citedIn,
@@ -247,15 +248,17 @@ describe('pages (FR-006)', () => {
     const org = fresh();
     const thread = await colombe(org);
     await inOrg(org, async (tx) => {
+      // Written straight, one query each: the pages are what is proven, within CI's time.
       const ids: string[] = [];
       for (let i = 0; i < 30; i += 1) {
-        const { message } = await postMessage(
-          tx,
-          org,
-          say(thread.id, i % 2 ? kossi : yao, `message ${i}`),
-          new Date(at(0).getTime() + i * 1000),
-        );
-        ids.push(message.id);
+        const id = `msg_page${String(i).padStart(2, '0')}xxxxxxxx`;
+        await insert(tx, org, {
+          ...say(thread.id, i % 2 ? kossi : yao, `message ${i}`),
+          id,
+          visibility: 'internal',
+          at: new Date(at(0).getTime() + i * 1000).toISOString(),
+        });
+        ids.push(id);
       }
       // Fifty by default: the whole thread fits.
       expect((await messagesPage(tx, thread.id)).messages).toHaveLength(30);
