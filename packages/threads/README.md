@@ -78,7 +78,7 @@ flowchart LR
 Run `threadsLiveMigrationSql` after `threadsMigrationSql`. `threadSummariesOf` lists a member's
 threads by last activity with their unread count, last message and open actions (a thread with none
 is resolved); `markUnread` marks from a message on. A mentioned person joins. A file is kept with its
-fingerprint (10 MB at most in the database, 100 MB in the product’s storage — spec 140); the same name again is its next version (`filesOf`, `threadFile`). A
+fingerprint (10 MB at most in the database, 100 MB in the product’s storage — spec 140); the same name again is its next version (`filesOf`, `threadFile`; `threadFileInfo` without its bytes). A
 message moves once, by its author or the thread's holder: the target names where it came from
 (`moved_from`), the source keeps the original and where it went (`movedTo`). A message is
 `internal` unless said `outside`; a contact's words are outside. Every change is announced on the

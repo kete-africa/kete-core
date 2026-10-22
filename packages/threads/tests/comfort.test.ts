@@ -36,6 +36,7 @@ import {
   threadChangeOf,
   ThreadError,
   threadFile,
+  threadFileInfo,
   threadsComfortMigrationSql,
   threadsLiveMigrationSql,
   threadsMigrationSql,
@@ -177,6 +178,9 @@ describe('voice notes and files (FR-004, FR-009)', () => {
       );
       expect(kept.size).toBe(1);
       expect((await threadFile(tx, file.id, { store }))?.content.byteLength).toBe(audio.byteLength);
+      // Without its store, a kept file has no bytes here, but its description stays.
+      expect(await threadFile(tx, file.id)).toBeNull();
+      expect(await threadFileInfo(tx, file.id)).toMatchObject({ id: file.id, name: 'vocal.ogg' });
       const { message } = await postMessage(
         tx,
         org,

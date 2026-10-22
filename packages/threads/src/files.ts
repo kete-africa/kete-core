@@ -119,6 +119,18 @@ export async function filesOf(db: SqlExecutor, threadId: string): Promise<Thread
   return rows.map(toFile);
 }
 
+/** A file without its bytes: what a message attaches, never fetched from its storage. */
+export async function threadFileInfo(db: SqlExecutor, fileId: string): Promise<ThreadFile | null> {
+  const { rows } = await db.query<FileRow>(
+    `select * from (select ${COLUMNS} from kete_thread_files
+                     where thread_id = (select thread_id from kete_thread_files where file_id = $1)) f
+      where f.file_id = $1`,
+    [fileId],
+  );
+  const row = rows[0];
+  return row ? toFile(row) : null;
+}
+
 /** A file and its bytes, for a reader the product already allowed; from its storage if kept there. */
 export async function threadFile(
   db: SqlExecutor,

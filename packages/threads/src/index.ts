@@ -22,6 +22,7 @@ export {
   MAX_THREAD_FILE_BYTES,
   saveThreadFile,
   threadFile,
+  threadFileInfo,
   type ThreadFile,
   type ThreadFileStore,
 } from './files.js';
