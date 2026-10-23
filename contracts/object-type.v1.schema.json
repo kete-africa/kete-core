@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/object-type.v1.schema.json",
+  "title": "ObjectType",
+  "description": "A kind of object, declared once by its owner — an app in its manifest, or the center for its own references (doctrine D-062, R1 and R3; ADR 0014): its states, which of the four axes it carries, its named links to other kinds, where it opens. The center keeps an index of the objects of every declared kind, never their data.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "label", "states"],
+  "properties": {
+    "kind": {
+      "description": "The kind's name, unique in an organization: `ticket`, `invoice`, `asset`. The center's references are `party`, `project`, `unit`, `place` and `asset`.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,40}$"
+    },
+    "label": {
+      "description": "What one of them is called, and several.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fr", "en"],
+      "properties": {
+        "fr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "fr_plural": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "en_plural": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      }
+    },
+    "icon": {
+      "description": "One of the design's icon names, for its card and its « # » chip.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,30}$"
+    },
+    "states": {
+      "description": "Its states, in the order of its life. A closed state ends it: its thread is put away (R12).",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,40}$"
+          },
+          "label": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fr", "en"],
+            "properties": {
+              "fr": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "en": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              }
+            }
+          },
+          "tone": {
+            "description": "How the state reads at a glance: a tag's tint, never a left border.",
+            "enum": ["neutral", "ok", "verify", "error", "info"]
+          },
+          "closed": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "axes": {
+      "description": "Which of the four axes its objects carry (R2). An object says the value of each; facts about it inherit them.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["project", "party", "unit", "person"]
+      }
+    },
+    "links": {
+      "description": "Its named links to other kinds: a project produces assets, a contract covers them, a ticket concerns one.",
+      "type": "array",
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["relation", "to"],
+        "properties": {
+          "relation": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{1,40}$"
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{1,40}$"
+          },
+          "label": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fr", "en"],
+            "properties": {
+              "fr": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "en": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              }
+            }
+          },
+          "inverse": {
+            "description": "The words read from the other side: « produit » when an asset says « produit par ».",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fr", "en"],
+            "properties": {
+              "fr": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "en": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              }
+            }
+          }
+        }
+      }
+    },
+    "href": {
+      "description": "Where one opens: an https address, or a path of its owner, with `{id}` for the object's identifier.",
+      "type": "string",
+      "maxLength": 300,
+      "pattern": "\\{id\\}"
+    },
+    "classification": {
+      "description": "How far its title and state may travel in the index. internal (the default): the organization's people who may read it by its axes; confidential: only its person, its project's team and who holds the kind's permission.",
+      "enum": ["internal", "confidential"]
+    }
+  }
+}

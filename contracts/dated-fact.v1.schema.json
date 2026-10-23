@@ -88,6 +88,22 @@
     "cancelled": {
       "description": "True takes the fact back.",
       "type": "boolean"
+    },
+    "object": {
+      "description": "The object it is about (optional, added in v1: additive; kete-core spec 142): it inherits that object's axes (D-062, R2).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{1,40}$"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+        }
+      }
     }
   }
 }

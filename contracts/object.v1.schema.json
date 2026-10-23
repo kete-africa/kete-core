@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/object.v1.schema.json",
+  "title": "KeteObject",
+  "description": "One object as its owner says it to the center's index (doctrine D-062, R1, R2, R15; ADR 0014): what finds it, cites it and rights it — its title, its state, its four axes, its named links, where it opens. Never its data: the rest is read at its owner, under the reader's rights. Said again, it replaces what was said; said with `gone`, it leaves the index.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "id", "title"],
+  "properties": {
+    "kind": {
+      "description": "A kind its owner declared (`object-type.v1`).",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,40}$"
+    },
+    "id": {
+      "description": "Its identifier at its owner: stable, unique within its kind.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "title": {
+      "description": "What a person reads in a list, a « # » chip, a search: « Mini-centrale · École de Tsévié », « T-0412 · Onduleur hors ligne ».",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "state": {
+      "description": "One of its kind's states.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,40}$"
+    },
+    "project_id": {
+      "description": "The project of the center it belongs to.",
+      "type": "string",
+      "pattern": "^prj_[0-9a-f-]{8,64}$"
+    },
+    "party_id": {
+      "description": "The third party of the center it concerns.",
+      "type": "string",
+      "pattern": "^pty_[0-9a-f-]{8,64}$"
+    },
+    "unit_id": {
+      "description": "The unit of the structure it belongs to — a service, an agency, a site.",
+      "type": "string",
+      "pattern": "^unt_[0-9a-f-]{8,64}$"
+    },
+    "person_id": {
+      "description": "The person who answers for it: an account's user id.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "links": {
+      "description": "Its named links to other objects, by a relation its kind declares.",
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["relation", "kind", "id"],
+        "properties": {
+          "relation": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,40}$" },
+          "kind": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,40}$" },
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$" }
+        }
+      }
+    },
+    "href": {
+      "description": "Where it opens, when its kind's pattern does not say it.",
+      "type": "string",
+      "maxLength": 600
+    },
+    "updated_at": {
+      "description": "When its owner last changed it: an older saying never replaces a newer one.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "gone": {
+      "description": "True takes it out of the index: deleted or no longer said by its owner.",
+      "type": "boolean"
+    }
+  }
+}

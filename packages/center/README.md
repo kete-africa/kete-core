@@ -160,6 +160,33 @@ thread of one of the app's objects — a ticket, an invoice, a contract, a leave
 the person who created it, and answers its id and the center's address to show it (« Fil »).
 Opened again, it is the same thread; without a center, `null`, and the app keeps working alone.
 
+## Objects, in the center's index (spec 142)
+
+An app declares its kinds of objects once, in its manifest (`objects`, contract `object-type.v1`:
+states, axes, named links, where one opens), and says its objects to the center's index with its own
+token: `sayObjects(appToken, organizationId, objects)` — at most 500 at once, an older saying never
+replacing a newer one, `gone: true` taking one out. The index keeps what finds, cites, filters and
+rights an object — its title, state, four axes (project, party, unit, person) and named links —
+never its data, which the reader reads at the app with her own rights (doctrine D-062, R1 and R2;
+ADR 0014).
+
+`objects(token, { q, kind, projectId, partyId, unitId, personId, state, closed, limit })` finds
+what she may read; `object(token, kind, id)` reads one with its named links, both ways, and its
+thread. A money fact and a dated fact may name their `object`: they inherit its axes.
+
+```mermaid
+sequenceDiagram
+  participant A as The app (Support)
+  participant C as The center's index
+  participant P as A person, Kete or an agent
+  A->>C: sayObjects(app token, org, [ticket T-0412 · concerns asset ast_…])
+  C-->>A: said 1
+  P->>C: objects(her token, { unitId: agence Maritime, state: open })
+  C-->>P: what she may read, with its axes
+  P->>C: object(her token, 'asset', 'ast_…')
+  C-->>P: the asset · produced by a project · concerned by T-0412 · its thread
+```
+
 ## A thread, in the app (spec 141)
 
 `thread(token, threadId)` reads a thread at the center as the person reads it — its last messages,

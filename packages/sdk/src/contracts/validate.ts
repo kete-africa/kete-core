@@ -62,6 +62,10 @@ export const validatePolicy = validator(`${base}policy.v1.schema.json`);
 export const validatePolicyDecision = validator(`${base}policy-decision.v1.schema.json`);
 /** Where people talk about one thing (doctrine D-056, D-057, spec 113). */
 export const validateThread = validator(`${base}thread.v1.schema.json`);
+/** A kind of object an app or the center declares once (doctrine D-062, kete-core spec 142). */
+export const validateObjectType = validator(`${base}object-type.v1.schema.json`);
+/** One object said to the center's index: what finds, cites and rights it (kete-core spec 142). */
+export const validateObject = validator(`${base}object.v1.schema.json`);
 /** One thing said in a thread, never rewritten (doctrine D-057, spec 113). */
 export const validateMessage = validator(`${base}message.v1.schema.json`);
 /** Where the router tied something received from outside (doctrine D-056, spec 113). */
