@@ -1,5 +1,11 @@
 # @kete-africa/commands
 
+## 0.3.4
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.3.3
 
 ### Patch Changes

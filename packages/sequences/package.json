@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/sequences",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "description": "Kete document numbers: quotes, invoices and orders numbered per organization, without a gap nor a duplicate, in the transaction that writes the document.",
   "repository": {

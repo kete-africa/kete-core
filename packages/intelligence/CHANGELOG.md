@@ -1,5 +1,11 @@
 # @kete-africa/intelligence
 
+## 0.4.1
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.4.0
 
 ### Minor Changes
