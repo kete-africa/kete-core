@@ -22,3 +22,14 @@ export {
   type ConnectionsMigrationOptions,
   type Credential,
 } from './store.js';
+export {
+  allows,
+  defaultGrants,
+  grantsOf,
+  newWebhookSecret,
+  signWebhook,
+  verifyWebhook,
+  type ActLevel,
+  type ConnectionGrants,
+  type Use,
+} from './uses.js';
