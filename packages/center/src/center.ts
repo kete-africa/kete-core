@@ -151,7 +151,73 @@ export interface MoneyFact {
   /** The post of the project's budget it counts against, by its name. */
   post?: string;
   partyId?: string;
+  /** The object it is about: it inherits that object's axes (kete-core spec 142). */
+  object?: { kind: string; id: string };
   href?: string;
+}
+
+/**
+ * One of the app's objects as it says it to the center's index (contract `object.v1`; doctrine
+ * D-062, R1, R2, R15; kete-core spec 142): what finds it, cites it and rights it — never its data.
+ * Said again, it replaces what was said; with `gone`, it leaves the index.
+ */
+export interface AppObject {
+  /** A kind the app declares in its manifest (`objects`). */
+  kind: string;
+  id: string;
+  title: string;
+  state?: string;
+  projectId?: string;
+  partyId?: string;
+  unitId?: string;
+  /** The person who answers for it: an account's user id. */
+  personId?: string;
+  /** Its named links to other objects, by a relation its kind declares. */
+  links?: { relation: string; kind: string; id: string }[];
+  href?: string;
+  /** When the app last changed it: an older saying never replaces a newer one. */
+  updatedAt?: string;
+  gone?: boolean;
+}
+
+/** An object of the center's index, as the person may read it (kete-core spec 142). */
+export interface CenterObject {
+  kind: string;
+  id: string;
+  /** Its owner: `center` for the center's references, else the app's product. */
+  product: string;
+  title: string;
+  state: string | null;
+  /** The state's words, from its kind's declaration. */
+  stateLabel: string | null;
+  closed: boolean;
+  projectId: string | null;
+  partyId: string | null;
+  unitId: string | null;
+  personId: string | null;
+  href: string | null;
+  updatedAt: string;
+}
+
+/** What the index is asked: words, a kind, an axis, a state. */
+export interface ObjectQuery {
+  q?: string;
+  kind?: string;
+  projectId?: string;
+  partyId?: string;
+  unitId?: string;
+  personId?: string;
+  state?: string;
+  /** Closed objects too; by default only the living ones. */
+  closed?: boolean;
+  limit?: number;
+}
+
+/** One object of the index with its named links, both ways, and its thread. */
+export interface CenterObjectCard {
+  object: CenterObject;
+  links: { relation: string; direction: 'out' | 'in'; object: CenterObject }[];
+  threadId: string | null;
 }
 
 /**
@@ -178,6 +244,8 @@ export interface DatedFact {
   partyId?: string;
   /** `shared` by default; `busy`: others see only that she is taken; `private`. */
   visibility?: 'shared' | 'busy' | 'private';
+  /** The object it is about: it inherits that object's axes (kete-core spec 142). */
+  object?: { kind: string; id: string };
   href?: string;
 }
 
@@ -389,6 +457,24 @@ export interface Center {
     organizationId: string,
     holdings: readonly AppHolding[],
   ): Promise<{ ok: true; said: number; finished: number } | { ok: false; error: string }>;
+  /**
+   * Says the app's objects to the center's index, with the app's own token (`kete:center`): their
+   * titles, states, axes and links, so that the center finds, cites, filters and rights them
+   * (kete-core spec 142). At most 500 at once; an older saying never replaces a newer one.
+   */
+  sayObjects(
+    appToken: string | null | undefined,
+    organizationId: string,
+    objects: readonly AppObject[],
+  ): Promise<{ ok: true; said: number; gone: number } | { ok: false; error: string }>;
+  /** The objects of the index she may read, by words, kind, axis or state; none without a center. */
+  objects(token: string | null | undefined, query?: ObjectQuery): Promise<CenterObject[]>;
+  /** One object of the index with its named links, if she may read it; null otherwise. */
+  object(
+    token: string | null | undefined,
+    kind: string,
+    id: string,
+  ): Promise<CenterObjectCard | null>;
   /**
    * Passes a gesture through the organization's policies, for the person (or her agent) whose
    * token is given, before the app makes it. Never throws: without an answer, `unruled`.
@@ -643,6 +729,61 @@ export function createCenter(options: CenterOptions): Center {
         : { ok: false, error: answer.error ?? `http_${response.status}` };
     },
 
+    async sayObjects(appToken, organizationId, objects) {
+      if (!base) return { ok: false, error: 'not_connected' };
+      if (!appToken) return { ok: false, error: 'signed_out' };
+      if (objects.length > 500) return { ok: false, error: 'too_many' };
+      const response = await call(`${base}/public/apps/objects`, {
+        method: 'PUT',
+        headers: { authorization: `Bearer ${appToken}`, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          organization: organizationId,
+          product: options.product,
+          objects: objects.map(objectBody),
+        }),
+        signal: AbortSignal.timeout(10_000),
+      }).catch(() => null);
+      if (!response) return { ok: false, error: 'unreachable' };
+      const answer = (await response.json().catch(() => ({}))) as {
+        said?: number;
+        gone?: number;
+        error?: string;
+      };
+      return response.ok
+        ? { ok: true, said: answer.said ?? 0, gone: answer.gone ?? 0 }
+        : { ok: false, error: answer.error ?? `http_${response.status}` };
+    },
+
+    async objects(token, query = {}) {
+      const params = new URLSearchParams();
+      const put = (key: string, value: string | number | undefined) => {
+        if (value !== undefined && value !== '') params.set(key, String(value));
+      };
+      put('q', query.q);
+      put('kind', query.kind);
+      put('project', query.projectId);
+      put('party', query.partyId);
+      put('unit', query.unitId);
+      put('person', query.personId);
+      put('state', query.state);
+      put('closed', query.closed ? 'true' : undefined);
+      put('limit', query.limit);
+      const search = params.toString();
+      const found = await read<{ objects: CenterObject[] }>(
+        token,
+        `/v1/objects${search ? `?${search}` : ''}`,
+      );
+      return found?.objects ?? [];
+    },
+
+    object(token, kind, id) {
+      if (!/^[a-z][a-z0-9_]{1,40}$/.test(kind)) return Promise.resolve(null);
+      return read<CenterObjectCard>(
+        token,
+        `/v1/objects/${encodeURIComponent(kind)}/${encodeURIComponent(id)}`,
+      );
+    },
+
     async checkGesture(token, gesture) {
       const unruled = (reason: string): GestureVerdict => ({
         effect: 'unruled',
@@ -762,7 +903,26 @@ export function moneyFactBody(fact: MoneyFact): Record<string, unknown> {
     ...(fact.projectId ? { project_id: fact.projectId } : {}),
     ...(fact.post ? { post: fact.post } : {}),
     ...(fact.partyId ? { party_id: fact.partyId } : {}),
+    ...(fact.object ? { object: fact.object } : {}),
     ...(fact.href ? { href: fact.href } : {}),
+  };
+}
+
+/** An object in its contract's shape (`contracts/object.v1.schema.json`). */
+export function objectBody(object: AppObject): Record<string, unknown> {
+  return {
+    kind: object.kind,
+    id: object.id,
+    title: object.title.length > 200 ? `${object.title.slice(0, 199)}…` : object.title,
+    ...(object.state ? { state: object.state } : {}),
+    ...(object.projectId ? { project_id: object.projectId } : {}),
+    ...(object.partyId ? { party_id: object.partyId } : {}),
+    ...(object.unitId ? { unit_id: object.unitId } : {}),
+    ...(object.personId ? { person_id: object.personId } : {}),
+    ...(object.links?.length ? { links: object.links } : {}),
+    ...(object.href ? { href: object.href } : {}),
+    ...(object.updatedAt ? { updated_at: object.updatedAt } : {}),
+    ...(object.gone ? { gone: true } : {}),
   };
 }
 
@@ -780,6 +940,7 @@ export function datedFactBody(fact: DatedFact): Record<string, unknown> {
     ...(fact.projectId ? { project_id: fact.projectId } : {}),
     ...(fact.partyId ? { party_id: fact.partyId } : {}),
     ...(fact.visibility ? { visibility: fact.visibility } : {}),
+    ...(fact.object ? { object: fact.object } : {}),
     ...(fact.href ? { href: fact.href } : {}),
   };
 }

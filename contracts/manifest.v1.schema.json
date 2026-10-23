@@ -376,6 +376,14 @@
       "items": {
         "$ref": "metric.v1.schema.json"
       }
+    },
+    "objects": {
+      "type": "array",
+      "description": "The kinds of objects the app owns (optional, added in v1: additive; doctrine D-062, kete-core spec 142): their states, axes, named links and where they open. The app says its objects to the center's index (`object.v1`); the rest stays at the app.",
+      "maxItems": 40,
+      "items": {
+        "$ref": "object-type.v1.schema.json"
+      }
     }
   }
 }

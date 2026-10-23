@@ -119,6 +119,13 @@ export type DatedFact = {
    * True takes the fact back.
    */
   cancelled?: boolean;
+  /**
+   * The object it is about (optional, added in v1: additive; kete-core spec 142): it inherits that object's axes (D-062, R2).
+   */
+  object?: {
+    kind: string;
+    id: string;
+  };
 } & (
   | {
       day: unknown;
@@ -936,6 +943,12 @@ export interface Manifest {
    * The figures the app declares (optional, added in v1: additive; spec 099), read at its API under the reader's rights.
    */
   metrics?: Metric[];
+  /**
+   * The kinds of objects the app owns (optional, added in v1: additive; doctrine D-062, kete-core spec 142): their states, axes, named links and where they open. The app says its objects to the center's index (`object.v1`); the rest stays at the app.
+   *
+   * @maxItems 40
+   */
+  objects?: ObjectType[];
 }
 
 /**
@@ -6452,6 +6465,2695 @@ export interface MoneyFact {
    * Where the piece that proves it is read, in the app.
    */
   href?: string;
+  /**
+   * The object it is about (optional, added in v1: additive; kete-core spec 142): it inherits that object's axes (D-062, R2).
+   */
+  object?: {
+    kind: string;
+    id: string;
+  };
+}
+
+/**
+ * A kind of object, declared once by its owner — an app in its manifest, or the center for its own references (doctrine D-062, R1 and R3; ADR 0014): its states, which of the four axes it carries, its named links to other kinds, where it opens. The center keeps an index of the objects of every declared kind, never their data.
+ */
+export interface ObjectType {
+  /**
+   * The kind's name, unique in an organization: `ticket`, `invoice`, `asset`. The center's references are `party`, `project`, `unit`, `place` and `asset`.
+   */
+  kind: string;
+  /**
+   * What one of them is called, and several.
+   */
+  label: {
+    fr: string;
+    en: string;
+    fr_plural?: string;
+    en_plural?: string;
+  };
+  /**
+   * One of the design's icon names, for its card and its « # » chip.
+   */
+  icon?: string;
+  /**
+   * Its states, in the order of its life. A closed state ends it: its thread is put away (R12).
+   *
+   * @minItems 1
+   * @maxItems 20
+   */
+  states:
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ]
+    | [
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+        {
+          id: string;
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * How the state reads at a glance: a tag's tint, never a left border.
+           */
+          tone?: 'neutral' | 'ok' | 'verify' | 'error' | 'info';
+          closed?: boolean;
+        },
+      ];
+  /**
+   * Which of the four axes its objects carry (R2). An object says the value of each; facts about it inherit them.
+   */
+  axes?: ('project' | 'party' | 'unit' | 'person')[];
+  /**
+   * Its named links to other kinds: a project produces assets, a contract covers them, a ticket concerns one.
+   *
+   * @maxItems 30
+   */
+  links?: {
+    relation: string;
+    to: string;
+    label?: {
+      fr: string;
+      en: string;
+    };
+    /**
+     * The words read from the other side: « produit » when an asset says « produit par ».
+     */
+    inverse?: {
+      fr: string;
+      en: string;
+    };
+  }[];
+  /**
+   * Where one opens: an https address, or a path of its owner, with `{id}` for the object's identifier.
+   */
+  href?: string;
+  /**
+   * How far its title and state may travel in the index. internal (the default): the organization's people who may read it by its axes; confidential: only its person, its project's team and who holds the kind's permission.
+   */
+  classification?: 'internal' | 'confidential';
+}
+
+/**
+ * One object as its owner says it to the center's index (doctrine D-062, R1, R2, R15; ADR 0014): what finds it, cites it and rights it — its title, its state, its four axes, its named links, where it opens. Never its data: the rest is read at its owner, under the reader's rights. Said again, it replaces what was said; said with `gone`, it leaves the index.
+ */
+export interface KeteObject {
+  /**
+   * A kind its owner declared (`object-type.v1`).
+   */
+  kind: string;
+  /**
+   * Its identifier at its owner: stable, unique within its kind.
+   */
+  id: string;
+  /**
+   * What a person reads in a list, a « # » chip, a search: « Mini-centrale · École de Tsévié », « T-0412 · Onduleur hors ligne ».
+   */
+  title: string;
+  /**
+   * One of its kind's states.
+   */
+  state?: string;
+  /**
+   * The project of the center it belongs to.
+   */
+  project_id?: string;
+  /**
+   * The third party of the center it concerns.
+   */
+  party_id?: string;
+  /**
+   * The unit of the structure it belongs to — a service, an agency, a site.
+   */
+  unit_id?: string;
+  /**
+   * The person who answers for it: an account's user id.
+   */
+  person_id?: string;
+  /**
+   * Its named links to other objects, by a relation its kind declares.
+   *
+   * @maxItems 50
+   */
+  links?: {
+    relation: string;
+    kind: string;
+    id: string;
+  }[];
+  /**
+   * Where it opens, when its kind's pattern does not say it.
+   */
+  href?: string;
+  /**
+   * When its owner last changed it: an older saying never replaces a newer one.
+   */
+  updated_at?: string;
+  /**
+   * True takes it out of the index: deleted or no longer said by its owner.
+   */
+  gone?: boolean;
 }
 
 /**

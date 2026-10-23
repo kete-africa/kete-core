@@ -7,6 +7,8 @@ import {
   validateEvent,
   validateHealthReport,
   validateManifest,
+  validateObject,
+  validateObjectType,
 } from '../src/index.js';
 import { manifest, orgA } from './support/fixtures.js';
 
@@ -60,6 +62,53 @@ describe('contracts', () => {
     expect(
       validateManifest({ ...manifest, governance: { ...governance, dataCategories: ['none'] } }).ok,
     ).toBe(true);
+  });
+
+  it('declares a kind of object once and says its objects to the index (spec 142)', () => {
+    const asset = {
+      kind: 'asset',
+      label: { fr: 'Équipement', en: 'Asset', fr_plural: 'Équipements', en_plural: 'Assets' },
+      icon: 'sun',
+      states: [
+        { id: 'in_service', label: { fr: 'En service', en: 'In service' }, tone: 'ok' },
+        { id: 'retired', label: { fr: 'Retiré', en: 'Retired' }, closed: true },
+      ],
+      axes: ['project', 'party', 'unit', 'person'],
+      links: [
+        {
+          relation: 'located_at',
+          to: 'place',
+          label: { fr: 'se trouve à', en: 'located at' },
+          inverse: { fr: 'accueille', en: 'hosts' },
+        },
+      ],
+      href: '/equipements/{id}',
+    };
+    expect(validateObjectType(asset).ok).toBe(true);
+    expect(validateManifest({ ...manifest, objects: [asset] }).ok).toBe(true);
+    expect(validateObjectType({ ...asset, kind: 'Asset' }).ok).toBe(false);
+    expect(validateObjectType({ ...asset, axes: ['site'] }).ok).toBe(false);
+    expect(validateObjectType({ ...asset, href: '/equipements' }).ok).toBe(false);
+    expect(validateObjectType({ ...asset, states: [] }).ok).toBe(false);
+
+    const said = {
+      kind: 'asset',
+      id: 'ast_0199a4',
+      title: 'Mini-centrale · École de Tsévié',
+      state: 'in_service',
+      project_id: 'prj_0199a40000',
+      unit_id: 'unt_0199a40000',
+      person_id: 'usr_yao',
+      links: [{ relation: 'located_at', kind: 'place', id: 'plc_0199a4' }],
+      updated_at: '2026-10-23T09:12:00Z',
+    };
+    expect(validateObject(said).ok).toBe(true);
+    expect(validateObject({ kind: 'asset', id: 'ast_0199a4', title: 'x', gone: true }).ok).toBe(
+      true,
+    );
+    expect(validateObject({ ...said, unit_id: 'site-12' }).ok).toBe(false);
+    expect(validateObject({ ...said, title: '' }).ok).toBe(false);
+    expect(validateObject({ ...said, fields: { power: 24 } }).ok).toBe(false);
   });
 });
 
