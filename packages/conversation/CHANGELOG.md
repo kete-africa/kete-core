@@ -1,5 +1,11 @@
 # @kete-africa/conversation
 
+## 0.3.0
+
+### Minor Changes
+
+- 18cac59: A message draws an agent with its own face when the product gives it (`faceOf`); otherwise one drawn from its id (spec 149, R6).
+
 ## 0.2.0
 
 ### Minor Changes
