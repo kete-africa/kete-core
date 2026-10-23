@@ -529,4 +529,20 @@ Screens checked against the canvas on 2026-10-23: the agent's panel (v6.2) gains
 and the team's apps among its sources; the catalogue (v7 « Agents livrés ») is drawn as cards — face,
 sources, what wakes it, what it takes on, grouped by who ships it — without v7's inventory and memory
 panels yet; « Connexions » (no canvas screen) reads and signals in words and is marked in the menu.
-A second pass of this audit, module by module, comes after KYA's first real day (R10's « done »).
+
+### A KYA day in the demo (2026-10-23)
+
+Abla Nyuiadzi's day, in Kete Enterprise's demo (KYA profile): « Pour moi », a decision approved in
+« À faire », the project's thread with the client's WhatsApp message, « Planifier », a question to
+Kete. All of it works; what a person would trip on:
+
+- « Pour moi » and « À faire » say where a holding comes from with the source's internal name
+  (« Dans notes », « Dans requests »).
+- A decision shows its reference as a raw id (`prm_…`) and « Montant 2 » for an app's opening — no
+  unit, no meaning.
+- The project's thread lists its client three times among members: the contact, « Quelqu'un hors
+  de l'organisation », its e-mail address.
+- Kete's answer announces a table it does not draw; Kete's messages carry the « agent » tag
+  (D-061: Kete is not an agent).
+- The week in « Planifier » squeezes the weekend's columns until their items are unreadable.
+  A second pass of this audit, module by module, comes after KYA's first real day (R10's « done »).
