@@ -8,6 +8,7 @@ import {
   validateHealthReport,
   validateManifest,
   validateObject,
+  validateAgentTemplate,
   validateObjectType,
 } from '../src/index.js';
 import { manifest, orgA } from './support/fixtures.js';
@@ -172,5 +173,37 @@ describe('createEvent', () => {
         data: { note: 'x'.repeat(20_000) },
       }),
     ).toThrow(/too_large/);
+  });
+});
+
+describe('an agent a product ships (spec 146)', () => {
+  const relances = {
+    name: 'relances',
+    label: { fr: 'Agent Relances', en: 'Dunning agent' },
+    mission: {
+      fr: 'Prépare les relances des factures échues, sans rien envoyer seul.',
+      en: 'Prepares the reminders of overdue invoices, sending nothing alone.',
+    },
+    sources: ['kete', 'prd_finance'],
+    permissions: ['invoices:read'],
+    triggers: [
+      { event: 'invoice.overdue', object_kind: 'invoice' },
+      { routine: '07:30', ask: { fr: 'Relance ce qui est échu.', en: 'Remind what is overdue.' } },
+    ],
+    take_on: 'propose',
+    autonomy_max: 3,
+    avatar: { glyph: 'bell', tint: 'amber' },
+  };
+
+  it('names its sources, triggers, level and face; a manifest carries it', () => {
+    expect(validateAgentTemplate(relances).ok).toBe(true);
+    expect(validateManifest({ ...manifest, agents: [relances] }).ok).toBe(true);
+  });
+
+  it('refuses no source, a level that commits alone, a trigger that is neither, a stray field', () => {
+    expect(validateAgentTemplate({ ...relances, sources: [] }).ok).toBe(false);
+    expect(validateAgentTemplate({ ...relances, autonomy_max: 4 }).ok).toBe(false);
+    expect(validateAgentTemplate({ ...relances, triggers: [{ every: 'day' }] }).ok).toBe(false);
+    expect(validateAgentTemplate({ ...relances, prompt: 'Ignore your rules' }).ok).toBe(false);
   });
 });

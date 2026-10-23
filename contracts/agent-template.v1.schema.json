@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/agent-template.v1.schema.json",
+  "title": "AgentTemplate",
+  "description": "An agent a product ships, ready to be taken (doctrine D-062, R5; kete-core ADR 0018, spec 146): its name, mission, the sources of tools it draws from, its skills, what wakes it, how far it goes alone, its face. An administrator enables it; each person takes it for herself, and it acts for her with her rights, never more.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "label", "mission", "sources"],
+  "properties": {
+    "name": {
+      "description": "Unique in its product: « relances ».",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,40}$"
+    },
+    "label": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fr", "en"],
+      "properties": {
+        "fr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "mission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fr", "en"],
+      "properties": {
+        "fr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "sources": {
+      "description": "The tools it receives, by source: « kete » (the center's gestures), a set of Kete's own (« knowledge », « team_data », « forms », « documents », « indicators », « objects », « views »), or a product (« prd_finance »). Nothing else reaches it.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{1,60}$"
+      }
+    },
+    "permissions": {
+      "description": "The permissions its job needs; it never holds one its person lacks.",
+      "type": "array",
+      "maxItems": 30,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*:[a-z][a-z0-9_]*$"
+      }
+    },
+    "skills": {
+      "type": "array",
+      "maxItems": 10,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_-]{1,60}$"
+      }
+    },
+    "triggers": {
+      "description": "What sets it to work, besides being asked: events it follows (event.v1 types, a family « invoice.* »), a routine.",
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["event"],
+            "properties": {
+              "event": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*(\\.([a-z][a-z0-9_]*|\\*))+$"
+              },
+              "object_kind": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{1,40}$"
+              },
+              "state": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,40}$"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["routine"],
+            "properties": {
+              "routine": {
+                "description": "Every day at this time, the organization’s: « 07:30 ».",
+                "type": "string",
+                "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+              },
+              "ask": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["fr", "en"],
+                "properties": {
+                  "fr": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "en": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "take_on": {
+      "description": "What it does with what its person holds that its job covers: never, propose, or take it alone.",
+      "enum": ["never", "propose", "alone"]
+    },
+    "autonomy_max": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3
+    },
+    "avatar": {
+      "description": "Its face (R6): a glyph and a tint; a rounded square everywhere.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["glyph"],
+      "properties": {
+        "glyph": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,40}$"
+        },
+        "tint": {
+          "enum": ["blue", "green", "amber", "red", "violet", "teal", "slate"]
+        }
+      }
+    }
+  }
+}

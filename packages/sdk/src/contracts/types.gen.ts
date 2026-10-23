@@ -2,6 +2,1049 @@
 /* eslint-disable */
 
 /**
+ * An agent a product ships, ready to be taken (doctrine D-062, R5; kete-core ADR 0018, spec 146): its name, mission, the sources of tools it draws from, its skills, what wakes it, how far it goes alone, its face. An administrator enables it; each person takes it for herself, and it acts for her with her rights, never more.
+ */
+export interface AgentTemplate {
+  /**
+   * Unique in its product: « relances ».
+   */
+  name: string;
+  label: {
+    fr: string;
+    en: string;
+  };
+  mission: {
+    fr: string;
+    en: string;
+  };
+  /**
+   * The tools it receives, by source: « kete » (the center's gestures), a set of Kete's own (« knowledge », « team_data », « forms », « documents », « indicators », « objects », « views »), or a product (« prd_finance »). Nothing else reaches it.
+   *
+   * @minItems 1
+   * @maxItems 12
+   */
+  sources:
+    | [string]
+    | [string, string]
+    | [string, string, string]
+    | [string, string, string, string]
+    | [string, string, string, string, string]
+    | [string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string, string]
+    | [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ];
+  /**
+   * The permissions its job needs; it never holds one its person lacks.
+   *
+   * @maxItems 30
+   */
+  permissions?: string[];
+  /**
+   * @maxItems 10
+   */
+  skills?:
+    | []
+    | [string]
+    | [string, string]
+    | [string, string, string]
+    | [string, string, string, string]
+    | [string, string, string, string, string]
+    | [string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string];
+  /**
+   * What sets it to work, besides being asked: events it follows (event.v1 types, a family « invoice.* »), a routine.
+   *
+   * @maxItems 10
+   */
+  triggers?:
+    | []
+    | [
+        | {
+            event: string;
+            object_kind?: string;
+            state?: string;
+          }
+        | {
+            /**
+             * Every day at this time, the organization’s: « 07:30 ».
+             */
+            routine: string;
+            ask?: {
+              fr: string;
+              en: string;
+            };
+          },
+      ]
+    | [
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+      ]
+    | [
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+      ]
+    | [
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+      ]
+    | [
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+      ]
+    | [
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+      ]
+    | [
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+      ]
+    | [
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+      ]
+    | [
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+      ]
+    | [
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+        (
+          | {
+              event: string;
+              object_kind?: string;
+              state?: string;
+            }
+          | {
+              /**
+               * Every day at this time, the organization’s: « 07:30 ».
+               */
+              routine: string;
+              ask?: {
+                fr: string;
+                en: string;
+              };
+            }
+        ),
+      ];
+  /**
+   * What it does with what its person holds that its job covers: never, propose, or take it alone.
+   */
+  take_on?: 'never' | 'propose' | 'alone';
+  autonomy_max?: number;
+  /**
+   * Its face (R6): a glyph and a tint; a rounded square everywhere.
+   */
+  avatar?: {
+    glyph: string;
+    tint?: 'blue' | 'green' | 'amber' | 'red' | 'violet' | 'teal' | 'slate';
+  };
+}
+
+/**
  * A gesture or a query a Kete product exposes to agents (MCP, chat, other apps), with its autonomy level: 1 read and signal, 2 act reversibly (with a notification and undo), 3 prepare a decision (a draft a person validates), 4 irreversible, money or external (always a person, with confirmation). It may name the view a copilot shows with its result (MCP Apps, doctrine D-037).
  */
 export interface Capability {
@@ -1668,6 +2711,236 @@ export interface Manifest {
    * @maxItems 40
    */
   objects?: ObjectType[];
+  /**
+   * The agents the app ships, ready to be taken (optional, added in v1: additive; kete-core spec 146).
+   *
+   * @maxItems 20
+   */
+  agents?:
+    | []
+    | [AgentTemplate]
+    | [AgentTemplate, AgentTemplate]
+    | [AgentTemplate, AgentTemplate, AgentTemplate]
+    | [AgentTemplate, AgentTemplate, AgentTemplate, AgentTemplate]
+    | [AgentTemplate, AgentTemplate, AgentTemplate, AgentTemplate, AgentTemplate]
+    | [AgentTemplate, AgentTemplate, AgentTemplate, AgentTemplate, AgentTemplate, AgentTemplate]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ]
+    | [
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+        AgentTemplate,
+      ];
 }
 
 /**

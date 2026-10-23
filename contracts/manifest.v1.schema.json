@@ -384,6 +384,14 @@
       "items": {
         "$ref": "object-type.v1.schema.json"
       }
+    },
+    "agents": {
+      "type": "array",
+      "description": "The agents the app ships, ready to be taken (optional, added in v1: additive; kete-core spec 146).",
+      "maxItems": 20,
+      "items": {
+        "$ref": "agent-template.v1.schema.json"
+      }
     }
   }
 }
