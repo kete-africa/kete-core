@@ -26,6 +26,8 @@ export interface CreateEventInput<T extends string> {
   organization: string;
   data: EventData<T>;
   occurredAt?: Date;
+  /** The object the fact is about (kete-core spec 143): who follows it learns it. */
+  object?: { kind: string; id: string };
   /** The event types the app's manifest declares; anything else is refused. */
   declaredTypes: readonly string[];
 }
@@ -43,6 +45,7 @@ export function createEvent<T extends string>(input: CreateEventInput<T>): KeteE
     organization: input.organization,
     occurred_at: (input.occurredAt ?? new Date()).toISOString(),
     data: input.data as Record<string, unknown>,
+    ...(input.object ? { object: input.object } : {}),
   };
   const envelope = validateEvent(event);
   if (!envelope.ok) throw new InvalidEventError('invalid_payload', envelope.errors);

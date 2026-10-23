@@ -576,6 +576,25 @@ export const schemas = {
       },
       "data": {
         "type": "object"
+      },
+      "object": {
+        "description": "The object the fact is about (optional, added in v1: additive; doctrine D-062, R11; kete-core spec 143): its thread, the agents and the screens that follow it learn it.",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "id"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{1,40}$"
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+          }
+        }
       }
     }
   },

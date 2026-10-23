@@ -263,6 +263,13 @@ export interface KeteEvent {
   data: {
     [k: string]: unknown;
   };
+  /**
+   * The object the fact is about (optional, added in v1: additive; doctrine D-062, R11; kete-core spec 143): its thread, the agents and the screens that follow it learn it.
+   */
+  object?: {
+    kind: string;
+    id: string;
+  };
 }
 
 /**

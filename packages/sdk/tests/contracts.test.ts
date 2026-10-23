@@ -22,6 +22,19 @@ describe('contracts', () => {
     expect(validateEvent({ ...event, id: 'evt_123' }).ok).toBe(false);
   });
 
+  it('lets an event name the object it is about (spec 143)', () => {
+    const event = emitter.build({
+      type: 'account.created',
+      organization: orgA,
+      data: {},
+      object: { kind: 'ticket', id: 'T-0412' },
+    });
+    expect(event.object).toEqual({ kind: 'ticket', id: 'T-0412' });
+    expect(validateEvent(event).ok).toBe(true);
+    expect(validateEvent({ ...event, object: { kind: 'Ticket', id: 'T-0412' } }).ok).toBe(false);
+    expect(validateEvent({ ...event, object: { kind: 'ticket' } }).ok).toBe(false);
+  });
+
   it('validates manifests, health reports and delivery results', () => {
     expect(validateManifest(manifest).ok).toBe(true);
     expect(validateManifest({ ...manifest, version: 'v1' }).ok).toBe(false);
