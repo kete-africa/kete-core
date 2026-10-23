@@ -126,7 +126,7 @@ export function Bullet({
           y="4"
           width={at.alert.to - at.alert.from}
           height="8"
-          className="fill-state-error-bg"
+          className="fill-state-error-surface"
         />
       )}
       {at.value !== null && <rect x="0" y="6" width={at.value} height="4" className="fill-fg" />}
