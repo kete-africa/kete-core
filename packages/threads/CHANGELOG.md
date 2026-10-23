@@ -1,5 +1,11 @@
 # @kete-africa/threads
 
+## 0.3.2
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.3.1
 
 ### Patch Changes
