@@ -210,7 +210,10 @@ export const schemas = {
           "properties": {
             "field": {
               "type": "string",
-              "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^[^\u0000-\u001f]+$",
+              "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
             },
             "op": {
               "enum": [
@@ -241,7 +244,10 @@ export const schemas = {
         "maxItems": 3,
         "items": {
           "type": "string",
-          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[^\u0000-\u001f]+$",
+          "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
         }
       },
       "measures": {
@@ -267,7 +273,10 @@ export const schemas = {
             },
             "field": {
               "type": "string",
-              "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^[^\u0000-\u001f]+$",
+              "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
             }
           }
         }
@@ -3730,7 +3739,10 @@ export const schemas = {
                 "maxItems": 3,
                 "items": {
                   "type": "string",
-                  "pattern": "^[A-Za-z_][A-Za-z0-9_.]{0,79}$"
+                  "minLength": 1,
+                  "maxLength": 80,
+                  "pattern": "^[^\u0000-\u001f]+$",
+                  "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
                 }
               },
               "measures": {
@@ -3755,7 +3767,10 @@ export const schemas = {
                     },
                     "field": {
                       "type": "string",
-                      "pattern": "^[A-Za-z_][A-Za-z0-9_.]{0,79}$"
+                      "minLength": 1,
+                      "maxLength": 80,
+                      "pattern": "^[^\u0000-\u001f]+$",
+                      "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
                     }
                   }
                 }
@@ -3840,7 +3855,10 @@ export const schemas = {
           "properties": {
             "field": {
               "type": "string",
-              "pattern": "^[A-Za-z_][A-Za-z0-9_.]{0,79}$"
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^[^\u0000-\u001f]+$",
+              "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
             },
             "op": {
               "enum": [
@@ -3936,7 +3954,10 @@ export const schemas = {
             "maxItems": 20,
             "items": {
               "type": "string",
-              "pattern": "^[A-Za-z_][A-Za-z0-9_.]{0,79}$"
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^[^\u0000-\u001f]+$",
+              "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
             }
           },
           "sort": {
@@ -3948,7 +3969,10 @@ export const schemas = {
             "properties": {
               "field": {
                 "type": "string",
-                "pattern": "^[A-Za-z_][A-Za-z0-9_.]{0,79}$"
+                "minLength": 1,
+                "maxLength": 80,
+                "pattern": "^[^\u0000-\u001f]+$",
+                "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
               },
               "descending": {
                 "type": "boolean"
@@ -3957,7 +3981,10 @@ export const schemas = {
           },
           "group": {
             "type": "string",
-            "pattern": "^[A-Za-z_][A-Za-z0-9_.]{0,79}$"
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^[^\u0000-\u001f]+$",
+            "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
           },
           "totals": {
             "type": "array",
@@ -3980,7 +4007,10 @@ export const schemas = {
                 },
                 "field": {
                   "type": "string",
-                  "pattern": "^[A-Za-z_][A-Za-z0-9_.]{0,79}$"
+                  "minLength": 1,
+                  "maxLength": 80,
+                  "pattern": "^[^\u0000-\u001f]+$",
+                  "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
                 }
               }
             }

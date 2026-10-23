@@ -80,6 +80,29 @@ describe('a question summed up at the source', () => {
     ).toEqual([{ count: 0, 'avg(amount)': null }]);
   });
 
+  it('names fields as a spreadsheet does: « Délai (jours) » is a field like any other', () => {
+    const team = {
+      name: 'team',
+      row: {
+        type: 'object',
+        properties: { Agence: { type: 'string' }, 'Délai (jours)': { type: 'number' } },
+      },
+    };
+    expect(
+      answerQuery(
+        team,
+        [
+          { Agence: 'Lomé', 'Délai (jours)': 3 },
+          { Agence: 'Lomé', 'Délai (jours)': 5 },
+        ],
+        {
+          group_by: ['Agence'],
+          measures: [{ fn: 'avg', field: 'Délai (jours)' }],
+        },
+      ).rows,
+    ).toEqual([{ Agence: 'Lomé', 'avg(Délai (jours))': 4 }]);
+  });
+
   it('refuses a field it does not have, and a sum of words', () => {
     const refused = (question: unknown) => {
       try {
