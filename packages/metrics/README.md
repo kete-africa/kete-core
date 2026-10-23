@@ -49,3 +49,16 @@ trend(readings[0], 'up'); // { direction: 'up', tone: 'good', change: 2.51 }
 - **Its tone comes from `better`**, never from its arrow: more absences is bad news.
 - A figure that breaks its contract, has no currency in money, or is declared twice is refused when
   the app starts.
+- **Missing is not zero** (spec 144; D-062, R17): asked by name, a figure whose app does not answer
+  comes back `missing: true`, its value null — a board draws it missing.
+- **The fourth axis**: a figure may be filtered by `unit` as well (`unit_id`).
+
+## Questions to a data set (spec 144)
+
+The Measure's query engine (ADR 0015), the same for an app's data sets (served by
+`@kete/capabilities`) and the center's own tables: `answerQuery(dataset, rows, question)` filters
+the rows on the axes the data set carries, its own fields and its period, groups them, sums them up
+— `count`, `sum`, `avg`, `min`, `max` —, the largest group first, and answers `dataset-answer.v1`.
+Nothing to count is a count of 0 and a sum of nothing (null), never a zero sum. From another app,
+or the center, with her token: `queryDataset({ api, token, dataset, query })` answers `done`,
+`refused`, or `missing` when the app does not answer.

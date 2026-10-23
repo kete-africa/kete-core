@@ -3,6 +3,7 @@
 export {
   metricsAsked,
   metricsResponse,
+  queryDataset,
   readMetrics,
   type MetricsAsked,
   type Within,

@@ -5,7 +5,7 @@ import {
   type Actor,
 } from '@kete/commands';
 import { draftsMigrationSql } from '@kete/drafts';
-import { validateDataset, validateManifest } from '@kete/sdk';
+import { validateDataset, validateDatasetAnswer, validateManifest } from '@kete/sdk';
 import { inOrganization } from '@kete/tenancy';
 import { createTestSchema, type TestSchema } from '@kete/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -25,6 +25,7 @@ import {
 let db: TestSchema;
 let api: (request: Request) => Promise<Response>;
 const org = 'org_http';
+const project = 'prj_0000aaaa';
 
 const ama: Actor = { kind: 'person', id: 'usr_ama', channel: 'api' };
 // Another app acting for Ama through the API: it prepares, it never decides.
@@ -82,6 +83,31 @@ const datasets = [
       return rows;
     },
   }),
+  // Its rows carry a project (spec 144): a question filtered on it is summed up here.
+  defineDataset({
+    name: 'tag_uses',
+    description: 'How often each tag is used, by project.',
+    permission: 'tags:read',
+    row: tagRow.extend({ project_id: z.string().nullable() }),
+    time: 'day',
+    measures: ['uses'],
+    dimensions: ['label'],
+    axes: { project: 'project_id' },
+    async rows(query, { db: tx }) {
+      const { rows } = await tx.query<{
+        label: string;
+        day: string;
+        uses: number;
+        project_id: string | null;
+      }>(
+        `select label, to_char(day, 'YYYY-MM-DD') as day, uses, project_id from tags
+          where ($1::date is null or day >= $1::date) and ($2::date is null or day <= $2::date)
+          order by day, label limit $3`,
+        [query.from ?? null, query.to ?? null, query.limit],
+      );
+      return rows;
+    },
+  }),
   defineDataset({
     name: 'quotes_issued',
     description: 'The quotes issued.',
@@ -100,14 +126,15 @@ beforeAll(async () => {
       await owner.query(commandsDelegationMigrationSql({ schema }));
       await owner.query(draftsMigrationSql({ schema, appRole }));
       await owner.query(`create table tags (organization_id text not null, label text not null,
-          day date not null, uses integer not null default 1);
+          day date not null, uses integer not null default 1, project_id text);
         alter table tags enable row level security;
         create policy tags_isolation on tags to ${appRole}
           using (organization_id = current_setting('kete.organization_id', true))
           with check (organization_id = current_setting('kete.organization_id', true));`);
-      await owner.query(`insert into tags (organization_id, label, day, uses) values
-        ('${org}', 'a', '2026-09-01', 3), ('${org}', 'b', '2026-09-15', 1),
-        ('${org}', 'c', '2026-10-01', 2), ('org_other', 'z', '2026-09-10', 9)`);
+      await owner.query(`insert into tags (organization_id, label, day, uses, project_id) values
+        ('${org}', 'a', '2026-09-01', 3, '${project}'), ('${org}', 'b', '2026-09-15', 1, '${project}'),
+        ('${org}', 'a', '2026-09-20', 4, '${project}'), ('${org}', 'c', '2026-10-01', 2, null),
+        ('org_other', 'z', '2026-09-10', 9, '${project}')`);
     },
   });
   const host = {
@@ -218,9 +245,10 @@ describe('the data sets of a product', () => {
     const forVisitor = (await call('visitor', 'GET', '/datasets')).body.datasets as {
       name: string;
     }[];
-    expect(forVisitor.map((d) => d.name)).toEqual(['tags_by_day']);
+    expect(forVisitor.map((d) => d.name)).toEqual(['tags_by_day', 'tag_uses']);
     for (const d of forVisitor) expect(validateDataset(d).ok).toBe(true);
     expect(forVisitor[0]).toMatchObject({ time: 'day', measures: ['uses'], dimensions: ['label'] });
+    expect(forVisitor[1]).toMatchObject({ axes: { project: 'project_id' } });
   });
 
   it('serves rows of the caller’s organization only, filtered by dates and limited', async () => {
@@ -228,6 +256,7 @@ describe('the data sets of a product', () => {
     expect((all.body.rows as { label: string }[]).map((r) => r.label)).toEqual([
       'a',
       'b',
+      'a',
       'c',
       'd',
     ]);
@@ -244,6 +273,50 @@ describe('the data sets of a product', () => {
     expect((await call('visitor', 'GET', '/datasets/quotes_issued')).status).toBe(403);
     expect((await call('visitor', 'GET', '/datasets/tags_by_day?from=yesterday')).status).toBe(422);
     expect((await call('visitor', 'GET', '/datasets/tags_by_day?limit=0')).status).toBe(422);
+  });
+
+  it('sums its rows up at home for a question, on a project, and answers only the groups', async () => {
+    const asked = await call('visitor', 'POST', '/datasets/tag_uses/query', {
+      filter: { project_id: project, party_id: 'pty_0000bbbb' },
+      group_by: ['label'],
+      measures: [{ fn: 'sum', field: 'uses' }, { fn: 'count' }],
+      from: '2026-09-01',
+      to: '2026-09-30',
+    });
+    expect(asked.status).toBe(200);
+    expect(validateDatasetAnswer(asked.body).ok).toBe(true);
+    // Its organization's rows only; the party, an axis it does not carry, is left out — and said.
+    expect(asked.body).toMatchObject({
+      dataset: 'tag_uses',
+      rows: [
+        { label: 'a', 'sum(uses)': 7, count: 2 },
+        { label: 'b', 'sum(uses)': 1, count: 1 },
+      ],
+      counted: 3,
+      truncated: false,
+      filter: { project_id: project },
+    });
+    // Nothing to count is an answer: 0 rows, and a sum that is not zero but nothing.
+    const none = await call('visitor', 'POST', '/datasets/tag_uses/query', {
+      measures: [{ fn: 'count' }, { fn: 'sum', field: 'uses' }],
+      from: '2030-01-01',
+    });
+    expect(none.body).toMatchObject({ rows: [{ count: 0, 'sum(uses)': null }], counted: 0 });
+  });
+
+  it('refuses a question on what it does not have, or a sum of words', async () => {
+    const ask = (body: unknown, set = 'tag_uses') =>
+      call('visitor', 'POST', `/datasets/${set}/query`, body);
+    expect((await ask({ measures: [{ fn: 'count' }], group_by: ['price'] })).body.error).toBe(
+      'unknown_field',
+    );
+    expect((await ask({ measures: [{ fn: 'sum', field: 'label' }] })).body.error).toBe(
+      'not_a_number',
+    );
+    expect((await ask({ measures: [] })).status).toBe(422);
+    expect((await ask({ measures: [{ fn: 'count' }] }, 'quotes_issued')).status).toBe(403);
+    expect((await ask({ measures: [{ fn: 'count' }] }, 'nothing')).status).toBe(404);
+    expect((await call('visitor', 'GET', '/datasets/tag_uses/query')).status).toBe(405);
   });
 
   it('refuses a declaration whose fields do not exist', () => {

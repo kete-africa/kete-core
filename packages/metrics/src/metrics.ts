@@ -11,6 +11,7 @@ import { periodRange, previousRange, type Period, type Range } from './period.js
 export interface MetricFilter {
   project_id?: string;
   party_id?: string;
+  unit_id?: string;
   person_id?: string;
 }
 
@@ -55,7 +56,12 @@ export interface MetricRegistry {
   read(names: readonly string[] | 'all', options: ReadOptions): Promise<MetricReading[]>;
 }
 
-const AXES = { project_id: 'project', party_id: 'party', person_id: 'person' } as const;
+const AXES = {
+  project_id: 'project',
+  party_id: 'party',
+  unit_id: 'unit',
+  person_id: 'person',
+} as const;
 
 /** The figures of an app; a figure that breaks its contract is refused at start. */
 export function defineMetrics(definitions: readonly MetricDefinition[]): MetricRegistry {

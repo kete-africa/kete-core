@@ -17,3 +17,12 @@ export {
   type Range,
 } from './period.js';
 export { trend, type Trend } from './trend.js';
+export {
+  answerQuery,
+  checkQuery,
+  fieldsOf,
+  MAX_ROWS,
+  measureName,
+  QueryRefused,
+  type DatasetRow,
+} from './query.js';

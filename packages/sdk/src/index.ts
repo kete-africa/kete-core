@@ -6,6 +6,8 @@ export type {
   AccountCreated,
   Capability,
   Dataset,
+  DatasetAnswer,
+  DatasetQuery,
   DatedFact,
   FileLink,
   Gesture,
@@ -37,6 +39,8 @@ export type {
 export {
   validateCapability,
   validateDataset,
+  validateDatasetAnswer,
+  validateDatasetQuery,
   validateDatedFact,
   validateDeliveryRequest,
   validateDeliveryResult,

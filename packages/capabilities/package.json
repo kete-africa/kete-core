@@ -30,6 +30,7 @@
   "dependencies": {
     "@kete/commands": "workspace:@kete-africa/commands@*",
     "@kete/drafts": "workspace:@kete-africa/drafts@*",
+    "@kete/metrics": "workspace:@kete-africa/metrics@*",
     "@kete/records": "workspace:@kete-africa/records@*",
     "@kete/sdk": "workspace:@kete-africa/sdk@*",
     "@kete/tenancy": "workspace:@kete-africa/tenancy@*",

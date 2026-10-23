@@ -1,5 +1,5 @@
-import type { MetricReading } from '@kete/sdk';
-import { validateMetricReading } from '@kete/sdk';
+import type { DatasetAnswer, DatasetQuery, MetricReading } from '@kete/sdk';
+import { validateDatasetAnswer, validateMetricReading } from '@kete/sdk';
 import type { MetricFilter, MetricRegistry } from './metrics.js';
 import { isPeriod, type Period } from './period.js';
 
@@ -15,7 +15,12 @@ export interface MetricsAsked {
   filter: MetricFilter;
 }
 
-const FILTERS = { project: 'project_id', party: 'party_id', person: 'person_id' } as const;
+const FILTERS = {
+  project: 'project_id',
+  party: 'party_id',
+  unit: 'unit_id',
+  person: 'person_id',
+} as const;
 
 /** The question in a URL; anything it does not understand is ignored. */
 export function metricsAsked(url: URL): MetricsAsked {
@@ -61,8 +66,9 @@ export async function metricsResponse(
 }
 
 /**
- * Reads an app's figures with the reader's token; what breaks the contract is dropped, and an app
- * that does not answer gives none — a board shows its other figures.
+ * Reads an app's figures with the reader's token; what breaks the contract is dropped. An app that
+ * does not answer gives each figure asked by name as missing — shown missing, never as zero
+ * (doctrine D-062, R17; spec 144); asked for all, it gives none, and a board shows its others.
  */
 export async function readMetrics(options: {
   /** The app's address: `https://finance.example`. */
@@ -82,18 +88,64 @@ export async function readMetrics(options: {
     const value = options.filter?.[key];
     if (value) target.searchParams.set(param, value);
   }
+  const missing = (): MetricReading[] =>
+    (options.names ?? []).map((name) => ({
+      name,
+      value: null,
+      at: new Date().toISOString(),
+      missing: true,
+    }));
   try {
     const response = await (options.fetch ?? fetch)(target, {
       headers: { authorization: `Bearer ${options.token}` },
     });
-    if (!response.ok) return [];
+    if (!response.ok) return missing();
     const body = (await response.json()) as { readings?: unknown };
     return Array.isArray(body.readings)
       ? body.readings.filter(
           (reading): reading is MetricReading => validateMetricReading(reading).ok,
         )
-      : [];
+      : missing();
   } catch {
-    return [];
+    return missing();
+  }
+}
+
+/**
+ * Puts a question to an app's data set with the reader's token (spec 144): the app sums its rows
+ * up under her rights and answers only the groups. An app that does not answer, or answers outside
+ * the contract, gives `missing` — never an empty answer that would read as zero.
+ */
+export async function queryDataset(options: {
+  /** The app's API address, its data sets under it: `https://finance.example/api/v1`. */
+  api: string;
+  token: string;
+  dataset: string;
+  query: DatasetQuery;
+  fetch?: typeof fetch;
+}): Promise<
+  | { status: 'done'; answer: DatasetAnswer }
+  | { status: 'refused'; reason: string }
+  | { status: 'missing' }
+> {
+  const target = `${options.api.replace(/\/$/, '')}/datasets/${encodeURIComponent(options.dataset)}/query`;
+  try {
+    const response = await (options.fetch ?? fetch)(target, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${options.token}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(options.query),
+    });
+    const body = (await response.json().catch(() => null)) as
+      (DatasetAnswer & { error?: string }) | null;
+    if (response.status >= 400 && response.status < 500 && body?.error) {
+      return { status: 'refused', reason: body.error };
+    }
+    if (!response.ok || !body || !validateDatasetAnswer(body).ok) return { status: 'missing' };
+    return { status: 'done', answer: body };
+  } catch {
+    return { status: 'missing' };
   }
 }

@@ -23,6 +23,9 @@
       "path": "../drafts"
     },
     {
+      "path": "../metrics"
+    },
+    {
       "path": "../testing"
     }
   ]
