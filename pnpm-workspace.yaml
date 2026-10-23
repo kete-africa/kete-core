@@ -23,6 +23,9 @@ overrides:
   'vite@>=8.3.0 <8.3.3': ^8.3.4
   'launch-editor@<2.14.2': ^2.14.2
   'markdown-it@>=14.1.0 <14.3.3': ^14.3.3
+  # DOMPurify, under mermaid in the documentation site: a critical and a high advisory published on
+  # 2026-10-22 (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr), fixed in 3.4.17.
+  'dompurify@<3.4.17': ^3.4.17
 
 # Advisories without a fix that only reach build-time code (decision 0007). Reviewed at each release.
 auditConfig:
