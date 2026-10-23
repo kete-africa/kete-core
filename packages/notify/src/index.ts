@@ -120,6 +120,7 @@ export {
   notify,
   pushSubscriptionsOf,
   removePushSubscription,
+  ringDevices,
   savePushSubscription,
   unreadCount,
   type Notification,
@@ -127,6 +128,22 @@ export {
   type NotificationsMigrationOptions,
   type PushSubscriptionInput,
 } from './inbox.js';
+export {
+  attend,
+  attentionMigrationSql,
+  attentionOrganizationsWaiting,
+  DEFAULT_ATTENTION,
+  planAttention,
+  quietUntil,
+  ringPostponed,
+  type Attended,
+  type AttentionMigrationOptions,
+  type AttentionPlan,
+  type AttentionPrefs,
+  type AttentionWeight,
+  type Reach,
+  type Signal,
+} from './attention.js';
 export {
   generatePushKeys,
   memoryPushSender,

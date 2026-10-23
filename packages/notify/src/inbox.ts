@@ -104,22 +104,33 @@ export async function notify(
       input.href ?? null,
     ],
   );
-  let pushed = 0;
-  if (push) {
-    for (const device of await pushSubscriptionsOf(db, input.userId)) {
-      const outcome = await push
-        .send(device, {
-          title: input.title,
-          body: input.body ?? '',
-          href: input.href ?? '/',
-          tag: input.kind,
-        })
-        .catch(() => 'failed' as const);
-      if (outcome === 'sent') pushed += 1;
-      if (outcome === 'gone') await removePushSubscription(db, input.userId, device.endpoint);
-    }
-  }
+  const pushed = push ? await ringDevices(db, push, input) : 0;
   return { notificationId, pushed };
+}
+
+/**
+ * Rings every device a person subscribed, with what she was told; a device the push service no
+ * longer knows is forgotten. Answers how many were reached.
+ */
+export async function ringDevices(
+  db: SqlExecutor,
+  push: PushSender,
+  input: Pick<NotificationInput, 'userId' | 'kind' | 'title' | 'body' | 'href'>,
+): Promise<number> {
+  let pushed = 0;
+  for (const device of await pushSubscriptionsOf(db, input.userId)) {
+    const outcome = await push
+      .send(device, {
+        title: input.title,
+        body: input.body ?? '',
+        href: input.href ?? '/',
+        tag: input.kind,
+      })
+      .catch(() => 'failed' as const);
+    if (outcome === 'sent') pushed += 1;
+    if (outcome === 'gone') await removePushSubscription(db, input.userId, device.endpoint);
+  }
+  return pushed;
 }
 
 export async function listNotifications(
