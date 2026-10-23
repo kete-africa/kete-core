@@ -3,6 +3,7 @@ import { deploymentOf } from '@/features/deployments/deployments';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 import { z } from 'zod';
 import { isAppAddress } from '@/features/apps/returns';
+import { readMyStandingMandates, revokeMyStandingMandate } from '@/features/apps/standing-mandates';
 import { accessUntil } from '@/features/payments/access';
 import { toolCatalog } from '@/features/tools/catalog';
 import { eq } from 'drizzle-orm';
@@ -60,9 +61,14 @@ export const fetchSecurity = createServerFn({ method: 'GET' }).handler(async () 
     .from(passkey)
     .where(eq(passkey.userId, actor.userId))
     .orderBy(passkey.createdAt);
+  // Spec 150: the agents that act for her while she is away, in her active organization.
+  const agents = actor.organizationId
+    ? await readMyStandingMandates(actor.organizationId, actor.userId)
+    : [];
   return {
     twoFactorEnabled: row?.twoFactorEnabled === true,
     password: methods.password,
+    agents,
     passkeys: keys.map((key) => ({
       id: key.id,
       name: key.name,
@@ -70,6 +76,16 @@ export const fetchSecurity = createServerFn({ method: 'GET' }).handler(async () 
     })),
   };
 });
+
+/** Spec 150: she withdraws an agent's standing mandate; it no longer acts for her while she is away. */
+export const revokeMyAgent = createServerFn({ method: 'POST' })
+  .validator((input: unknown) =>
+    z.object({ id: z.string().regex(/^smd_[\w-]{4,64}$/) }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const me = requireMember(await actorFromHeaders(getRequestHeaders()));
+    return { ok: await revokeMyStandingMandate(me.organizationId, me.userId, data.id) };
+  });
 
 /** Removes her password once she has a passkey and has just signed in with it (spec 016). */
 export const removeMyPassword = createServerFn({ method: 'POST' }).handler(async () => {

@@ -11,7 +11,7 @@ import { AppApiError, requireApp } from './people';
  * same claims — never more — and an `act` claim naming the agent and the center. Ten minutes at
  * most, and never beyond the person's own token. A mandate is not exchanged again.
  */
-const mandateInput = z.object({
+export const mandateInput = z.object({
   subjectToken: z.string().min(20).max(8000),
   agent: z.object({
     id: z.string().regex(/^agt_[\w-]{1,64}$/),
@@ -19,7 +19,7 @@ const mandateInput = z.object({
   }),
 });
 
-const MANDATE_SECONDS = 600;
+export const MANDATE_SECONDS = 600;
 
 const api = auth.api as unknown as {
   getJwks(): Promise<JSONWebKeySet>;
@@ -31,19 +31,15 @@ const api = auth.api as unknown as {
 /** The claims of a person's token the mandate carries: the same, nothing added. */
 const carried = ['sub', 'email', 'name', 'org', 'role', 'apps', 'two_factor'] as const;
 
-export async function issueMandate(
-  request: Request,
-): Promise<{ token: string; expiresIn: number }> {
-  const center = await requireApp(request, MANDATE_SCOPE);
-  const parsed = mandateInput.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) throw new AppApiError(422, 'invalid_input');
+/** The person behind a token the Compte Kete signed: never a mandate, always in an organization. */
+export async function personOf(subjectToken: string): Promise<Record<string, unknown>> {
   let person: Record<string, unknown>;
   try {
-    ({ payload: person } = await jwtVerify(
-      parsed.data.subjectToken,
-      createLocalJWKSet(await api.getJwks()),
-      { issuer: env.publicUrl, audience: KETE_APPS_AUDIENCE, requiredClaims: ['sub', 'exp'] },
-    ));
+    ({ payload: person } = await jwtVerify(subjectToken, createLocalJWKSet(await api.getJwks()), {
+      issuer: env.publicUrl,
+      audience: KETE_APPS_AUDIENCE,
+      requiredClaims: ['sub', 'exp'],
+    }));
   } catch {
     throw new AppApiError(422, 'invalid_subject');
   }
@@ -55,15 +51,19 @@ export async function issueMandate(
   ) {
     throw new AppApiError(422, 'invalid_subject');
   }
+  return person;
+}
+
+/** Signs a mandate: the person's claims, the agent and the center in `act`, until `expiresAt`. */
+export async function signMandate(
+  claims: Record<string, unknown>,
+  act: { agent: { id: string; name: string }; clientId: string },
+  expiresAt: number,
+): Promise<{ token: string; expiresIn: number }> {
   const now = Math.floor(Date.now() / 1000);
-  const expiresAt = Math.min(now + MANDATE_SECONDS, person.exp as number);
   const payload: Record<string, unknown> = {};
-  for (const claim of carried) if (person[claim] !== undefined) payload[claim] = person[claim];
-  payload.act = {
-    sub: parsed.data.agent.id,
-    name: parsed.data.agent.name,
-    client_id: center.clientId,
-  };
+  for (const claim of carried) if (claims[claim] !== undefined) payload[claim] = claims[claim];
+  payload.act = { sub: act.agent.id, name: act.agent.name, client_id: act.clientId };
   const { token } = await api.signJWT({
     body: {
       payload,
@@ -74,4 +74,19 @@ export async function issueMandate(
     },
   });
   return { token, expiresIn: Math.max(0, expiresAt - now) };
+}
+
+export async function issueMandate(
+  request: Request,
+): Promise<{ token: string; expiresIn: number }> {
+  const center = await requireApp(request, MANDATE_SCOPE);
+  const parsed = mandateInput.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) throw new AppApiError(422, 'invalid_input');
+  const person = await personOf(parsed.data.subjectToken);
+  const now = Math.floor(Date.now() / 1000);
+  return signMandate(
+    person,
+    { agent: parsed.data.agent, clientId: center.clientId },
+    Math.min(now + MANDATE_SECONDS, person.exp as number),
+  );
 }

@@ -8,4 +8,5 @@ export const prefixedId = prefixedIds({
   subscription: 'sub',
   signInLink: 'lnk',
   deployment: 'dpl',
+  standingMandate: 'smd',
 });

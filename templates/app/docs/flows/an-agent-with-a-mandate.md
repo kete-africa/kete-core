@@ -10,14 +10,20 @@ sequenceDiagram
   participant E as Kete Enterprise (agent « Briefing »)
   participant K as Compte Kete
   participant A as App
-  P->>E: her token (she is signed in, or her agent works for her)
+  P->>E: her token (she is signed in)
   E->>K: POST /api/apps/mandates (the center's own token, kete:mandate)
   K-->>E: a mandate: sub = the person, act = agt_briefing, ten minutes at most
+  Note over P,E: she is away — a routine, an event the agent follows
+  E->>K: POST /api/apps/standing-mandates/token (the grant she gave once)
+  K-->>E: a mandate: her claims as they are now, act = agt_briefing, ten minutes
   E->>A: /mcp or /api/v1 with the mandate
   A->>A: caller = agent agt_briefing for the person: her rights, the agent's autonomy
   A->>A: journal: the agent, for the person
 ```
 
 - **Never more than the person**: the mandate carries her claims only; her grants apply.
+- **While she is away** (kete-core spec 150): she gives the agent a standing mandate once; each use
+  reads her claims again. She withdraws it in Mon espace Kete; then nothing more is signed. The app
+  sees the same mandate either way.
 - **The agent's autonomy**: a decision (level 3 or 4) becomes a draft the person validates.
 - **Not exchanged again**: a mandate never makes another mandate.

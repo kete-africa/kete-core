@@ -123,6 +123,108 @@ export const accountPaths: Record<string, Schema> = {
       },
     },
   },
+  '/api/apps/standing-mandates': {
+    post: {
+      tags: ['Apps'],
+      summary: 'Give one of the center’s agents a standing mandate',
+      description:
+        "Only the center's client (scope kete:mandate), with the person's own token as her consent. The agent may then act for her while she is away; given again, it is renewed. She withdraws it in Mon espace Kete.",
+      security: appToken,
+      requestBody: {
+        required: true,
+        ...json(
+          {
+            type: 'object',
+            properties: {
+              subjectToken: { type: 'string' },
+              agent: {
+                type: 'object',
+                properties: { id: { type: 'string' }, name: { type: 'string' } },
+                required: ['id', 'name'],
+              },
+            },
+            required: ['subjectToken', 'agent'],
+          },
+          "The person's token and the agent she lets act for her",
+        ),
+      },
+      responses: {
+        '201': json(
+          { type: 'object', properties: { grant: { type: 'string' } }, required: ['grant'] },
+          'The standing mandate',
+        ),
+        '401': error('No valid app token'),
+        '403': error('Not the center'),
+        '422': error("Invalid input, or a subject that is not a person's token"),
+      },
+    },
+  },
+  '/api/apps/standing-mandates/token': {
+    post: {
+      tags: ['Apps'],
+      summary: "An agent's mandate for now, from its standing mandate",
+      description:
+        "Only the center's client that was given it. The person's claims are read again as they are now; ten minutes. Refused once withdrawn, or once she is no longer a member.",
+      security: appToken,
+      requestBody: {
+        required: true,
+        ...json(
+          {
+            type: 'object',
+            properties: {
+              organization: { type: 'string' },
+              grant: { type: 'string' },
+            },
+            required: ['organization', 'grant'],
+          },
+          'The organization and the standing mandate',
+        ),
+      },
+      responses: {
+        '201': json(
+          {
+            type: 'object',
+            properties: { token: { type: 'string' }, expiresIn: { type: 'integer' } },
+            required: ['token', 'expiresIn'],
+          },
+          'The mandate',
+        ),
+        '401': error('No valid app token'),
+        '403': error('Not the center, or the person is no longer a member'),
+        '404': error('No such standing mandate for this client, or withdrawn'),
+        '422': error('Invalid input'),
+      },
+    },
+  },
+  '/api/apps/standing-mandates/revoke': {
+    post: {
+      tags: ['Apps'],
+      summary: 'Withdraw a standing mandate',
+      description:
+        "Only the center's client that was given it: the agent removed, or the person withdrew it there.",
+      security: appToken,
+      requestBody: {
+        required: true,
+        ...json(
+          {
+            type: 'object',
+            properties: {
+              organization: { type: 'string' },
+              grant: { type: 'string' },
+            },
+            required: ['organization', 'grant'],
+          },
+          'The organization and the standing mandate',
+        ),
+      },
+      responses: {
+        '204': { description: 'Withdrawn, or already withdrawn' },
+        '401': error('No valid app token'),
+        '403': error('Not the center'),
+        '422': error('Invalid input'),
+      },
+    },
+  },
   '/api/apps/clients': {
     post: {
       tags: ['Apps'],
