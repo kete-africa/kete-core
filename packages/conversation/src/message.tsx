@@ -1,4 +1,10 @@
-import { ActorAvatar, CanvasIcon, Markdown, type CanvasIconName } from '@kete/design';
+import {
+  ActorAvatar,
+  CanvasIcon,
+  Markdown,
+  type ActorFace,
+  type CanvasIconName,
+} from '@kete/design';
 import { useRef, useState, type ReactNode } from 'react';
 import { AgentRun } from './run.js';
 import type { RunView, ShownMessage, Who } from './types.js';
@@ -23,6 +29,8 @@ export interface MessageProps {
   words: ConversationWords;
   me: Who;
   nameOf: (who: { kind: string; id: string }) => string;
+  /** An agent's own face, when the product knows it; otherwise one is drawn from its id (R6). */
+  faceOf?: (who: { kind: string; id: string }) => ActorFace | null | undefined;
   /** The message it answers, if shown in this page. */
   quoted?: ShownMessage | undefined;
   /** Where a file of the thread is read. */
@@ -51,12 +59,13 @@ export interface MessageProps {
 const URL = /\bhttps?:\/\/[^\s<>()«»"']+[^\s<>()«»"'.,;:!?]/g;
 
 /** Its author's face, as everywhere (R6): Kete and an agent a square, a person a circle. */
-function Avatar({ name, who }: { name: string; who: Who }) {
+function Avatar({ name, who, face }: { name: string; who: Who; face?: ActorFace | null }) {
   return (
     <ActorAvatar
       kind={who.kind === 'agent' && who.id === 'agt_assistant' ? 'kete' : who.kind}
       id={who.id}
       name={name}
+      face={face ?? null}
     />
   );
 }
@@ -181,6 +190,7 @@ export function MessageItem({
   words,
   me,
   nameOf,
+  faceOf,
   quoted,
   fileHref,
   renderReference,
@@ -216,7 +226,7 @@ export function MessageItem({
       data-mine={mine || undefined}
       className="group/message relative grid max-w-[760px] scroll-mt-4 grid-cols-[28px_minmax(0,1fr)] gap-2.5 max-[860px]:grid-cols-[24px_minmax(0,1fr)]"
     >
-      <Avatar name={name} who={message.author} />
+      <Avatar name={name} who={message.author} face={faceOf?.(message.author) ?? null} />
       <div className="min-w-0">
         {!message.deleted && (onReact || onReply || onAction || menu.length > 0) && (
           <div
