@@ -58,11 +58,14 @@ export interface MessageProps {
 
 const URL = /\bhttps?:\/\/[^\s<>()«»"']+[^\s<>()«»"'.,;:!?]/g;
 
+/** Kete itself writes as the center's assistant: Kete, never one of the agents (D-061). */
+const isKete = (who: Who) => who.kind === 'agent' && who.id === 'agt_assistant';
+
 /** Its author's face, as everywhere (R6): Kete and an agent a square, a person a circle. */
 function Avatar({ name, who, face }: { name: string; who: Who; face?: ActorFace | null }) {
   return (
     <ActorAvatar
-      kind={who.kind === 'agent' && who.id === 'agt_assistant' ? 'kete' : who.kind}
+      kind={isKete(who) ? 'kete' : who.kind}
       id={who.id}
       name={name}
       face={face ?? null}
@@ -308,7 +311,7 @@ export function MessageItem({
         )}
         <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-[12px] text-fg-muted">
           <b className="text-[13.5px] font-semibold text-fg">{name}</b>
-          {message.author.kind === 'agent' && (
+          {message.author.kind === 'agent' && !isKete(message.author) && (
             <span className="rounded-[4px] bg-agent px-1.5 text-[11px] font-semibold text-on-agent">
               {words.agent}
             </span>

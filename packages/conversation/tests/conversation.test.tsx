@@ -188,6 +188,21 @@ describe('a message as the canvas v6.2 draws it', () => {
     expect(mine).toContain('<strong>195 000 F</strong>');
     expect(mine).toContain('A lu 3 sources');
   });
+
+  it('tags an agent’s words « agent », never Kete’s own (D-061)', () => {
+    const said = (id: string) =>
+      renderToStaticMarkup(
+        <MessageItem
+          message={base({ author: { kind: 'agent', id }, text: 'Voici les factures.' })}
+          words={words}
+          me={afi}
+          nameOf={nameOf}
+          fileHref={(file) => file}
+        />,
+      );
+    expect(said('agt_relances')).toContain('>agent</span>');
+    expect(said('agt_assistant')).not.toContain('>agent</span>');
+  });
 });
 
 describe('the frame, the stream and « Infos du fil »', () => {

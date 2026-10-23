@@ -69,6 +69,20 @@ describe('the calendar’s parts', () => {
     expect(html).not.toMatch(BASE_COLOR);
   });
 
+  it('keeps a rest day narrow while empty, as wide as the others once it holds something', () => {
+    const empty = renderToStaticMarkup(<WeekCalendar days={days} words={words} items={[]} />);
+    expect(empty).toContain('minmax(0,.5fr) minmax(0,.5fr)');
+    const busy = renderToStaticMarkup(
+      <WeekCalendar
+        days={days}
+        words={words}
+        items={[]}
+        allDay={[{ key: 'devis', day: 5, label: 'Chiffre le devis Garage Bè' }]}
+      />,
+    );
+    expect(busy).toContain('minmax(0,1fr) minmax(0,.5fr)');
+  });
+
   it('reads the same week as a list, day by day, empty days left out', () => {
     const html = renderToStaticMarkup(
       <AgendaList

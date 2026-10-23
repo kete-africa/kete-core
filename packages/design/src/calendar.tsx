@@ -150,7 +150,11 @@ export function WeekCalendar({
   words: CalendarWords;
 }) {
   const span = Math.max(hours.to - hours.from, 1);
-  const columns = `56px ${days.map((day) => (day.rest ? 'minmax(0,.5fr)' : 'minmax(0,1fr)')).join(' ')}`;
+  // A rest day is narrow while empty; holding something, it is as wide as the others, readable.
+  const busy = new Set([...items, ...allDay].map((item) => item.day));
+  const columns = `56px ${days
+    .map((day, index) => (day.rest && !busy.has(index) ? 'minmax(0,.5fr)' : 'minmax(0,1fr)'))
+    .join(' ')}`;
   const top = (minutes: number) => Math.min(Math.max(minutes / 60 - hours.from, 0), span) * HOUR;
   return (
     <section aria-label={words.label} data-calendar="week">
