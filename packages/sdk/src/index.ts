@@ -2,6 +2,7 @@
 
 export type {
   AccountActivated,
+  AgentTemplate,
   AccountClosed,
   AccountCreated,
   Capability,
@@ -38,6 +39,7 @@ export type {
   View,
 } from './contracts/types.gen.js';
 export {
+  validateAgentTemplate,
   validateCapability,
   validateDataset,
   validateDatasetAnswer,

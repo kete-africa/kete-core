@@ -72,6 +72,8 @@ export const validateObjectType = validator(`${base}object-type.v1.schema.json`)
 export const validateObject = validator(`${base}object.v1.schema.json`);
 /** A generic component configured where it is used (doctrine D-062, R22; kete-core spec 145). */
 export const validateView = validator(`${base}view.v1.schema.json`);
+/** An agent a product ships, ready to be taken (doctrine D-062, R5; kete-core spec 146). */
+export const validateAgentTemplate = validator(`${base}agent-template.v1.schema.json`);
 /** One thing said in a thread, never rewritten (doctrine D-057, spec 113). */
 export const validateMessage = validator(`${base}message.v1.schema.json`);
 /** Where the router tied something received from outside (doctrine D-056, spec 113). */
