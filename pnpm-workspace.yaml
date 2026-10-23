@@ -26,9 +26,15 @@ overrides:
   # DOMPurify, under mermaid in the documentation site: a critical and a high advisory published on
   # 2026-10-22 (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr), fixed in 3.4.17.
   'dompurify@<3.4.17': ^3.4.17
+  # Zod can exhaust memory validating oversized input (GHSA-mrhx-c7xc-m3w5, published 2026-10-23):
+  # every zod 4 lifted to 4.6.6.
+  'zod@>=4.0.0 <4.6.6': ^4.6.6
 
 # Advisories without a fix that only reach build-time code (decision 0007). Reviewed at each release.
 auditConfig:
   ignoreGhsas:
     - GHSA-ch52-4w7c-c8xp
     - GHSA-vfj7-8cjw-p6xm
+    # Zod 3, under @google/design.md only (no fixed 3.x): it lints and exports Kete's own DESIGN.md
+    # at build time; zod 4 everywhere at run time is lifted by the override above.
+    - GHSA-mrhx-c7xc-m3w5
