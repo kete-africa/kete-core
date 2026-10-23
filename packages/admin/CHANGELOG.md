@@ -1,5 +1,11 @@
 # @kete-africa/admin
 
+## 0.3.8
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.3.7
 
 ### Patch Changes

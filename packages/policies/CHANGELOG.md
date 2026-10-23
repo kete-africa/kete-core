@@ -1,5 +1,11 @@
 # @kete-africa/policies
 
+## 0.2.7
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.2.6
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/views",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "type": "module",
   "description": "Kete's generic views (doctrine D-037, D-062 R22): view.v1 — figures, layers of configuration and their React renderer for Kete and the phone; and for copilots (MCP Apps) a draft to verify, a form, a table, a detail — one self-contained page, in the product's design.",
   "repository": {

@@ -1,5 +1,11 @@
 # @kete-africa/metrics
 
+## 0.2.3
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.2.2
 
 ### Patch Changes
