@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/settings",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "type": "module",
   "description": "Kete settings in layers (spec 115; decision 0013; doctrine D-060): each setting declared once by its owner, resolved from Kete's default through the organization, the legal entity or unit, the app and the person to the device — the most precise wins, and the screen says where a value comes from.",
   "repository": {
