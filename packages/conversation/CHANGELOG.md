@@ -1,5 +1,11 @@
 # @kete-africa/conversation
 
+## 0.3.1
+
+### Patch Changes
+
+- c2e0912: Kete's own words carry no « agent » tag: Kete is not one of the agents (D-061); an agent's still do.
+
 ## 0.3.0
 
 ### Minor Changes
