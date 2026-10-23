@@ -1,4 +1,5 @@
-import type { Dataset } from '@kete/sdk';
+import { answerQuery, MAX_ROWS, QueryRefused } from '@kete/metrics';
+import type { Dataset, DatasetAnswer } from '@kete/sdk';
 import type { SqlExecutor } from '@kete/tenancy';
 import { z } from 'zod';
 import type { Classification } from './capability.js';
@@ -30,6 +31,17 @@ export interface DatasetDefinition<Row extends z.ZodObject = z.ZodObject> {
   dimensions?: (keyof z.output<Row> & string)[];
   /** How far its rows may travel (spec 049): `internal` by default. */
   classification?: Classification;
+  /**
+   * Which fields carry the center's four axes and the object a row is about (spec 144): a filter
+   * « project = X » then applies to its rows, at home.
+   */
+  axes?: {
+    project?: keyof z.output<Row> & string;
+    party?: keyof z.output<Row> & string;
+    unit?: keyof z.output<Row> & string;
+    person?: keyof z.output<Row> & string;
+    object?: { kind: string; field: keyof z.output<Row> & string };
+  };
   /** The rows, in the caller's organization (RLS applies), filtered by the query. */
   rows(query: DatasetQuery, context: { db: SqlExecutor; caller: Caller }): Promise<z.output<Row>[]>;
 }
@@ -48,10 +60,14 @@ export function defineDataset<Row extends z.ZodObject>(
     throw new Error(`A permission reads « feature:verb »: ${definition.permission}`);
   }
   const fields = Object.keys(definition.row.shape);
+  const axes = definition.axes ?? {};
   for (const field of [
     ...(definition.time ? [definition.time] : []),
     ...(definition.measures ?? []),
     ...(definition.dimensions ?? []),
+    ...[axes.project, axes.party, axes.unit, axes.person, axes.object?.field].filter(
+      (f): f is string => typeof f === 'string',
+    ),
   ]) {
     if (!fields.includes(field)) {
       throw new Error(`${definition.name}: « ${field} » is not a field of its rows.`);
@@ -71,6 +87,7 @@ export function describeDataset(definition: DatasetDefinition): Dataset {
     ...(definition.measures?.length ? { measures: definition.measures } : {}),
     ...(definition.dimensions?.length ? { dimensions: definition.dimensions } : {}),
     ...(definition.classification ? { classification: definition.classification } : {}),
+    ...(definition.axes && Object.keys(definition.axes).length ? { axes: definition.axes } : {}),
   };
 }
 
@@ -79,6 +96,15 @@ const day = /^\d{4}-\d{2}-\d{2}$/;
 export type DatasetRead =
   | { status: 'done'; dataset: string; rows: unknown[]; truncated: boolean }
   | { status: 'refused'; reason: 'unknown_dataset' | 'not_allowed' | 'invalid_query' };
+
+export type DatasetSummed =
+  | ({ status: 'done' } & DatasetAnswer)
+  | {
+      status: 'refused';
+      reason:
+        'unknown_dataset' | 'not_allowed' | 'invalid_query' | 'unknown_field' | 'not_a_number';
+      message?: string;
+    };
 
 export interface DatasetRegistry {
   /** The data sets this caller may read. */
@@ -90,6 +116,11 @@ export interface DatasetRegistry {
     name: string,
     query: Partial<Record<'from' | 'to' | 'limit', string>>,
   ): Promise<DatasetRead>;
+  /**
+   * A question (dataset-query.v1) summed up here, under the caller's rights: only the answer
+   * travels (spec 144, ADR 0015).
+   */
+  query(caller: Caller, name: string, question: unknown): Promise<DatasetSummed>;
 }
 
 /** The product's data sets, read with the same rights and transaction as its capabilities. */
@@ -141,6 +172,35 @@ export function createDatasetRegistry(
         rows: rows.slice(0, limit),
         truncated: rows.length > limit,
       };
+    },
+    async query(caller, name, question) {
+      const definition = byName.get(name);
+      if (!definition) return { status: 'refused', reason: 'unknown_dataset' };
+      if (!(await host.authorize(caller, definition.permission))) {
+        return { status: 'refused', reason: 'not_allowed' };
+      }
+      const asked = (question ?? {}) as { from?: unknown; to?: unknown };
+      const period = {
+        ...(typeof asked.from === 'string' && day.test(asked.from) ? { from: asked.from } : {}),
+        ...(typeof asked.to === 'string' && day.test(asked.to) ? { to: asked.to } : {}),
+      };
+      try {
+        const rows = await host.transaction(caller.organizationId, (db) =>
+          definition.rows({ ...period, limit: MAX_ROWS + 1 }, { db, caller }),
+        );
+        const answer = answerQuery(
+          describeDataset(definition),
+          rows.slice(0, MAX_ROWS) as Record<string, unknown>[],
+          question,
+          { cut: rows.length > MAX_ROWS },
+        );
+        return { status: 'done', ...answer };
+      } catch (error) {
+        if (error instanceof QueryRefused) {
+          return { status: 'refused', reason: error.code, message: error.message };
+        }
+        throw error;
+      }
     },
   };
 }

@@ -32,6 +32,10 @@ const base = 'https://kete.africa/contracts/';
 export const validateEvent = validator(`${base}event.v1.schema.json`);
 export const validateCapability = validator(`${base}capability.v1.schema.json`);
 export const validateDataset = validator(`${base}dataset.v1.schema.json`);
+/** A question put to an app's data set, summed up at the app (kete-core spec 144). */
+export const validateDatasetQuery = validator(`${base}dataset-query.v1.schema.json`);
+/** An app's answer to a data set's question (kete-core spec 144). */
+export const validateDatasetAnswer = validator(`${base}dataset-answer.v1.schema.json`);
 export const validateManifest = validator(`${base}manifest.v1.schema.json`);
 export const validateHealthReport = validator(`${base}health.v1.schema.json`);
 /** A fact of money an app says to its center (doctrine D-049). */

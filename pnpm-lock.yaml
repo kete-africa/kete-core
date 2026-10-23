@@ -504,6 +504,9 @@ importers:
       '@kete/drafts':
         specifier: workspace:@kete-africa/drafts@*
         version: link:../drafts
+      '@kete/metrics':
+        specifier: workspace:@kete-africa/metrics@*
+        version: link:../metrics
       '@kete/records':
         specifier: workspace:@kete-africa/records@*
         version: link:../records

@@ -70,11 +70,231 @@ export const schemas = {
       }
     }
   },
+  "dataset-answer.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/dataset-answer.v1.schema.json",
+    "title": "DatasetAnswer",
+    "description": "An app's answer to a data set's question (dataset-query.v1; kete-core spec 144): the groups, each with its measures, the largest first; how many rows were summed up; the axes it applied; when it was read. Only this travels, never the rows.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "dataset",
+      "rows",
+      "counted",
+      "truncated",
+      "filter",
+      "at"
+    ],
+    "properties": {
+      "dataset": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,62}$"
+      },
+      "rows": {
+        "type": "array",
+        "maxItems": 500,
+        "items": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "counted": {
+        "description": "The rows summed up, after the filters.",
+        "type": "integer",
+        "minimum": 0
+      },
+      "truncated": {
+        "description": "True: more rows than the app sums up at once (50 000), or more groups than asked.",
+        "type": "boolean"
+      },
+      "filter": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "pattern": "^prj_[0-9a-f-]{8,64}$"
+          },
+          "party_id": {
+            "type": "string",
+            "pattern": "^pty_[0-9a-f-]{8,64}$"
+          },
+          "unit_id": {
+            "type": "string",
+            "pattern": "^unt_[0-9a-f-]{8,64}$"
+          },
+          "person_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "object_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+          }
+        },
+        "description": "The axes it applied."
+      },
+      "at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  "dataset-query.v1": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://kete.africa/contracts/dataset-query.v1.schema.json",
+    "title": "DatasetQuery",
+    "description": "A question put to an app's data set (dataset.v1) at POST {api}/datasets/{name}/query, under the reader's rights (kete-core spec 144, ADR 0015): its rows filtered on the center's axes and on its own fields, grouped, summed up at the app; only the answer travels (dataset-answer.v1). No one writes a query language: every field named is one of the data set's own.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "measures"
+    ],
+    "properties": {
+      "filter": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "pattern": "^prj_[0-9a-f-]{8,64}$"
+          },
+          "party_id": {
+            "type": "string",
+            "pattern": "^pty_[0-9a-f-]{8,64}$"
+          },
+          "unit_id": {
+            "type": "string",
+            "pattern": "^unt_[0-9a-f-]{8,64}$"
+          },
+          "person_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "object_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+          }
+        },
+        "description": "The center's axes, through the data set's `axes`: an axis it does not carry is left out, and the answer says which it applied."
+      },
+      "where": {
+        "description": "Filters on the data set's own fields, all of them true.",
+        "type": "array",
+        "maxItems": 10,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "field",
+            "op",
+            "value"
+          ],
+          "properties": {
+            "field": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+            },
+            "op": {
+              "enum": [
+                "eq",
+                "neq",
+                "gte",
+                "lte",
+                "contains"
+              ]
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              ]
+            }
+          }
+        }
+      },
+      "group_by": {
+        "description": "Up to three of its dimensions.",
+        "type": "array",
+        "maxItems": 3,
+        "items": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+        }
+      },
+      "measures": {
+        "description": "What each group sums up; a group's value is named `count`, or `fn(field)`: « sum(amount) ».",
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 6,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "fn"
+          ],
+          "properties": {
+            "fn": {
+              "enum": [
+                "count",
+                "sum",
+                "avg",
+                "min",
+                "max"
+              ]
+            },
+            "field": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+            }
+          }
+        }
+      },
+      "from": {
+        "description": "Rows whose time field is on or after this day.",
+        "type": "string",
+        "format": "date"
+      },
+      "to": {
+        "description": "Rows whose time field is on or before this day.",
+        "type": "string",
+        "format": "date"
+      },
+      "limit": {
+        "description": "At most this many groups, the largest first (default 100).",
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 500
+      }
+    }
+  },
   "dataset.v1": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://kete.africa/contracts/dataset.v1.schema.json",
     "title": "Dataset",
-    "description": "A set of rows a Kete product exposes to people's dashboards, to its assistant and to other apps, always under the reader's rights: its name, what it holds, the permission to read it, the JSON Schema of one row, and which fields are a date, measures or dimensions. Read at the product's API: GET {api}/datasets/{name}.",
+    "description": "A set of rows a Kete product exposes to people's dashboards, to its assistant and to other apps, always under the reader's rights: its name, what it holds, the permission to read it, the JSON Schema of one row, and which fields are a date, measures or dimensions. Read at the product's API: GET {api}/datasets/{name}; summed up there: POST {api}/datasets/{name}/query (dataset-query.v1).",
     "type": "object",
     "additionalProperties": false,
     "required": [
@@ -129,6 +349,47 @@ export const schemas = {
           "secret"
         ],
         "description": "How far the data may travel. public: anyone; internal (the default): the organization's people with the permission; confidential: a need to know, never in a shared briefing; secret: never sent to a model, a shared briefing nor a notification's text."
+      },
+      "axes": {
+        "description": "Which fields carry the center's four axes and the object a row is about (added in v1: additive; doctrine D-062, R2; kete-core spec 144): a filter « project = X » then applies to every app's rows at once, at the app.",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "project": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+          },
+          "party": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+          },
+          "unit": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+          },
+          "person": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+          },
+          "object": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "field"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{1,40}$"
+              },
+              "field": {
+                "type": "string",
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -2263,6 +2524,10 @@ export const schemas = {
             "type": "string",
             "minLength": 1,
             "maxLength": 100
+          },
+          "unit_id": {
+            "type": "string",
+            "pattern": "^unt_[0-9a-f-]{8,64}$"
           }
         }
       },
@@ -2273,6 +2538,10 @@ export const schemas = {
       },
       "denied": {
         "description": "True: the reader may not read this figure; its value is null.",
+        "type": "boolean"
+      },
+      "missing": {
+        "description": "True: its source did not answer when it was read; its value is null. A figure missing is shown missing, never as zero (doctrine D-062, R17; added in v1: additive).",
         "type": "boolean"
       }
     }
@@ -2364,6 +2633,7 @@ export const schemas = {
           "enum": [
             "project",
             "party",
+            "unit",
             "person",
             "period"
           ]

@@ -32,8 +32,14 @@
       "additionalProperties": false,
       "required": ["from", "to"],
       "properties": {
-        "from": { "type": "string", "format": "date" },
-        "to": { "type": "string", "format": "date" }
+        "from": {
+          "type": "string",
+          "format": "date"
+        },
+        "to": {
+          "type": "string",
+          "format": "date"
+        }
       }
     },
     "filter": {
@@ -41,9 +47,23 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "project_id": { "type": "string", "pattern": "^prj_[0-9a-f-]{8,64}$" },
-        "party_id": { "type": "string", "pattern": "^pty_[0-9a-f-]{8,64}$" },
-        "person_id": { "type": "string", "minLength": 1, "maxLength": 100 }
+        "project_id": {
+          "type": "string",
+          "pattern": "^prj_[0-9a-f-]{8,64}$"
+        },
+        "party_id": {
+          "type": "string",
+          "pattern": "^pty_[0-9a-f-]{8,64}$"
+        },
+        "person_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "unit_id": {
+          "type": "string",
+          "pattern": "^unt_[0-9a-f-]{8,64}$"
+        }
       }
     },
     "at": {
@@ -53,6 +73,10 @@
     },
     "denied": {
       "description": "True: the reader may not read this figure; its value is null.",
+      "type": "boolean"
+    },
+    "missing": {
+      "description": "True: its source did not answer when it was read; its value is null. A figure missing is shown missing, never as zero (doctrine D-062, R17; added in v1: additive).",
       "type": "boolean"
     }
   }

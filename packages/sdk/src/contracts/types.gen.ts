@@ -40,7 +40,478 @@ export interface Capability {
 }
 
 /**
- * A set of rows a Kete product exposes to people's dashboards, to its assistant and to other apps, always under the reader's rights: its name, what it holds, the permission to read it, the JSON Schema of one row, and which fields are a date, measures or dimensions. Read at the product's API: GET {api}/datasets/{name}.
+ * An app's answer to a data set's question (dataset-query.v1; kete-core spec 144): the groups, each with its measures, the largest first; how many rows were summed up; the axes it applied; when it was read. Only this travels, never the rows.
+ */
+export interface DatasetAnswer {
+  dataset: string;
+  /**
+   * @maxItems 500
+   */
+  rows: {
+    [k: string]: number | string | boolean | null;
+  }[];
+  /**
+   * The rows summed up, after the filters.
+   */
+  counted: number;
+  /**
+   * True: more rows than the app sums up at once (50 000), or more groups than asked.
+   */
+  truncated: boolean;
+  /**
+   * The axes it applied.
+   */
+  filter: {
+    project_id?: string;
+    party_id?: string;
+    unit_id?: string;
+    person_id?: string;
+    object_id?: string;
+  };
+  at: string;
+}
+
+/**
+ * A question put to an app's data set (dataset.v1) at POST {api}/datasets/{name}/query, under the reader's rights (kete-core spec 144, ADR 0015): its rows filtered on the center's axes and on its own fields, grouped, summed up at the app; only the answer travels (dataset-answer.v1). No one writes a query language: every field named is one of the data set's own.
+ */
+export interface DatasetQuery {
+  /**
+   * The center's axes, through the data set's `axes`: an axis it does not carry is left out, and the answer says which it applied.
+   */
+  filter?: {
+    project_id?: string;
+    party_id?: string;
+    unit_id?: string;
+    person_id?: string;
+    object_id?: string;
+  };
+  /**
+   * Filters on the data set's own fields, all of them true.
+   *
+   * @maxItems 10
+   */
+  where?:
+    | []
+    | [
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ];
+  /**
+   * Up to three of its dimensions.
+   *
+   * @maxItems 3
+   */
+  group_by?: [] | [string] | [string, string] | [string, string, string];
+  /**
+   * What each group sums up; a group's value is named `count`, or `fn(field)`: « sum(amount) ».
+   *
+   * @minItems 1
+   * @maxItems 6
+   */
+  measures:
+    | [
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+      ]
+    | [
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+      ]
+    | [
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+      ]
+    | [
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+      ]
+    | [
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+      ]
+    | [
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          field?: string;
+        },
+      ];
+  /**
+   * Rows whose time field is on or after this day.
+   */
+  from?: string;
+  /**
+   * Rows whose time field is on or before this day.
+   */
+  to?: string;
+  /**
+   * At most this many groups, the largest first (default 100).
+   */
+  limit?: number;
+}
+
+/**
+ * A set of rows a Kete product exposes to people's dashboards, to its assistant and to other apps, always under the reader's rights: its name, what it holds, the permission to read it, the JSON Schema of one row, and which fields are a date, measures or dimensions. Read at the product's API: GET {api}/datasets/{name}; summed up there: POST {api}/datasets/{name}/query (dataset-query.v1).
  */
 export interface Dataset {
   name: string;
@@ -68,6 +539,19 @@ export interface Dataset {
    * How far the data may travel. public: anyone; internal (the default): the organization's people with the permission; confidential: a need to know, never in a shared briefing; secret: never sent to a model, a shared briefing nor a notification's text.
    */
   classification?: 'public' | 'internal' | 'confidential' | 'secret';
+  /**
+   * Which fields carry the center's four axes and the object a row is about (added in v1: additive; doctrine D-062, R2; kete-core spec 144): a filter « project = X » then applies to every app's rows at once, at the app.
+   */
+  axes?: {
+    project?: string;
+    party?: string;
+    unit?: string;
+    person?: string;
+    object?: {
+      kind: string;
+      field: string;
+    };
+  };
 }
 
 /**
@@ -6384,6 +6868,7 @@ export interface MetricReading {
     project_id?: string;
     party_id?: string;
     person_id?: string;
+    unit_id?: string;
   };
   /**
    * When it was read.
@@ -6393,6 +6878,10 @@ export interface MetricReading {
    * True: the reader may not read this figure; its value is null.
    */
   denied?: boolean;
+  /**
+   * True: its source did not answer when it was read; its value is null. A figure missing is shown missing, never as zero (doctrine D-062, R17; added in v1: additive).
+   */
+  missing?: boolean;
 }
 
 /**
@@ -6425,7 +6914,7 @@ export interface Metric {
   /**
    * What it can be split or filtered by.
    */
-  axes?: ('project' | 'party' | 'person' | 'period')[];
+  axes?: ('project' | 'party' | 'unit' | 'person' | 'period')[];
 }
 
 /**

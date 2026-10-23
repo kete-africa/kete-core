@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/dataset-answer.v1.schema.json",
+  "title": "DatasetAnswer",
+  "description": "An app's answer to a data set's question (dataset-query.v1; kete-core spec 144): the groups, each with its measures, the largest first; how many rows were summed up; the axes it applied; when it was read. Only this travels, never the rows.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["dataset", "rows", "counted", "truncated", "filter", "at"],
+  "properties": {
+    "dataset": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,62}$"
+    },
+    "rows": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "counted": {
+      "description": "The rows summed up, after the filters.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "truncated": {
+      "description": "True: more rows than the app sums up at once (50 000), or more groups than asked.",
+      "type": "boolean"
+    },
+    "filter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^prj_[0-9a-f-]{8,64}$"
+        },
+        "party_id": {
+          "type": "string",
+          "pattern": "^pty_[0-9a-f-]{8,64}$"
+        },
+        "unit_id": {
+          "type": "string",
+          "pattern": "^unt_[0-9a-f-]{8,64}$"
+        },
+        "person_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "object_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+        }
+      },
+      "description": "The axes it applied."
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

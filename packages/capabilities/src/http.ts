@@ -9,6 +9,7 @@ import type { Caller, CapabilityRegistry } from './registry.js';
 //   POST {prefix}/capabilities/{name}     invoke one: JSON input, `Idempotency-Key` header
 //   GET  {prefix}/datasets                what the caller may read (dataset.v1)
 //   GET  {prefix}/datasets/{name}         rows: ?from=YYYY-MM-DD&to=YYYY-MM-DD&limit=500
+//   POST {prefix}/datasets/{name}/query   summed up here (dataset-query.v1 → dataset-answer.v1)
 
 export interface HttpApiOptions {
   registry: CapabilityRegistry;
@@ -35,6 +36,8 @@ const refusalStatus: Record<string, number> = {
   unknown_dataset: 404,
   invalid_input: 422,
   invalid_query: 422,
+  unknown_field: 422,
+  not_a_number: 422,
 };
 
 export function createHttpApi(options: HttpApiOptions): (request: Request) => Promise<Response> {
@@ -56,6 +59,26 @@ export function createHttpApi(options: HttpApiOptions): (request: Request) => Pr
       });
     }
     const [collection, name, ...rest] = parts;
+    if (collection === 'datasets' && name && rest.join('/') === 'query') {
+      if (request.method !== 'POST') return json({ error: 'not_found' }, 405);
+      const question: unknown = await request.json().catch(() => undefined);
+      if (question === undefined) return json({ error: 'invalid_query' }, 422);
+      const summed = await options.datasets.query(caller, name, question);
+      if (summed.status === 'refused') {
+        return json(
+          { error: summed.reason, ...(summed.message ? { message: summed.message } : {}) },
+          refusalStatus[summed.reason] ?? 400,
+        );
+      }
+      return json({
+        dataset: summed.dataset,
+        rows: summed.rows,
+        counted: summed.counted,
+        truncated: summed.truncated,
+        filter: summed.filter,
+        at: summed.at,
+      });
+    }
     if (rest.length > 0) return json({ error: 'not_found' }, 404);
 
     if (collection === 'capabilities' && !name && request.method === 'GET') {

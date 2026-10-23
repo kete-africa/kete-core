@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://kete.africa/contracts/dataset.v1.schema.json",
   "title": "Dataset",
-  "description": "A set of rows a Kete product exposes to people's dashboards, to its assistant and to other apps, always under the reader's rights: its name, what it holds, the permission to read it, the JSON Schema of one row, and which fields are a date, measures or dimensions. Read at the product's API: GET {api}/datasets/{name}.",
+  "description": "A set of rows a Kete product exposes to people's dashboards, to its assistant and to other apps, always under the reader's rights: its name, what it holds, the permission to read it, the JSON Schema of one row, and which fields are a date, measures or dimensions. Read at the product's API: GET {api}/datasets/{name}; summed up there: POST {api}/datasets/{name}/query (dataset-query.v1).",
   "type": "object",
   "additionalProperties": false,
   "required": ["name", "description", "permission", "row"],
@@ -47,6 +47,44 @@
     "classification": {
       "enum": ["public", "internal", "confidential", "secret"],
       "description": "How far the data may travel. public: anyone; internal (the default): the organization's people with the permission; confidential: a need to know, never in a shared briefing; secret: never sent to a model, a shared briefing nor a notification's text."
+    },
+    "axes": {
+      "description": "Which fields carry the center's four axes and the object a row is about (added in v1: additive; doctrine D-062, R2; kete-core spec 144): a filter « project = X » then applies to every app's rows at once, at the app.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+        },
+        "party": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+        },
+        "unit": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+        },
+        "person": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+        },
+        "object": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "field"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{1,40}$"
+            },
+            "field": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,79}$"
+            }
+          }
+        }
+      }
     }
   }
 }

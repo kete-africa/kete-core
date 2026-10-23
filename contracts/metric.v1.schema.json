@@ -18,8 +18,16 @@
       "additionalProperties": false,
       "required": ["fr", "en"],
       "properties": {
-        "fr": { "type": "string", "minLength": 1, "maxLength": 120 },
-        "en": { "type": "string", "minLength": 1, "maxLength": 120 }
+        "fr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
       }
     },
     "description": {
@@ -28,8 +36,16 @@
       "additionalProperties": false,
       "required": ["fr", "en"],
       "properties": {
-        "fr": { "type": "string", "minLength": 1, "maxLength": 400 },
-        "en": { "type": "string", "minLength": 1, "maxLength": 400 }
+        "fr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        }
       }
     },
     "unit": {
@@ -44,7 +60,9 @@
       "description": "What it can be split or filtered by.",
       "type": "array",
       "uniqueItems": true,
-      "items": { "enum": ["project", "party", "person", "period"] }
+      "items": {
+        "enum": ["project", "party", "unit", "person", "period"]
+      }
     }
   }
 }

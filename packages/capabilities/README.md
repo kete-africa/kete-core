@@ -160,3 +160,22 @@ sequenceDiagram
 capabilities and data sets over HTTP (`/capabilities`, `/datasets`), with the same rights,
 journal and autonomy as MCP and the screens. See
 [spec 045](../../specs/045-integration-contract/spec.md).
+
+Since spec 144 (ADR 0015), a data set says which of its fields carry the center's four axes
+(`axes: { project, party, unit, person, object }`) and answers a question at home:
+`POST /datasets/{name}/query` (`dataset-query.v1`) reads its rows under the caller's rights — up to
+50 000 —, filters them on those axes, its own fields and its period, groups and sums them up with
+`@kete/metrics`' engine, and answers only the groups (`dataset-answer.v1`). An axis it does not
+carry is left out and the answer says what it applied; a field it does not have, or a sum of
+words, is refused.
+
+```mermaid
+sequenceDiagram
+  participant C as The center (a board, an indicator)
+  participant A as The app · POST /datasets/{name}/query
+  participant R as Its rows (defineDataset.rows, RLS)
+  C->>A: project = prj_…, group by client, sum(amount), September (her token)
+  A->>R: the period's rows, within her rights
+  R-->>A: up to 50 000 rows
+  A-->>C: the groups, the rows counted, the axes applied — never the rows
+```
