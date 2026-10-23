@@ -1,5 +1,11 @@
 # @kete-africa/design
 
+## 0.16.1
+
+### Patch Changes
+
+- 1a4553f: The week calendar keeps a rest day narrow only while it is empty: holding a deadline or a meeting, it is as wide as the others, readable.
+
 ## 0.16.0
 
 ### Minor Changes
