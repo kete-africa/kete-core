@@ -94,6 +94,9 @@ export interface DatasetQuery {
     | []
     | [
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
@@ -101,28 +104,17 @@ export interface DatasetQuery {
       ]
     | [
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-      ]
-    | [
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
@@ -130,48 +122,25 @@ export interface DatasetQuery {
       ]
     | [
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-      ]
-    | [
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
@@ -179,68 +148,33 @@ export interface DatasetQuery {
       ]
     | [
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-      ]
-    | [
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
@@ -248,88 +182,41 @@ export interface DatasetQuery {
       ]
     | [
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-      ]
-    | [
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
-          field: string;
-          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
-          value: number | string;
-        },
-        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
@@ -337,51 +224,329 @@ export interface DatasetQuery {
       ]
     | [
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
         },
         {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field: string;
           op: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
           value: number | string;
@@ -403,96 +568,159 @@ export interface DatasetQuery {
     | [
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
       ]
     | [
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
-          field?: string;
-        },
-      ]
-    | [
-        {
-          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
-          field?: string;
-        },
-        {
-          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
-          field?: string;
-        },
-        {
-          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
       ]
     | [
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
-          field?: string;
-        },
-        {
-          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
-          field?: string;
-        },
-      ]
-    | [
-        {
-          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
-          field?: string;
-        },
-        {
-          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
-          field?: string;
-        },
-        {
-          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
-          field?: string;
-        },
-        {
-          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
-          field?: string;
-        },
-        {
-          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
       ]
     | [
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field?: string;
+        },
+      ]
+    | [
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
         {
           fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field?: string;
+        },
+      ]
+    | [
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field?: string;
+        },
+        {
+          fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
           field?: string;
         },
       ];
@@ -9924,4 +10152,1538 @@ export interface Thread {
   state: 'open' | 'closed';
   opened_at: string;
   closed_at?: string;
+}
+
+/**
+ * A generic component configured where it is used (doctrine D-062, R22; kete-core ADR 0016, spec 145): its kind, where its data comes from, what the place binds, its filters, the gestures it offers and the options of its kind. Data, versioned, never code nor a query language; drawn the same in Kete, on the phone and in the copilots.
+ */
+export interface View {
+  id?: string;
+  kind: 'card' | 'collection' | 'figure' | 'board' | 'form' | 'timeline';
+  title: {
+    fr: string;
+    en: string;
+  };
+  /**
+   * Where its data comes from, read with the reader's rights (ADR 0014, 0015): the objects of a kind, a question to a data set, an app's figure, an indicator of the organization, or a read tool.
+   */
+  source?:
+    | {
+        objects: string;
+      }
+    | {
+        product?: string;
+        dataset: string;
+        /**
+         * @maxItems 3
+         */
+        group_by?: [] | [string] | [string, string] | [string, string, string];
+        /**
+         * @minItems 1
+         * @maxItems 6
+         */
+        measures?:
+          | [
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+            ]
+          | [
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+            ]
+          | [
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+            ]
+          | [
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+            ]
+          | [
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+            ]
+          | [
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+              {
+                fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+                /**
+                 * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+                 */
+                field?: string;
+              },
+            ];
+      }
+    | {
+        metric: string;
+      }
+    | {
+        /**
+         * @minItems 1
+         * @maxItems 50
+         */
+        indicators: [string, ...string[]];
+      }
+    | {
+        tool: string;
+        arguments?: {
+          [k: string]: unknown;
+        };
+      };
+  /**
+   * What the place binds: this object, this unit, me, the period — each filter on its axis.
+   */
+  context?: ('object' | 'project' | 'party' | 'unit' | 'me' | 'period')[];
+  /**
+   * Filters the reader may change, on the source's own fields.
+   *
+   * @maxItems 10
+   */
+  filters?:
+    | []
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+      ]
+    | [
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+        {
+          /**
+           * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+           */
+          field: string;
+          op?: 'eq' | 'neq' | 'gte' | 'lte' | 'contains';
+          value?: number | string;
+        },
+      ];
+  /**
+   * The capabilities it offers, by name; what commits is a draft (D-037).
+   *
+   * @maxItems 10
+   */
+  actions?:
+    | []
+    | [string]
+    | [string, string]
+    | [string, string, string]
+    | [string, string, string, string]
+    | [string, string, string, string, string]
+    | [string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string]
+    | [string, string, string, string, string, string, string, string, string, string];
+  /**
+   * Declared tasks and « Demander à Kete » with this view's context.
+   *
+   * @maxItems 6
+   */
+  shortcuts?:
+    | []
+    | [
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+      ]
+    | [
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+      ]
+    | [
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+      ]
+    | [
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+      ]
+    | [
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+      ]
+    | [
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+        {
+          label: {
+            fr: string;
+            en: string;
+          };
+          /**
+           * A sentence for Kete, with this view as its context.
+           */
+          ask?: string;
+          task?: string;
+        },
+      ];
+  collection?: {
+    layout?: 'table' | 'list' | 'columns' | 'calendar' | 'timeline' | 'map' | 'planning';
+    /**
+     * @maxItems 20
+     */
+    fields?:
+      | []
+      | [string]
+      | [string, string]
+      | [string, string, string]
+      | [string, string, string, string]
+      | [string, string, string, string, string]
+      | [string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string]
+      | [string, string, string, string, string, string, string, string, string, string, string]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+        ]
+      | [
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+          string,
+        ];
+    sort?: {
+      /**
+       * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+       */
+      field: string;
+      descending?: boolean;
+    };
+    /**
+     * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+     */
+    group?: string;
+    /**
+     * @maxItems 6
+     */
+    totals?:
+      | []
+      | [
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+        ]
+      | [
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+        ]
+      | [
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+        ]
+      | [
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+        ]
+      | [
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+        ]
+      | [
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+          {
+            fn: 'count' | 'sum' | 'avg' | 'min' | 'max';
+            /**
+             * One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) ».
+             */
+            field?: string;
+          },
+        ];
+  };
+  figure?: {
+    chart:
+      | 'number'
+      | 'bar'
+      | 'line'
+      | 'pie'
+      | 'table'
+      | 'bullet'
+      | 'scorecard'
+      | 'combo'
+      | 'cumulative'
+      | 'waterfall'
+      | 'tilemap'
+      | 'pareto'
+      | 'radar'
+      | 'boxplot';
+    period?: '7d' | '30d' | '90d' | 'quarter' | 'year' | 'all';
+    /**
+     * Shows the period before.
+     */
+    compare?: boolean;
+    target?: number;
+    threshold?: number;
+    better?: 'up' | 'down';
+    unit?: 'count' | 'percent' | 'money' | 'hours' | 'days' | 'number';
+    /**
+     * A click on a part filters the board on it.
+     */
+    drill?: boolean;
+  };
+  board?: {
+    /**
+     * @maxItems 40
+     */
+    cards: {
+      view: View;
+      place: {
+        x: number;
+        y: number;
+        w: number;
+        h: number;
+      };
+      /**
+       * Its order on a phone, one card per screen.
+       */
+      phone?: number;
+    }[];
+    /**
+     * @maxItems 8
+     */
+    tabs?:
+      | []
+      | [
+          {
+            fr: string;
+            en: string;
+          },
+        ]
+      | [
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+        ]
+      | [
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+        ]
+      | [
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+        ]
+      | [
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+        ]
+      | [
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+        ]
+      | [
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+        ]
+      | [
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+          {
+            fr: string;
+            en: string;
+          },
+        ];
+    modes?: ('grid' | 'meeting' | 'story' | 'phone')[];
+    cross_filter?: boolean;
+  };
+  form?: {
+    /**
+     * The record's JSON Schema (@kete/records).
+     */
+    schema: {
+      [k: string]: unknown;
+    };
+    prefill?: ('object' | 'project' | 'party' | 'unit' | 'me' | 'today')[];
+    capture?: ('voice' | 'photo' | 'place')[];
+    /**
+     * The capability it ends in.
+     */
+    gesture?: string;
+    /**
+     * A register: this form, its collection and its figures.
+     */
+    register?: boolean;
+  };
 }

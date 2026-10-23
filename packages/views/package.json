@@ -2,14 +2,16 @@
   "name": "@kete-africa/views",
   "version": "0.2.7",
   "type": "module",
-  "description": "Kete's generic views for copilots (MCP Apps, doctrine D-037): a draft to verify, a form, a table, a detail — one self-contained page, in the product's design.",
+  "description": "Kete's generic views (doctrine D-037, D-062 R22): view.v1 — figures, layers of configuration and their React renderer for Kete and the phone; and for copilots (MCP Apps) a draft to verify, a form, a table, a detail — one self-contained page, in the product's design.",
   "repository": {
     "type": "git",
     "url": "https://github.com/kete-africa/kete-core.git",
     "directory": "packages/views"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./figures": "./src/figures-entry.ts",
+    "./react": "./src/react/index.ts"
   },
   "scripts": {
     "build": "vite build",
@@ -26,12 +28,22 @@
       ".": {
         "types": "./dist/src/index.d.ts",
         "default": "./dist/src/index.js"
+      },
+      "./figures": {
+        "types": "./dist/src/figures-entry.d.ts",
+        "default": "./dist/src/figures-entry.js"
+      },
+      "./react": {
+        "types": "./dist/src/react/index.d.ts",
+        "default": "./dist/src/react/index.js"
       }
     }
   },
   "dependencies": {
     "@kete/capabilities": "workspace:@kete-africa/capabilities@*",
+    "@kete/sdk": "workspace:@kete-africa/sdk@*",
     "@kete/tenancy": "workspace:@kete-africa/tenancy@*",
+    "echarts": "6.1.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -49,5 +61,13 @@
     "tailwindcss": "^4.3.3",
     "vite": "^8.3.1",
     "vite-plugin-singlefile": "^2.3.0"
+  },
+  "peerDependencies": {
+    "react": "^19"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   }
 }

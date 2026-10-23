@@ -1,0 +1,456 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kete.africa/contracts/view.v1.schema.json",
+  "title": "View",
+  "description": "A generic component configured where it is used (doctrine D-062, R22; kete-core ADR 0016, spec 145): its kind, where its data comes from, what the place binds, its filters, the gestures it offers and the options of its kind. Data, versioned, never code nor a query language; drawn the same in Kete, on the phone and in the copilots.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "title"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,62}$"
+    },
+    "kind": {
+      "enum": ["card", "collection", "figure", "board", "form", "timeline"]
+    },
+    "title": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fr", "en"],
+      "properties": {
+        "fr": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "en": {
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+    "source": {
+      "description": "Where its data comes from, read with the reader's rights (ADR 0014, 0015): the objects of a kind, a question to a data set, an app's figure, an indicator of the organization, or a read tool.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["objects"],
+          "properties": {
+            "objects": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{1,40}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dataset"],
+          "properties": {
+            "product": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "dataset": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,62}$"
+            },
+            "group_by": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80,
+                "pattern": "^[^\u0000-\u001f]+$",
+                "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
+              }
+            },
+            "measures": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 6,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["fn"],
+                "properties": {
+                  "fn": {
+                    "enum": ["count", "sum", "avg", "min", "max"]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80,
+                    "pattern": "^[^\u0000-\u001f]+$",
+                    "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["metric"],
+          "properties": {
+            "metric": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["indicators"],
+          "properties": {
+            "indicators": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 50,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tool"],
+          "properties": {
+            "tool": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,62}$"
+            },
+            "arguments": {
+              "type": "object"
+            }
+          }
+        }
+      ]
+    },
+    "context": {
+      "description": "What the place binds: this object, this unit, me, the period — each filter on its axis.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["object", "project", "party", "unit", "me", "period"]
+      }
+    },
+    "filters": {
+      "description": "Filters the reader may change, on the source's own fields.",
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field"],
+        "properties": {
+          "field": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^[^\u0000-\u001f]+$",
+            "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
+          },
+          "op": {
+            "enum": ["eq", "neq", "gte", "lte", "contains"]
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "maxLength": 200
+              }
+            ]
+          }
+        }
+      }
+    },
+    "actions": {
+      "description": "The capabilities it offers, by name; what commits is a draft (D-037).",
+      "type": "array",
+      "maxItems": 10,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,62}$"
+      }
+    },
+    "shortcuts": {
+      "description": "Declared tasks and « Demander à Kete » with this view's context.",
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label"],
+        "properties": {
+          "label": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fr", "en"],
+            "properties": {
+              "fr": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "en": {
+                "type": "string",
+                "maxLength": 200
+              }
+            }
+          },
+          "ask": {
+            "description": "A sentence for Kete, with this view as its context.",
+            "type": "string",
+            "maxLength": 300
+          },
+          "task": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,62}$"
+          }
+        }
+      }
+    },
+    "collection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "layout": {
+          "enum": ["table", "list", "columns", "calendar", "timeline", "map", "planning"]
+        },
+        "fields": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^[^\u0000-\u001f]+$",
+            "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
+          }
+        },
+        "sort": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["field"],
+          "properties": {
+            "field": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^[^\u0000-\u001f]+$",
+              "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
+            },
+            "descending": {
+              "type": "boolean"
+            }
+          }
+        },
+        "group": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[^\u0000-\u001f]+$",
+          "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
+        },
+        "totals": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fn"],
+            "properties": {
+              "fn": {
+                "enum": ["count", "sum", "avg", "min", "max"]
+              },
+              "field": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80,
+                "pattern": "^[^\u0000-\u001f]+$",
+                "description": "One of the data set's own fields, as it names it: a spreadsheet's header may be « Délai (jours) »."
+              }
+            }
+          }
+        }
+      }
+    },
+    "figure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chart"],
+      "properties": {
+        "chart": {
+          "enum": [
+            "number",
+            "bar",
+            "line",
+            "pie",
+            "table",
+            "bullet",
+            "scorecard",
+            "combo",
+            "cumulative",
+            "waterfall",
+            "tilemap",
+            "pareto",
+            "radar",
+            "boxplot"
+          ]
+        },
+        "period": {
+          "enum": ["7d", "30d", "90d", "quarter", "year", "all"]
+        },
+        "compare": {
+          "description": "Shows the period before.",
+          "type": "boolean"
+        },
+        "target": {
+          "type": "number"
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "better": {
+          "enum": ["up", "down"]
+        },
+        "unit": {
+          "enum": ["count", "percent", "money", "hours", "days", "number"]
+        },
+        "drill": {
+          "description": "A click on a part filters the board on it.",
+          "type": "boolean"
+        }
+      }
+    },
+    "board": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cards"],
+      "properties": {
+        "cards": {
+          "type": "array",
+          "maxItems": 40,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["view", "place"],
+            "properties": {
+              "view": {
+                "$ref": "#"
+              },
+              "place": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["x", "y", "w", "h"],
+                "properties": {
+                  "x": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 11
+                  },
+                  "y": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 500
+                  },
+                  "w": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 12
+                  },
+                  "h": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 12
+                  }
+                }
+              },
+              "phone": {
+                "description": "Its order on a phone, one card per screen.",
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "tabs": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fr", "en"],
+            "properties": {
+              "fr": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "en": {
+                "type": "string",
+                "maxLength": 200
+              }
+            }
+          }
+        },
+        "modes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["grid", "meeting", "story", "phone"]
+          }
+        },
+        "cross_filter": {
+          "type": "boolean"
+        }
+      }
+    },
+    "form": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema"],
+      "properties": {
+        "schema": {
+          "description": "The record's JSON Schema (@kete/records).",
+          "type": "object"
+        },
+        "prefill": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["object", "project", "party", "unit", "me", "today"]
+          }
+        },
+        "capture": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["voice", "photo", "place"]
+          }
+        },
+        "gesture": {
+          "description": "The capability it ends in.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,62}$"
+        },
+        "register": {
+          "description": "A register: this form, its collection and its figures.",
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
