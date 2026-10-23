@@ -1,5 +1,12 @@
 # @kete-africa/sdk
 
+## 0.19.0
+
+### Minor Changes
+
+- aab967c: One event path (spec 143; doctrine D-062, R11; ADR 0017): an event may name the object it is about
+  (`event.v1`'s `object`, additive); `createEvent` and the emitter carry it.
+
 ## 0.18.0
 
 ### Minor Changes

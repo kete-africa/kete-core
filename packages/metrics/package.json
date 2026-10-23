@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/metrics",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "type": "module",
   "description": "Kete metrics (spec 103; doctrine D-052): the figures an app declares in its manifest, computed by its code under the reader's rights, read over a period and compared with the one before — served at the app's /api/metrics and read by the center, never a query written by hand.",
   "repository": {
