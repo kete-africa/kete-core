@@ -74,6 +74,8 @@ export const validateObject = validator(`${base}object.v1.schema.json`);
 export const validateView = validator(`${base}view.v1.schema.json`);
 /** An agent a product ships, ready to be taken (doctrine D-062, R5; kete-core spec 146). */
 export const validateAgentTemplate = validator(`${base}agent-template.v1.schema.json`);
+/** Who acts or speaks, drawn alike everywhere (doctrine D-062, R6; kete-core spec 149). */
+export const validateActor = validator(`${base}actor.v1.schema.json`);
 /** One thing said in a thread, never rewritten (doctrine D-057, spec 113). */
 export const validateMessage = validator(`${base}message.v1.schema.json`);
 /** Where the router tied something received from outside (doctrine D-056, spec 113). */

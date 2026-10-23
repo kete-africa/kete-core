@@ -69,6 +69,14 @@ export {
   FrameTab,
   type PlaceExtra,
 } from './canvas-frame.js';
+export {
+  ActorAvatar,
+  faceOf,
+  initialsOf,
+  type ActorFace,
+  type ActorKind,
+  type ActorTint,
+} from './actor.js';
 export { CanvasIcon, isCanvasIconName, type CanvasIconName } from './canvas-icon.js';
 export {
   FieldToggle,

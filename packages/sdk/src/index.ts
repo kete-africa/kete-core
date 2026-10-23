@@ -5,6 +5,7 @@ export type {
   AgentTemplate,
   AccountClosed,
   AccountCreated,
+  Actor,
   Capability,
   Dataset,
   DatasetAnswer,
@@ -39,6 +40,7 @@ export type {
   View,
 } from './contracts/types.gen.js';
 export {
+  validateActor,
   validateAgentTemplate,
   validateCapability,
   validateDataset,

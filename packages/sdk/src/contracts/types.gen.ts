@@ -2,6 +2,26 @@
 /* eslint-disable */
 
 /**
+ * Who acts or speaks, drawn alike everywhere (doctrine D-062, R6; kete-core spec 149): a person, an agent, Kete, a contact from outside — its name, its face, where a contact came from. A person and a contact are a circle with their initials; an agent and Kete a rounded square with their glyph.
+ */
+export interface Actor {
+  kind: 'person' | 'agent' | 'kete' | 'contact';
+  id: string;
+  name: string;
+  /**
+   * An agent's face: a glyph and a tint; without it, one is drawn from its id, the same everywhere.
+   */
+  face?: {
+    glyph: string;
+    tint?: 'blue' | 'green' | 'amber' | 'red' | 'violet' | 'teal' | 'slate';
+  };
+  /**
+   * Where a contact speaks from.
+   */
+  via?: 'whatsapp' | 'telegram' | 'mail' | 'sms' | 'phone';
+}
+
+/**
  * An agent a product ships, ready to be taken (doctrine D-062, R5; kete-core ADR 0018, spec 146): its name, mission, the sources of tools it draws from, its skills, what wakes it, how far it goes alone, its face. An administrator enables it; each person takes it for herself, and it acts for her with her rights, never more.
  */
 export interface AgentTemplate {
