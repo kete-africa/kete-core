@@ -1,5 +1,11 @@
 # @kete-africa/agents
 
+## 0.5.6
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.5.5
 
 ### Patch Changes

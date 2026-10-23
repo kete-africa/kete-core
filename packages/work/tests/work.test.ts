@@ -209,11 +209,13 @@ describe('the relay on absence', () => {
   it('« Kossi sera absent vendredi »: his holdings move the same day, deputy first', async () => {
     const org = fresh();
     const friday = new Date('2026-10-23T07:00:00Z');
+    // Said on Monday, before the relay's days: the test reads the same whatever day it runs.
+    const monday = new Date('2026-10-19T07:00:00Z');
     await inOrganization(db.app, org, async (tx) => {
-      const dueFriday = await sayHolding(tx, org, said('Q-3', { due: '2026-10-23' }));
-      const undated = await sayHolding(tx, org, said('Q-4'));
-      const nextWeek = await sayHolding(tx, org, said('Q-5', { due: '2026-10-28' }));
-      const told = await sayHolding(tx, org, said('Q-6', { for: 'information' }));
+      const dueFriday = await sayHolding(tx, org, said('Q-3', { due: '2026-10-23' }), monday);
+      const undated = await sayHolding(tx, org, said('Q-4'), monday);
+      const nextWeek = await sayHolding(tx, org, said('Q-5', { due: '2026-10-28' }), monday);
+      const told = await sayHolding(tx, org, said('Q-6', { for: 'information' }), monday);
 
       // Thursday: nothing moves yet.
       const thursday = await relayAbsences(tx, org, {

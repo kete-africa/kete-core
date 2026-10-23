@@ -1,5 +1,11 @@
 # @kete-africa/metering
 
+## 0.1.7
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.1.6
 
 ### Patch Changes

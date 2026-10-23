@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/analytics",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "type": "module",
   "description": "Kete usage: who uses what, per organization, in the app's own Postgres; read by the organization, and by Kete Cockpit as daily counts only.",
   "repository": {
