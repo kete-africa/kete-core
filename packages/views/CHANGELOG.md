@@ -1,5 +1,11 @@
 # @kete-africa/views
 
+## 0.3.1
+
+### Patch Changes
+
+- 8450191: The bullet's alert zone wears the design's `state-error-surface` (it named a token that does not exist, and drew black).
+
 ## 0.3.0
 
 ### Minor Changes

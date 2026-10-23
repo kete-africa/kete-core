@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/connections",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "type": "module",
   "description": "Kete connections (spec 119; doctrine D-059, D-060; phase 11, step B1): the tools an organization connects — by OAuth or by a key — their credentials sealed and never shown, never handed to an agent; each connection's health, its refresh and its revocation, journaled.",
   "repository": {

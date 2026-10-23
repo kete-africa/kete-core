@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/agents",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "type": "module",
   "description": "Kete agents: a turn of an agent on a proven runtime (Mastra), with the caller's capabilities as its only tools, usage measured and budgets enforced, what the page shows as events, and its conversations kept under each organization's row-level security.",
   "repository": {
