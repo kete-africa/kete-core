@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/conversation",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "Kete conversation (spec 140; doctrine D-061): the threads' screen any product shows — its list with agents' states, the conversation with photos, voice notes, citations, reactions and an agent's work in folded steps, « Infos du fil » — built against the canvas v6.2, every word given by the product.",
   "repository": {
