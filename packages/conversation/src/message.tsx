@@ -1,4 +1,4 @@
-import { CanvasIcon, Markdown, type CanvasIconName } from '@kete/design';
+import { ActorAvatar, CanvasIcon, Markdown, type CanvasIconName } from '@kete/design';
 import { useRef, useState, type ReactNode } from 'react';
 import { AgentRun } from './run.js';
 import type { RunView, ShownMessage, Who } from './types.js';
@@ -50,21 +50,14 @@ export interface MessageProps {
 
 const URL = /\bhttps?:\/\/[^\s<>()«»"']+[^\s<>()«»"'.,;:!?]/g;
 
-function Avatar({ name, kind }: { name: string; kind: Who['kind'] }) {
-  const initials = name
-    .split(/\s+/)
-    .filter((w) => /\p{L}/u.test(w.charAt(0)))
-    .slice(0, 2)
-    .map((w) => w.charAt(0).toUpperCase())
-    .join('');
+/** Its author's face, as everywhere (R6): Kete and an agent a square, a person a circle. */
+function Avatar({ name, who }: { name: string; who: Who }) {
   return (
-    <span
-      aria-hidden="true"
-      data-kind={kind}
-      className="inline-grid size-7 flex-none place-items-center rounded-full bg-surface-selected text-[11px] font-bold text-fg data-[kind=agent]:rounded-[6px] data-[kind=agent]:bg-agent data-[kind=agent]:text-on-agent data-[kind=contact]:bg-state-success-fg data-[kind=contact]:text-surface"
-    >
-      {kind === 'agent' ? <CanvasIcon name="bot" size={14} /> : initials || '·'}
-    </span>
+    <ActorAvatar
+      kind={who.kind === 'agent' && who.id === 'agt_assistant' ? 'kete' : who.kind}
+      id={who.id}
+      name={name}
+    />
   );
 }
 
@@ -223,7 +216,7 @@ export function MessageItem({
       data-mine={mine || undefined}
       className="group/message relative grid max-w-[760px] scroll-mt-4 grid-cols-[28px_minmax(0,1fr)] gap-2.5 max-[860px]:grid-cols-[24px_minmax(0,1fr)]"
     >
-      <Avatar name={name} kind={message.author.kind} />
+      <Avatar name={name} who={message.author} />
       <div className="min-w-0">
         {!message.deleted && (onReact || onReply || onAction || menu.length > 0) && (
           <div
