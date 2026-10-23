@@ -545,4 +545,8 @@ Kete. All of it works; what a person would trip on:
 - Kete's answer announces a table it does not draw; Kete's messages carry the « agent » tag
   (D-061: Kete is not an agent).
 - The week in « Planifier » squeezes the weekend's columns until their items are unreadable.
-  A second pass of this audit, module by module, comes after KYA's first real day (R10's « done »).
+
+All six fixed on 2026-10-24 (kete-core #183, Kete Enterprise #116, spec 111) and checked in the demo.
+On the way: Kete answering in a thread now has Kete's own tool sets (the same turn as Kete
+Intelligence, D-061), and the tables it reads are kept with its run.
+A second pass of this audit, module by module, comes after KYA's first real day (R10's « done »).
