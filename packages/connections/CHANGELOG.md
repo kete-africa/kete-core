@@ -1,5 +1,11 @@
 # @kete-africa/connections
 
+## 0.2.1
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.2.0
 
 ### Minor Changes

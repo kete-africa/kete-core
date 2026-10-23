@@ -1,5 +1,11 @@
 # @kete-africa/time
 
+## 0.4.7
+
+### Patch Changes
+
+- Published again on the current versions of the packages it depends on.
+
 ## 0.4.6
 
 ### Patch Changes
