@@ -59,3 +59,23 @@ const credential = await credentialOf(tx, organizationId, sealer, connectionId, 
   same migration; the journal is never changed nor deleted.
 - **No vendor here**: a provider's addresses come from the product's infrastructure layer.
 - **Revoked for good**: the credential is wiped, the connection stays in the journal.
+
+## One connection, three uses (spec 147)
+
+Doctrine D-062 (R8) and ADR 0019: a tool connected once serves to **read** (Kete, the boards), to
+**act** (agents' tools, as drafts) and to **signal** (what waits, into « Décider »). Three grants,
+kept apart: read is given at connection (`defaultGrants`); act only tool by tool, at a level, never
+above « prepare » — paying and signing come back to a person; signal by choosing what to watch.
+`allows(grants, use, tool)` answers whether, and at which level; `grantsOf` reads kept grants, and
+what it does not understand grants nothing. An external tool's events arrive by a webhook signed
+with the connection's own secret (`newWebhookSecret`, `signWebhook`, `verifyWebhook` — HMAC-SHA256
+of the exact body, compared in constant time).
+
+```mermaid
+flowchart LR
+  C[a connection · its credential sealed] --> G{grants}
+  G -->|read · at connection| R[Kete, boards, the Measure]
+  G -->|act · tool by tool, ≤ prepare| A[agents' tools · drafts]
+  G -->|signal · chosen| S[« Décider »]
+  X[the tool] -->|webhook · kete-signature| E[event path]
+```
