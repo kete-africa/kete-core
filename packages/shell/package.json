@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/shell",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "type": "module",
   "description": "Kete shell (spec 100; doctrine D-042, D-045, D-050 to D-054): the frame every Kete product wears — its places read from the app's manifest, Ctrl K, the drawer beside the page, « Noter », the state of synchronization and the phone's tabs — the same in the center and in every app.",
   "repository": {

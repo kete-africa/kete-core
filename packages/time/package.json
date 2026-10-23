@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/time",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "type": "module",
   "description": "Kete time (spec 102; doctrine D-050): when dated facts happen, the conflicts in a week (someone expected while away, someone in two places), a person's free time, blocks proposed for tasks before their day — computed by code — and a person's own agenda read from an ICS feed.",
   "repository": {

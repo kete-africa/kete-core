@@ -1,6 +1,6 @@
 {
   "name": "@kete-africa/work",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "type": "module",
   "description": "Kete holdings (spec 111; doctrine D-056): every thing in progress has a holder, a person or an agent, never nobody; it passes to the deputy, then the manager, when its holder is away; it is nudged when it waits too long, in working hours; « Pour moi » gathers what a person must answer and holds.",
   "repository": {
