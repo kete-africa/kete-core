@@ -633,3 +633,30 @@ describe('her consent and her link', () => {
     expect(sentFrom('2002').at(-1)).toMatchObject({ to: 'TG.yao4f9c2', text: 'Bienvenue' });
   });
 });
+
+describe('a message that waits for her quiet hours (spec 151)', () => {
+  it('leaves only once the moment it was given has come', async () => {
+    await as(BLEU, async (client) => {
+      await saveChatContact(client, BLEU, { reference: 'cus_kafui', phone: '+228 90 44 55 66' });
+      await setChatConsent(client, 'cus_kafui', true);
+      const later = await queueChatText(client, BLEU, {
+        reference: 'cus_kafui',
+        text: 'Votre décision est attendue',
+        subject: 'quiet',
+        notBefore: new Date(Date.now() + 60 * 60_000),
+      });
+      expect(later).toMatchObject({ status: 'queued', reason: '' });
+      expect(await deliverChat(client, options)).toEqual({ sent: 0, failed: 0, retried: 0 });
+      await client.query(
+        `update kete_chat_messages set next_attempt_at = now() - interval '1 minute'
+          where message_id = $1`,
+        [later.messageId],
+      );
+      expect(await deliverChat(client, options)).toMatchObject({ sent: 1 });
+      expect(sentFrom('1001').at(-1)).toMatchObject({
+        to: '22890445566',
+        text: 'Votre décision est attendue',
+      });
+    });
+  });
+});

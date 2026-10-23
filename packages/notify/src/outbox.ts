@@ -675,16 +675,25 @@ export async function queueChatText(
     kind?: string;
     subject?: string;
     actions?: ChatAction[];
+    /** Not before this moment: her quiet hours (spec 151). */
+    notBefore?: Date;
   },
 ): Promise<ChatQueued> {
   const contact = await contactRow(db, input.reference);
   if (!contact) return { messageId: null, status: 'skipped', reason: 'unknown_contact' };
-  return file(db, organizationId, contact, {
+  const queued = await file(db, organizationId, contact, {
     kind: input.kind ?? 'text',
     subject: input.subject,
     body: input.text,
     actions: input.actions,
   });
+  if (queued.messageId && queued.status === 'queued' && input.notBefore) {
+    await db.query(`update kete_chat_messages set next_attempt_at = $2 where message_id = $1`, [
+      queued.messageId,
+      input.notBefore,
+    ]);
+  }
+  return queued;
 }
 
 /**

@@ -278,3 +278,37 @@ return response;
   which category; no price is invented.
 - A channel that does not name its account in a notification carries it in its address: the app
   reads it from its route and gives it as `account`.
+
+## One attention model (spec 151; doctrine D-062, R14)
+
+One place decides who is told, of what, on which channel, once. A product raises a **signal** — a
+person, its words, where it opens, its **weight** and a **key** — and `attend` decides with her
+choices (`AttentionPrefs`: quiet hours in her time zone, the channels she chose, her evening
+summary):
+
+| Weight   | Her list (« Pour moi ») | Her devices (Web Push)      | Her phone (WhatsApp, Telegram, when chosen) | Her summary       |
+| -------- | ----------------------- | --------------------------- | ------------------------------------------- | ----------------- |
+| `urgent` | always                  | at once, at any hour        | at once                                     | —                 |
+| `act`    | always                  | at once, or after her quiet | at once, or after her quiet hours           | —                 |
+| `know`   | always                  | never                       | never                                       | when she chose it |
+
+```mermaid
+flowchart LR
+  S[a signal · weight · key] --> A{attend}
+  P[her choices · quiet hours · channels · summary] --> A
+  A -->|once per key · kete_attention| L[her list · kete_notifications]
+  A -->|now| D[her devices]
+  A -->|after her quiet hours| W[ringPostponed · the worker]
+  W -->|unless read since| D
+  A -->|plan.phone| C[the product queues her phone · queueChatText notBefore]
+  A -->|plan.digest| E[her evening summary]
+```
+
+- **Once**: the same key for the same person is told once (`kete_attention`, row-level security);
+  a reminder is another signal, with its own key.
+- **Quiet hours**: what asks her to act waits until they end; what is urgent does not. A device
+  rung late is not rung if she read it meanwhile.
+- **Her phone**: the plan says when; the product queues its own words and buttons with
+  `queueChatText(…, { notBefore })`.
+- `attentionMigrationSql` after `notificationsMigrationSql`; the worker asks
+  `attentionOrganizationsWaiting` then `ringPostponed` in each organization.
