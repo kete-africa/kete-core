@@ -35,6 +35,7 @@ export type {
   Routing,
   SubscriptionRenewalDue,
   Thread,
+  View,
 } from './contracts/types.gen.js';
 export {
   validateCapability,
@@ -64,6 +65,7 @@ export {
   validateRouting,
   validateThread,
   validateResource,
+  validateView,
   type ValidationResult,
 } from './contracts/validate.js';
 

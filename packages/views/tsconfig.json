@@ -9,5 +9,10 @@
     "resolveJsonModule": true
   },
   "include": ["src", "app", "tests", "messages/*.json"],
-  "references": [{ "path": "../capabilities" }, { "path": "../design" }, { "path": "../tenancy" }]
+  "references": [
+    { "path": "../capabilities" },
+    { "path": "../design" },
+    { "path": "../sdk" },
+    { "path": "../tenancy" }
+  ]
 }
