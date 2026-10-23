@@ -2,7 +2,12 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { Button, Panel, Tag, TextField } from '@kete/design';
 import QRCode from 'qrcode';
-import { addMyPassword, fetchSecurity, removeMyPassword } from '@/features/identity/functions';
+import {
+  addMyPassword,
+  fetchSecurity,
+  removeMyPassword,
+  revokeMyAgent,
+} from '@/features/identity/functions';
 import { authClient } from '@/lib/auth-client';
 import { Notice, useHydrated } from '@/lib/ui';
 import * as m from '@/paraglide/messages.js';
@@ -19,7 +24,7 @@ interface Enrollment {
 }
 
 function Security() {
-  const { twoFactorEnabled, password, passkeys } = Route.useLoaderData();
+  const { twoFactorEnabled, password, passkeys, agents } = Route.useLoaderData();
   // Her password removed, the two-factor panel goes at once — not when the page is read again.
   const [passwordGone, setPasswordGone] = useState(false);
   useEffect(() => setPasswordGone(false), [password]);
@@ -89,6 +94,7 @@ function Security() {
         password={password}
         onPasswordRemoved={() => setPasswordGone(true)}
       />
+      <Agents agents={agents} />
       {password && !passwordGone && (
         <Panel title={m.security_two_factor()}>
           <div className="mb-4">
@@ -155,6 +161,71 @@ function Security() {
         </Panel>
       )}
     </div>
+  );
+}
+
+/**
+ * Spec 150: the agents that act for her while she is away — given in Kete, withdrawn here at any
+ * time. Each one acts with her rights, never more; withdrawn, it no longer acts while she is away.
+ */
+function Agents({
+  agents,
+}: {
+  agents: {
+    id: string;
+    agentName: string;
+    appName: string | null;
+    grantedAt: string;
+    lastUsedAt: string | null;
+  }[];
+}) {
+  const router = useRouter();
+  const hydrated = useHydrated();
+  const [state, setState] = useState<'idle' | 'pending' | 'removed' | 'refused'>('idle');
+
+  async function remove(id: string) {
+    setState('pending');
+    const outcome = await revokeMyAgent({ data: { id } }).catch(() => null);
+    setState(outcome?.ok ? 'removed' : 'refused');
+    await router.invalidate();
+  }
+
+  return (
+    <Panel title={m.security_agents()}>
+      <p className="mb-4 text-body-sm text-bark">{m.security_agents_intro()}</p>
+      {state === 'removed' && <Notice tone="success">{m.security_agent_removed()}</Notice>}
+      {state === 'refused' && <Notice tone="error">{m.security_agent_refused()}</Notice>}
+      {agents.length === 0 ? (
+        <p className="text-body-sm">{m.security_agents_none()}</p>
+      ) : (
+        <ul className="my-4 flex flex-col gap-2">
+          {agents.map((agent) => (
+            <li key={agent.id} className="flex items-center justify-between gap-3">
+              <span className="flex flex-col">
+                <span className="text-body-sm font-semibold">
+                  {agent.agentName}
+                  {agent.appName ? ` · ${agent.appName}` : ''}
+                </span>
+                <span className="text-body-sm text-bark">
+                  {m.security_agent_granted({ date: agent.grantedAt.slice(0, 10) })}
+                  {agent.lastUsedAt
+                    ? ` · ${m.security_agent_used({ date: agent.lastUsedAt.slice(0, 10) })}`
+                    : ''}
+                </span>
+              </span>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => void remove(agent.id)}
+                disabled={state === 'pending' || !hydrated}
+              >
+                {m.security_agent_remove()}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
   );
 }
 

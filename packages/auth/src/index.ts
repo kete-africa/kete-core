@@ -27,6 +27,8 @@ export {
   createAppToken,
   createAppTokenVerifier,
   createMandates,
+  createStandingMandates,
+  type StandingMandates,
   type AppTokenOptions,
   type MandatesOptions,
   type AppTokenVerifier,

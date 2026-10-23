@@ -96,6 +96,41 @@ export function createMandates(options: MandatesOptions) {
   };
 }
 
+/**
+ * The center's side of a standing mandate (kete-core spec 150): a person lets one of its agents act
+ * for her while she is away. `grant` takes her token once, as her consent, and answers the grant's
+ * id; `token` asks, at each use, for the agent's mandate of now — her claims read again, ten
+ * minutes; `revoke` withdraws it. Null or false when the Compte Kete refuses or does not answer.
+ */
+export function createStandingMandates(options: MandatesOptions) {
+  const call = options.fetch ?? fetch;
+  const post = async (path: string, body: unknown) => {
+    const token = await options.appToken();
+    if (!token) return null;
+    return call(`${options.accountUrl.replace(/\/$/, '')}/api/apps/standing-mandates${path}`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(5000),
+    }).catch(() => null);
+  };
+  const field = async (response: Response | null, name: string): Promise<string | null> => {
+    if (!response || response.status !== 201) return null;
+    const answer = (await response.json().catch(() => null)) as Record<string, unknown> | null;
+    const value = answer?.[name];
+    return typeof value === 'string' ? value : null;
+  };
+  return {
+    grant: async (subjectToken: string, agent: { id: string; name: string }) =>
+      field(await post('', { subjectToken, agent }), 'grant'),
+    token: async (organization: string, grant: string) =>
+      field(await post('/token', { organization, grant }), 'token'),
+    revoke: async (organization: string, grant: string) =>
+      (await post('/revoke', { organization, grant }))?.status === 204,
+  };
+}
+export type StandingMandates = ReturnType<typeof createStandingMandates>;
+
 export interface AppTokenOptions {
   accountUrl: string;
   clientId: string;

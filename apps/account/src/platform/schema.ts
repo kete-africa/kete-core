@@ -167,6 +167,41 @@ export const deployments = pgTable(
   ],
 ).enableRLS();
 
+/**
+ * A standing mandate (spec 150): a person lets one of her agents act for her while she is away —
+ * the center's agent, through one app client, in one organization. Given once with her own token,
+ * withdrawn by her at any time. Each use asks the Compte Kete again: her claims as they are now,
+ * ten minutes at most; withdrawn, or she no longer a member, nothing more is signed.
+ */
+export const standingMandates = pgTable(
+  'standing_mandates',
+  {
+    id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    /** The center's client that asked for it: only that client may use it. */
+    clientId: text('client_id').notNull(),
+    agentId: text('agent_id').notNull(),
+    agentName: text('agent_name').notNull(),
+    grantedAt: timestamp('granted_at', { withTimezone: true }).notNull().defaultNow(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+  },
+  (table) => [
+    unique('standing_mandates_one_per_agent').on(
+      table.organizationId,
+      table.userId,
+      table.clientId,
+      table.agentId,
+    ),
+    organizationIsolation('standing_mandates_isolation', accountApp),
+  ],
+).enableRLS();
+
 /** The Kete apps an organization can subscribe to. */
 export type KeteApp = 'firmo' | 'nettio' | 'nyatefe' | 'cockpit';
 
