@@ -8,6 +8,8 @@ export interface EmitInput<T extends string> {
   organization: string;
   data: EventData<T>;
   occurredAt?: Date;
+  /** The object the fact is about (kete-core spec 143). */
+  object?: { kind: string; id: string };
 }
 
 /**
